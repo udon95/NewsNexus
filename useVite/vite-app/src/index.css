@@ -1,7 +1,17 @@
-@import "tailwindcss";
-@import "tailwindcss/preflight";
+@import url("https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Space+Grotesk:wght@300..700&display=swap");
+@import "tailwindcss/theme.css" layer(theme);
+@import "tailwindcss/preflight.css" layer(base);
+@import "tailwindcss/utilities.css" layer(utilities);
 /* @tailwind utilities; */
 
+.font-grotesk {
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 500;
+}
+
+
+
+/* 
 :root {
   font-family: Space Grotesk, sans-serif;
   line-height: 1.5;
@@ -31,7 +41,7 @@ html, body {
   display: flex;
   place-items: center;
   /* min-width: 320px;
-  min-height: 100vh; */
+  min-height: 100vh; 
   height: 100%;
   flex-direction: column; 
 }
@@ -70,35 +80,5 @@ button:focus-visible {
   }
   button {
     background-color: #f9f9f9;
-  }
-}
-/* 
-.login-container {
-  background-color: #fff;
-  display: flex;
-  flex-direction: column;
-  font-family: Space Grotesk, sans-serif;
-  color: #00317f;
-  font-weight: 500;
-} */
-
-/* .header {
-  align-self: center;
-  display: flex;
-  width: 100%;
-  max-width: 1356px;
-  gap: 20px;
-  font-size: 40px;
-  font-weight: 400;
-  text-align: center;
-  line-height: 0.7;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  padding: 10px 30px;
-}
-
-@media (max-width: 991px) {
-  .header {
-      max-width: 100%;
   }
 } */
