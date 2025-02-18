@@ -152,9 +152,9 @@ function LoginPage() {
 
 
       {/* Login Section */}
-      <main className="flex flex-col items-center justify-center flex-grow w-full px-4 sm:px-6">
-        <section className="flex w-[30rem] flex-col bg-white shadow-lg rounded-lg">
-          <h2 className="text-5xl sm:text-3xl font-bold text-left text-gray-900 mb-6">Login</h2>
+      <main className="flex flex-col items-center justify-center flex-grow w-full bg-white px-4 sm:px-6">
+        <section className="flex w-[30rem] flex-col rounded-lg">
+          <h2 className="text-5xl sm:text-3xl font-bold text-left text-black mb-6">Login</h2>
           <form className="space-y-4 sm:space-y-6">
             {/* Username Field */}
             <div>
