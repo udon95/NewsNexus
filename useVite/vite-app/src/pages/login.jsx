@@ -40,7 +40,7 @@ function LoginPage() {
       {/* Login Section */}
       <main className="flex flex-col flex-grow items-center justify-center w-full px-4 sm:px-6">
         <div className="flex flex-col  bg-white shadow-lg rounded-lg p-4 max-w-xl w-full">
-          <h2 className="text-7xl sm:text-5xl font-bold text-gray-900 mb-4 font-grotesk">
+          <h2 className="text-3xl sm:text-5xl font-bold text-gray-900 mb-10 mt-0 font-grotesk">
             Login
           </h2>
           <form className="space-y-3 sm:space-y-5">
@@ -48,7 +48,7 @@ function LoginPage() {
             <div className="flex items-center gap-4">
               <label
                 htmlFor="email"
-                className="text-sm sm:text-lg font-medium text-black w-24"
+                className="text-xl sm:text-xl font-medium text-black w-24"
               >
                 Email:
               </label>
@@ -64,7 +64,7 @@ function LoginPage() {
             <div className="flex items-center gap-4">
               <label
                 htmlFor="password"
-                className="text-sm sm:text-lg font-medium text-black w-24"
+                className="text-xl sm:text-xl font-medium text-black w-24"
               >
                 Password:
               </label>

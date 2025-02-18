@@ -10,8 +10,8 @@ const Layout = () => {
         <Outlet />
       </main>
 
-      <footer className="w-full h-16 bg-[#7FB0FE] text-sm sm:text-base text-[#00317F] font-bold flex items-center justify-evenly px-20">
-        <p>&copy; 2025 NewsNexus. All Rights Reserved. </p>
+      <footer className="w-full h-16 bg-[#7FB0FE] text-sm sm:text-base text-[#00317F] font-bold flex items-center justify-left px-20">
+        <p>&copy; 2025 NewsNexus. All Rights Reserved. &nbsp; &nbsp; &nbsp;</p>
         <a href="/privacy-policy" className="underline">
           {" "}
           Privacy Policy
