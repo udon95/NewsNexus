@@ -1,0 +1,87 @@
+/* Ensure full-page layout matches Subscription Page */
+.topics-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    min-height: 100vh;
+    background-color: white;
+    overflow-x: hidden; /* ✅ Prevents horizontal scrolling */
+    overflow-y: auto; /* ✅ Allows proper vertical scrolling */
+}
+
+/* PAGE TITLE (Aligned with the first button) */
+.topics-title {
+    font-size: 28px;
+    font-weight: 600;
+    margin-bottom: 20px;
+    text-align: left;
+    width: 100%;
+    max-width: 800px; /* ✅ Matches button container */
+    display: flex;
+    justify-content: flex-start; /* ✅ Ensures left alignment */
+    padding-left: 0; /* ✅ Ensures text is left-aligned */
+    margin-left: auto; /* ✅ Centers the text in the same container as buttons */
+    margin-right: auto;
+}
+
+/* GRID CONTAINER FOR BUTTONS */
+.topics-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+    justify-content: flex-start; /* ✅ Aligns buttons with the title */
+    align-items: center;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+/* TOPIC BUTTON STYLING */
+.topic-button {
+    padding: 12px 20px;
+    font-size: 16px;
+    font-weight: 600;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    background-color: #7FB0FE; /* Default color */
+    color: white;
+    transition: background-color 0.3s ease-in-out, color 0.3s ease-in-out;
+}
+
+.topic-button:hover {
+    background-color: #00317f;
+}
+
+.topic-button.selected {
+    background-color: black; /* Selected button is black */
+    color: white; /* Ensure text remains visible */
+}
+
+/* NEXT BUTTON STYLING (Aligns with the last button) */
+.next-button {
+    background-color: #3f414c;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 12px;
+    cursor: pointer;
+    font-size: 14px;
+    margin-top: 20px;
+    
+    /* ✅ Ensures the button is aligned with the last row of topics */
+    display: flex;
+    justify-content: flex-end;
+    align-self: flex-end;
+    margin-left: auto; /* ✅ Pushes it to the right */
+    margin-right: 0; /* ✅ Keeps it exactly at the end */
+    width: fit-content; /* ✅ Ensures no stretching */
+}
+
+/* RESPONSIVENESS */
+@media (max-width: 768px) {
+    .topics-title,
+    .topics-grid {
+        max-width: 95%;
+    }
+}

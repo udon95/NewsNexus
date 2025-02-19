@@ -1,0 +1,86 @@
+/* SUBSCRIPTION CONTAINER */
+.subscription-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    min-height: 100vh;
+    background-color: white;
+}
+
+/* PAGE TITLE */
+.subscription-title {
+    font-size: 28px;
+    font-weight: 600;
+    margin-bottom: 20px;
+    align-self: flex-start; /* Aligns with the subscription cards */
+    text-align: left;
+    width: 100%;
+    max-width: 800px; /* Matches subscription cards */
+}
+
+/* SUBSCRIPTION CARDS */
+.subscription-card {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start; /* Aligns label and content */
+    padding: 20px;
+    border-radius: 20px;
+    border: 2px solid black;
+    box-shadow: 2px 4px 6px rgba(0, 0, 0, 0.3);
+    background-color: white;
+    width: 100%;
+    max-width: 800px; /* Matches upgrade button */
+    margin-bottom: 20px;
+}
+
+/* SUBSCRIPTION LABEL */
+.subscription-label {
+    font-size: 24px;
+    font-weight: bold;
+    padding: 10px 15px;
+    background-color: white;
+    border-radius: 10px;
+    text-align: center;
+    width: 100px; /* Adjust label width */
+    flex-shrink: 0; /* Prevents shrinking */
+}
+
+/* CONTENT WRAPPER */
+.subscription-card-content {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start; /* Aligns content properly */
+    gap: 20px; /* Adds spacing between label and text */
+    width: 100%;
+}
+
+/* SUBSCRIPTION DETAILS */
+.subscription-details {
+    list-style-type: disc;
+    padding-left: 20px; /* Ensure bullet points align correctly */
+    font-size: 16px;
+    flex-grow: 1;
+}
+
+/* UPGRADE BUTTON */
+.upgrade-button {
+    background-color: #3f414c;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 12px;
+    cursor: pointer;
+    font-size: 14px;
+    display: block;
+    margin-left: auto; /* Aligns with card */
+    margin-right: 0;
+}
+
+/* RESPONSIVENESS */
+@media (max-width: 768px) {
+    .subscription-title,
+    .subscription-card {
+        max-width: 95%;
+    }
+}
