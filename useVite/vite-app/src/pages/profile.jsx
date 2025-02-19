@@ -3,7 +3,7 @@ import supabase from "../api/supabaseClient";
 
 const Profile = () => {
   const [user, setUser] = useState(null);
-  const [userDetails, setUserDetails] = useState(null); // ✅ Store user details
+  const [userDetails, setUserDetails] = useState(null); // Store user details
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -13,7 +13,7 @@ const Profile = () => {
       setLoading(true);
       setError("");
 
-      // ✅ Step 1: Get logged-in user from Supabase Auth
+      // Step 1: Get logged-in user from Supabase Auth
       const { data: { user }, error: authError } = await supabase.auth.getUser();
 
       if (authError || !user) {
@@ -24,7 +24,7 @@ const Profile = () => {
 
       setUser(user);
 
-      // ✅ Step 2: Fetch user details from `users` table
+      // Step 2: Fetch user details from `users` table
       const { data: userData, error: userError } = await supabase
         .from("users")
         .select("*")
@@ -37,9 +37,9 @@ const Profile = () => {
         return;
       }
 
-      setUserDetails(userData); // ✅ Store user details in state
+      setUserDetails(userData); // Store user details in state
 
-      // ✅ Step 3: Fetch profile details from `profile` table
+      // Step 3: Fetch profile details from `profile` table
       const { data: profileData, error: profileError } = await supabase
         .from("profile")
         .select("*")
@@ -78,6 +78,7 @@ const Profile = () => {
           <p><strong>Date of Birth:</strong> {profile.dob || "N/A"}</p>
         </div>
       )}
+      
     </div>
   );
 };

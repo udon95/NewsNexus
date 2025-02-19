@@ -22,10 +22,10 @@ function Home() {
     onClick={() => navigate("/login")}>
       Login
     </button>
-    <button className="px-6 py-2 bg-[#3F414C] text-white rounded-lg hover:bg-opacity-90 w-auto"
+    {/* <button className="px-6 py-2 bg-[#3F414C] text-white rounded-lg hover:bg-opacity-90 w-auto"
     onClick={() => navigate("/test")}>
       Test
-    </button>
+    </button> */}
     </div>
     </main>
     </div>

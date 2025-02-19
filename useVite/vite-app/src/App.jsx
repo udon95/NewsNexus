@@ -5,6 +5,8 @@ import Register from "./pages/register.jsx";
 import Home from "./pages/home.jsx";
 import Layout from  "./Layout.jsx";
 import Test from "./pages/test.jsx"
+import Subscription from "./pages/subscription.jsx"
+
 import TestLogin from "./pages/testlogin.jsx";
 import Profile from "./pages/profile.jsx";
 import supabase from "./api/supabaseClient.js";
@@ -37,6 +39,8 @@ function App() {
       <Route path="/" element={<Home/>}/>
         <Route path="/login" element={<Login />} />
         <Route path="register" element={<Register />} />
+        <Route path="/subscription" element={<Subscription />} />
+
         <Route path="/test" element={<Test />} />
         <Route path="/testlogin" element={<TestLogin />} />
         <Route path="/profile" element={<Profile />} />

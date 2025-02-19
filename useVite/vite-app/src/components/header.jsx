@@ -104,7 +104,7 @@ const Header = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
 
-  // ✅ Fetch logged-in user from Supabase
+  // Fetch logged-in user from Supabase
   useEffect(() => {
     const fetchUser = async () => {
       const { data: { user } } = await supabase.auth.getUser();
@@ -116,7 +116,7 @@ const Header = () => {
   const userEmail = user?.email;
   const userInitial = userEmail ? userEmail.charAt(0).toUpperCase() : "P";
 
-  // ✅ Logout function
+  // Logout function
   const logout = async () => {
     await supabase.auth.signOut();
     navigate("/");
@@ -125,10 +125,10 @@ const Header = () => {
   const renderNavLinks = () => {
     return (
       <>
-        <Link to="/">Home</Link>
-        <Link to="/explore">Explore</Link>
+        {/* <Link to="/">Home</Link> */}
+        {/* <Link to="/explore">Explore</Link>
         <Link to="/subscription">Subscription</Link>
-        <Link to="/guidelines">Platform Guidelines</Link>
+        <Link to="/guidelines">Platform Guidelines</Link> */}
       </>
     );
   };
@@ -148,7 +148,7 @@ const Header = () => {
         <nav className="nav-items flex items-center gap-6">
           {renderNavLinks()}
 
-          {/* ✅ Show Profile Button if User is Logged In */}
+          {/* Show Profile Button if User is Logged In */}
           {userEmail && (
             <button
               className="w-12 h-12 sm:w-14 sm:h-14 bg-blue-200 rounded-lg text-blue-900 font-bold border-2 border-blue-900 flex items-center justify-center shadow-md hover:bg-blue-300 transition"
@@ -159,7 +159,7 @@ const Header = () => {
             </button>
           )}
 
-          {/* ✅ Show Logout if Logged In */}
+          {/* Show Logout if Logged In */}
           {userEmail && (
             <button
               onClick={logout}
