@@ -1,6 +1,7 @@
 import React from "react";
 import {useNavigate} from "react-router-dom";
 import "../index.css";
+import Navbar from "../components/navbar.jsx";
 
 
 function LoginPage() {
@@ -8,38 +9,11 @@ function LoginPage() {
 
   return (
     <div className="w-full min-w-screen min-h-screen flex flex-col bg-white">
-      {/* Navigation Bar */}
-      <nav className="w-full bg-blue-200 py-3 shadow-md overflow-x-auto ">
-        <div className="max-w-screen-lg mx-auto flex flex-nowrap justify-center items-center text-sm sm:text-lg text-blue-900 whitespace-nowrap gap-6 px-4">
-          <div className="w-px h-5 bg-blue-900"></div> {/* Divider */}
-          <a href="/" className="hover:underline px-4 sm:px-6 font-bold">
-            Home
-          </a>
-          <div className="w-px h-5 bg-blue-900"></div> {/* Divider */}
-          <a href="/explore" className="hover:underline px-4 sm:px-6 font-bold">
-            Explore
-          </a>
-          <div className="w-px h-5 bg-blue-900"></div> {/* Divider */}
-          <a
-            href="/subscription"
-            className="hover:underline px-4 sm:px-6 font-bold"
-          >
-            Subscription
-          </a>
-          <div className="w-px h-5 bg-blue-900"></div> {/* Divider */}
-          <a
-            href="/guidelines"
-            className="hover:underline px-4 sm:px-6 font-bold"
-          >
-            Platform Guidelines
-          </a>
-          <div className="w-px h-5 bg-blue-900"></div> {/* Divider */}
-        </div>
-      </nav>
+     <Navbar/>
 
       {/* Login Section */}
       <main className="flex flex-col flex-grow items-center justify-center w-full px-4 sm:px-6">
-        <div className="flex flex-col  bg-white shadow-lg rounded-lg p-4 max-w-xl w-full">
+        <div className="flex flex-col p-4 max-w-xl w-full">
           <h2 className="text-3xl sm:text-5xl font-bold text-gray-900 mb-10 mt-0 font-grotesk">
             Login
           </h2>
@@ -48,9 +22,9 @@ function LoginPage() {
             <div className="flex items-center gap-4">
               <label
                 htmlFor="email"
-                className="text-xl sm:text-xl font-medium text-black w-24"
+                className="text-2xl sm:text-2xl font-normal text-black w-30"
               >
-                Email:
+                E-mail:
               </label>
               <input
                 id="email"
@@ -64,7 +38,7 @@ function LoginPage() {
             <div className="flex items-center gap-4">
               <label
                 htmlFor="password"
-                className="text-xl sm:text-xl font-medium text-black w-24"
+                className="text-2xl sm:text-2xl font-normal text-black w-30"
               >
                 Password:
               </label>
