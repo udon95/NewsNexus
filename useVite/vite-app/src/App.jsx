@@ -6,6 +6,10 @@ import Home from "./pages/home.jsx";
 import Layout from  "./Layout.jsx";
 import Test from "./pages/test.jsx"
 import Subscription from "./pages/subscription.jsx"
+import Explore from "./pages/explore.jsx"
+import Guidelines from "./pages/guidelines.jsx"
+import Privacy from "./pages/privacy.jsx"
+
 
 import TestLogin from "./pages/testlogin.jsx";
 import Profile from "./pages/profile.jsx";
@@ -40,6 +44,9 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="register" element={<Register />} />
         <Route path="/subscription" element={<Subscription />} />
+        <Route path="/explore" element={<Explore />} />
+        <Route path="/guidelines" element={<Guidelines />} />
+        <Route path="/privacy" element={<Privacy />} />
 
         <Route path="/test" element={<Test />} />
         <Route path="/testlogin" element={<TestLogin />} />
