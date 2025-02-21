@@ -135,7 +135,7 @@ const Header = () => {
 
   return (
     <header className="bg-white shadow-md">
-      <div className="container mx-auto flex items-center justify-between py-4">
+      <div className="container mx-auto flex items-center justify-between px-[60px] py-4">
         <Link to="/">
           <img
             loading="lazy"

@@ -9,6 +9,7 @@ import Subscription from "./pages/subscription.jsx"
 import Explore from "./pages/explore.jsx"
 import Guidelines from "./pages/guidelines.jsx"
 import Privacy from "./pages/privacy.jsx"
+import Latest from "./components/latestNews.jsx";
 
 
 import TestLogin from "./pages/testlogin.jsx";
@@ -47,6 +48,7 @@ function App() {
         <Route path="/explore" element={<Explore />} />
         <Route path="/guidelines" element={<Guidelines />} />
         <Route path="/privacy" element={<Privacy />} />
+        <Route path="/latest" element={<Latest />} />
 
         <Route path="/test" element={<Test />} />
         <Route path="/testlogin" element={<TestLogin />} />

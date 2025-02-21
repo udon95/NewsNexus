@@ -35,7 +35,9 @@ const Navbar = () => {
     <nav className="w-full bg-[#BFD8FF] py-3 shadow-md overflow-x-auto">
       {/* <div className="max-w-screen-lg w-full mx-auto flex flex-nowrap justify-center 
         items-center text-sm sm:text-lg text-blue-900 whitespace-nowrap gap-6 px-4"> */}
-      <div className="flex justify-center items-center gap-16 text-blue-900 text-lg">
+      {/* <div className="flex justify-center items-center gap-16 text-blue-900 text-lg"> */}
+      <div className="flex items-center justify-center gap-16 text-blue-900 text-lg whitespace-nowrap ">
+
         <div className="border-l border-blue-900 h-6"></div> {/* Divider */}
         <a href="/" className="hover:underline px-4 sm:px-6 font-bold">
           Home

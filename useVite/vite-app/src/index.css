@@ -9,6 +9,12 @@
   font-weight: 500;
 }
 
+/* Optional: Add Smooth Scrolling */
+.scrollbar-hide {
+  -ms-overflow-style: none;  /* Hide scrollbar for IE and Edge */
+  scrollbar-width: none;  /* Hide scrollbar for Firefox */
+}
+
 
 
 /* 
