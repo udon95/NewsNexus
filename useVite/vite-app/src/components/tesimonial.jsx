@@ -20,7 +20,7 @@ const testimonials = [
     name: "Alice Johnson",
     review:
       "A great place to stay updated with reliable sources!A great place to stay updated with reliable sources!A great place to stay updated with reliable sources!A great place to stay updated with reliable sources!A great place to stay updated with reliable sources!A great place to stay updated with reliable sources!A great place to stay updated with reliable sources!A great place to stay updated with reliable sources!A great place to stay updated with reliable sources!",
-    rating: 5,
+    rating: 2,
   },
 ];
 
@@ -42,8 +42,8 @@ const StarRating = ({ rating }) => {
 
 const TestimonialSlider = () => {
   return (
-    <div className="w-full max-w-[900px] mx-auto">
-      <h2 className="text-3xl font-bold font-grotesk mb-4">Testimonials :</h2>
+    <div className="w-full max-w-[900px] mx-auto font-grotesk">
+      <h2 className="text-3xl font-bold  mb-4">Testimonials :</h2>
 
       {/* Swiper Component */}
       <Swiper
@@ -55,10 +55,10 @@ const TestimonialSlider = () => {
       >
         {testimonials.map((testimonial, index) => (
           <SwiperSlide key={index} className="p-6">
-            {/* Testimonial Text */}
+            
 
             {/* User Profile Info */}
-            <div className="flex items-center border-b pb-3">
+            <div className="flex items-center border-b pb-3 ">
               {/* Profile Letter */}
               <div className="w-10 h-10 rounded-full bg-gray-500 text-white flex items-center justify-center text-lg font-bold">
                 {testimonial.name.charAt(0)}
@@ -71,8 +71,8 @@ const TestimonialSlider = () => {
               </div>
             </div>
 
-            <p className="text-gray-700 text-lg italic mt-4">
-              "{testimonial.review}"
+            <p className="text-gray-700 text-lg font-semiitalic mt-4">
+              {testimonial.review}
             </p>
           </SwiperSlide>
         ))}

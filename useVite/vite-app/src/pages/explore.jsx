@@ -1,7 +1,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import "../index.css";
-import Navbar from "../components/navbar.jsx";
+import Navbar from "../components/navBar.jsx";
 
 function Explore() {
   

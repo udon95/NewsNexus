@@ -4,16 +4,20 @@ import Login from "./pages/login.jsx";
 import Register from "./pages/register.jsx";
 import Home from "./pages/home.jsx";
 import Layout from  "./Layout.jsx";
-import Test from "./pages/test.jsx"
+import Test from "./pages/testregister.jsx"
 import Subscription from "./pages/subscription.jsx"
 import Explore from "./pages/explore.jsx"
 import Guidelines from "./pages/guidelines.jsx"
 import Privacy from "./pages/privacy.jsx"
 import Latest from "./components/latestNews.jsx";
+import Article from "./pages/article.jsx";
+import FreeUser from "./components/freeUser/freeManageArticle.jsx";
+import ViewRooms from "./components/premiumUser/viewRooms.jsx";
+import RoomPage from "./components/premiumUser/roomPage.jsx";
 
 
 import TestLogin from "./pages/testlogin.jsx";
-import Profile from "./pages/profile.jsx";
+import Profile from "./pages/testProfile.jsx";
 import supabase from "./api/supabaseClient.js";
 import "./index.css";
 
@@ -49,10 +53,14 @@ function App() {
         <Route path="/guidelines" element={<Guidelines />} />
         <Route path="/privacy" element={<Privacy />} />
         <Route path="/latest" element={<Latest />} />
+        <Route path="/article" element={<Article />} />
+        <Route path="/freeUser" element={<FreeUser />} />
+        <Route path="/rooms" element={<ViewRooms />} />
+        <Route path="/room/:id" element={<RoomPage />} />
+
 
         <Route path="/test" element={<Test />} />
         <Route path="/testlogin" element={<TestLogin />} />
-        <Route path="/profile" element={<Profile />} />
 
     </Route>
     </Routes>

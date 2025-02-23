@@ -1,7 +1,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import "../index.css";
-import Navbar from "../components/navbar.jsx";
+import Navbar from "../components/navBar.jsx";
 
 function LoginPage() {
   const navigate = useNavigate();
@@ -14,7 +14,7 @@ function LoginPage() {
       <Navbar />
 
       {/* Login Section */}
-      <main className="flex flex-col flex-grow items-center justify-center w-full px-4 sm:px-6">
+      <main className="flex flex-col flex-grow items-center justify-center w-full">
         <div className="flex flex-col p-4 max-w-xl w-full">
           <h2 className="text-3xl sm:text-5xl font-bold text-gray-900 mb-10 mt-0 font-grotesk">
             Login

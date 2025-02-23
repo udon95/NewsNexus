@@ -29,7 +29,7 @@
 // export default Topic;
 
 import React, { useState } from "react";
-import Navbar from "../components/navbar";
+import Navbar from "../components/navBar";
 import TopicList from "../components/topicList";
 
 

@@ -22,7 +22,7 @@ const SearchBar = ({ onSearch }) => {
 
   return (
     <div className="flex flex-col items-center mt-10">
-    <div className="flex items-center space-x-3 w-full max-w-[700px]">
+    <div className="flex items-center space-x-3 w-full max-w-[700px] px-3">
       {/* Search Icon Button */}
       <button className="bg-[#191A23] p-3 rounded-lg flex items-center justify-center shadow-lg" onClick={handleSearch  }>
         <Search className="text-white w-6 h-6" />

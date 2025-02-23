@@ -1,12 +1,12 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../index.css";
-import Navbar from "../components/navbar.jsx";
+import Navbar from "../components/navBar.jsx";
 import Search from "../components/search.jsx";
 import Testimonial from "../components/tesimonial.jsx";
 import TopicsList from "../components/topicList.jsx";
 import LatestNews from "../components/latestNews.jsx";
-import downArrow from "../assets/Down arrow.svg";
+import downArrow from "../assets/DownArrow.svg";
 
 const newsData = [
   {
@@ -60,34 +60,29 @@ function Home() {
   };
   return (
     <div className="w-full min-w-screen min-h-screen flex flex-col bg-white">
-      <div className="w-full min-w-screen mx-auto px-6 sm:px-12 md:px-24 lg:px-36 xl:px-48 flex flex-col items-start justify-center h-[300px] bg-[#7FB0FE]">
+      <div className="w-full min-w-screen  mx-auto px-6 sm:px-12 md:px-24 lg:px-36 xl:px-48 flex flex-col items-start justify-center h-[300px] bg-[#7FB0FE]">
         <h1 className="text-black text-4xl w-[300px] font-bold font-grotesk">
           Navigating the Singaporean News Landscape
         </h1>
         <div className="flex justify-left gap-3 mt-4 sm:mt-4">
           <button
-            className="px-2 py-1 bg-[#191A23] text-white rounded-lg hover:bg-opacity-90 w-[80px]"
+            className="px-2 py-1 bg-[#191A23] font-grotesk text-white rounded-lg hover:bg-opacity-90 w-[80px]"
             onClick={() => navigate("/register")}
           >
             Register
           </button>
           <button
-            className="px-2 py-1 bg-[#191A23] text-white rounded-lg hover:bg-opacity-90 w-[80px]"
+            className="px-2 py-1 bg-[#191A23] font-grotesk text-white rounded-lg hover:bg-opacity-90 w-[80px]"
             onClick={() => navigate("/login")}
           >
             Login
           </button>
-
-          {/* <button className="px-6 py-2 bg-[#3F414C] text-white rounded-lg hover:bg-opacity-90 w-auto"
-    onClick={() => navigate("/test")}>
-      Test
-    </button> */}
         </div>
       </div>
       <Navbar />
       <Search />
 
-      <div className="flex justify-center w-full mt-10">
+      <div className="flex justify-center w-full mt-10 font-grotesk">
         <div className="relative w-full max-w-[900px] bg-gray-300 rounded-lg shadow-lg overflow-hidden ">
           {/* Text Overlay */}
           <p className="absolute top-3 left-4 text-black font-bold text-3xl z-10">
@@ -104,8 +99,8 @@ function Home() {
 
       <div className="flex justify-center w-full mt-12">
         <button
-          onClick={() => navigate("/discussion-rooms")} // Update with the correct route
-          className="w-full max-w-[900px] bg-gray-100 text-left text-black text-4xl font-grotesk font-semibold px-6 py-3 rounded-lg shadow-md hover:bg-gray-200 transition"
+          onClick={() => navigate("/rooms")}
+          className="w-full max-w-[900px] bg-gray-100 text-left text-black text-3xl font-grotesk font-semibold px-6 py-3 rounded-lg shadow-md hover:bg-gray-200 transition"
         >
           Go To Discussion Rooms &gt;
         </button>
