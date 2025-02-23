@@ -1,8 +1,9 @@
-In useVite folder 
+In useVite folder
 
+To start client side
 cd to vite-app 
 
-run npm install 
+run command "npm install"
 
 then npm run dev
 
@@ -13,3 +14,7 @@ and the path is included (e.g. <Route path="register" element={<Register />} />)
 in the new file (e.g. home.jsx) ensure that <Navbar/> is added before the main contents 
 after setting the container for all the contents 
 
+To start server side
+
+cd to server 
+use command "node server.js"
