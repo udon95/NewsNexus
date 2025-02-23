@@ -14,7 +14,7 @@ import Article from "./pages/article.jsx";
 import FreeUser from "./components/freeUser/freeManageArticle.jsx";
 import ViewRooms from "./components/premiumUser/viewRooms.jsx";
 import RoomPage from "./components/premiumUser/roomPage.jsx";
-
+import SubscriptionStatus from "./components/payment.jsx";
 
 import TestLogin from "./pages/testlogin.jsx";
 import Profile from "./pages/testProfile.jsx";
@@ -49,11 +49,13 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="register" element={<Register />} />
         <Route path="/subscription" element={<Subscription />} />
+        <Route path="/subscription-status/:status" element={<SubscriptionStatus />} />
+
         <Route path="/explore" element={<Explore />} />
         <Route path="/guidelines" element={<Guidelines />} />
         <Route path="/privacy" element={<Privacy />} />
         <Route path="/latest" element={<Latest />} />
-        <Route path="/article" element={<Article />} />
+        <Route path="/article/:title" element={<Article />} />
         <Route path="/freeUser" element={<FreeUser />} />
         <Route path="/rooms" element={<ViewRooms />} />
         <Route path="/room/:id" element={<RoomPage />} />

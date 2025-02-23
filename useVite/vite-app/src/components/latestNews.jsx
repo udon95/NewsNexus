@@ -5,12 +5,12 @@ import NewsCard from "./newsCard";
 const newsData = [
   {
     title: "Latest Malaysian Forest Fire",
-    imageUrl: "", // Replace with actual image URL
+    imageUrl: "/vite.svg", // Replace with actual image URL
     rating: 4,
   },
   {
     title: "US Currency Strengthens Again",
-    imageUrl: "]",
+    imageUrl: "",
     rating: 3,
   },
   {
