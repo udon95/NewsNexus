@@ -14,18 +14,34 @@ import {
   PauseIcon,
   ArrowPathIcon,
 } from "@heroicons/react/24/solid"; // Submit & Share Icons
-import { SpeakerWaveIcon } from "@heroicons/react/24/outline"; // Text-to-Speech Icon
+import {
+  SpeakerWaveIcon,
+  BookOpenIcon,
+  XMarkIcon,
+} from "@heroicons/react/24/outline"; // Text-to-Speech Icon
+
+const OXFORD_API_URL =
+  "https://od-api.oxforddictionaries.com/api/v2/entries/en-gb/";
+const APP_ID = import.meta.env.VITE_OXFORD_APP_ID; // Store in .env
+const APP_KEY = import.meta.env.VITE_OXFORD_APP_KEY; // Store in .env
 
 const Article = () => {
   const [rating, setRating] = useState(0); //  Track user rating
   const [hover, setHover] = useState(0); //  Handle hover effect
-
   const [comments, setComments] = useState([]);
   const { title } = useParams(); // Get the article title from URL
+
   const articleRef = useRef(null); // Reference to the article content
   const [isPlaying, setIsPlaying] = useState(false); // Track TTS play state
   const [canRestart, setCanRestart] = useState(false); // Track restart availability
   const speechRef = useRef(null); // Reference to Speech API object
+
+  const [selectedText, setSelectedText] = useState("");
+  const [definition, setDefinition] = useState(null);
+  const [showDictionary, setShowDictionary] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [buttonPosition, setButtonPosition] = useState({ x: 0, y: 0 });
+  const buttonRef = useRef(null);
 
   const handleShare = async () => {
     try {
@@ -126,8 +142,52 @@ const Article = () => {
     window.scrollTo(0, 0); // Scroll to top when page loads
   }, []);
 
+  const handleTextSelection = () => {
+    const selection = window.getSelection();
+    const text = selection.toString().trim();
+
+    if (text) {
+      setSelectedText(text);
+
+      // Get the bounding rectangle of the selected text
+      const range = selection.getRangeAt(0).getBoundingClientRect();
+      setButtonPosition({
+        x: range.left + window.scrollX,
+        y: range.top + window.scrollY - 40, // Position above text
+      });
+    } else {
+      setSelectedText("");
+    }
+  };
+
+  // Function to fetch word definition
+  const fetchDefinition = async () => {
+    if (!selectedText) return;
+
+    setLoading(true);
+    try {
+      const response = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${selectedText}`);
+      const data = await response.json();
+
+      if (Array.isArray(data) && data.length > 0) {
+        setDefinition(data[0].meanings[0].definitions[0].definition);
+      } else {
+        setDefinition("No definition found.");
+      }
+
+      setShowDictionary(true);
+    } catch (error) {
+      setDefinition("Error fetching definition.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
-    <div className="min-h-screen w-screen flex flex-col bg-white">
+    <div
+      className="min-h-screen w-screen flex flex-col bg-white"
+      onMouseUp={handleTextSelection}
+    >
       {/* Navbar */}
       <Navbar />
 
@@ -189,7 +249,7 @@ const Article = () => {
 
         {/* Article Date */}
         <span className="font-grotesk text-lg text-[#00317F] mb-4">
-          Posted on 22/01/2025
+          Posted by Author on 22/01/2025
         </span>
 
         {/* Article Content */}
@@ -198,7 +258,7 @@ const Article = () => {
           className="text-lg sm:text-xl font-grotesk font-medium text-black leading-relaxed space-y-6"
         >
           <p>
-            Article titled "{decodeURIComponent(title)}. Lorem ipsum dolor sit
+            Article titled "{decodeURIComponent(title)}". Lorem ipsum dolor sit
             amet. Eum error officiis est dolorem architecto quo iusto quos rem
             ipsam maxime. Est nulla dolor cum saepe esse qui quia fugiat ut
             numquam harum. Aut enim assumenda sed quidem modi eos fugiat nisi et
@@ -280,6 +340,42 @@ const Article = () => {
             )}
           </div>
         </div>
+
+        {/* Dictionary Button */}
+        {selectedText && (
+          <button
+            ref={buttonRef}
+            onClick={fetchDefinition}
+            className="absolute bg-blue-500 text-white px-3 py-1 rounded-lg flex items-center space-x-2 shadow-md"
+            style={{
+              left: `${buttonPosition.x}px`,
+              top: `${buttonPosition.y}px`,
+              position: "absolute",
+              zIndex: 50,
+            }}
+          >
+            <BookOpenIcon className="h-5 w-5" />
+            <span>Define "{selectedText}"</span>
+          </button>
+        )}
+
+        {/* Dictionary Popup Modal */}
+        {showDictionary && (
+          <div className="fixed inset-0 flex items-center justify-center backdrop-blur-sm z-50">
+            <div className="bg-white shadow-lg rounded-lg p-6 w-[90%] max-w-md text-center">
+              <div className="flex justify-between items-center">
+                <h2 className="text-xl font-bold text-blue-700">Dictionary</h2>
+                <button onClick={() => setShowDictionary(false)}>
+                  <XMarkIcon className="h-6 w-6 text-gray-600 hover:text-black" />
+                </button>
+              </div>
+              <p className="text-lg mt-2">
+                <strong>{selectedText}:</strong>{" "}
+                {loading ? "Loading..." : definition}
+              </p>
+            </div>
+          </div>
+        )}
 
         {/* Comments Section */}
         <div className="w-full mt-10">

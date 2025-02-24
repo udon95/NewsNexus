@@ -28,7 +28,7 @@ function App() {
         if (event === "SIGNED_IN" && session?.user?.email_confirmed_at) {
           const userId = session.user.id;
 
-          // ✅ Update user status to "Free" after email verification
+          //  Update user status to "Free" after email verification
           await supabase
             .from("users")
             .update({ status: "Free" })
