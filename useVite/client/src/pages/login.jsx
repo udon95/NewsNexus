@@ -22,8 +22,6 @@ function LoginPage() {
 
       if (error) throw new Error(error.message);
 
-      console.log("Login Success:", data);
-
       // Fetch user role from backend
       const userId = data.user.id;
       const response = await fetch(
@@ -32,8 +30,6 @@ function LoginPage() {
       const userData = await response.json();
 
       if (!response.ok) throw new Error(userData.error);
-
-      console.log("User Role:", userData.role);
 
       // Redirect based on role
       if (userData.role === "Admin") {

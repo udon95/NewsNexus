@@ -5,7 +5,6 @@ const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 const authRoute = require("./routes/authRoute");
 const { createClient } = require("@supabase/supabase-js");
 
-
 // Use fetch correctly depending on Node.js version
 let fetch;
 if (typeof globalThis.fetch !== "function") {
@@ -16,13 +15,17 @@ if (typeof globalThis.fetch !== "function") {
 
 const app = express();
 app.use(express.json());
-app.use(cors());
+app.use(
+  cors({
+    origin: "http://localhost:5173", // Allow only frontend requests
+    credentials: true, // Allow cookies & authentication headers
+  })
+);
 
 const supabase = createClient(
   process.env.SUPABASE_URL,
   process.env.SUPABASE_ANON_KEY
 );
-
 
 app.use("/auth", authRoute);
 
@@ -49,4 +52,6 @@ app.post("/create-checkout-session", async (req, res) => {
 
 // Start Server
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
+app.listen(PORT, () =>
+  console.log(`Server running on http://localhost:${PORT}`)
+);

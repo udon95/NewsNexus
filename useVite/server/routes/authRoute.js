@@ -3,7 +3,7 @@ const express = require("express");
 const router = express.Router();
 const supabase = require("../supabaseClient"); // Import Supabase client
 
-// 🔹 User Login
+//  User Login
 router.post("/login", async (req, res) => {
   const { email, password } = req.body;
   console.log("Login attempt:", req.body);
@@ -35,7 +35,7 @@ router.post("/login", async (req, res) => {
   res.json({ user: data.user, session: data.session, role: userRole.usertype });
 });
 
-// 🔹 User Registration
+//  User Registration
 router.post("/register", async (req, res) => {
   const { username, email, password, dob, gender, topics } = req.body;
 
@@ -94,7 +94,7 @@ router.post("/register", async (req, res) => {
   }
 });
 
-// 🔹 Get User Role
+//  Get User Role
 router.get("/user-role/:userid", async (req, res) => {
   const { userid } = req.params;
 

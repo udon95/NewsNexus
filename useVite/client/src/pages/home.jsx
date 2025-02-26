@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "../index.css";
 import Navbar from "../components/navBar.jsx";
@@ -7,6 +7,7 @@ import Testimonial from "../components/tesimonial.jsx";
 import TopicsList from "../components/topicList.jsx";
 import LatestNews from "../components/latestNews.jsx";
 import downArrow from "../assets/DownArrow.svg";
+import supabase from "../api/supabaseClient.js";
 
 const newsData = [
   {
@@ -16,7 +17,7 @@ const newsData = [
   },
   {
     title: "US Currency Strengthens Again",
-    imageUrl: "]",
+    imageUrl: "",
     rating: 3,
   },
   {
@@ -50,6 +51,30 @@ const topics = [
 function Home() {
   const navigate = useNavigate();
   const [selectedTopics, setSelectedTopics] = useState([]);
+  const [user, setUser] = useState(null);
+
+  // Fetch the logged-in user
+  useEffect(() => {
+    const fetchUser = async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      setUser(user);
+    };
+
+    fetchUser();
+
+    // Listen for auth state changes
+    const { data: listener } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        setUser(session?.user || null);
+      }
+    );
+
+    return () => {
+      listener?.subscription?.unsubscribe();
+    };
+  }, []);
 
   const toggleSelection = (topic) => {
     if (selectedTopics.includes(topic)) {
@@ -65,7 +90,9 @@ function Home() {
           Navigating the Singaporean News Landscape
         </h1>
         <div className="flex justify-left gap-3 mt-4 sm:mt-4">
-          <button
+          {!user && (
+            <>
+            <button
             className="px-2 py-1 bg-[#191A23] font-grotesk text-white rounded-lg hover:bg-opacity-90 w-[80px]"
             onClick={() => navigate("/register")}
           >
@@ -77,6 +104,8 @@ function Home() {
           >
             Login
           </button>
+          </>
+          )}
         </div>
       </div>
       <Navbar />
@@ -123,7 +152,7 @@ function Home() {
 
       <div className="flex justify-center mt-12 mb-5">
         <button
-          onClick={() => navigate("/news")}
+          onClick={() => navigate("/explore")}
           className="transition hover:opacity-80"
         >
           <img src={downArrow} alt="Down Arrow" className="w-6 h-6" />
