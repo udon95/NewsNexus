@@ -1,11 +1,10 @@
-// src/pages/LatestNews.jsx
 import React from "react";
 import NewsCard from "./newsCard";
 
 const newsData = [
   {
     title: "Latest Malaysian Forest Fire",
-    imageUrl: "/vite.svg", // Replace with actual image URL
+    imageUrl: "/vite.svg",
     rating: 4,
   },
   {
@@ -28,7 +27,12 @@ const LatestNews = () => {
       {/* News Cards */}
       <div className="space-y-6">
         {newsData.map((news, index) => (
-          <NewsCard key={index} title={news.title} imageUrl={news.imageUrl} rating={news.rating} />
+          <NewsCard
+            key={index}
+            title={news.title}
+            imageUrl={news.imageUrl}
+            rating={news.rating}
+          />
         ))}
       </div>
     </div>

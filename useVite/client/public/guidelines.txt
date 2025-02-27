@@ -1,0 +1,12 @@
+1. First guideline item
+   a) Sub-item 1
+   b) Sub-item 2
+
+2. Second guideline item
+   a) Another sub-item
+   b) More details
+   c) Extra information
+
+3. Third guideline item
+   a) Important sub-point
+   b) Another sub-point

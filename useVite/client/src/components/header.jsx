@@ -10,42 +10,117 @@ const Header = () => {
 
   // Fetch logged-in user from Supabase
 
+  // useEffect(() => {
+  //   const fetchUser = async () => {
+  //     // console.log("Checking Supabase Auth Session..."); // Debugging log
+
+  //     //  First, check if there is an active session
+  //     const { data: session, error: sessionError } =
+  //       await supabase.auth.getSession();
+
+  //     if (sessionError || !session || !session.session) {
+  //       console.error("Auth session missing or expired!"); // Log session issue
+  //       setUser(null);
+  //       return;
+  //     }
+
+  //     // console.log("Auth session found:", session); // Debugging log
+
+  //     //  Get the authenticated user
+  //     const {
+  //       data: { user },
+  //       error: authError,
+  //     } = await supabase.auth.getUser();
+
+  //     if (authError || !user) {
+  //       console.error(
+  //         "Error fetching auth user:",
+  //         authError?.message || "No user found!"
+  //       );
+  //       setUser(null);
+  //       return;
+  //     }
+
+  //     console.log("Logged-in User:", user); // Debugging log
+
+  //     setUser(user);
+
+  //     //  Fetch user type from backend
+  //     try {
+  //       const response = await fetch(
+  //         `http://localhost:5000/auth/user-role/${user.id}`
+  //       );
+  //       const result = await response.json();
+
+  //       if (response.ok) {
+  //         console.log("Backend User Role Response:", result); //  Debugging log
+  //         setUserType(result.role); //  Use backend response
+  //       } else {
+  //         console.error("Failed to fetch user role:", result.error);
+  //       }
+  //     } catch (err) {
+  //       console.error("Error fetching user type from backend:", err);
+  //     }
+  //   };
+
+  //   fetchUser();
+
+  //   //  Listen for auth state changes (login/logout)
+  //   const { data: listener } = supabase.auth.onAuthStateChange(
+  //     (_event, session) => {
+  //       if (!session?.session) {
+  //         console.log("User session ended, logging out...");
+  //         setUser(null);
+  //         setUserType(null);
+  //       }
+  //     }
+  //   );
+
+  //   return () => {
+  //     listener?.subscription?.unsubscribe();
+  //   };
+  // }, []);
+
   useEffect(() => {
     const fetchUser = async () => {
-      console.log("Checking Supabase Auth Session..."); // Debugging log
-  
-      // ✅ First, check if there is an active session
-      const { data: session, error: sessionError } = await supabase.auth.getSession();
-  
-      if (sessionError || !session || !session.session) {
-        console.error("Auth session missing or expired!"); // Log session issue
+      console.log("Checking Supabase Auth Session...");
+
+      const { data: sessionData, error: sessionError } =
+        await supabase.auth.getSession();
+
+      if (sessionError || !sessionData || !sessionData.session) {
+        console.error("Auth session missing or expired!");
         setUser(null);
         return;
       }
-  
-      console.log("Auth session found:", session); // Debugging log
-  
-      // ✅ Get the authenticated user
-      const { data: { user }, error: authError } = await supabase.auth.getUser();
-  
+
+      console.log("Auth session found:", sessionData.session);
+
+      const {
+        data: { user },
+        error: authError,
+      } = await supabase.auth.getUser();
       if (authError || !user) {
-        console.error("Error fetching auth user:", authError?.message || "No user found!");
+        console.error(
+          "Error fetching auth user:",
+          authError?.message || "No user found!"
+        );
         setUser(null);
         return;
       }
-  
-      console.log("Logged-in User:", user); // Debugging log
-  
+
+      console.log("Logged-in User:", user);
       setUser(user);
-  
-      // ✅ Fetch user type from backend
+
       try {
-        const response = await fetch(`http://localhost:5000/auth/user-role/${user.id}`);
+        const response = await fetch(
+          `http://localhost:5000/auth/user-role/${user.id}`
+        );
         const result = await response.json();
-  
+
         if (response.ok) {
-          console.log("Backend User Role Response:", result); // 🔍 Debugging log
-          setUserType(result.role); // ✅ Use backend response
+          console.log("Backend User Role Response:", result);
+          setUserType(result.role);
         } else {
           console.error("Failed to fetch user role:", result.error);
         }
@@ -53,25 +128,30 @@ const Header = () => {
         console.error("Error fetching user type from backend:", err);
       }
     };
-  
+
     fetchUser();
-  
-    // ✅ Listen for auth state changes (login/logout)
-    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (!session?.session) {
-        console.log("User session ended, logging out...");
-        setUser(null);
-        setUserType(null);
+
+    // Fix: Prevents auto-logout if session refreshes
+    const { data: listener } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        console.log("Auth State Changed:", event, session);
+        if (event === "SIGNED_IN") {
+          console.log("User signed in, updating state...");
+          setUser(session?.user);
+        } else if (event === "SIGNED_OUT") {
+          console.log("User signed out, clearing state...");
+          setUser(null);
+          setUserType(null);
+        }
       }
-    });
-  
+    );
+
     return () => {
       listener?.subscription?.unsubscribe();
     };
   }, []);
-  
 
-  const userEmail = user?.email;
+  const userEmail = user?.email || "";
   const userInitial = userEmail ? userEmail.charAt(0).toUpperCase() : "P";
 
   // Logout function
@@ -84,7 +164,7 @@ const Header = () => {
     try {
       console.log("Attempting to log out...");
 
-      //  Step 1: Log out from Supabase
+      // Step 1: Log out from Supabase
       const { error } = await supabase.auth.signOut();
 
       if (error) {
@@ -95,16 +175,15 @@ const Header = () => {
 
       console.log("User logged out successfully");
 
-      //  Step 2: Clear localStorage completely
-      localStorage.clear();
+      // Step 2: Clear localStorage (but keep site state)
+      localStorage.removeItem("userProfile");
+      localStorage.removeItem("supabase.auth.token");
+      // Step 3: Update React state
+      // setUser(null);
+      // setUserType(null);
 
-      //  Step 3: Update React state
-      setUser(null);
-
-      //  Step 4: Force a reload to fully clear the session
-      setTimeout(() => {
-        window.location.href = "/";
-      }, 500);
+      // Step 4: Redirect to homepage
+      window.location.href = "/";
     } catch (error) {
       console.error("Unexpected error during logout:", error);
       alert("Unexpected error: " + error.message);
@@ -112,7 +191,7 @@ const Header = () => {
   };
 
   const handleProfileClick = () => {
-    console.log("Navigating to:", userType); // 🔍 Debugging log
+    console.log("Navigating to:", userType); //  Debugging log
 
     if (userType === "Free") {
       navigate("/freeDashboard");
@@ -139,7 +218,7 @@ const Header = () => {
 
         <nav className="nav-items flex items-center gap-6">
           {/* Show Profile Button if User is Logged In */}
-          {userEmail ? (
+          {user && (
             <button
               className="w-12 h-12 sm:w-14 sm:h-14 bg-blue-200 rounded-lg text-blue-900 font-bold border-2 border-blue-900 flex items-center justify-center shadow-md hover:bg-blue-300 transition"
               onClick={handleProfileClick}
@@ -147,18 +226,20 @@ const Header = () => {
             >
               {userInitial}
             </button>
-          ) : (
-            <button
-              className="bg-blue-600 text-white px-4 py-2 rounded-lg"
-              onClick={() => navigate("/login")}
-            >
-              Login
-            </button>
-          )}
+          )
+          // : (
+          //   <button
+          //     className="bg-blue-600 text-white px-4 py-2 rounded-lg"
+          //     onClick={() => navigate("/login")}
+          //   >
+          //     Login
+          //   </button>
+          // )
+          }
 
           {/* Show Logout if Logged In */}
 
-          {user && (
+          {user !== null && (
             <button
               onClick={logout}
               className="text-red-500 font-medium hover:underline"

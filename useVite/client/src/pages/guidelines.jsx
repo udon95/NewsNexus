@@ -1,9 +1,17 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import "../index.css";
 import Navbar from "../components/navBar.jsx";
 
-function guidelines() {
-  // const navigate = useNavigate();
+function Guidelines() {
+  // const [guidelines, setGuidelines] = useState("");
+
+  // useEffect(() => {
+  //   //  Load text file
+  //   fetch("/guidelines.txt")
+  //     .then((response) => response.text())
+  //     .then((text) => setGuidelines(text))
+  //     .catch((error) => console.error("Error loading guidelines:", error));
+  // }, []);
 
   return (
     <div className="w-full min-w-screen min-h-screen flex flex-col bg-white">
@@ -16,6 +24,7 @@ function guidelines() {
 
         {/* Privacy Policy Content */}
         <div className="mt-6 text-lg sm:text-xl font-medium text-black leading-relaxed w-full">
+        {/* {guidelines} */}
           <ol className="list-decimal pl-6 space-y-4">
             <li>
               Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus
@@ -110,4 +119,4 @@ function guidelines() {
   );
 }
 
-export default guidelines;
+export default Guidelines;

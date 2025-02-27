@@ -13,7 +13,7 @@ const draftArticles = [
   "An Objective View of ASEAN Political Landscape",
 ];
 
-export const FreeManageMyArticles = () => {
+export const FreeSubmitTest = () => {
   const navigate = useNavigate();
 
   // Function to Handle Clicking an Article
@@ -28,18 +28,7 @@ export const FreeManageMyArticles = () => {
         <div className="flex flex-grow max-md:flex-col min-h-full w-full">
           <section className="flex-1 min-h-full bg-indigo-50 max-md:w-full">
             <div className="flex flex-col flex-grow min-h-full md:px-5 pt-8 w-full text-2xl font-medium text-black max-md:px-4 max-md:pb-24">
-              <ArticleList
-                title="My Posted Articles :"
-                articles={postedArticles}
-                isDraft={false}
-                onArticleClick={handleArticleClick}
-              />
-              <ArticleList
-                title="My Drafts :"
-                articles={draftArticles}
-                isDraft={true}
-                onArticleClick={handleArticleClick}
-              />
+              djiasjdiojioas
             </div>
           </section>
         </div>
@@ -48,4 +37,4 @@ export const FreeManageMyArticles = () => {
   );
 };
 
-export default FreeManageMyArticles;
+export default FreeSubmitTest;

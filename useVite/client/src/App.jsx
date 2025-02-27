@@ -3,14 +3,16 @@ import { useEffect } from "react";
 import Login from "./pages/login.jsx";
 import Register from "./pages/register.jsx";
 import Home from "./pages/home.jsx";
-import Layout from  "./Layout.jsx";
-import Subscription from "./pages/subscription.jsx"
-import Explore from "./pages/explore.jsx"
-import Guidelines from "./pages/guidelines.jsx"
-import Privacy from "./pages/privacy.jsx"
+import Layout from "./Layout.jsx";
+import Subscription from "./pages/subscription.jsx";
+import Explore from "./pages/explore.jsx";
+import Guidelines from "./pages/guidelines.jsx";
+import Privacy from "./pages/privacy.jsx";
 import Latest from "./components/latestNews.jsx";
 import Article from "./pages/article.jsx";
 import FreeDashboard from "./components/freeUser/freeDashboard.jsx";
+import Topic from "./pages/topic.jsx";
+
 import ViewRooms from "./components/premiumUser/viewRooms.jsx";
 import RoomPage from "./components/premiumUser/roomPage.jsx";
 import SubscriptionStatus from "./components/payment.jsx";
@@ -41,29 +43,33 @@ function App() {
   }, []);
 
   return (
-    <Routes>
-      <Route path="/" element={<Layout/>}>
-      <Route path="/" element={<Home/>}/>
-        <Route path="/login" element={<Login />} />
-        <Route path="register" element={<Register />} />
-        <Route path="/subscription" element={<Subscription />} />
-        <Route path="/subscription-status/:status" element={<SubscriptionStatus />} />
+      <Routes>
+        <Route path="/" element={<Layout />}>
+          <Route path="/" element={<Home />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="register" element={<Register />} />
+          <Route path="/subscription" element={<Subscription />} />
+          <Route
+            path="/subscription-status/:status"
+            element={<SubscriptionStatus />}
+          />
 
-        <Route path="/explore" element={<Explore />} />
-        <Route path="/guidelines" element={<Guidelines />} />
-        <Route path="/privacy" element={<Privacy />} />
-        <Route path="/latest" element={<Latest />} />
-        <Route path="/article/:title" element={<Article />} />
-        <Route path="/freeDashboard" element={<FreeDashboard />} />
-        <Route path="/rooms" element={<ViewRooms />} />
-        <Route path="/room/:id" element={<RoomPage />} />
+          <Route path="/explore" element={<Explore />} />
+          <Route path="/guidelines" element={<Guidelines />} />
+          <Route path="/privacy" element={<Privacy />} />
+          <Route path="/latest" element={<Latest />} />
+          <Route path="/article/:title" element={<Article />} />
+          <Route path="/freeDashboard/*" element={<FreeDashboard />} />
 
-        <Route path="/testprofile" element={<Profile />} />
+          <Route path="/rooms" element={<ViewRooms />} />
+          <Route path="/room/:id" element={<RoomPage />} />
 
+          <Route path="/testprofile" element={<Profile />} />
+          {/* <Route path="/topic" element={<Topic />} /> */}
 
-    </Route>
-    </Routes>
+        </Route>
+      </Routes>
   );
 }
 
-export default App
+export default App;

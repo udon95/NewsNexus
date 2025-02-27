@@ -9,23 +9,23 @@ import LatestNews from "../components/latestNews.jsx";
 import downArrow from "../assets/DownArrow.svg";
 import supabase from "../api/supabaseClient.js";
 
-const newsData = [
-  {
-    title: "Latest Malaysian Forest Fire",
-    imageUrl: "", // Replace with actual image URL
-    rating: 4,
-  },
-  {
-    title: "US Currency Strengthens Again",
-    imageUrl: "",
-    rating: 3,
-  },
-  {
-    title: "Personal Top 5 Singaporean Xiao Mei Mei",
-    imageUrl: "",
-    rating: 2,
-  },
-];
+// const newsData = [
+//   {
+//     title: "Latest Malaysian Forest Fire",
+//     imageUrl: "test.png", // Replace with actual image URL
+//     rating: 4,
+//   },
+//   {
+//     title: "US Currency Strengthens Again",
+//     imageUrl: "",
+//     rating: 3,
+//   },
+//   {
+//     title: "Personal Top 5 Singaporean Xiao Mei Mei",
+//     imageUrl: "",
+//     rating: 2,
+//   },
+// ];
 
 const topics = [
   "Finance",

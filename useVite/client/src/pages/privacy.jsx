@@ -1,9 +1,9 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import "../index.css";
 import Navbar from "../components/navBar.jsx";
 
 function PrivacyPolicy() {
-  // const navigate = useNavigate();
+  // const [privacy, setPrivacy] = useState("");
 
   return (
     <div className="w-full min-w-screen min-h-screen flex flex-col bg-white">

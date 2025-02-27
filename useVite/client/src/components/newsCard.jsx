@@ -7,7 +7,12 @@ const NewsCard = ({ title, imageUrl, rating }) => {
   // Function to generate stars
   const renderStars = () => {
     return [...Array(4)].map((_, index) => (
-      <span key={index} className={index < rating ? "text-yellow-400 text-xl" : "text-gray-400 text-xl"}>
+      <span
+        key={index}
+        className={
+          index < rating ? "text-yellow-400 text-xl" : "text-gray-400 text-xl"
+        }
+      >
         ★
       </span>
     ));
@@ -25,8 +30,8 @@ const NewsCard = ({ title, imageUrl, rating }) => {
     >
       {/* Image Section with Overlayed Vertical Stars */}
       <div className="relative w-full h-[200px]">
-        <img 
-          src={imageUrl || "https://via.placeholder.com/900x500"} // Default placeholder
+        <img
+          src={imageUrl || "test.png"} 
           alt={title}
           className="w-full h-full object-cover"
         />

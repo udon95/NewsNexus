@@ -6,33 +6,33 @@ const supabase = require("../supabaseClient"); // Import Supabase client
 //  User Login
 router.post("/login", async (req, res) => {
   const { email, password } = req.body;
-  console.log("Login attempt:", req.body);
 
+  console.log("Login attempt:", { email, password });
 
-  // Validate input
-  if (!email || !password) {
-    return res.status(400).json({ error: "Email and password are required" });
-  }
-
-  // Authenticate user
   const { data, error } = await supabase.auth.signInWithPassword({
     email,
-    password
+    password,
   });
 
   if (error) return res.status(401).json({ error: error.message });
+  if (!data.user)
+    return res.status(401).json({ error: "Authentication failed" });
 
-  // Fetch user role  
-  const { data: userRole, error: roleError } = await supabase
-    .from("usertype")
-    .select("usertype")
-    .eq("userid", data.user.id)
+  console.log("Authenticated User:", data.user);
+
+  // Fetch user details from the database
+  const { data: userData, error: userError } = await supabase
+    .from("users")
+    .select("*")
+    .eq("auth_id", data.user.id) // Match auth_id
     .single();
 
-  if (roleError)
-    return res.status(500).json({ error: "Failed to fetch user role" });
+  console.log("User Data from DB:", userData);
 
-  res.json({ user: data.user, session: data.session, role: userRole.usertype });
+  if (userError || !userData)
+    return res.status(404).json({ error: "User not found in DB" });
+
+  res.json({ user: data.user, session: data.session, role: userData.usertype });
 });
 
 //  User Registration
@@ -108,6 +108,111 @@ router.get("/user-role/:userid", async (req, res) => {
     return res.status(500).json({ error: "Failed to fetch user role" });
 
   res.json({ role: data.usertype });
+});
+
+router.get("/user-interest/:userid", async (req, res) => {
+  const { userid } = req.params;
+
+  const { data, error } = await supabase
+    .from("topicinterest")
+    .select("interesttype")
+    .eq("userid", userid)
+    .single();
+
+  if (error)
+    return res.status(500).json({ error: "Failed to fetch user interest" });
+
+  res.json({ interests: data });
+});
+
+router.get("/profile/:userid", async (req, res) => {
+  const { userid } = req.params;
+
+  const { data, error } = await supabase
+    .from("profile")
+    .select("*")
+    .eq("uuserid", userid)
+    .single();
+
+  if (error)
+    return res.status(500).json({ error: "Failed to fetch user profile" });
+
+  res.json({ profile: data });
+});
+
+router.get("/user-details/:userid", async (req, res) => {
+  const { userid } = req.params;
+
+  const { data, error } = await supabase
+    .from("users")
+    .select("*")
+    .eq("userid", userid)
+    .single();
+
+  if (error)
+    return res.status(500).json({ error: "Failed to fetch user details" });
+
+  res.json({ details: data });
+});
+
+router.get("/user-full/:userid", async (req, res) => {
+  const { userid } = req.params;
+
+  if (!userid) {
+    return res.status(400).json({ error: "User ID is required" });
+  }
+
+  try {
+    // Fetch user details, profile, and user role in ONE query
+    const { data, error } = await supabase
+      .from("users")
+      .select(
+        `
+        userid, email, username, password, status, auth_id,
+        profile:profile(uuserid, gender, dob),
+        usertype:usertype(usertype)
+      `
+      )
+      .eq("userid", userid)
+      .single();
+
+    if (error || !data) {
+      console.error("Error fetching user profile:", error?.message);
+      return res.status(404).json({ error: "User details not found" });
+    }
+
+    // Fetch interests separately
+    const { data: interestData, error: interestError } = await supabase
+      .from("topicinterest")
+      .select("interesttype")
+      .eq("userid", userid)
+      .single();
+
+    if (interestError) {
+      console.error("Interest fetch error:", interestError?.message);
+    }
+
+    // Extract interests
+    const interests = interestData?.interesttype || "No interests set";
+
+    // Return formatted response
+    res.json({
+      user: {
+        userid: data.userid,
+        email: data.email,
+        username: data.username,
+        password: data.password,
+        status: data.status,
+        auth_id: data.auth_id,
+      },
+      profile: data.profile || {},
+      role: data.usertype?.usertype || "Unknown",
+      interests, // Corrected interest retrieval
+    });
+  } catch (error) {
+    console.error("Unexpected error fetching full user profile:", error);
+    res.status(500).json({ error: "Failed to fetch full user profile" });
+  }
 });
 
 module.exports = router;

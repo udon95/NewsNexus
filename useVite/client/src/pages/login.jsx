@@ -14,33 +14,60 @@ function LoginPage() {
     e.preventDefault();
     setError("");
     try {
+      // const { data, error } = await supabase.auth.signInWithPassword({
+      //   email,
+      //   password,
+      //   options: { persistSession: true }, // Keeps user logged in
+      // });
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
-        options: { persistSession: true }, // Keeps user logged in
       });
 
-      if (error) throw new Error(error.message);
+      // if (error) throw new Error(error.message);
+      if (error) throw error;
+
+      if (!data.user) throw new Error("Authentication failed: No user found.");
+
+      console.log("Login successful:", data.user);
+
+      alert("Login successful!"); // ✅ Show success alert
+
+      // Fetch user session
+      const { data: sessionData } = await supabase.auth.getSession();
+      if (!sessionData || !sessionData.session) {
+        throw new Error("Session not found. Please try logging in again.");
+      }
+
+      console.log("Session Data:", sessionData);
 
       // Fetch user role from backend
       const userId = data.user.id;
+      if (!userId) throw new Error("User ID is missing.");
       const response = await fetch(
-        `http://localhost:5000/auth/user-role/${userId}`
+        `http://localhost:5000/auth/user-role/${userId}`,
+        {
+          method: "GET",
+          headers: { "Content-Type": "application/json" },
+        }
       );
       const userData = await response.json();
 
       if (!response.ok) throw new Error(userData.error);
+      console.log("User Role:", userData);
 
       // Redirect based on role
-      if (userData.role === "Admin") {
-        navigate("/admin-dashboard");
+      if (userData.role === "Free") {
+        navigate("/freeDashboard");
       } else {
         navigate("/"); // Redirect Free/Premium users to Home
       }
     } catch (error) {
       console.error("Login failed:", error.message);
+      setError(error.message);
       alert(error.message);
     }
+   
   };
 
   return (
