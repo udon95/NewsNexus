@@ -228,7 +228,7 @@ function Register() {
                   <button
                     type="button"
                     onClick={() => navigate("/login")}
-                    className="px-6 py-2 bg-[#3F414C] text-white rounded-lg hover:bg-opacity-90"
+                    className="px-6 py-2 bg-[#3F414C] text-white rounded-lg hover:bg-opacity-90 cursor-pointer"
                   >
                     Login
                   </button>
@@ -238,7 +238,7 @@ function Register() {
                     onClick={handleNext}
                     className={`px-6 py-2 rounded-lg text-white transition ${
                       isValid
-                        ? "bg-[#3F414C] hover:bg-[#3F414C]"
+                        ? "bg-[#3F414C] hover:bg-[#3F414C] cursor-pointer"
                         : "bg-gray-400 cursor-not-allowed"
                     }`}
                     disabled={!isValid}

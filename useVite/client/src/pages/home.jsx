@@ -52,6 +52,7 @@ function Home() {
   const navigate = useNavigate();
   const [selectedTopics, setSelectedTopics] = useState([]);
   const [user, setUser] = useState(null);
+  
 
   // Fetch the logged-in user
   useEffect(() => {
@@ -82,6 +83,7 @@ function Home() {
     } else if (selectedTopics.length < 6) {
       setSelectedTopics([...selectedTopics, topic]);
     }
+     
   };
   return (
     <div className="w-full min-w-screen min-h-screen flex flex-col bg-white">

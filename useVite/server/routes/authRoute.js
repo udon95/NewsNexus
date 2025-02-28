@@ -4,36 +4,109 @@ const router = express.Router();
 const supabase = require("../supabaseClient"); // Import Supabase client
 
 //  User Login
+// router.post("/login", async (req, res) => {
+//   const { email, password } = req.body;
+
+//   console.log("Login attempt:", { email, password });
+
+//   const { data, error } = await supabase.auth.signInWithPassword({
+//     email,
+//     password,
+//   });
+
+//   if (error) return res.status(401).json({ error: error.message });
+//   if (!data.user)
+//     return res.status(401).json({ error: "Authentication failed" });
+
+//   console.log("Authenticated User:", data.user);
+
+//   // Fetch user details from the database
+//   const { data: userData, error: userError } = await supabase
+//     .from("users")
+//     .select("*")
+//     .eq("auth_id", data.user.id) // Match auth_id
+//     .single();
+
+//   console.log("User Data from DB:", userData);
+
+//   if (userError || !userData)
+//     return res.status(404).json({ error: "User not found in DB" });
+
+//   res.json({ user: data.user, session: data.session, role: userData.usertype });
+// });
+
 router.post("/login", async (req, res) => {
   const { email, password } = req.body;
 
   console.log("Login attempt:", { email, password });
 
+  // Authenticate user with Supabase
   const { data, error } = await supabase.auth.signInWithPassword({
     email,
     password,
   });
 
   if (error) return res.status(401).json({ error: error.message });
-  if (!data.user)
-    return res.status(401).json({ error: "Authentication failed" });
+  if (!data.user) return res.status(401).json({ error: "Authentication failed" });
 
   console.log("Authenticated User:", data.user);
 
-  // Fetch user details from the database
-  const { data: userData, error: userError } = await supabase
-    .from("users")
-    .select("*")
-    .eq("auth_id", data.user.id) // Match auth_id
-    .single();
+  const userId = data.user.id;
 
-  console.log("User Data from DB:", userData);
+  try {
+    // Fetch user details, profile, and role in ONE query
+    const { data: userProfile, error: profileError } = await supabase
+      .from("users")
+      .select(
+        `
+        userid, email, username, password, status, auth_id,
+        profile:profile(uuserid, gender, dob),
+        usertype:usertype(usertype)
+      `
+      )
+      .eq("auth_id", userId) // Match Supabase auth_id
+      .single();
 
-  if (userError || !userData)
-    return res.status(404).json({ error: "User not found in DB" });
+    if (profileError || !userProfile) {
+      console.error("Error fetching user profile:", profileError?.message);
+      return res.status(404).json({ error: "User details not found" });
+    }
 
-  res.json({ user: data.user, session: data.session, role: userData.usertype });
+    // Fetch user interests separately
+    const { data: interestData, error: interestError } = await supabase
+      .from("topicinterest")
+      .select("interesttype")
+      .eq("userid", userProfile.userid)
+      .single();
+
+    if (interestError) {
+      console.error("Interest fetch error:", interestError?.message);
+    }
+
+    // Extract interests (ensure it doesn't break if null)
+    const interests = interestData?.interesttype || [];
+
+    // Return full user details
+    res.json({
+      user: {
+        userid: userProfile.userid,
+        email: userProfile.email,
+        username: userProfile.username,
+        password: userProfile.password,
+        status: userProfile.status,
+        auth_id: userProfile.auth_id,
+      },
+      profile: userProfile.profile || {}, // Ensure no null values
+      role: userProfile.usertype?.usertype || "Unknown",
+      interests,
+      session: data.session, // Supabase session data
+    });
+  } catch (error) {
+    console.error("Unexpected error during login:", error);
+    res.status(500).json({ error: "Failed to log in and fetch user data" });
+  }
 });
+
 
 //  User Registration
 router.post("/register", async (req, res) => {

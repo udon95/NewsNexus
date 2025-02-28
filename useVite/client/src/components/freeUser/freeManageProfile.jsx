@@ -25,7 +25,7 @@ export const FreeManageProfile = () => {
 
       try {
         //  Check if data is already in localStorage (reduces API calls)
-        const cachedProfile = localStorage.getItem("userProfile");
+        const cachedProfile = sessionStorage.getItem("userProfile") || localStorage.getItem("userProfile");
         if (cachedProfile) {
           console.log("Loading profile from cache...");
           const data = JSON.parse(cachedProfile);
