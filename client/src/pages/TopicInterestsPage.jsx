@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
-import "../styles/TopicInterests.css"; // ✅ Only necessary styles
-import "../styles/Header.css"; // ✅ Header styles
-import "../styles/Footer.css"; // ✅ Footer styles
+import "../styles/TopicInterests.css"; //Only necessary styles
+import "../styles/Header.css"; //Header styles
+import "../styles/Footer.css"; //Footer styles
 
 const TopicInterestsPage = () => {
   const topics = [
@@ -25,10 +25,10 @@ const TopicInterestsPage = () => {
 
   return (
     <div className="topics-container">
-      <Header /> {/* ✅ Ensures header is applied correctly */}
+      <Header /> {/*Ensures header is applied correctly */}
 
       <main className="content-wrapper">
-        <h1 className="topics-title">Topic Interests:</h1> {/* ✅ Title properly aligned */}
+        <h1 className="topics-title">Topic Interests:</h1> {/*Title properly aligned */}
 
         <div className="topics-grid">
           {topics.map((topic, index) => (
@@ -42,10 +42,10 @@ const TopicInterestsPage = () => {
           ))}
         </div>
 
-        <button className="next-button">Next</button> {/* ✅ Button aligned properly */}
+        <button className="next-button">Next</button> {/*Button aligned properly */}
       </main>
 
-      <Footer /> {/* ✅ Footer styling enforced */}
+      <Footer /> {/*Footer styling enforced */}
     </div>
   );
 };
