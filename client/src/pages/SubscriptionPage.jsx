@@ -1,95 +1,66 @@
-// import React from "react";
-// import Header from "../components/Header";
-// import Footer from "../components/Footer";
-// import "../index.css"; // Ensure styles are applied
-
-// const SubscriptionPage = () => {
-//   return (
-//     <div className="subscription-container">
-//       <Header />
-
-//       {/* Page Title */}
-//       <main className="subscription-content">
-//         <h1 className="subscription-title">Monthly Subscription</h1>
-
-//         {/* Free Subscription Card */}
-//         <div className="subscription-card">
-//           <div className="subscription-label">Free</div>
-//           <ul className="subscription-details">
-//             <li>Aut consequatur maxime aut harum repudiandae aut</li>
-//             <li>Est magnam vitae qui reiciendis nihil qui saepe nisi et soluta adipisci qui autem aperiam et reprehenderit</li>
-//             <li>Et consequuntur aspernatur et eius ipsam et harum.</li>
-//           </ul>
-//         </div>
-
-//         {/* Paid Subscription Card */}
-//         <div className="subscription-card">
-//           <div className="subscription-label">$ 5</div>
-//           <ul className="subscription-details">
-//             <li>Aut consequatur maxime aut harum repudiandae aut</li>
-//             <li>Est magnam vitae qui reiciendis nihil qui saepe nisi et soluta adipisci qui autem aperiam et reprehenderit</li>
-//             <li>Et consequuntur aspernatur et eius ipsam et harum.</li>
-//           </ul>
-//         </div>
-
-//         {/* Upgrade Button */}
-//         <button className="upgrade-button">Upgrade</button>
-//       </main>
-
-//       <Footer />
-//     </div>
-//   );
-// };
-
-// export default SubscriptionPage;
-
-import React from "react";
+import React, { useState, useEffect } from "react";
+import supabase from "../supabase";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import SubscriptionCard from "../components/SubscriptionCard";
 import "../styles/Subscription.css"; // Import CSS properly
 
 const SubscriptionPage = () => {
+  const [subscriptions, setSubscriptions] = useState([]); // State for subscriptions
+  const [loading, setLoading] = useState(true); // Loading state
+  const [error, setError] = useState(null); // Error handling
+
+  useEffect(() => {
+    fetchSubscriptions();
+  }, []);
+
+  const fetchSubscriptions = async () => {
+    setLoading(true);
+  
+    const { data, error } = await supabase
+      .from("subscriptions")
+      .select("*")
+      .order("price", { ascending: true });
+  
+    if (error) {
+      console.error("Supabase Error:", error); // Log full error
+      setError(`Supabase Error: ${error.message}`);
+    } else {
+      console.log("Fetched Subscriptions:", data); // Log response
+      setSubscriptions(data);
+    }
+  
+    setLoading(false);
+  };   
+
   return (
     <div className="subscription-container">
-      {/* Ensure Header Renders */}
       <Header />
-
+  
       <main className="subscription-content">
         <h1 className="subscription-title">Monthly Subscription</h1>
-
-        {/* Ensure Subscription Cards Render */}
-        <SubscriptionCard
-          title="Free"
-          content={
-            <ul className="subscription-details">
-              <li>Aut consequatur maxime aut harum repudiandae aut</li>
-              <li>Est magnam vitae qui reiciendis nihil qui saepe nisi et soluta adipisci qui autem aperiam et reprehenderit</li>
-              <li>Et consequuntur aspernatur et eius ipsam et harum.</li>
-            </ul>
-          }
-        />
-
-        <SubscriptionCard
-          title="$5"
-          content={
-            <ul className="subscription-details">
-              <li>Aut consequatur maxime aut harum repudiandae aut</li>
-              <li>Est magnam vitae qui reiciendis nihil qui saepe nisi et soluta adipisci qui autem aperiam et reprehenderit</li>
-              <li>Et consequuntur aspernatur et eius ipsam et harum.</li>
-            </ul>
-          }
-        />
-
-        {/* 🏆 Ensure Upgrade Button Renders */}
+  
+        {subscriptions.map((sub) => (
+          <SubscriptionCard
+            key={sub.id}
+            title={sub.tier === "Free" ? "Free" : `$${sub.price}`}
+            content={
+              <ul className="subscription-details">
+                {sub.description.split(",").map((item, index) => (
+                  <li key={index}>{item.trim()}</li> // Trim removes extra spaces
+                ))}
+              </ul>
+            }
+          />
+        ))}
+  
         <button className="upgrade-button">Upgrade</button>
       </main>
-
-      {/* 🏆 Ensure Footer Renders */}
+  
       <Footer />
     </div>
   );
+  
 };
 
 export default SubscriptionPage;
-
