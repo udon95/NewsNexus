@@ -4,7 +4,7 @@
 //   topics,
 //   selectedTopics,
 //   toggleSelection,
-  
+
 // }) => {
 //   return (
 //     <div className="flex flex-col flex-grow items-left justify-center w-full max-w-[900px] mx-auto">
@@ -36,55 +36,32 @@
 
 // export default TopicList;
 
-// import React, { useEffect, useState } from "react";
-
-// const TopicList = ({ allTopics, selectedTopics, setSelectedTopics, handleTopicSelection }) => {
-//   // ✅ Ensure topics are selected when the component mounts
-//   useEffect(() => {
-//     if (selectedTopics.length > 0) {
-//       console.log("✅ Auto-selecting topics:", selectedTopics);
-//       setSelectedTopics(selectedTopics); // Ensure state is set correctly
-//     }
-//   }, [selectedTopics, setSelectedTopics]);
-
-//   return (
-//     <div className="grid grid-cols-2 gap-4">
-//       {selectedTopics.map((topic) => (
-//         <button
-//           key={topic}
-//           className={`p-3 rounded-lg shadow-md ${
-//             selectedTopics.includes(topic) ? "bg-blue-500 text-white" : "bg-gray-200 text-black"
-//           }`}
-//           onClick={() => handleTopicSelection(topic)}
-//         >
-//           {topic}
-//         </button>
-//       ))}
-//     </div>
-//   );
-// };
-
-// export default TopicList;
-
 import React from "react";
 
-const TopicList = ({ allTopics, selectedTopics, handleTopicSelection }) => {
+const TopicList = ({
+  allTopics = [],
+  selectedTopics = [],
+  handleTopicSelection,
+}) => {
   return (
-    <div className="grid grid-cols-2 gap-4">
-      {(allTopics || []).map((topic) => (
-        <button
-          key={topic}
-          className={`p-3 rounded-lg shadow-md ${
-            selectedTopics.includes(topic) ? "bg-blue-500 text-white" : "bg-gray-200 text-black"
-          }`}
-          onClick={() => handleTopicSelection(topic)}
-        >
-          {topic}
-        </button>
-      ))}
+    <div className="flex flex-col flex-grow items-center justify-center w-full max-w-[900px] mx-auto mb-1">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-3 w-full">
+        {allTopics.map((topic) => (
+          <button
+            key={topic}
+            className={`p-2 min-w-[180px] whitespace-nowrap rounded-lg shadow-md ${
+              selectedTopics.includes(topic)
+                ? "bg-blue-500 text-white"
+                : "bg-gray-200 text-black"
+            }`}
+            onClick={() => handleTopicSelection(topic)}
+          >
+            {topic}
+          </button>
+        ))}
+      </div>
     </div>
   );
 };
 
 export default TopicList;
-

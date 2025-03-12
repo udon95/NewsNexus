@@ -306,7 +306,7 @@ const FreeManageProfile = () => {
         if (storedUser) {
           const data2 = JSON.parse(storedUser);
 
-          console.log(" Loaded user profile:", data2);
+          // console.log(" Loaded user profile:", data2);
 
           setUserDetails(data2.user);
           setProfile(data2.profile);
@@ -317,7 +317,7 @@ const FreeManageProfile = () => {
             : data2.interests.split(", ").map((topic) => topic.trim());
 
           setSelectedTopics(formattedInterests); //  Pre-select topics from stored interests
-          console.log(" Auto-selected topics:", formattedInterests);
+          // console.log(" Auto-selected topics:", formattedInterests);
         }
       } catch (err) {
         console.error("Profile fetch error:", err.message);
@@ -338,87 +338,74 @@ const FreeManageProfile = () => {
     );
   };
 
-  const toggleSelection = (topic) => {
-        if (selectedTopics.includes(topic)) {
-          setSelectedTopics(selectedTopics.filter((t) => t !== topic));
-          setShowError(false);
-        } else if (selectedTopics.length < 6) {
-          setSelectedTopics([...selectedTopics, topic]);
-          setShowError(false);
-        } else {
-          setShowError(true);
-        }
-      };
-    
-      const updateProfile = async () => {
-        try {
-          const { error } = await supabase
-            .from("users")
-            .update({ username: editUsername, email: editEmail })
-            .eq("userid", userDetails.userid);
-    
-          if (error) throw error;
-          alert("Profile updated successfully!");
-        } catch (error) {
-          console.error("Error updating profile:", error.message);
-          setError(error.message);
-        }
-      };
-    
-      const updatePassword = async () => {
-        try {
-          if (!editOldPassword || !editNewPassword) {
-            alert("Please fill in both the old and new passwords.");
-            return;
-          }
-    
-          if (userDetails.password !== editOldPassword) {
-            alert("Old password is incorrect.");
-            return;
-          }
-    
-          //Update password if old password matches
-          const { error: updateError } = await supabase
-            .from("users")
-            .update({ password: editNewPassword }) // Update password field
-            .eq("userid", userDetails.userid);
-    
-          if (updateError) {
-            alert("Failed to update password.");
-            return;
-          }
-    
-          alert("Password updated successfully!");
-          setEditOldPassword("");
-          setEditNewPassword("");
-        } catch (error) {
-          console.error("Error updating password:", error.message);
-          alert("An error occurred while updating the password.");
-        }
-      };
-    
-      const updateInterests = async () => {
-        try {
-          const { error } = await supabase
-            .from("topicinterest")
-            .update({ interesttype: selectedTopics.join(", ") })
-            .eq("userid", userDetails.userid);
-    
-          if (error) throw error;
-          alert("Interests updated successfully!");
-        } catch (error) {
-          console.error("Error updating interests:", error.message);
-          setError(error.message);
-        }
-      };
+  const updateProfile = async () => {
+    try {
+      const { error } = await supabase
+        .from("users")
+        .update({ username: editUsername, email: editEmail })
+        .eq("userid", userDetails.userid);
 
-      useEffect(() => {
-        if (userDetails) {
-          setEditUsername(userDetails.username || "");
-          setEditEmail(userDetails.email || "");
-        }
-      }, [userDetails]);
-      
+      if (error) throw error;
+      alert("Profile updated successfully!");
+    } catch (error) {
+      console.error("Error updating profile:", error.message);
+      setError(error.message);
+    }
+  };
+
+  const updatePassword = async () => {
+    try {
+      if (!editOldPassword || !editNewPassword) {
+        alert("Please fill in both the old and new passwords.");
+        return;
+      }
+
+      if (userDetails.password !== editOldPassword) {
+        alert("Old password is incorrect.");
+        return;
+      }
+
+      //Update password if old password matches
+      const { error: updateError } = await supabase
+        .from("users")
+        .update({ password: editNewPassword }) // Update password field
+        .eq("userid", userDetails.userid);
+
+      if (updateError) {
+        alert("Failed to update password.");
+        return;
+      }
+
+      alert("Password updated successfully!");
+      setEditOldPassword("");
+      setEditNewPassword("");
+    } catch (error) {
+      console.error("Error updating password:", error.message);
+      alert("An error occurred while updating the password.");
+    }
+  };
+
+  const updateInterests = async () => {
+    try {
+      const { error } = await supabase
+        .from("topicinterest")
+        .update({ interesttype: selectedTopics.join(", ") })
+        .eq("userid", userDetails.userid);
+
+      if (error) throw error;
+      alert("Interests updated successfully!");
+    } catch (error) {
+      console.error("Error updating interests:", error.message);
+      setError(error.message);
+    }
+  };
+
+  useEffect(() => {
+    if (userDetails) {
+      setEditUsername(userDetails.username || "");
+      setEditEmail(userDetails.email || "");
+    }
+  }, [userDetails]);
 
   return (
     <div className="w-screen min-h-screen flex flex-col overflow-auto">
@@ -427,7 +414,7 @@ const FreeManageProfile = () => {
           <div className="flex-1 min-h-full bg-indigo-50 max-md:w-full">
             <div className="flex flex-col flex-grow min-h-full md:px-5 pt-8 w-full text-2xl font-grotesk font-medium text-black max-md:px-4 max-md:pb-24">
               {/* Profile Details */}
-              <h3 className="text-2xl font-bold">Profile Particulars:</h3>
+              <h3 className="text-2xl font-grotesk font-bold mb-1">Profile Particulars:</h3>
               <div className="p-4 bg-white shadow-md rounded-lg w-3/3 md:w-2/3">
                 <input
                   type="text"
@@ -453,7 +440,7 @@ const FreeManageProfile = () => {
               </div>
 
               {/* Password Change */}
-              <h3 className="text-2xl font-bold mt-6">Manage Password:</h3>
+              <h3 className="text-2xl font-bold  font-grotesk mb-1 mt-6">Manage Password:</h3>
               <div className="p-4 bg-white shadow-md rounded-lg w-3/3 md:w-2/3">
                 <input
                   type="password"
@@ -478,38 +465,42 @@ const FreeManageProfile = () => {
               </div>
 
               {/* Topic Interests */}
-              <h3 className="text-2xl font-bold mt-6">
+              <h3 className="text-2xl font-bold font-grotesk mb-1 mt-6">
                 Interest Selection (Max 6):
               </h3>
-              <TopicList
-                allTopics={[
-                  "Finance",
-                  "Politics",
-                  "Entertainment",
-                  "Sports",
-                  "Weather",
-                  "Lifestyle",
-                  "Beauty",
-                  "Hollywood",
-                  "China",
-                  "Horticulture",
-                  "Culinary",
-                  "LGBTQ++",
-                  "Singapore",
-                  "Environment",
-                  "Investment",
-                  "USA",
-                ]}
-                selectedTopics={selectedTopics} //  Pass selected topics
-                setSelectedTopics={setSelectedTopics} //  Allow updates
-                handleTopicSelection={handleTopicSelection}
-              />
-              <button
-                onClick={updateInterests}
-                className="bg-[#3f414c] text-[white] cursor-pointer text-sm flex justify-end self-end w-fit ml-auto mr-0 mt-5 px-5 py-2.5 rounded-xl border-[none]"
-              >
-                Update Interests
-              </button>
+              <div className="p-4 bg-white shadow-md rounded-lg w-3/3 md:w-2/3 mb-1">
+                <TopicList
+                  allTopics={[
+                    "Finance",
+                    "Politics",
+                    "Entertainment",
+                    "Sports",
+                    "Weather",
+                    "Lifestyle",
+                    "Beauty",
+                    "Hollywood",
+                    "China",
+                    "Horticulture",
+                    "Culinary",
+                    "LGBTQ++",
+                    "Singapore",
+                    "Environment",
+                    "Investment",
+                    "USA",
+                    "Luxury",
+                    "Korea"
+                  ]}
+                  selectedTopics={selectedTopics} //  Pass selected topics
+                  setSelectedTopics={setSelectedTopics} //  Allow updates
+                  handleTopicSelection={handleTopicSelection}
+                />
+                <button
+                  onClick={updateInterests}
+                  className="bg-[#3f414c] text-[white] cursor-pointer text-sm flex justify-end self-end w-fit ml-auto mr-0 mt-5 px-5 py-2.5 rounded-xl border-[none]"
+                >
+                  Update Interests
+                </button>
+              </div>
 
               {showError && (
                 <p className="text-red-600">

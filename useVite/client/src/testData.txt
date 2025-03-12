@@ -1,0 +1,17 @@
+Visa Card: 
+4000007020000003
+CVC: 
+any 3 digits
+
+Admin user:
+admin@test.com
+testtest
+
+Free user: 
+free@test.com 
+testtest
+
+Premium user:
+premium@test.com 
+testtest
+

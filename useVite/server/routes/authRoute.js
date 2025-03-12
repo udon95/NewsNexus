@@ -138,31 +138,18 @@ router.post("/register", async (req, res) => {
         email,
         username,
         password: hashPw,
-        status: "Free",
+        status: "Active",
         auth_id: userId,
       },
     ]);
     if (userError) return res.status(500).json({ error: userError.message });
 
-    // 3) Insert into 'profile'
     const { error: profileError } = await supabase
       .from("profile")
       .insert([{ uuserid: userId, gender, dob }]);
     if (profileError)
       return res.status(500).json({ error: profileError.message });
 
-    // 4) Insert topics
-    // if (topics && topics.length > 0) {
-    //   const topicRecords = topics.map((topic) => ({
-    //     userid: userId,
-    //     interesttype: topic,
-    //   }));
-    //   const { error: topicError } = await supabase
-    //     .from("topicinterest")
-    //     .insert(topicRecords);
-    //   if (topicError)
-    //     return res.status(500).json({ error: topicError.message });
-    // }
 
     if (topics && topics.length > 0) {
       const interestsString = topics.join(", ");
@@ -176,7 +163,6 @@ router.post("/register", async (req, res) => {
       }
     }
 
-    // 5) Set user role to 'Free'
     await supabase
       .from("usertype")
       .insert([{ userid: userId, usertype: "Free" }]);
@@ -186,6 +172,26 @@ router.post("/register", async (req, res) => {
     return res.status(500).json({ error: error.message });
   }
 });
+
+router.post("/forgot-password", async (req, res) => {
+  const { email } = req.body;
+
+  if (!email) {
+    return res.status(400).json({ error: "Email is required" });
+  }
+
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: "http://localhost:5173/reset-password", // ✅ Change to your frontend reset page
+  });
+
+  if (error) {
+    return res.status(500).json({ error: error.message });
+  }
+
+  res.json({ message: "Password reset email sent. Check your inbox." });
+});
+
+
 
 //  Get User Role
 router.get("/user-role/:userid", async (req, res) => {

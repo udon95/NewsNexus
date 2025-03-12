@@ -6,7 +6,7 @@ import useAuthHook from "../hooks/useAuth.jsx";
 
 const Header = () => {
   const {user, userType, handleLogout} = useAuthHook();
-  // const navigate = useNavigate();
+  const navigate = useNavigate();
   // const [user, setUser] = useState(null);
   // const [userType, setUserType] = useState(null);
 
@@ -451,7 +451,7 @@ const Header = () => {
 
   return (
     <header className="bg-white shadow-md">
-      <div className="container mx-auto flex items-center justify-between px-[60px] py-4">
+      <div className="container mx-28 flex items-center justify-between px-[60px] py-4">
         <Link to="/">
           <img
             loading="lazy"

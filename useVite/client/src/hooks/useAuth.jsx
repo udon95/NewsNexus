@@ -67,19 +67,21 @@ const useAuthHook = () => {
   };
 
   useEffect(() => {
-    const storedUser = localStorage.getItem("userProfile");
+    const storedUser =
+      sessionStorage.getItem("userProfile") ||
+      localStorage.getItem("userProfile");
     if (storedUser) {
       const parsedUser = JSON.parse(storedUser);
       const storedInterests = parsedUser.interests || [];
 
-      console.log("✅ Loaded interests from storage:", storedInterests);
+      // console.log("Loaded interests from storage:", storedInterests);
 
-      // ✅ Ensure stored interests are properly formatted as an array
+      // Ensure stored interests are properly formatted as an array
       const formattedInterests = Array.isArray(storedInterests)
-      ? storedInterests
-      : storedInterests.split(", ").map((topic) => topic.trim());
+        ? storedInterests
+        : storedInterests.split(", ").map((topic) => topic.trim());
 
-    setInterests(formattedInterests);
+      setInterests(formattedInterests);
     }
   }, []);
 

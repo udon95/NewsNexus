@@ -12,7 +12,9 @@ import Latest from "./components/latestNews.jsx";
 import Article from "./pages/article.jsx";
 import FreeDashboard from "./components/freeUser/freeDashboard.jsx";
 import Topic from "./pages/topic.jsx";
-
+import PremiumDashboard from "./components/premiumUser/premiumDashboard.jsx";
+import ForgotPassword from "./pages/forgetPW";
+import ResetPassword from "./pages/resetPW.jsx";
 import ViewRooms from "./components/premiumUser/viewRooms.jsx";
 import RoomPage from "./components/premiumUser/roomPage.jsx";
 import SubscriptionStatus from "./components/payment.jsx";
@@ -61,6 +63,9 @@ function App() {
           <Route path="/latest" element={<Latest />} />
           <Route path="/article/:title" element={<Article />} />
           <Route path="/freeDashboard/*" element={<FreeDashboard />} />
+          <Route path="/premiumDashboard/*" element={<PremiumDashboard />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
 
           <Route path="/rooms" element={<ViewRooms />} />
           <Route path="/room/:id" element={<RoomPage />} />

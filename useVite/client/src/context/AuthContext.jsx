@@ -186,24 +186,26 @@ export const AuthProvider = ({ children }) => {
     const loadUserFromStorage = async () => {
       setLoading(true);
       try {
-        const storedUser = localStorage.getItem("userProfile");
+        const storedUser =
+          sessionStorage.getItem("userProfile") ||
+          localStorage.getItem("userProfile");
         if (storedUser) {
           const parsedUser = JSON.parse(storedUser);
           setUser(parsedUser.user);
           setUserType(parsedUser.role);
           setInterests(parsedUser.interests || []); // ✅ Load interests correctly
 
-          console.log(" Loaded user from localStorage:", parsedUser);
+          // console.log(" Loaded user from localStorage:", parsedUser);
         }
         const { data: sessionData, error } = await supabase.auth.getSession();
         if (error) throw error;
 
         if (sessionData?.session?.user) {
-          console.log("✅ Supabase session found:", sessionData.session.user);
+          // console.log("✅ Supabase session found:", sessionData.session.user);
           fetchUserRole(sessionData.session.user.id); // Ensure user role is set
           fetchUserInterest(sessionData.session.user.id); // ✅ Fetch interests on startup
         } else {
-          console.warn("⚠️ No active session found.");
+          console.warn(" No active session found.");
         }
       } catch (error) {
         console.error("Error loading user from storage:", error.message);
@@ -227,10 +229,10 @@ export const AuthProvider = ({ children }) => {
 
   const fetchUserInterest = async (userId) => {
     try {
-		console.log("🔄 Fetching interests for user:", userId);
+      // console.log("🔄 Fetching interests for user:", userId);
 
       const response = await axios.get(`/auth/user-interest/${userId}`);
-      console.log("✅ API Response:", response.data); // ✅ Debugging: Ensure API response is received
+      // console.log("✅ API Response:", response.data); // ✅ Debugging: Ensure API response is received
 
       if (response.data.interests) {
         const formattedInterests = response.data.interests
@@ -285,6 +287,30 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const refreshUserProfile = async () => {
+    const storedUser = JSON.parse(localStorage.getItem("userProfile"));
+    if (!storedUser || !storedUser.user || !storedUser.user.userid) return;
+
+    const { data, error } = await supabase
+      .from("usertype")
+      .select("usertype")
+      .eq("userid", storedUser.user.userid)
+      .single();
+
+    if (error) {
+      console.error("❌ Error fetching updated role:", error);
+      return;
+    }
+
+    console.log("✅ Fetched updated role:", data.usertype);
+
+    storedUser.role = data.usertype;
+    localStorage.setItem("userProfile", JSON.stringify(storedUser));
+    sessionStorage.setItem("userProfile", JSON.stringify(storedUser)); // ✅ Update session storage too
+
+    setUserType(data.usertype);
+  };
+
   const signOut = async () => {
     await supabase.auth.signOut();
     setUser(null);
@@ -292,6 +318,7 @@ export const AuthProvider = ({ children }) => {
     setInterests([]); // ✅ Reset interests on logout
 
     localStorage.removeItem("userProfile");
+    window.location.reload();
   };
 
   return (
@@ -303,6 +330,7 @@ export const AuthProvider = ({ children }) => {
         signOut,
         loading,
         fetchUserInterest,
+        refreshUserProfile,
       }}
     >
       {children}

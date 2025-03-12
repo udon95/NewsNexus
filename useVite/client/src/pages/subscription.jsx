@@ -1,99 +1,3 @@
-// import React, { useState, useEffect } from "react";
-// import { useLocation } from "react-router-dom";
-// import Navbar from "../components/navBar";
-// import SubscriptionCard from "../components/subscriptionCard";
-// import Status from "../components/payment";
-
-// const SubscriptionPage = () => {
-//   const location = useLocation();
-//   const [showStatus, setShowStatus] = useState(false);
-
-//   useEffect(() => {
-//     if (
-//       location.pathname.includes("success") ||
-//       location.pathname.includes("cancel")
-//     ) {
-//       setShowStatus(true);
-//     }
-//   }, [location.pathname]);
-
-//   const handleUpgrade = async () => {
-//     try {
-//       const response = await fetch(
-//         "http://localhost:5000/create-checkout-session",
-//         {
-//           method: "POST",
-//           headers: { "Content-Type": "application/json" },
-//         }
-//       );
-
-//       const data = await response.json();
-//       if (data.url) {
-//         window.location.href = data.url; // Redirect to Stripe Checkout
-//       }
-//     } catch (error) {
-//       console.error("Error creating checkout session:", error);
-//     }
-//   };
-
-//   return (
-//     <div className="min-h-screen w-screen flex flex-col bg-white">
-//       <Navbar />
-
-//       {showStatus && <Status onClose={() => setShowStatus(false)} />}
-//       <main className={`flex flex-col flex-grow items-center justify-center w-full px-4 ${showStatus ? "blur-sm" : ""}`}>
-//         <div className="w-full max-w-3xl p-6 font-grotesk">
-//           <h1 className="text-4xl mb-8 font-grotesk text-left">
-//             Monthly Subscription
-//           </h1>
-
-//           {/* Subscription Cards */}
-//           <div className="flex flex-col w-full items-center space-y-10 font-grotesk">
-//             <SubscriptionCard
-//               title="Free"
-//               content={
-//                 <ul className="list-disc pl-3 font-medium text-lg">
-//                   <li>Aut consequatur maxime aut harum repudiandae aut</li>
-//                   <li>
-//                     Est magnam vitae qui reiciendis nihil qui saepe nisi et
-//                     soluta adipisci qui autem aperiam et reprehenderit
-//                   </li>
-//                   <li>Et consequuntur aspernatur et eius ipsam et harum.</li>
-//                 </ul>
-//               }
-//             />
-
-//             <SubscriptionCard
-//               title="$5"
-//               content={
-//                 <ul className="list-disc pl-3 font-medium text-lg">
-//                   <li>Aut consequatur maxime aut harum repudiandae aut</li>
-//                   <li>
-//                     Est magnam vitae qui reiciendis nihil qui saepe nisi et
-//                     soluta adipisci qui autem aperiam et reprehenderit
-//                   </li>
-//                   <li>Et consequuntur aspernatur et eius ipsam et harum.</li>
-//                 </ul>
-//               }
-//             />
-
-//             {/* Upgrade Button */}
-//             <div className="w-full flex justify-end">
-//               <button
-//                 className="bg-[#3F414C] text-white p-3 rounded-lg cursor-pointer text-sm"
-//                 onClick={handleUpgrade}
-//               >
-//                 Upgrade
-//               </button>
-//             </div>
-//           </div>
-//         </div>
-//       </main>
-//     </div>
-//   );
-// };
-
-// export default SubscriptionPage;
 import React, { useState, useEffect } from "react";
 import Navbar from "../components/navBar";
 import SubscriptionCard from "../components/subscriptionCard";
@@ -105,17 +9,32 @@ const SubscriptionPage = () => {
   const [showStatus, setShowStatus] = useState(false);
 
   useEffect(() => {
-    if (location.pathname.includes("success") || location.pathname.includes("cancel")) {
+    if (
+      location.pathname.includes("success") ||
+      location.pathname.includes("cancel")
+    ) {
       setShowStatus(true);
     }
   }, [location.pathname]);
 
   const handleUpgrade = async () => {
     try {
-      const response = await fetch("http://localhost:5000/create-checkout-session", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-      });
+      const storedUser = JSON.parse(localStorage.getItem("userProfile"));
+      if (!storedUser || !storedUser.user || !storedUser.user.userid) {
+        console.error("User not found");
+        return;
+      }
+
+      const userId = storedUser.user.userid;
+
+      const response = await fetch(
+        "http://localhost:5000/subscription/create-checkout-session",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ userId }),
+        }
+      );
 
       const data = await response.json();
       if (data.url) {
@@ -135,7 +54,9 @@ const SubscriptionPage = () => {
 
       <main className="flex flex-col flex-grow items-center justify-center w-full px-4">
         <div className="w-full max-w-3xl p-6 font-grotesk">
-          <h1 className="text-4xl mb-8 font-grotesk text-left">Monthly Subscription</h1>
+          <h1 className="text-4xl mb-8 font-grotesk text-left">
+            Monthly Subscription
+          </h1>
 
           {/* Subscription Cards */}
           <div className="flex flex-col w-full items-center space-y-10 font-grotesk">
@@ -144,7 +65,10 @@ const SubscriptionPage = () => {
               content={
                 <ul className="list-disc pl-3 font-medium text-lg">
                   <li>Aut consequatur maxime aut harum repudiandae aut</li>
-                  <li>Est magnam vitae qui reiciendis nihil qui saepe nisi et soluta adipisci qui autem aperiam et reprehenderit</li>
+                  <li>
+                    Est magnam vitae qui reiciendis nihil qui saepe nisi et
+                    soluta adipisci qui autem aperiam et reprehenderit
+                  </li>
                   <li>Et consequuntur aspernatur et eius ipsam et harum.</li>
                 </ul>
               }
@@ -155,7 +79,10 @@ const SubscriptionPage = () => {
               content={
                 <ul className="list-disc pl-3 font-medium text-lg">
                   <li>Aut consequatur maxime aut harum repudiandae aut</li>
-                  <li>Est magnam vitae qui reiciendis nihil qui saepe nisi et soluta adipisci qui autem aperiam et reprehenderit</li>
+                  <li>
+                    Est magnam vitae qui reiciendis nihil qui saepe nisi et
+                    soluta adipisci qui autem aperiam et reprehenderit
+                  </li>
                   <li>Et consequuntur aspernatur et eius ipsam et harum.</li>
                 </ul>
               }
@@ -178,5 +105,3 @@ const SubscriptionPage = () => {
 };
 
 export default SubscriptionPage;
-
-
