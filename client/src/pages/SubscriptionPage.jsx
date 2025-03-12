@@ -52,13 +52,13 @@ import "../styles/Subscription.css"; // Import CSS properly
 const SubscriptionPage = () => {
   return (
     <div className="subscription-container">
-      {/* 🏆 Ensure Header Renders */}
+      {/* Ensure Header Renders */}
       <Header />
 
       <main className="subscription-content">
         <h1 className="subscription-title">Monthly Subscription</h1>
 
-        {/* 🏆 Ensure Subscription Cards Render */}
+        {/* Ensure Subscription Cards Render */}
         <SubscriptionCard
           title="Free"
           content={
