@@ -18,6 +18,7 @@ import RoomPage from "./components/premiumUser/roomPage.jsx";
 import SubscriptionStatus from "./components/payment.jsx";
 
 import Profile from "./pages/testProfile.jsx";
+import Test from "./pages/testlogin.jsx";
 import supabase from "./api/supabaseClient.js";
 import "./index.css";
 
@@ -65,6 +66,7 @@ function App() {
           <Route path="/room/:id" element={<RoomPage />} />
 
           <Route path="/testprofile" element={<Profile />} />
+          <Route path="/testlogin" element={<Test/>}/>
           {/* <Route path="/topic" element={<Topic />} /> */}
 
         </Route>

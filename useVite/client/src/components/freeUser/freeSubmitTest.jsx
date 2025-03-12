@@ -1,26 +1,10 @@
-import React from "react";
+import React, { useState } from "react";
 import ArticleList from "../articleList.jsx";
 import { useNavigate } from "react-router-dom";
+import Rating from "@mui/material/Rating";
 
-const postedArticles = [
-  "Personal Top 10 Singaporean Xiao Mei Mei",
-  "Latest Malaysian Forest Fire",
-  "US Currency Strengthens again",
-];
-
-const draftArticles = [
-  "Personal Reflection of 2024 Economics",
-  "An Objective View of ASEAN Political Landscape",
-];
-
-export const FreeSubmitTest = () => {
-  const navigate = useNavigate();
-
-  // Function to Handle Clicking an Article
-  const handleArticleClick = (article) => {
-    console.log(`Clicked on: ${article}`);
-    navigate(`/article/${encodeURIComponent(article)}`); // Navigates to article page
-  };
+export const FreeSubmitTest = ({rating, setRating}) => {
+  const [test, setTest] = useState("");
 
   return (
     <div className="w-screen min-h-screen flex flex-col overflow-auto">
@@ -28,7 +12,30 @@ export const FreeSubmitTest = () => {
         <div className="flex flex-grow max-md:flex-col min-h-full w-full">
           <section className="flex-1 min-h-full bg-indigo-50 max-md:w-full">
             <div className="flex flex-col flex-grow min-h-full md:px-5 pt-8 w-full text-2xl font-medium text-black max-md:px-4 max-md:pb-24">
-              djiasjdiojioas
+              <label>Rate :</label>
+              {/* ⭐ Half-Star Rating with MUI */}
+              <Rating
+                name="half-rating"
+                value={rating}
+                precision={0.5}
+                onChange={(event, newValue) => setRating(newValue)}
+                max={4}
+              />
+
+              <div className="mb-4">
+                <label>Share Your Experience :</label>
+                <textarea
+                  value={test}
+                  onChange={(e) => setTest(e.target.value)}
+                  className="w-full max-w-[800px] h-96 p-2 border rounded-lg shadow-sm bg-white text-black focus:outline-none focus:ring-2 focus:ring-blue-400"
+                ></textarea>
+              </div>
+
+              <div className="flex justify-end gap-2 max-w-[800px]">
+                <button className="px-4 py-2 text-lg text-white bg-black rounded-lg shadow-md">
+                  Submit
+                </button>
+              </div>
             </div>
           </section>
         </div>

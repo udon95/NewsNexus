@@ -2,6 +2,7 @@ require("dotenv").config();
 const express = require("express");
 const router = express.Router();
 const supabase = require("../supabaseClient"); // Import Supabase client
+const bcrypt = require("bcryptjs");
 
 //  User Login
 // router.post("/login", async (req, res) => {
@@ -38,20 +39,22 @@ const supabase = require("../supabaseClient"); // Import Supabase client
 router.post("/login", async (req, res) => {
   const { email, password } = req.body;
 
-  console.log("Login attempt:", { email, password });
+  // console.log("Login attempt:", { email, password });
 
   // Authenticate user with Supabase
-  const { data, error } = await supabase.auth.signInWithPassword({
-    email,
-    password,
-  });
+  const { data: authData, error: authError } =
+    await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
 
-  if (error) return res.status(401).json({ error: error.message });
-  if (!data.user) return res.status(401).json({ error: "Authentication failed" });
+  if (authError) return res.status(401).json({ error: authError.message });
+  if (!authData.user)
+    return res.status(401).json({ error: "Authentication failed" });
 
-  console.log("Authenticated User:", data.user);
+  // console.log("Authenticated User:", data.user);
 
-  const userId = data.user.id;
+  const userId = authData.user.id;
 
   try {
     // Fetch user details, profile, and role in ONE query
@@ -71,6 +74,8 @@ router.post("/login", async (req, res) => {
       console.error("Error fetching user profile:", profileError?.message);
       return res.status(404).json({ error: "User details not found" });
     }
+    const isMatch = await bcrypt.compare(password, userProfile.password);
+    if (!isMatch) return res.status(400).json({ error: "Invalid credentials" });
 
     // Fetch user interests separately
     const { data: interestData, error: interestError } = await supabase
@@ -84,10 +89,11 @@ router.post("/login", async (req, res) => {
     }
 
     // Extract interests (ensure it doesn't break if null)
-    const interests = interestData?.interesttype || [];
+    const interests = interestData?.interesttype || "";
 
     // Return full user details
-    res.json({
+    return res.json({
+      message: "Login Successful",
       user: {
         userid: userProfile.userid,
         email: userProfile.email,
@@ -99,20 +105,22 @@ router.post("/login", async (req, res) => {
       profile: userProfile.profile || {}, // Ensure no null values
       role: userProfile.usertype?.usertype || "Unknown",
       interests,
-      session: data.session, // Supabase session data
+      session: authData.session, // Supabase session data
     });
+    // return res.json({ message: "Login successful" });
   } catch (error) {
     console.error("Unexpected error during login:", error);
     res.status(500).json({ error: "Failed to log in and fetch user data" });
   }
 });
 
-
 //  User Registration
 router.post("/register", async (req, res) => {
   const { username, email, password, dob, gender, topics } = req.body;
 
   try {
+    const salt = await bcrypt.genSalt(10);
+    const hashPw = await bcrypt.hash(password, salt);
     // 1) Create user in Supabase Auth
     const { data: authData, error: authError } = await supabase.auth.signUp({
       email,
@@ -129,8 +137,8 @@ router.post("/register", async (req, res) => {
         userid: userId,
         email,
         username,
-        password,
-        status: "Pending",
+        password: hashPw,
+        status: "Free",
         auth_id: userId,
       },
     ]);
@@ -144,16 +152,28 @@ router.post("/register", async (req, res) => {
       return res.status(500).json({ error: profileError.message });
 
     // 4) Insert topics
+    // if (topics && topics.length > 0) {
+    //   const topicRecords = topics.map((topic) => ({
+    //     userid: userId,
+    //     interesttype: topic,
+    //   }));
+    //   const { error: topicError } = await supabase
+    //     .from("topicinterest")
+    //     .insert(topicRecords);
+    //   if (topicError)
+    //     return res.status(500).json({ error: topicError.message });
+    // }
+
     if (topics && topics.length > 0) {
-      const topicRecords = topics.map((topic) => ({
-        userid: userId,
-        interesttype: topic,
-      }));
+      const interestsString = topics.join(", ");
+
       const { error: topicError } = await supabase
         .from("topicinterest")
-        .insert(topicRecords);
-      if (topicError)
+        .insert([{ userid: userId, interesttype: interestsString }]); // Store as one row
+
+      if (topicError) {
         return res.status(500).json({ error: topicError.message });
+      }
     }
 
     // 5) Set user role to 'Free'
@@ -186,16 +206,21 @@ router.get("/user-role/:userid", async (req, res) => {
 router.get("/user-interest/:userid", async (req, res) => {
   const { userid } = req.params;
 
-  const { data, error } = await supabase
-    .from("topicinterest")
-    .select("interesttype")
-    .eq("userid", userid)
-    .single();
+  try {
+    const { data: interestData, error: interestError } = await supabase
+      .from("topicinterest")
+      .select("interesttype")
+      .eq("userid", userid)
+      .single();
 
-  if (error)
-    return res.status(500).json({ error: "Failed to fetch user interest" });
-
-  res.json({ interests: data });
+    if (interestError) {
+      return res.status(500).json({ error: "Failed to fetch user interest" });
+    }
+    return res.json({ interests: interestData?.interesttype || "" });
+  } catch (error) {
+    console.error("Unexpected error fetching interests:", error);
+    return res.status(500).json({ error: "Error retrieving interests" });
+  }
 });
 
 router.get("/profile/:userid", async (req, res) => {

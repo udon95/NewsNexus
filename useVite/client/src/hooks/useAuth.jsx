@@ -1,9 +1,100 @@
-import { useContext } from "react";
-import AuthContext from "../context/AuthProvider";
-import { BrowserRouter } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext"; // Import AuthContext
+// import supabase from "../api/supabaseClient";
 
-const useAuth = () => {
-	return useContext(AuthContext);
+const useAuthHook = () => {
+  const { user, userType, signInWithPass, signOut } = useAuth();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [interests, setInterests] = useState("");
+  const [error, setError] = useState("");
+  const navigate = useNavigate();
+
+  // Handles Login Functionality
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    setError("");
+
+    try {
+      const { user, userType, interests } = await signInWithPass(
+        email,
+        password
+      );
+      if (!user) throw new Error("Authentication failed: No user found.");
+
+      alert("Login successful!");
+      console.log("Login successful:", user, "Interests: ", interests);
+      const formattedInterests = Array.isArray(interests)
+        ? interests
+        : interests.split(", ").map((topic) => topic.trim());
+
+      // Store user data in sessionStorage & localStorage
+      const fullUserData = {
+        user,
+        role: userType,
+        interests: formattedInterests,
+      };
+      sessionStorage.setItem("userProfile", JSON.stringify(fullUserData));
+      localStorage.setItem("userProfile", JSON.stringify(fullUserData));
+
+      setInterests(formattedInterests);
+
+      // Redirect based on role
+      if (userType === "Free") navigate("/freeDashboard");
+      else if (userType === "Premium") navigate("/premiumDashboard");
+      else navigate("/adminDashboard");
+    } catch (error) {
+      console.error("Login failed:", error.message);
+      setError(error.message);
+      alert(error.message);
+    }
+  };
+
+  // Handles Logout Functionality
+  const handleLogout = async () => {
+    try {
+      await signOut();
+      sessionStorage.removeItem("userProfile");
+      localStorage.removeItem("userProfile");
+      setInterests([]);
+      navigate("/");
+      window.location.reload();
+    } catch (error) {
+      console.error("Logout failed:", error.message);
+      alert(error.message);
+    }
+  };
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem("userProfile");
+    if (storedUser) {
+      const parsedUser = JSON.parse(storedUser);
+      const storedInterests = parsedUser.interests || [];
+
+      console.log("✅ Loaded interests from storage:", storedInterests);
+
+      // ✅ Ensure stored interests are properly formatted as an array
+      const formattedInterests = Array.isArray(storedInterests)
+      ? storedInterests
+      : storedInterests.split(", ").map((topic) => topic.trim());
+
+    setInterests(formattedInterests);
+    }
+  }, []);
+
+  return {
+    email,
+    setEmail,
+    password,
+    setPassword,
+    error,
+    handleLogin,
+    handleLogout,
+    user,
+    userType,
+    interests,
+  };
 };
 
-export default useAuth;
+export default useAuthHook;
