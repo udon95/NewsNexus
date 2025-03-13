@@ -6,7 +6,19 @@ const Navbar = () => {
    
     <nav className="w-full bg-[#BFD8FF] py-3 font-grotesk shadow-md overflow-x-auto">
       
-      <div className="flex items-center justify-between sm:px-48 px-20 gap-4 text-blue-900 text-lg whitespace-nowrap ">
+      <div  className="
+       max-w-screen-xl
+      mx-auto
+      flex items-center
+      justify-between
+      px-14      /* Matches header’s base padding */
+      sm:px-6   /* Matches header’s sm breakpoint */
+      md:px-8   /* Matches header’s md breakpoint */
+      lg:px-12  /* Matches header’s lg breakpoint */
+      gap-2 sm:gap-4
+      text-blue-900 text-lg
+      whitespace-nowrap
+    ">
 
         <div className="border-l border-blue-900 h-6"></div> 
         <a href="/" className="hover:underline px-4 sm:px-6 font-bold">

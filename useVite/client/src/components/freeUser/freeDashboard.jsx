@@ -8,7 +8,7 @@ import FreeSubmitTest from "./freeSubmitTest";
 
 function FreeDashboard() {
   return (
-    <div className="w-full min-w-screen min-h-screen flex flex-col overflow-hidden">
+    <div className="w-full min-w-screen max-h-screen flex flex-col overflow-hidden">
       <main className="flex-grow w-full flex min-h-full overflow-hidden">
         <aside className="md:w-[250px] md:flex-none">
           <FreeSidebar />

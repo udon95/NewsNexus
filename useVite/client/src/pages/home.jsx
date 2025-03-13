@@ -34,7 +34,7 @@ const topics = [
 function Home() {
   const navigate = useNavigate();
   const [selectedTopics, setSelectedTopics] = useState([]);
-  const {user, loading} = useAuthHook();
+  const { user, loading } = useAuthHook();
 
   const handleTopicSelection = (topic) => {
     setSelectedTopics(
@@ -43,6 +43,13 @@ function Home() {
           ? prevTopics.filter((t) => t !== topic) // Remove if already selected
           : [...prevTopics, topic] // Add if not selected
     );
+  };
+
+  const handleSearchFromHome = (query) => {
+    if (query.trim() !== "") {
+      // Use encodeURIComponent to ensure special characters are handled
+      navigate(`/explore?query=${encodeURIComponent(query)}`);
+    }
   };
 
   // Fetch the logged-in user
@@ -75,38 +82,54 @@ function Home() {
   //     setSelectedTopics([...selectedTopics, topic]);
   //   }
   // };
-  
+
   if (loading) {
-    return <p>Loading...</p>; // ✅ Prevents flickering before user is set
+    return <p>Loading...</p>; // Prevents flickering before user is set
   }
 
   return (
     <div className="w-full min-w-screen min-h-screen flex flex-col bg-white">
-      <div className="w-full min-w-screen  mx-auto px-6 sm:px-12 md:px-24 lg:px-36 xl:px-48 flex flex-col items-start justify-center h-[300px] bg-[#7FB0FE]">
-        <h1 className="text-black text-4xl w-[300px] font-bold font-grotesk">
-          Navigating the Singaporean News Landscape
-        </h1>
-        <div className="flex justify-left gap-3 mt-4 sm:mt-4">
-          {!user && !loading &&(
-            <>
-              <button
-                className="px-2 py-1 bg-[#191A23] font-grotesk text-white rounded-lg hover:bg-opacity-90 w-[80px]"
-                onClick={() => navigate("/register")}
-              >
-                Register
-              </button>
-              <button
-                className="px-2 py-1 bg-[#191A23] font-grotesk text-white rounded-lg hover:bg-opacity-90 w-[80px]"
-                onClick={() => navigate("/login")}
-              >
-                Login
-              </button>
-            </>
-          )}
+      <div className="      w-full h-[300px] bg-[#7FB0FE]">
+        <div
+          className="
+          max-w-screen-xl
+          mx-auto
+          px-14
+          sm:px-6
+          md:px-8
+          lg:px-12
+          h-full
+          flex
+          flex-col
+          items-start
+          justify-center
+          "
+        >
+          <h1 className="text-black text-4xl w-[300px] font-bold font-grotesk">
+            Navigating the Singaporean News Landscape
+          </h1>
+          <div className="flex justify-left gap-3 mt-4 sm:mt-4">
+            {!user && !loading && (
+              <>
+                <button
+                  className="px-2 py-1 bg-[#191A23] font-grotesk text-white rounded-lg hover:bg-opacity-90 w-[80px]"
+                  onClick={() => navigate("/register")}
+                >
+                  Register
+                </button>
+                <button
+                  className="px-2 py-1 bg-[#191A23] font-grotesk text-white rounded-lg hover:bg-opacity-90 w-[80px]"
+                  onClick={() => navigate("/login")}
+                >
+                  Login
+                </button>
+              </>
+            )}
+          </div>
         </div>
       </div>
       <Navbar />
-      <Search />
+      <Search onSearch={handleSearchFromHome} />
 
       <div className="flex justify-center w-full mt-10 font-grotesk">
         <div className="relative w-full max-w-[900px] bg-gray-300 rounded-lg shadow-lg overflow-hidden ">
@@ -131,20 +154,34 @@ function Home() {
           Go To Discussion Rooms &gt;
         </button>
       </div>
-      <div className="flex justify-center w-full mt-12">
-        <Testimonial />
+      <div className="w-full font-grotesk mt-12">
+        <h1 className="text-2xl sm:text-3xl mb-5 text-left max-w-[900px] mx-auto">
+          Testimonials:
+        </h1>
+        <div className="flex justify-center w-full ">
+          <Testimonial />
+        </div>
+      </div>
+      <div className="w-full font-grotesk mt-12">
+        <h1 className="text-2xl sm:text-3xl mb-5 text-left max-w-[900px] mx-auto">
+          Topics:
+        </h1>
+        <div className="flex justify-center w-full ">
+          <TopicsList
+            allTopics={topics}
+            selectedTopics={selectedTopics}
+            handleTopicSelection={handleTopicSelection}
+          />
+        </div>
       </div>
 
-      <div className="flex justify-center w-full mt-12">
-        <TopicsList
-          allTopics={topics}
-          selectedTopics={selectedTopics}
-          handleTopicSelection={handleTopicSelection}
-        />
-      </div>
-
-      <div className="flex justify-center w-full mt-12">
-        <LatestNews />
+      <div className="w-full font-grotesk mt-12">
+        <h1 className="text-2xl sm:text-3xl mb-5 text-left max-w-[900px] mx-auto">
+          Latest News:
+        </h1>
+        <div className="flex justify-center w-full ">
+          <LatestNews />
+        </div>
       </div>
 
       <div className="flex justify-center mt-12 mb-5">
@@ -152,7 +189,12 @@ function Home() {
           onClick={() => navigate("/explore")}
           className="transition hover:opacity-80"
         >
-          <img src={downArrow} alt="Down Arrow" className="w-6 h-6" />
+          <img
+            src={downArrow}
+            alt="Down Arrow"
+            value="View More"
+            className="w-6 h-6"
+          />
         </button>
       </div>
     </div>

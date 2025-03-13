@@ -1,8 +1,13 @@
 import { useParams, useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
 
 const RoomPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+
+  useEffect(() => {
+      window.scrollTo(0, 0); // Scroll to top when page loads
+    }, []);
 
   return (
     <div className="p-6 max-w-3xl mx-auto">

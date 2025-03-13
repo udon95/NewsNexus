@@ -19,14 +19,15 @@ const newsData = [
   },
 ];
 
-const LatestNews = () => {
+const LatestNews = ({ searchQuery = "" }) => {
+  const filteredNewsData = newsData.filter((news) =>
+    news.title.toLowerCase().includes(searchQuery.toLowerCase())
+  );
   return (
     <div className="w-full max-w-[900px] mx-auto ">
-      <h2 className="text-3xl font-bold font-grotesk mb-4">Latest News :</h2>
-
       {/* News Cards */}
       <div className="space-y-6">
-        {newsData.map((news, index) => (
+        {filteredNewsData.map((news, index) => (
           <NewsCard
             key={index}
             title={news.title}

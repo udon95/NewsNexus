@@ -41,8 +41,8 @@ const useAuthHook = () => {
       setInterests(formattedInterests);
 
       // Redirect based on role
-      if (userType === "Free") navigate("/freeDashboard");
-      else if (userType === "Premium") navigate("/premiumDashboard");
+      if (userType === "Free") navigate("/explore");
+      else if (userType === "Premium") navigate("/explore");
       else navigate("/adminDashboard");
     } catch (error) {
       console.error("Login failed:", error.message);

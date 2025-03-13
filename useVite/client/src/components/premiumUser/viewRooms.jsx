@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom"; // Import navigation
 import Navbar from "../../components/navBar";
 import Search from "../../components/search";
@@ -25,6 +25,9 @@ const ViewRoomsPage = () => {
       setJoinedRooms([...joinedRooms, id]);
     }
   };
+  useEffect(() => {
+    window.scrollTo(0, 0); // Scroll to top when page loads
+  }, []);
 
   return (
     <div className="w-full min-w-screen min-h-screen flex flex-col bg-white">

@@ -58,7 +58,7 @@ router.post("/login", async (req, res) => {
 
   try {
     // Fetch user details, profile, and role in ONE query
-    const { data: userProfile, error: profileError } = await supabase
+    let { data: userProfile, error: profileError } = await supabase
       .from("users")
       .select(
         `
@@ -74,6 +74,7 @@ router.post("/login", async (req, res) => {
       console.error("Error fetching user profile:", profileError?.message);
       return res.status(404).json({ error: "User details not found" });
     }
+    if (userProfile){
     const isMatch = await bcrypt.compare(password, userProfile.password);
     if (!isMatch) return res.status(400).json({ error: "Invalid credentials" });
 
@@ -107,6 +108,31 @@ router.post("/login", async (req, res) => {
       interests,
       session: authData.session, // Supabase session data
     });
+  }
+  let { data: adminProfile, error: adminError } = await supabase
+      .from("admin")
+      .select("adminid, email, username, password") // No auth_id in admin
+      .eq("email", email) // Admins are matched via email
+      .single();
+
+    if (adminProfile) {
+      // ✅ Validate Admin Password
+      const isMatch = await bcrypt.compare(password, adminProfile.password);
+      if (!isMatch) return res.status(400).json({ error: "Invalid credentials" });
+
+      // ✅ Return Admin Profile
+      return res.json({
+        message: "Admin Login Successful",
+        user: {
+          userid: adminProfile.adminid,
+          email: adminProfile.email,
+          username: adminProfile.username,
+          status: "Active",
+        },
+        role: "Admin",
+        session: authData.session, // Supabase session
+      });
+    }
     // return res.json({ message: "Login successful" });
   } catch (error) {
     console.error("Unexpected error during login:", error);
