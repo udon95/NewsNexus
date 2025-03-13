@@ -1,3 +1,4 @@
+`cd useVite`
 In useVite folder
 
 To start client side
