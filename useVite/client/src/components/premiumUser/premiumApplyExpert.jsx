@@ -1,25 +1,66 @@
 import React, { useState } from "react";
-import ArticleList from "../articleList.jsx";
-import { useNavigate } from "react-router-dom";
-import Rating from "@mui/material/Rating";
+import { Star } from "lucide-react"; // Using Lucide Icons for rating
 
-export const FreeSubmitTest = ({rating, setRating}) => {
-  const [test, setTest] = useState("");
+const PremiumApplyExpert = () => {
+  const [reason, setReason] = useState(""); // User input for reason
+  const [rating, setRating] = useState(0); // User-selected rating
+  const [submitted, setSubmitted] = useState(false); // Submission state
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (!reason.trim() || rating === 0) {
+      alert("Please provide a reason and select a rating!");
+      return;
+    }
+    setSubmitted(true); // Mark application as submitted
+  };
 
   return (
-    <div className="w-screen min-h-screen flex flex-col overflow-auto">
-      <main className="flex-grow w-full flex min-h-full overflow-auto">
-        <div className="flex flex-grow max-md:flex-col min-h-full w-full">
-          <section className="flex-1 min-h-full bg-indigo-50 max-md:w-full">
-            <div className="flex flex-col flex-grow min-h-full md:px-5 pt-8 w-full text-2xl font-medium text-black max-md:px-4 max-md:pb-24">
-              dhsaoijdiosajidosaiodasj
-              
+    <div className="w-screen min-h-screen flex flex-col items-center justify-center bg-indigo-50 p-6">
+      <div className="bg-white shadow-lg rounded-lg p-6 max-w-lg w-full">
+        <h2 className="text-2xl font-bold text-gray-800 mb-4">Apply to Be an Expert</h2>
+
+        {submitted ? (
+          <p className="text-green-600 text-lg font-semibold">
+            ✅ Your application has been submitted! Awaiting review.
+          </p>
+        ) : (
+          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+            {/* Reason Input */}
+            <textarea
+              className="w-full p-3 border rounded-md resize-none"
+              placeholder="Why do you want to be an expert?"
+              value={reason}
+              onChange={(e) => setReason(e.target.value)}
+              rows={3}
+              required
+            />
+
+            {/* Star Rating Selection */}
+            <div className="flex gap-2 text-yellow-500 text-xl">
+              {[1, 2, 3, 4, 5].map((star) => (
+                <Star
+                  key={star}
+                  className={`cursor-pointer ${
+                    rating >= star ? "fill-yellow-500" : "fill-gray-300"
+                  }`}
+                  onClick={() => setRating(star)}
+                />
+              ))}
             </div>
-          </section>
-        </div>
-      </main>
+
+            {/* Submit Button */}
+            <button
+              type="submit"
+              className="bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition"
+            >
+              Submit Application
+            </button>
+          </form>
+        )}
+      </div>
     </div>
   );
 };
 
-export default FreeSubmitTest;
+export default PremiumApplyExpert;

@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Menu, X } from "lucide-react";
+import { Link } from "react-router-dom";
 
 export const PremSidebar = () => {
   const [isOpen, setIsOpen] = useState(false); // State to toggle menu
@@ -31,21 +32,25 @@ export const PremSidebar = () => {
 
         {/* Sidebar Links */}
         <div className="flex flex-col gap-4 mt-2 text-lg font-grotesk">
-          <a href="#" className="font-bold">
-           Expert &gt;
-          </a>
-          <a href="#" className="tracking-wide">
+          <Link to="/premiumDashboard/manageArticles" className="font-bold" onClick={() => setIsOpen(false)}>
+            Manage Articles &gt; 
+          </Link>
+          <Link to="/premiumDashboard/writeArticle" className="tracking-wide" onClick={() => setIsOpen(false)}>
             Write Articles &gt;
-          </a>
-          <a href="#" className="tracking-wide">
+          </Link>
+          <Link to="/premiumDashboard/manageProfile" className="tracking-wide" onClick={() => setIsOpen(false)}>
             Manage Profile &gt;
-          </a>
-          <a href="#" className="tracking-wide">
+          </Link>
+          <Link to="/premiumDashboard/submitTest" className="tracking-wide" onClick={() => setIsOpen(false)}>
             Submit Testimonial &gt;
-          </a>
-          <a href="/" className="tracking-wide">
+          </Link>
+          <Link to="/premiumDashboard/applyexpert" className="tracking-wide" onClick={() => setIsOpen(false)}>
+            Apply to Expert &gt;
+          </Link>
+          <Link to="/" className="tracking-wide" onClick={() => setIsOpen(false)}>
             Homepage &gt;
-          </a>
+          </Link>
+        
         </div>
       </nav>
     </>
