@@ -37,7 +37,7 @@ export const AdminSidebar = () => {
           <a href="#" className="tracking-wide">
             Categories &gt;
           </a>
-          <a href="#" className="tracking-wide">
+          <a href="/AdminProfile" className="tracking-wide">
              Profile &gt;
           </a>
           <a href="#" className="tracking-wide">
@@ -47,13 +47,19 @@ export const AdminSidebar = () => {
              Feature display &gt;
           </a>
           <a href="#" className="tracking-wide">
+            Users &gt;
+          </a>
+          <a href="/AdminTestimonials#" className="tracking-wide">
             Testimonial &gt;
           </a>
-          <a href="/" className="tracking-wide">
-            Homepage &gt;
+          <a href="/AdminExperts" className="tracking-wide">
+            Expert Applications &gt;
           </a>
           <a href="/" className="tracking-wide">
-            Homepage &gt;
+            Comment Reports &gt;
+          </a>
+          <a href="/" className="tracking-wide">
+            Article Reports &gt;
           </a>
         </div>
       </nav>

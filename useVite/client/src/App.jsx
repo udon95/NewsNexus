@@ -20,6 +20,11 @@ import ViewRooms from "./components/premiumUser/viewRooms.jsx";
 import RoomPage from "./components/premiumUser/roomPage.jsx";
 import SubscriptionStatus from "./components/payment.jsx";
 
+import AdminExperts from "./pages/AdminExperts.jsx";
+import AdminProfile from "./pages/AdminProfile.jsx";
+import AdminTestimonials from "./pages/AdminTestimonials.jsx";
+
+
 import Profile from "./pages/testProfile.jsx";
 import Test from "./pages/testlogin.jsx";
 import supabase from "./api/supabaseClient.js";
@@ -67,6 +72,12 @@ function App() {
           <Route path="/premiumDashboard/*" element={<PremiumDashboard />} />
           <Route path="/adminDashboard/*" element={<AdminDashboard />} />
 
+          <Route path="/AdminExperts/*" element={<AdminExperts />} />
+          <Route path="/AdminProfile/*" element={<AdminProfile />} />
+          <Route path="/AdminTestimonials/*" element={<AdminTestimonials />} />
+
+
+          
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
 
