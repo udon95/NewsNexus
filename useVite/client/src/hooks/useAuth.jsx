@@ -17,23 +17,25 @@ const useAuthHook = () => {
     setError("");
 
     try {
-      const { user, userType, interests, profile } = await signInWithPass(
-        email,
-        password
-      );
+      const {
+        user,
+        userType,
+        interests = [],
+        profile = {},
+      } = await signInWithPass(email, password);
       if (!user) throw new Error("Authentication failed: No user found.");
 
       alert("Login successful!");
       const formattedInterests = Array.isArray(interests)
         ? interests
-        : interests.split(", ").map((topic) => topic.trim());
+        : interests.split(", ").map((topic) => topic.trim()) || [];
 
       // Store user data in sessionStorage & localStorage
       const fullUserData = {
         user,
         role: userType,
         interests: formattedInterests,
-        profile,
+        profile: profile || {},
       };
       sessionStorage.setItem("userProfile", JSON.stringify(fullUserData));
       localStorage.setItem("userProfile", JSON.stringify(fullUserData));

@@ -7,7 +7,6 @@ import Testimonial from "../components/tesimonial.jsx";
 import TopicsList from "../components/topicList.jsx";
 import LatestNews from "../components/latestNews.jsx";
 import downArrow from "../assets/DownArrow.svg";
-// import supabase from "../api/supabaseClient.js";
 import useAuthHook from "../hooks/useAuth.jsx";
 
 const topics = [
@@ -37,12 +36,7 @@ function Home() {
   const { user, loading } = useAuthHook();
 
   const handleTopicSelection = (topic) => {
-    setSelectedTopics(
-      (prevTopics) =>
-        prevTopics.includes(topic)
-          ? prevTopics.filter((t) => t !== topic) // Remove if already selected
-          : [...prevTopics, topic] // Add if not selected
-    );
+    navigate(`/explore?topic=${topic}`);
   };
 
   const handleSearchFromHome = (query) => {
@@ -51,37 +45,6 @@ function Home() {
       navigate(`/explore?query=${encodeURIComponent(query)}`);
     }
   };
-
-  // Fetch the logged-in user
-  // useEffect(() => {
-  //   const fetchUser = async () => {
-  //     const {
-  //       data: { user },
-  //     } = await supabase.auth.getUser();
-  //     setUser(user);
-  //   };
-
-  //   fetchUser();
-
-  //   // Listen for auth state changes
-  //   const { data: listener } = supabase.auth.onAuthStateChange(
-  //     (_event, session) => {
-  //       setUser(session?.user || null);
-  //     }
-  //   );
-
-  //   return () => {
-  //     listener?.subscription?.unsubscribe();
-  //   };
-  // }, []);
-
-  // const toggleSelection = (topic) => {
-  //   if (selectedTopics.includes(topic)) {
-  //     setSelectedTopics(selectedTopics.filter((t) => t !== topic));
-  //   } else if (selectedTopics.length < 6) {
-  //     setSelectedTopics([...selectedTopics, topic]);
-  //   }
-  // };
 
   if (loading) {
     return <p>Loading...</p>; // Prevents flickering before user is set

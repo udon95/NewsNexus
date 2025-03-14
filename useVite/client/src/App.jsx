@@ -13,6 +13,7 @@ import Article from "./pages/article.jsx";
 import FreeDashboard from "./components/freeUser/freeDashboard.jsx";
 import Topic from "./pages/topic.jsx";
 import PremiumDashboard from "./components/premiumUser/premiumDashboard.jsx";
+import AdminDashboard from "./components/adminUser/adminDashboard.jsx";
 import ForgotPassword from "./pages/forgetPW";
 import ResetPassword from "./pages/resetPW.jsx";
 import ViewRooms from "./components/premiumUser/viewRooms.jsx";
@@ -64,6 +65,8 @@ function App() {
           <Route path="/article/:title" element={<Article />} />
           <Route path="/freeDashboard/*" element={<FreeDashboard />} />
           <Route path="/premiumDashboard/*" element={<PremiumDashboard />} />
+          <Route path="/adminDashboard/*" element={<AdminDashboard />} />
+
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
 

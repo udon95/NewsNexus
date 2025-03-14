@@ -34,10 +34,36 @@ router.post("/login", async (req, res) => {
       .eq("auth_id", userId) // Match Supabase auth_id
       .single();
 
-    if (profileError || !userProfile) {
-      console.error("Error fetching user profile:", profileError?.message);
-      return res.status(404).json({ error: "User details not found" });
-    }
+      if (profileError || !userProfile) {
+        // If not found in users table, check if it's an admin
+        let { data: adminProfile, error: adminError } = await supabase
+          .from("admin")
+          .select("adminid, email, username, password")
+          .eq("email", email) // Admins are matched via email
+          .single();
+  
+        if (adminProfile) {
+          // Validate Admin Password
+          const isMatch = await bcrypt.compare(password, adminProfile.password);
+          if (!isMatch) return res.status(400).json({ error: "Invalid credentials" });
+  
+          // Return Admin Profile
+          return res.json({
+            message: "Admin Login Successful",
+            user: {
+              userid: adminProfile.adminid,
+              email: adminProfile.email,
+              username: adminProfile.username,
+              status: "Active",
+            },
+            role: "Admin",
+            
+            session: authData.session, // Supabase session
+          });
+        } else {
+          return res.status(404).json({ error: "User details not found" });
+        }
+      }
     if (userProfile) {
       const isMatch = await bcrypt.compare(password, userProfile.password);
       if (!isMatch)

@@ -134,7 +134,7 @@ export const AuthProvider = ({ children }) => {
       return;
     }
 
-    console.log(" Fetched updated role:", data.usertype);
+    // console.log(" Fetched updated role:", data.usertype);
 
     storedUser.role = data.usertype;
     localStorage.setItem("userProfile", JSON.stringify(storedUser));

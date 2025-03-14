@@ -26,21 +26,19 @@ const Explore = () => {
     setSearchQuery(query);
     setSearchParams({ query });
   };
+  const userInterests =
+    user?.interests ||
+    JSON.parse(localStorage.getItem("userProfile"))?.interests;
 
   let pageTitle = "Explore All Articles:";
-
-  if (!loading) {
-    if (user) {
-      const userInterest = user?.preferredTopic || user?.interests;
-      if (userInterest) {
-        pageTitle = `Explore “${userInterest}” Articles`;
-      } else {
-        pageTitle = "Explore ‘My’ Articles";
-      }
-    } else if (topicParam) {
-      pageTitle = `Explore “${topicParam}” Articles`;
-    }
+  if (topicParam) {
+    pageTitle = `Explore “${topicParam}” Articles:`; // Set the page title based on the selected topic
+  } else if (userInterests && userInterests.length > 0) {
+    pageTitle = `Explore My Articles:`; // If user has interests, use them
+  } else if (user) {
+    pageTitle = "Explore ‘My Articles’:";
   }
+
 
   return (
     <div className="w-full min-w-screen min-h-screen flex flex-col bg-white">
@@ -52,64 +50,24 @@ const Explore = () => {
             Search Results:
           </h1>
           <div className="w-full font-grotesk ">
-            {/* <h1 className="text-2xl sm:text-3xl mb-5 text-left max-w-[900px] mx-auto">
-              {pageTitle}
-            </h1> */}
             <div className="flex justify-center w-full ">
-              <Rank searchQuery={searchQuery} />
+              <Rank searchQuery={searchQuery} topic={topicParam} />
             </div>
           </div>
 
-          {/* {isPremium ? (
-              <div className="w-full font-grotesk ">
-                 <h1 className="text-2xl sm:text-3xl mb-5 text-left max-w-[900px] mx-auto">
-                  Expert:
-                </h1> *
-                <div className="flex justify-center mb-5 w-full ">
-                  <Expert searchQuery={searchQuery} />
-                </div>
-              </div>
-             ) 
-            : (
-              <div className="w-full font-grotesk mt-8 ">
-                <h1 className="text-2xl sm:text-3xl mb-5 text-left max-w-[900px] mx-auto">
-                  Latest News:
-                </h1>
-                 <div className="flex justify-center mb-5 w-full ">
-                   <LatestNews searchQuery={searchQuery}/>
-                 </div>
-              </div>
-            )
-            } */}
-
           <div className="w-full font-grotesk mt-5">
-            {/* <h1 className="text-2xl sm:text-3xl mb-5 text-left max-w-[900px] mx-auto">
-              Expert:
-            </h1> */}
-            <div
-              className="flex justify-center mb-5 w-full"
-              //     if (!isPremium) {
-              //       alert("You need to subscribe to access Expert articles!");
-              //     } else {
-              //       // If premium, you can either allow normal interactions (or navigate)
-              //       // For example, you might navigate to an Expert page:
-              //       // navigate('/expertDashboard')
-              //     }
-              //   }}
-            >
+            <div className="flex justify-center mb-5 w-full">
               <Expert
                 searchQuery={searchQuery}
                 disableNavigation={!isPremium}
+                topic={topicParam}
               />
             </div>
           </div>
 
           <div className="w-full font-grotesk ">
-            {/* <h1 className="text-2xl sm:text-3xl mb-5 text-left max-w-[900px] mx-auto">
-                  Latest News:
-                </h1> */}
             <div className="flex justify-center mb-5 w-full "></div>
-            <LatestNews searchQuery={searchQuery} />
+            <LatestNews searchQuery={searchQuery} topic={topicParam} />
           </div>
         </div>
       ) : (
@@ -119,50 +77,16 @@ const Explore = () => {
               {pageTitle}
             </h1>
             <div className="flex justify-center w-full ">
-              <Rank searchQuery={searchQuery} />
+              <Rank searchQuery={searchQuery} topic={topicParam} />
             </div>
           </div>
 
-          {/* <div className="flex justify-center w-full mt-8">
-            {isPremium ? (
-              <div className="w-full font-grotesk mt-5 ">
-                <h1 className="text-2xl sm:text-3xl mb-5 text-left max-w-[900px] mx-auto">
-                  Expert:
-                </h1>
-                <div className="flex justify-center mb-5 w-full ">
-                  <Expert />
-                </div>
-              </div>
-            ) 
-            : (
-               <div className="w-full font-grotesk  ">
-                 <h1 className="text-2xl sm:text-3xl mb-5 text-left max-w-[900px] mx-auto">
-                 Latest News:
-                </h1>
-                <div className="flex justify-center mb-5 w-full ">
-                   <LatestNews />
-                </div>
-               </div>
-            )
-            } 
-          </div>*/}
           <div className="w-full font-grotesk mt-5">
             <h1 className="text-2xl sm:text-3xl mb-5 text-left max-w-[900px] mx-auto">
               Expert:
             </h1>
-            <div
-              className="flex justify-center mb-5 w-full "
-              // onClick={() => {
-              //   if (!isPremium) {
-              //     alert("You need to subscribe to access Expert articles!");
-              //   } else {
-              //     // If premium, you can either allow normal interactions (or navigate)
-              //     // For example, you might navigate to an Expert page:
-              //     // navigate('/expertDashboard')
-              //   }
-              // }}
-            >
-              <Expert disableNavigation={!isPremium} />
+            <div className="flex justify-center mb-5 w-full ">
+              <Expert disableNavigation={!isPremium} topic={topicParam} />
             </div>
           </div>
 
@@ -171,7 +95,7 @@ const Explore = () => {
               Latest News:
             </h1>
             <div className="flex justify-center mb-5 w-full ">
-              <LatestNews />
+              <LatestNews searchQuery={searchQuery} topic={topicParam} />
             </div>
           </div>
         </>
