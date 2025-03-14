@@ -3,7 +3,7 @@ import "../index.css";
 import AdminSidebar from "../components/adminUser/adminSideBar.jsx";
 import Navbar from "../components/navBar.jsx";
 
-const AdminTestimonials = () => {
+const AdminFeatures = () => {
 
     const [selectedButton, setSelectedButton] = useState(null); // Track selected button
 
@@ -23,41 +23,51 @@ const AdminTestimonials = () => {
                 {/* Sidebar */}
                 <AdminSidebar />
                 <div className="flex-1">
+                <div className="text-2xl sm:text-3xl text-left mt-8 ml-10 font-bold">
+                    Upload video:
+                    </div>
+                <input type="file" className="ml-10 mt-5 min-w-[700px] min-h-[200px] bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300"/>
+                        <button
+                        type="submit"
+                        className="px-6 py-3 ml-10 bg-[#3F414C] flex ml-5 mt-7 text-white rounded-lg hover:bg-opacity-90 cursor-pointer"
+                        onClick={() => handleClick(1)}>
+                            Upload
+                        </button>
 
                     <div className="text-2xl sm:text-3xl text-left mt-8 ml-10 font-bold">
                     Testimonials:
                     </div>
                     <div className="flex">
                         <div className="ml-10 mt-8 min-w-150 bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300">
-                        Testimonial 1
+                        Video 1
                         </div>
                         <button
                         type="submit"
-                        className="px-6 py-3 bg-[#3F414C] flex ml-5 mt-7 text-white rounded-lg hover:bg-opacity-90 cursor-pointer"
+                        className="px-6 py-3 bg-[#3F414C] flex ml-5 mt-8 text-white rounded-lg hover:bg-opacity-90 cursor-pointer"
                         onClick={() => handleClick(1)}>
-                            Select
+                            View
                         </button>
                     </div>
                     <div className="flex">
                         <div className="ml-10 mt-7 min-w-150 bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300">
-                        Testimonial 2
+                        Video 2
                         </div>
                         <button
                         type="submit"
                         className="px-6 py-3 bg-[#3F414C] flex ml-5 mt-7 text-white rounded-lg hover:bg-opacity-90 cursor-pointer"
                         onClick={() => handleClick(2)}>
-                            Select
+                            View
                         </button>
                     </div>
                     <div className="flex">
                         <div className="ml-10 mt-7 min-w-150 bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300">
-                        Testimonial 3
+                        Video 3
                         </div>
                         <button
                         type="submit"
                         className="px-6 py-3 bg-[#3F414C] flex ml-5 mt-7 text-white rounded-lg hover:bg-opacity-90 cursor-pointer"
                         onClick={() => handleClick(3)}>
-                            Select
+                            View
                         </button>
                     </div>
                 </div>
@@ -66,4 +76,4 @@ const AdminTestimonials = () => {
     )
 };
 
-export default AdminTestimonials;
+export default AdminFeatures;

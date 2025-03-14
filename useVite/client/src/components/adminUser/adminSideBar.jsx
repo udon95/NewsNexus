@@ -31,34 +31,34 @@ export const AdminSidebar = () => {
 
         {/* Sidebar Links */}
         <div className="flex flex-col gap-4 mt-2 text-lg font-grotesk">
-          <a href="#" className="font-bold">
+          <a href="/AdminGuidelines" className="font-bold">
             Guidelines &gt;
           </a>
-          <a href="#" className="tracking-wide">
+          <a href="/AdminCategories" className="tracking-wide">
             Categories &gt;
           </a>
           <a href="/AdminProfile" className="tracking-wide">
              Profile &gt;
           </a>
-          <a href="#" className="tracking-wide">
+          <a href="/AdminSubscription" className="tracking-wide">
              Subscription &gt;
           </a>          
-          <a href="#" className="tracking-wide">
+          <a href="/AdminFeatures" className="tracking-wide">
              Feature display &gt;
           </a>
-          <a href="#" className="tracking-wide">
+          <a href="/AdminUsers" className="tracking-wide">
             Users &gt;
           </a>
-          <a href="/AdminTestimonials#" className="tracking-wide">
+          <a href="/AdminTestimonials" className="tracking-wide">
             Testimonial &gt;
           </a>
           <a href="/AdminExperts" className="tracking-wide">
             Expert Applications &gt;
           </a>
-          <a href="/" className="tracking-wide">
+          <a href="/AdminCommentReports" className="tracking-wide">
             Comment Reports &gt;
           </a>
-          <a href="/" className="tracking-wide">
+          <a href="/AdminArticleReports" className="tracking-wide">
             Article Reports &gt;
           </a>
         </div>

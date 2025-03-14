@@ -23,8 +23,16 @@ import SubscriptionStatus from "./components/payment.jsx";
 import AdminExperts from "./pages/AdminExperts.jsx";
 import AdminProfile from "./pages/AdminProfile.jsx";
 import AdminTestimonials from "./pages/AdminTestimonials.jsx";
+import AdminCategories from "./pages/AdminCategories.jsx";
+import AdminUserDetails from "./pages/AdminUserDetails.jsx";
+import AdminGuidelines from "./pages/AdminGuidelines.jsx";
+import AdminSubscription from "./pages/AdminSubscription.jsx";
+import AdminFeatures from "./pages/AdminFeatures.jsx";
+import AdminCommentReports from "./pages/AdminCommentReports.jsx";
+import AdminArticleReports from "./pages/AdminArticleReports.jsx";
+import AdminUsers from "./pages/AdminUsers.jsx";
 
-
+AdminUsers
 import Profile from "./pages/testProfile.jsx";
 import Test from "./pages/testlogin.jsx";
 import supabase from "./api/supabaseClient.js";
@@ -75,8 +83,16 @@ function App() {
           <Route path="/AdminExperts/*" element={<AdminExperts />} />
           <Route path="/AdminProfile/*" element={<AdminProfile />} />
           <Route path="/AdminTestimonials/*" element={<AdminTestimonials />} />
+          <Route path="/AdminCategories/*" element={<AdminCategories />} />
+          <Route path="/AdminUserDetails/*" element={<AdminUserDetails />} />
+          <Route path="/AdminGuidelines/*" element={<AdminGuidelines />} />
+          <Route path="/AdminSubscription/*" element={<AdminSubscription />} />
+          <Route path="/AdminFeatures/*" element={<AdminFeatures />} />
+          <Route path="/AdminCommentReports/*" element={<AdminCommentReports />} />
+          <Route path="/AdminArticleReports/*" element={<AdminArticleReports />} />
+          <Route path="/AdminUsers/*" element={<AdminUsers />} />
 
-
+          
           
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />

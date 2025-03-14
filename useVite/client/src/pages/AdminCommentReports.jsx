@@ -3,7 +3,7 @@ import "../index.css";
 import AdminSidebar from "../components/adminUser/adminSideBar.jsx";
 import Navbar from "../components/navBar.jsx";
 
-const AdminExperts = () => {
+const AdminCommentReports = () => {
 
     const [selectedButton, setSelectedButton] = useState(null); // Track selected button
 
@@ -24,16 +24,16 @@ const AdminExperts = () => {
                 <AdminSidebar />
                 <div className="flex-1">
                 <div className="text-2xl sm:text-3xl text-left mt-8 ml-10 mb-5 font-bold">
-                        Applicant particulars:
+                Report details:
                     </div>
                     <div className="ml-10 mt-5 max-w-[500px] bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300">
                         Username
                     </div>
                     <div className="ml-10 mt-5 max-w-[500px] bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300">
-                        Professional designation
-                    </div>
+                        "Comment"
+                    </div> 
                     <div className="ml-10 mt-5 max-w-[500px] min-h-[200px] bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300">
-                        Other details
+                        Details of infringement
                     </div>
                     <div className="flex">
                     <button
@@ -50,16 +50,16 @@ const AdminExperts = () => {
                 </button>
                 </div>
                     <div className="text-2xl sm:text-3xl text-left mt-8 ml-10 font-bold">
-                    Applications:
+                    Comment Reports:
                     </div>
                         <div className="ml-10 mt-8 max-w-150 bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300">
-                        Application 1
+                        Report 1
                         </div>
                         <div className="ml-10 mt-7 max-w-150 bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300">
-                        Application 2
+                        Report 2
                         </div>
                         <div className="ml-10 mt-7 max-w-150 bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300">
-                        Application 3
+                        Report 3
                     </div>
                 </div>
             </div>
@@ -67,4 +67,4 @@ const AdminExperts = () => {
     )
 };
 
-export default AdminExperts;
+export default AdminCommentReports;

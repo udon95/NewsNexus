@@ -24,14 +24,14 @@ const AdminProfile = () => {
                     </div>
 
                     {/* Administrator Name */}
-                    <div className="ml-10 mt-5 max-w-[180px] bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300">
+                    <div className="ml-10 mt-5 max-w-[500px] bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300">
                         Administrator1
                     </div>
 
                     {/* Email Input */}
                     <div className="flex">
                         <input
-                            className="ml-10 mt-8 min-w-[150px] bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300"
+                            className="ml-10 mt-8 min-w-[500px] bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300"
                             value="Administrator1@email.com"
                             readOnly
                         />
@@ -44,34 +44,24 @@ const AdminProfile = () => {
                     </div>
 
                     <div className="text-2xl sm:text-3xl text-left mt-8 ml-10 mb-5 font-bold">
-                        User 1 Articles:
+                        Manage password:
                     </div>
-
-                    {/* Clickable Articles */}
-                    <button
-                        className="ml-10 mt-5 max-w-[180px] bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300 hover:bg-gray-200"
-                        onClick={handleClick}>
-                        User 1 Article 1
-                    </button>
-
-                    <button
-                        className="ml-10 mt-5 max-w-[180px] bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300 hover:bg-gray-200"
-                        onClick={handleClick}>
-                        User 1 Article 2
-                    </button>
-
-                    <button
-                        className="ml-10 mt-5 max-w-[180px] bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300 hover:bg-gray-200"
-                        onClick={handleClick}>
-                        User 1 Article 3
-                    </button>
-
-                    {/* Suspend Button */}
+                    <div className="flex">
+                    <input
+                            className="ml-10 mt-8 min-w-[300px] bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300"
+                            placeholder="Old password"
+                        />                        
+                    <input
+                        className="ml-10 mt-8 min-w-[300px] bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300"
+                        placeholder="New password"
+                    />
                     <button
                         type="button"
-                        className="px-6 py-3 bg-[#3F414C] flex ml-10 mt-7 text-white rounded-lg hover:bg-opacity-90 cursor-pointer">
-                        Suspend
+                        className="px-6 py-3 bg-[#3F414C] flex ml-10 mt-8 text-white rounded-lg hover:bg-opacity-90 cursor-pointer">
+                        Update
                     </button>
+                    </div>
+
                 </div>
             </div>
         </div>
