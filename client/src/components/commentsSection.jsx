@@ -6,6 +6,29 @@ import MenuItem from "@mui/material/MenuItem";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 
 const CommentsSection = () => {
+  const handleDeleteComment = (commentId, isReply, parentCommentId = null) => {
+    if (isReply) {
+      // ✅ Delete only the specific reply
+      setComments((prevComments) =>
+        prevComments.map((comment) =>
+          comment.id === parentCommentId
+            ? {
+                ...comment,
+                replies: comment.replies.filter((reply) => reply.id !== commentId),
+              }
+            : comment
+        )
+      );
+    } else {
+      // ✅ Delete the entire comment + its replies
+      setComments((prevComments) =>
+        prevComments.filter((comment) => comment.id !== commentId)
+      );
+    }
+  
+    handleMenuClose(commentId); // ✅ Close menu after deleting
+  };
+  
   const initialComments = [
     {
       id: 1,
@@ -155,6 +178,10 @@ const CommentsSection = () => {
                   <MenuItem onClick={() => handleMenuClose(comment.id)}>
                     Report Comment
                   </MenuItem>
+                  <MenuItem onClick={() => handleDeleteComment(comment.id, false)}>
+  Delete Comment
+</MenuItem>
+
                 </Menu>
               </div>
 
@@ -218,6 +245,11 @@ const CommentsSection = () => {
                     <MenuItem onClick={() => handleMenuClose(reply.id)}>
                       Report Comment
                     </MenuItem>
+                    <MenuItem onClick={() => handleDeleteComment(reply.id, true, comment.id)}>
+  Delete Comment
+</MenuItem>
+
+
                   </Menu>
                 </div>
               </div>
