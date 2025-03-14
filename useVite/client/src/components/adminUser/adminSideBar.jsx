@@ -32,16 +32,22 @@ export const AdminSidebar = () => {
         {/* Sidebar Links */}
         <div className="flex flex-col gap-4 mt-2 text-lg font-grotesk">
           <a href="#" className="font-bold">
-            Manage My Articles &gt;
+            Guidelines &gt;
           </a>
           <a href="#" className="tracking-wide">
-            Write Articles &gt;
+            Categories &gt;
           </a>
           <a href="#" className="tracking-wide">
-            Manage Profile &gt;
+             Profile &gt;
           </a>
           <a href="#" className="tracking-wide">
-            Submit Testimonial &gt;
+             Subscription &gt;
+          </a>          
+          <a href="#" className="tracking-wide">
+             Feature display &gt;
+          </a>
+          <a href="#" className="tracking-wide">
+            Testimonial &gt;
           </a>
           <a href="/" className="tracking-wide">
             Homepage &gt;
