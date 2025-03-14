@@ -3,10 +3,14 @@ import Navbar from "../components/navBar";
 import SubscriptionCard from "../components/subscriptionCard";
 import PaymentStatus from "../components/payment"; // Import the popup from payment.jsx
 import { useLocation } from "react-router-dom";
+import supabase from "../api/supabaseClient";
 
 const SubscriptionPage = () => {
   const location = useLocation();
   const [showStatus, setShowStatus] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [subscriptions, setSubscriptions] = useState([]);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     if (
@@ -44,6 +48,45 @@ const SubscriptionPage = () => {
       console.error("Error creating checkout session:", error);
     }
   };
+  useEffect(() => {
+    fetchSubscriptions();
+
+    const subscription = supabase
+      .channel("subscriptions_realtime")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "subscriptions" },
+        async () => {
+          await fetchSubscriptions();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(subscription);
+    };
+  }, []);
+
+  const fetchSubscriptions = async () => {
+    setLoading(true);
+
+    try {
+      const { data, error } = await supabase
+        .from("subscriptions")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (error) {
+        setError(`Supabase Error: ${error.message}`);
+      } else {
+        setSubscriptions(data);
+      }
+    } catch {
+      setError("Network Error: Please check your connection.");
+    }
+
+    setLoading(false);
+  };
 
   return (
     <div className="relative min-h-screen w-screen flex flex-col bg-white">
@@ -52,41 +95,35 @@ const SubscriptionPage = () => {
       {/* Show PaymentStatus Popup if Stripe Redirects Here */}
       {showStatus && <PaymentStatus />}
 
-      <main className="flex flex-col flex-grow items-center justify-center w-full px-4">
+      <div className="flex flex-col flex-grow items-center justify-center w-full px-4">
         <div className="w-full max-w-3xl p-6 font-grotesk">
           <h1 className="text-4xl mb-8 font-grotesk text-left">
             Monthly Subscription
           </h1>
 
           {/* Subscription Cards */}
-          <div className="flex flex-col w-full items-center space-y-10 font-grotesk">
-            <SubscriptionCard
-              title="Free"
-              content={
-                <ul className="list-disc pl-3 font-medium text-lg">
-                  <li>Aut consequatur maxime aut harum repudiandae aut</li>
-                  <li>
-                    Est magnam vitae qui reiciendis nihil qui saepe nisi et
-                    soluta adipisci qui autem aperiam et reprehenderit
-                  </li>
-                  <li>Et consequuntur aspernatur et eius ipsam et harum.</li>
-                </ul>
-              }
-            />
+          {loading && <p>⏳ Loading subscriptions...</p>}
+        {error && <p className="error">{error}</p>}
 
+        {subscriptions.length > 0 ? (
+          subscriptions.map((sub) => (
             <SubscriptionCard
-              title="$5"
+              key={sub.id}
+              title={sub.tier === "Free" ? "Free" : `$${sub.price}`}
               content={
-                <ul className="list-disc pl-3 font-medium text-lg">
-                  <li>Aut consequatur maxime aut harum repudiandae aut</li>
-                  <li>
-                    Est magnam vitae qui reiciendis nihil qui saepe nisi et
-                    soluta adipisci qui autem aperiam et reprehenderit
-                  </li>
-                  <li>Et consequuntur aspernatur et eius ipsam et harum.</li>
+                <ul className="subscription-details">
+                  {sub.description
+                    ? sub.description.split(",").map((item, index) => (
+                        <li key={index}>{item.trim()}</li>
+                      ))
+                    : <li>No description available</li>}
                 </ul>
               }
             />
+          ))
+        ) : (
+          <p>No subscriptions available.</p>
+        )}
 
             {/* Upgrade Button */}
             <div className="w-full flex justify-end">
@@ -99,8 +136,8 @@ const SubscriptionPage = () => {
             </div>
           </div>
         </div>
-      </main>
-    </div>
+      </div>
+    // </div>
   );
 };
 
