@@ -87,16 +87,15 @@ const Explore = () => {
               Expert:
             </h1> */}
             <div
-              className={`flex justify-center mb-5 w-full  `}
-              onClick={() => {
-                if (!isPremium) {
-                  alert("You need to subscribe to access Expert articles!");
-                } else {
-                  // If premium, you can either allow normal interactions (or navigate)
-                  // For example, you might navigate to an Expert page:
-                  // navigate('/expertDashboard')
-                }
-              }}
+              className="flex justify-center mb-5 w-full"
+              //     if (!isPremium) {
+              //       alert("You need to subscribe to access Expert articles!");
+              //     } else {
+              //       // If premium, you can either allow normal interactions (or navigate)
+              //       // For example, you might navigate to an Expert page:
+              //       // navigate('/expertDashboard')
+              //     }
+              //   }}
             >
               <Expert
                 searchQuery={searchQuery}
@@ -119,7 +118,7 @@ const Explore = () => {
             <h1 className="text-2xl sm:text-3xl mb-5 text-left max-w-[900px] mx-auto">
               {pageTitle}
             </h1>
-            <div className="flex justify-center  w-full ">
+            <div className="flex justify-center w-full ">
               <Rank searchQuery={searchQuery} />
             </div>
           </div>
@@ -152,16 +151,16 @@ const Explore = () => {
               Expert:
             </h1>
             <div
-              className="flex justify-center mb-5 w-full cursor-pointer"
-              onClick={() => {
-                if (!isPremium) {
-                  alert("You need to subscribe to access Expert articles!");
-                } else {
-                  // If premium, you can either allow normal interactions (or navigate)
-                  // For example, you might navigate to an Expert page:
-                  // navigate('/expertDashboard')
-                }
-              }}
+              className="flex justify-center mb-5 w-full "
+              // onClick={() => {
+              //   if (!isPremium) {
+              //     alert("You need to subscribe to access Expert articles!");
+              //   } else {
+              //     // If premium, you can either allow normal interactions (or navigate)
+              //     // For example, you might navigate to an Expert page:
+              //     // navigate('/expertDashboard')
+              //   }
+              // }}
             >
               <Expert disableNavigation={!isPremium} />
             </div>

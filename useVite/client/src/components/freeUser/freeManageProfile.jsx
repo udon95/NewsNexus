@@ -1,22 +1,27 @@
-
 import { useEffect, useState } from "react";
-import { useAuth } from "../../context/AuthContext";
+import useAuthHook from "../../hooks/useAuth";
 import TopicList from "../../components/topicList";
+import axios from "axios";
+import PasswordInput from "../showPW";
 
 const FreeManageProfile = () => {
-  const { interests } = useAuth(); //  Get interests from AuthContext
+  // const { interests } = useAuth(); //  Get interests from AuthContext
   const [selectedTopics, setSelectedTopics] = useState([]);
   const [userDetails, setUserDetails] = useState(null);
-  const [profile, setProfile] = useState(null);
+  // const [profile, setProfile] = useState(null);
   const [error, setError, showError] = useState("");
+  const { interests, profile: authProfile, user } = useAuthHook();
+  const [passwordError, setPasswordError] = useState("");
+  const [dobError, setDobError] = useState("");
+  const [oldPasswordError, setOldPasswordError] = useState("");
 
   const [editUsername, setEditUsername] = useState("");
   const [editEmail, setEditEmail] = useState("");
   const [editDate, setEditDate] = useState("");
   const [editGender, setEditGender] = useState("");
-
   const [editOldPassword, setEditOldPassword] = useState("");
   const [editNewPassword, setEditNewPassword] = useState("");
+  const [editNewPasswordConfirm, setEditNewPasswordConfirm] = useState("");
 
   useEffect(() => {
     const fetchUserProfile = async () => {
@@ -25,10 +30,7 @@ const FreeManageProfile = () => {
         if (storedUser) {
           const data = JSON.parse(storedUser);
 
-          // console.log(" Loaded user profile:", data);
-
           setUserDetails(data.user);
-          setProfile(data.profile);
 
           //  Ensure interests are always an array before setting state
           const formattedInterests = Array.isArray(data.interests)
@@ -36,7 +38,6 @@ const FreeManageProfile = () => {
             : data.interests.split(", ").map((topic) => topic.trim());
 
           setSelectedTopics(formattedInterests); //  Pre-select topics from stored interests
-          // console.log(" Auto-selected topics:", formattedInterests);
         }
       } catch (err) {
         console.error("Profile fetch error:", err.message);
@@ -57,47 +58,121 @@ const FreeManageProfile = () => {
     );
   };
 
-  const updateProfile = async () => {
-    try {
-      const { error } = await supabase
-        .from("users")
-        .update({ username: editUsername, email: editEmail })
-        .eq("userid", userDetails.userid);
+  useEffect(() => {
+    if (editDate) {
+      const dobDate = new Date(editDate);
+      const today = new Date();
+      if (dobDate > today) {
+        setDobError("Date of Birth cannot be later than today.");
+      } else {
+        setDobError("");
+      }
+    } else {
+      setDobError("");
+    }
+  }, [editDate]);
 
-      if (error) throw error;
-      alert("Profile updated successfully!");
+  const isValidDOB = (dob) => {
+    const dobDate = new Date(dob);
+    const today = new Date();
+    return dobDate <= today;
+  };
+
+  const updateProfile = async () => {
+    if (!isValidDOB(editDate)) {
+      alert("Date of Birth cannot be later than today.");
+      return;
+    }
+
+    try {
+      const payload = {
+        userId: userDetails.userid,
+        username: editUsername,
+        email: editEmail,
+        dob: editDate,
+        gender: editGender,
+      };
+
+      const response = await axios.post(
+        "http://localhost:5000/auth/update-profile",
+        payload,
+        {
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+
+      if (response.data.message) {
+        alert("Profile updated successfully!");
+        const storedUser = JSON.parse(localStorage.getItem("userProfile"));
+        if (storedUser) {
+          storedUser.user.username = editUsername;
+          storedUser.user.email = editEmail;
+          storedUser.profile = {
+            ...storedUser.profile,
+            dob: editDate,
+            gender: editGender,
+          };
+          localStorage.setItem("userProfile", JSON.stringify(storedUser));
+        }
+      }
     } catch (error) {
-      console.error("Error updating profile:", error.message);
-      setError(error.message);
+      console.error(
+        "Error updating profile:",
+        error.response?.data?.error || error.message
+      );
+      setError(error.response?.data?.error || error.message);
     }
   };
 
   const updatePassword = async () => {
+    if (!editOldPassword || !editNewPassword || !editNewPasswordConfirm) {
+      alert("Please fill in all password fields.");
+      return;
+    }
+    if (oldPasswordError) {
+      alert(oldPasswordError);
+      return;
+    }
+    if (editNewPassword.length < 8) {
+      alert("New password must be at least 8 characters long.");
+      return;
+    }
+
+    if (editNewPassword !== editNewPasswordConfirm) {
+      alert("New password and confirmation do not match.");
+      return;
+    }
     try {
-      if (!editOldPassword || !editNewPassword) {
-        alert("Please fill in both the old and new passwords.");
-        return;
+      const payload = {
+        userId: userDetails.userid,
+        oldPassword: editOldPassword,
+        newPassword: editNewPassword,
+        newPasswordConfirm: editNewPasswordConfirm,
+      };
+
+      const response = await axios.post(
+        "http://localhost:5000/auth/update-password",
+        payload,
+        {
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+
+      if (response.data.message) {
+        alert("Password updated successfully!");
+        setEditOldPassword("");
+        setEditNewPassword("");
+        setEditNewPasswordConfirm("");
+
+        const updatedUser = response.data.updatedUser;
+        if (updatedUser) {
+          const storedUser = JSON.parse(localStorage.getItem("userProfile"));
+          if (storedUser) {
+            storedUser.user.password = updatedUser.password;
+            localStorage.setItem("userProfile", JSON.stringify(storedUser));
+          }
+        }
       }
-
-      if (userDetails.password !== editOldPassword) {
-        alert("Old password is incorrect.");
-        return;
-      }
-
-      //Update password if old password matches
-      const { error: updateError } = await supabase
-        .from("users")
-        .update({ password: editNewPassword }) // Update password field
-        .eq("userid", userDetails.userid);
-
-      if (updateError) {
-        alert("Failed to update password.");
-        return;
-      }
-
-      alert("Password updated successfully!");
-      setEditOldPassword("");
-      setEditNewPassword("");
     } catch (error) {
       console.error("Error updating password:", error.message);
       alert("An error occurred while updating the password.");
@@ -106,13 +181,24 @@ const FreeManageProfile = () => {
 
   const updateInterests = async () => {
     try {
-      const { error } = await supabase
-        .from("topicinterest")
-        .update({ interesttype: selectedTopics.join(", ") })
-        .eq("userid", userDetails.userid);
-
+      const response = await axios.post(
+        "http://localhost:5000/auth/update-interests",
+        {
+          userId: userDetails.userid,
+          interests: selectedTopics.join(", "),
+        },
+        {
+          headers: { "Content-Type": "application/json" },
+        }
+      );
       if (error) throw error;
       alert("Interests updated successfully!");
+
+      const storedUser = JSON.parse(localStorage.getItem("userProfile"));
+      if (storedUser) {
+        storedUser.interests = selectedTopics.join(", ");
+        localStorage.setItem("userProfile", JSON.stringify(storedUser));
+      }
     } catch (error) {
       console.error("Error updating interests:", error.message);
       setError(error.message);
@@ -120,23 +206,65 @@ const FreeManageProfile = () => {
   };
 
   useEffect(() => {
+    if (editNewPassword && editNewPassword.length < 8) {
+      setPasswordError("New password must be at least 8 characters long.");
+    } else if (editNewPassword !== editNewPasswordConfirm) {
+      setPasswordError("New password and confirmation do not match.");
+    } else {
+      setPasswordError("");
+    }
+  }, [editNewPassword, editNewPasswordConfirm]);
+
+  useEffect(() => {
+    // Only check if there's an input
+    if (!editOldPassword || !userDetails) {
+      setOldPasswordError("");
+      return;
+    }
+
+    // Set a timer to debounce the API call (e.g., 500ms)
+    const timer = setTimeout(() => {
+      axios
+        .post("http://localhost:5000/auth/verify-old-password", {
+          userId: userDetails.userid,
+          oldPassword: editOldPassword,
+        })
+        .then((res) => {
+          if (!res.data.valid) {
+            setOldPasswordError("Old password is incorrect.");
+          } else {
+            setOldPasswordError("");
+          }
+        })
+        .catch((err) => {
+          console.error("Error verifying old password:", err.message);
+          setOldPasswordError("Error verifying password.");
+        });
+    }, 500);
+
+    // Cleanup timer on effect cleanup
+    return () => clearTimeout(timer);
+  }, [editOldPassword, userDetails]);
+
+  useEffect(() => {
     if (userDetails) {
       setEditUsername(userDetails.username || "");
       setEditEmail(userDetails.email || "");
-      setEditDate(userDetails.dob || "");
-      setEditGender(userDetails.gender || "");
-
+      setEditDate(authProfile?.dob || "");
+      setEditGender(authProfile?.gender || "");
     }
-  }, [userDetails]);
+  }, [userDetails, authProfile]);
 
   return (
-    <div className="w-screen min-h-screen flex flex-col overflow-auto">
-      <div className="flex-grow w-full flex min-h-full overflow-auto">
+    <div className="w-screen min-h-screen flex flex-col overflow-hidden">
+      <div className="flex-grow w-full flex min-h-full overflow-hidden">
         <div className="flex flex-grow max-md:flex-col min-h-full w-full">
           <div className="flex-1 min-h-full bg-indigo-50 max-md:w-full">
             <div className="flex flex-col flex-grow min-h-full md:px-5 pt-8 w-full text-2xl font-grotesk font-medium text-black max-md:px-4 max-md:pb-24">
               {/* Profile Details */}
-              <h3 className="text-2xl font-grotesk font-bold mb-1">Profile Particulars:</h3>
+              <h3 className="text-2xl font-grotesk font-bold mb-1">
+                Profile Particulars:
+              </h3>
               <div className="p-4 bg-white shadow-md rounded-lg w-3/3 md:w-2/3">
                 Name:
                 <input
@@ -145,8 +273,8 @@ const FreeManageProfile = () => {
                   onChange={(e) => setEditUsername(e.target.value)}
                   className="w-full p-2 border rounded-lg"
                   placeholder="Username"
-                />Email:
-
+                />
+                Email:
                 <input
                   type="email"
                   value={editEmail}
@@ -162,14 +290,22 @@ const FreeManageProfile = () => {
                   className="w-full p-2 border rounded-lg mt-2"
                   placeholder="DOB"
                 />
-                Gender:
-                <input
-                  type="text"
-                  value={editDate}
-                  onChange={(e) => setEditDate(e.target.value)}
-                  className="w-full p-2 border rounded-lg mt-2"
-                  placeholder="Gender"
-                />
+                {dobError && (
+                  <p className="text-red-600 text-sm mt-2">{dobError}</p>
+                )}
+                <div>
+                  <label className="block font-bold">Gender:</label>
+                  <select
+                    value={editGender}
+                    onChange={(e) => setEditGender(e.target.value)}
+                    className="w-full p-2 border rounded-lg mt-2"
+                  >
+                    <option value="">Select Gender</option>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                    <option value="Other">Prefer Not To Say</option>
+                  </select>
+                </div>
                 <button
                   onClick={updateProfile}
                   className="bg-gray-700 text-white text-sm px-4 py-2 rounded-lg mt-2 "
@@ -179,22 +315,39 @@ const FreeManageProfile = () => {
               </div>
 
               {/* Password Change */}
-              <h3 className="text-2xl font-bold  font-grotesk mb-1 mt-6">Manage Password:</h3>
+              <h3 className="text-2xl font-bold  font-grotesk mb-1 mt-6">
+                Manage Password:
+              </h3>
               <div className="p-4 bg-white shadow-md rounded-lg w-3/3 md:w-2/3">
-                <input
-                  type="password"
+                <PasswordInput
+                  name="password"
                   value={editOldPassword}
                   onChange={(e) => setEditOldPassword(e.target.value)}
                   className="w-full p-2 border rounded-lg"
                   placeholder="Old Password"
                 />
-                <input
-                  type="password"
+                {oldPasswordError && (
+                  <p className="text-red-600 text-sm mt-1">
+                    {oldPasswordError}
+                  </p>
+                )}
+                <PasswordInput
+                  name="password"
                   value={editNewPassword}
                   onChange={(e) => setEditNewPassword(e.target.value)}
                   className="w-full p-2 border rounded-lg mt-2"
-                  placeholder="New Password"
+                  placeholder="New Password "
                 />
+                <PasswordInput
+                  name="password"
+                  value={editNewPasswordConfirm}
+                  onChange={(e) => setEditNewPasswordConfirm(e.target.value)}
+                  className="w-full p-2 border rounded-lg mt-2"
+                  placeholder="Confirm New Password"
+                />
+                {passwordError && (
+                  <p className="text-red-600 text-sm mt-2">{passwordError}</p>
+                )}
                 <button
                   onClick={updatePassword}
                   className="bg-gray-700 text-white text-sm px-4 py-2 rounded-lg mt-2"
@@ -227,7 +380,7 @@ const FreeManageProfile = () => {
                     "Investment",
                     "USA",
                     "Luxury",
-                    "Korea"
+                    "Korea",
                   ]}
                   selectedTopics={selectedTopics} //  Pass selected topics
                   setSelectedTopics={setSelectedTopics} //  Allow updates

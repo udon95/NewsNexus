@@ -19,11 +19,9 @@ const ExpertNewsCard = ({ searchQuery = "", disableNavigation }) => {
     news.title.toLowerCase().includes(searchQuery.toLowerCase())
   );
   return (
-    <div className="w-full max-w-5xl mx-auto px-6 space-y-6 font-grotesk">
+    <div className="w-full max-w-[900px] mx-auto space-y-6 font-grotesk">
     {filteredExpertArticles.map((news, index) => (
-      // Use inline-block so that the container only covers the card
-      <div key={index} className="relative inline-block">
-        {/* Attach the click handler on the container */}
+      <div key={index} className="relative ">
         <div
           className="relative cursor-pointer"
           onClickCapture={(e) => {
@@ -32,7 +30,6 @@ const ExpertNewsCard = ({ searchQuery = "", disableNavigation }) => {
               e.stopPropagation();
               alert("You need to subscribe to access Expert articles!");
             }
-            // Otherwise, allow the event to proceed (or add navigation logic here)
           }}
         >
           <NewsCard

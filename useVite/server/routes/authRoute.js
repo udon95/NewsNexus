@@ -1,45 +1,11 @@
 require("dotenv").config();
 const express = require("express");
 const router = express.Router();
-const supabase = require("../supabaseClient"); // Import Supabase client
+const supabase = require("../supabaseClient");
 const bcrypt = require("bcryptjs");
-
-//  User Login
-// router.post("/login", async (req, res) => {
-//   const { email, password } = req.body;
-
-//   console.log("Login attempt:", { email, password });
-
-//   const { data, error } = await supabase.auth.signInWithPassword({
-//     email,
-//     password,
-//   });
-
-//   if (error) return res.status(401).json({ error: error.message });
-//   if (!data.user)
-//     return res.status(401).json({ error: "Authentication failed" });
-
-//   console.log("Authenticated User:", data.user);
-
-//   // Fetch user details from the database
-//   const { data: userData, error: userError } = await supabase
-//     .from("users")
-//     .select("*")
-//     .eq("auth_id", data.user.id) // Match auth_id
-//     .single();
-
-//   console.log("User Data from DB:", userData);
-
-//   if (userError || !userData)
-//     return res.status(404).json({ error: "User not found in DB" });
-
-//   res.json({ user: data.user, session: data.session, role: userData.usertype });
-// });
 
 router.post("/login", async (req, res) => {
   const { email, password } = req.body;
-
-  // console.log("Login attempt:", { email, password });
 
   // Authenticate user with Supabase
   const { data: authData, error: authError } =
@@ -51,8 +17,6 @@ router.post("/login", async (req, res) => {
   if (authError) return res.status(401).json({ error: authError.message });
   if (!authData.user)
     return res.status(401).json({ error: "Authentication failed" });
-
-  // console.log("Authenticated User:", data.user);
 
   const userId = authData.user.id;
 
@@ -74,53 +38,55 @@ router.post("/login", async (req, res) => {
       console.error("Error fetching user profile:", profileError?.message);
       return res.status(404).json({ error: "User details not found" });
     }
-    if (userProfile){
-    const isMatch = await bcrypt.compare(password, userProfile.password);
-    if (!isMatch) return res.status(400).json({ error: "Invalid credentials" });
+    if (userProfile) {
+      const isMatch = await bcrypt.compare(password, userProfile.password);
+      if (!isMatch)
+        return res.status(400).json({ error: "Invalid credentials" });
 
-    // Fetch user interests separately
-    const { data: interestData, error: interestError } = await supabase
-      .from("topicinterest")
-      .select("interesttype")
-      .eq("userid", userProfile.userid)
-      .single();
+      // Fetch user interests separately
+      const { data: interestData, error: interestError } = await supabase
+        .from("topicinterest")
+        .select("interesttype")
+        .eq("userid", userProfile.userid)
+        .single();
 
-    if (interestError) {
-      console.error("Interest fetch error:", interestError?.message);
+      if (interestError) {
+        console.error("Interest fetch error:", interestError?.message);
+      }
+
+      // Extract interests (ensure it doesn't break if null)
+      const interests = interestData?.interesttype || "";
+
+      // Return full user details
+      return res.json({
+        message: "Login Successful",
+        user: {
+          userid: userProfile.userid,
+          email: userProfile.email,
+          username: userProfile.username,
+          password: userProfile.password,
+          status: userProfile.status,
+          auth_id: userProfile.auth_id,
+        },
+        profile: userProfile.profile || {}, // Ensure no null values
+        role: userProfile.usertype?.usertype || "Unknown",
+        interests,
+        session: authData.session, // Supabase session data
+      });
     }
-
-    // Extract interests (ensure it doesn't break if null)
-    const interests = interestData?.interesttype || "";
-
-    // Return full user details
-    return res.json({
-      message: "Login Successful",
-      user: {
-        userid: userProfile.userid,
-        email: userProfile.email,
-        username: userProfile.username,
-        password: userProfile.password,
-        status: userProfile.status,
-        auth_id: userProfile.auth_id,
-      },
-      profile: userProfile.profile || {}, // Ensure no null values
-      role: userProfile.usertype?.usertype || "Unknown",
-      interests,
-      session: authData.session, // Supabase session data
-    });
-  }
-  let { data: adminProfile, error: adminError } = await supabase
+    let { data: adminProfile, error: adminError } = await supabase
       .from("admin")
       .select("adminid, email, username, password") // No auth_id in admin
       .eq("email", email) // Admins are matched via email
       .single();
 
     if (adminProfile) {
-      // ✅ Validate Admin Password
+      //  Validate Admin Password
       const isMatch = await bcrypt.compare(password, adminProfile.password);
-      if (!isMatch) return res.status(400).json({ error: "Invalid credentials" });
+      if (!isMatch)
+        return res.status(400).json({ error: "Invalid credentials" });
 
-      // ✅ Return Admin Profile
+      //  Return Admin Profile
       return res.json({
         message: "Admin Login Successful",
         user: {
@@ -176,7 +142,6 @@ router.post("/register", async (req, res) => {
     if (profileError)
       return res.status(500).json({ error: profileError.message });
 
-
     if (topics && topics.length > 0) {
       const interestsString = topics.join(", ");
 
@@ -207,7 +172,7 @@ router.post("/forgot-password", async (req, res) => {
   }
 
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: "http://localhost:5173/reset-password", // ✅ Change to your frontend reset page
+    redirectTo: "http://localhost:5173/reset-password", //  Change to your frontend reset page
   });
 
   if (error) {
@@ -216,8 +181,6 @@ router.post("/forgot-password", async (req, res) => {
 
   res.json({ message: "Password reset email sent. Check your inbox." });
 });
-
-
 
 //  Get User Role
 router.get("/user-role/:userid", async (req, res) => {
@@ -342,6 +305,141 @@ router.get("/user-full/:userid", async (req, res) => {
   } catch (error) {
     console.error("Unexpected error fetching full user profile:", error);
     res.status(500).json({ error: "Failed to fetch full user profile" });
+  }
+});
+
+router.post("/update-profile", async (req, res) => {
+  const { userId, username, email, dob, gender } = req.body;
+
+  if (!userId || !username || !email) {
+    return res.status(400).json({ error: "Missing required fields" });
+  }
+
+  try {
+    // Update basic user details in the "users" table
+    const { error: errorUser } = await supabase
+      .from("users")
+      .update({ username, email })
+      .eq("userid", userId);
+
+    if (errorUser) throw errorUser;
+
+    // Update additional details in the "profile" table
+    const { error: errorProfile } = await supabase
+      .from("profile")
+      .update({ dob, gender })
+      .eq("uuserid", userId);
+
+    if (errorProfile) throw errorProfile;
+
+    return res.json({ message: "Profile updated successfully" });
+  } catch (error) {
+    console.error("Error updating profile:", error.message);
+    return res.status(500).json({ error: error.message });
+  }
+});
+
+// Update Interests Endpoint
+router.post("/update-interests", async (req, res) => {
+  const { userId, interests } = req.body;
+
+  if (!userId || interests === undefined) {
+    return res.status(400).json({ error: "Missing required fields" });
+  }
+
+  try {
+    // Update the topicinterest table with the new interests string.
+    const { error } = await supabase
+      .from("topicinterest")
+      .update({ interesttype: interests }) 
+      .eq("userid", userId);
+
+    if (error) throw error;
+
+    return res.json({ message: "Interests updated successfully" });
+  } catch (err) {
+    console.error("Error updating interests:", err.message);
+    return res.status(500).json({ error: err.message });
+  }
+});
+
+router.post("/update-password", async (req, res) => {
+  const { userId, oldPassword, newPassword, newPasswordConfirm } = req.body;
+
+  // Validate presence of fields
+  if (!userId || !oldPassword || !newPassword || !newPasswordConfirm) {
+    return res.status(400).json({ error: "Missing required fields" });
+  }
+
+  // Check that the new passwords match
+  if (newPassword !== newPasswordConfirm) {
+    return res.status(400).json({ error: "New password and confirmation do not match" });
+  }
+
+  // Check for minimum length
+  if (newPassword.length < 8) {
+    return res.status(400).json({ error: "New password must be at least 8 characters long" });
+  }
+
+  try {
+    // Fetch the user's current password from the "users" table
+    const { data: userData, error: fetchError } = await supabase
+      .from("users")
+      .select("password")
+      .eq("userid", userId)
+      .single();
+
+    if (fetchError) throw fetchError;
+
+    // Compare provided old password with the hashed password in the DB
+    const isMatch = await bcrypt.compare(oldPassword, userData.password);
+    if (!isMatch) {
+      return res.status(400).json({ error: "Old password is incorrect" });
+    }
+    const { data: updateAuthData, error: updateAuthError } = await supabase.auth.updateUser({
+      password: newPassword,
+    });
+    if (updateAuthError) throw updateAuthError;
+    // Hash the new password
+    const salt = await bcrypt.genSalt(10);
+    const hashedNewPassword = await bcrypt.hash(newPassword, salt);
+
+    // Update the password in the "users" table
+    const { error: updateError } = await supabase
+      .from("users")
+      .update({ password: hashedNewPassword })
+      .eq("userid", userId);
+
+    if (updateError) throw updateError;
+
+    return res.json({ message: "Password updated successfully" });
+  } catch (err) {
+    console.error("Error updating password:", err.message);
+    return res.status(500).json({ error: err.message });
+  }
+});
+
+router.post("/verify-old-password", async (req, res) => {
+  const { userId, oldPassword } = req.body;
+  if (!userId || !oldPassword) {
+    return res.status(400).json({ error: "Missing required fields" });
+  }
+  try {
+    // Fetch the hashed password for the user
+    const { data: userData, error } = await supabase
+      .from("users")
+      .select("password")
+      .eq("userid", userId)
+      .single();
+    if (error || !userData) {
+      return res.status(500).json({ error: "Failed to fetch user data" });
+    }
+    // Compare the provided old password with the hashed password
+    const isMatch = await bcrypt.compare(oldPassword, userData.password);
+    return res.json({ valid: isMatch });
+  } catch (err) {
+    console.error("Error verifying old password:", err.message);
+    return res.status(500).json({ error: err.message });
   }
 });
 

@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-// import supabase from "../api/supabaseClient.js";
 import { Link, useNavigate } from "react-router-dom";
 import logo from "../assets/Logo.svg";
 import useAuthHook from "../hooks/useAuth.jsx";
@@ -9,9 +8,9 @@ const Header = () => {
   const navigate = useNavigate();
 
   const handleProfileClick = () => {
-    console.log("Navigating to:", userType); //  Debugging log
+    // console.log("Navigating to:", userType); 
     if (!userType) {
-      console.warn("UserType is null! Fetching from sessionStorage...");
+      // console.warn("UserType is null! Fetching from sessionStorage...");
       const cachedProfile = sessionStorage.getItem("userProfile");
       if (cachedProfile) {
         const data = JSON.parse(cachedProfile);
@@ -25,7 +24,7 @@ const Header = () => {
     } else if (userType === "Admin") {
       navigate("/adminDashboard");
     } else {
-      navigate("/login"); // Default route if type is unknown
+      navigate("/login"); 
     }
   };
 

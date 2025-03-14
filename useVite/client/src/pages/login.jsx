@@ -2,131 +2,15 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../index.css";
 import Navbar from "../components/navBar.jsx";
-// import supabase from "../api/supabaseClient.js";
 import useAuthHook from "../hooks/useAuth.jsx";
+import PasswordInput from "../components/showPW.jsx";
 
 function LoginPage() {
-    const navigate = useNavigate();
-  // const [email, setEmail] = use
-  // State("");
-  // const [password, setPassword] = useState("");
-  // const [error, setError] = useState("");
-  // const navigate = useNavigate();
-  // // const { signInWithPass } = useAuth();
+  const navigate = useNavigate();
 
-  // // const handleLogin = async (e) => {
-  // //   e.preventDefault();
-  // //   setError("");
-  // //   try {
-  // //     const { data, error } = await supabase.auth.signInWithPassword({
-  // //       email,
-  // //       password,
-  // //     });
-
-  // //     // if (error) throw new Error(error.message);
-  // //     if (error) throw error;
-
-  // //     if (!data.user) throw new Error("Authentication failed: No user found.");
-
-  // //     console.log("Login successful:", data.user);
-
-  // //     alert("Login successful!"); //  Show success alert
-
-  // //     sessionStorage.setItem("userProfile", JSON.stringify(data.user));
-
-  // //     // Fetch user session
-  // //     const { data: sessionData } = await supabase.auth.getSession();
-  // //     if (!sessionData || !sessionData.session) {
-  // //       throw new Error("Session not found. Please try logging in again.");
-  // //     }
-
-  // //     console.log("Session Data:", sessionData);
-
-  // //     // Fetch user role from backend
-  // //     const userId = data.user.id;
-  // //     if (!userId) throw new Error("User ID is missing.");
-  // //     const response = await fetch(
-  // //       `http://localhost:5000/auth/user-role/${userId}`
-  // //       // ,
-  // //       // {
-  // //       //   method: "GET",
-  // //       //   headers: { "Content-Type": "application/json" },
-  // //       // }
-  // //     );
-  // //     const userData = await response.json();
-
-  // //     if (!response.ok) throw new Error(userData.error);
-  // //     console.log("User Role:", userData);
-
-  // //     // Redirect based on role
-  // //     if (userData.role === "Free") {
-  // //       navigate("/freeDashboard");
-  // //     } else {
-  // //       navigate("/"); // Redirect Free/Premium users to Home
-  // //     }
-  // //   } catch (error) {
-  // //     console.error("Login failed:", error.message);
-  // //     setError(error.message);
-  // //     alert(error.message);
-  // //   }
-  // // };
-
-  // const handleLogin = async (e) => {
-  //   e.preventDefault();
-  //   setError("");
-
-  //   try {
-  //     const { data, error } = await supabase.auth.signInWithPassword({
-  //       email,
-  //       password
-  //   });
-
-  //     if (error) throw error;
-  //     if (!data.user) throw new Error("Authentication failed: No user found.");
-
-  //     alert("Login successful!");
-  //     console.log("Login successful:", data.user);
-
-  //     // Fetch user role from backend
-  //     const userId = data.user.id;
-  //     if (!userId) throw new Error("User ID is missing.");
-
-  //     const response = await fetch(
-  //       `http://localhost:5000/auth/user-full/${userId}`
-  //     );
-  //     const userData = await response.json();
-
-  //     if (!response.ok) throw new Error(userData.error);
-
-  //     console.log("User Full Data:", userData);
-
-  //     // Store full user profile in both sessionStorage & localStorage
-  //     const fullUserData = {
-  //       user: userData.user,
-  //       profile: userData.profile,
-  //       role: userData.role,
-  //       interests: userData.interests,
-  //     };
-
-  //     sessionStorage.setItem("userProfile", JSON.stringify(fullUserData));
-  //     localStorage.setItem("userProfile", JSON.stringify(fullUserData));
-
-  //     // Redirect based on role
-  //     if (userData.role === "Free") {
-  //       navigate("/freeDashboard");
-  //     } else if (userData.role === "Premium") {
-  //       navigate("/premiumDashboard");
-  //     }  else {
-  //       navigate("/adminDashboard")
-  //     }
-  //   } catch (error) {
-  //     console.error("Login failed:", error.message);
-  //     setError(error.message);
-  //     alert(error.message);
-  //   }
-  // };
-
-  const { email, setEmail, password, setPassword, error, handleLogin } = useAuthHook();
+  const { email, setEmail, password, setPassword, error, handleLogin } =
+    useAuthHook();
+  // const [showPassword, setShowPassword] = useState(false);
 
   return (
     <div className="min-h-screen w-screen flex flex-col bg-white">
@@ -170,14 +54,11 @@ function LoginPage() {
               >
                 Password:
               </label>
-              <input
-                id="password"
-                type="password"
-                className="p-3 rounded-lg bg-[#F3F3F3] focus:ring-2 focus:ring-blue-500 shadow-md w-full"
-                placeholder="Enter your password"
+              <PasswordInput
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                required
+                className="p-3  rounded-lg  bg-[#F3F3F3]   focus:ring-2 focus:ring-blue-500  shadow-md w-full"
+                placeholder="Enter your password"
               />
             </div>
 
@@ -205,7 +86,6 @@ function LoginPage() {
               </button>
             </div>
             {error && <p className="text-red-500">{error}</p>}
-
           </form>
         </div>
       </main>

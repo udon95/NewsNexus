@@ -9,20 +9,18 @@ const articles = [
     id: 1,
     title: "Personal Legacy of Lee Hsien Loong",
     image: rank1Image,
-   
   },
   { id: 2, title: "Rank #02 Article", image: rank2Image },
-  { id: 3, title: "Rank #03 Article", image: rank3Image},
+  { id: 3, title: "Rank #03 Article", image: rank3Image },
 ];
 
 const ArticlesRank = ({ searchQuery = "" }) => {
   const navigate = useNavigate();
-  
+
   const filteredArticles = articles.filter((news) =>
     news.title.toLowerCase().includes(searchQuery.toLowerCase())
   );
   const handleCardClick = (title) => {
-    // e.g., /article/Personal%20Legacy%20of%20Lee%20Hsien%20Loong
     navigate(`/article/${encodeURIComponent(title)}`);
   };
   return (
@@ -35,7 +33,7 @@ const ArticlesRank = ({ searchQuery = "" }) => {
       </h1> */}
 
       {/* Article Ranking Boxes */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3  max-w-[900px]">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 max-w-[900px]">
         {filteredArticles.map((article) => (
           <button
             key={article.id}
@@ -53,7 +51,9 @@ const ArticlesRank = ({ searchQuery = "" }) => {
             />
 
             {/* Bottom Divider */}
-            <div className="w-full h-0.5 bg-gray-300 mb-4">{article.title}</div>
+            <div className="w-full h-auto bg-gray-300 mb-4">
+              {article.title}
+            </div>
           </button>
         ))}
       </div>

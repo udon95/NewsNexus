@@ -1,13 +1,13 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../context/AuthContext"; // Import AuthContext
-// import supabase from "../api/supabaseClient";
+import { useAuth } from "../context/AuthContext";
 
 const useAuthHook = () => {
-  const { user, userType, signInWithPass, signOut } = useAuth();
+  const { user, userType, signInWithPass, signOut, profile } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [interests, setInterests] = useState("");
+  const [localProfile, setLocalProfile] = useState("");
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
@@ -17,14 +17,13 @@ const useAuthHook = () => {
     setError("");
 
     try {
-      const { user, userType, interests } = await signInWithPass(
+      const { user, userType, interests, profile } = await signInWithPass(
         email,
         password
       );
       if (!user) throw new Error("Authentication failed: No user found.");
 
       alert("Login successful!");
-      console.log("Login successful:", user, "Interests: ", interests);
       const formattedInterests = Array.isArray(interests)
         ? interests
         : interests.split(", ").map((topic) => topic.trim());
@@ -34,6 +33,7 @@ const useAuthHook = () => {
         user,
         role: userType,
         interests: formattedInterests,
+        profile,
       };
       sessionStorage.setItem("userProfile", JSON.stringify(fullUserData));
       localStorage.setItem("userProfile", JSON.stringify(fullUserData));
@@ -96,6 +96,7 @@ const useAuthHook = () => {
     user,
     userType,
     interests,
+    profile,
   };
 };
 

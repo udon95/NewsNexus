@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import Navbar from "../components/navBar.jsx";
 import Topic from "./topic.jsx";
 import supabase from "../api/supabaseClient.js";
+import PasswordInput from "../components/showPW.jsx";
 
 import "../index.css";
 
@@ -116,14 +117,14 @@ function Register() {
                   <input
                     type="text"
                     name="username"
-                    value={userData.name}
+                    value={userData.username}
                     onChange={handleInputChange}
                     className="flex-grow p-3 rounded-lg bg-[#F3F3F3] focus:ring-2 focus:ring-blue-500 shadow-lg"
                     placeholder="Enter your name"
                   />
-                  {errors.name && (
+                  {errors.username && (
                     <div className="absolute top-[-30px] left-1/2 -translate-x-1/2 bg-red-500 text-white text-xs p-2 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                      {errors.name}
+                      {errors.username}
                     </div>
                   )}
                 </div>
@@ -151,7 +152,7 @@ function Register() {
                   <label className="text-2xl sm:text-2xl font-normal text-black w-30">
                     Password:
                   </label>
-                  <input
+                  <PasswordInput
                     type="password"
                     name="password"
                     value={userData.password}
@@ -169,7 +170,7 @@ function Register() {
                   <label className="text-2xl sm:text-2xl font-normal text-black w-30">
                     Re-enter password:
                   </label>
-                  <input
+                  <PasswordInput
                     type="password"
                     name="confirmPassword"
                     value={userData.confirmPassword}
