@@ -46,6 +46,9 @@ export const AdminSidebar = () => {
           <a href="/" className="tracking-wide">
             Homepage &gt;
           </a>
+          <a href="/" className="tracking-wide">
+            Homepage &gt;
+          </a>
         </div>
       </nav>
     </>
