@@ -73,8 +73,8 @@ function App() {
           <Route path="/rooms" element={<ViewRooms />} />
           <Route path="/room/:id" element={<RoomPage />} />
 
-          <Route path="/testprofile" element={<Profile />} />
-          <Route path="/testlogin" element={<Test/>}/>
+          {/* <Route path="/testprofile" element={<Profile />} /> */}
+          {/* <Route path="/testlogin" element={<Test/>}/> */}
           {/* <Route path="/topic" element={<Topic />} /> */}
 
         </Route>

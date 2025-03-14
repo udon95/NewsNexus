@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import Medialogo from "/src/assets/Medialogo.svg";
+import { useNavigate } from "react-router-dom";
+import { useArticleContext } from "/src/context/ArticleContext";
 
 export const FreeWriteArticle = () => {
   const [title, setTitle] = useState("");
@@ -9,6 +11,8 @@ export const FreeWriteArticle = () => {
   const [showConfirm, setShowConfirm] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
   const [selection, setSelection] = useState("");
+  const navigate = useNavigate();
+  const { addArticle } = useArticleContext();
 
   const topicOptions = [
     "Finance",
@@ -46,6 +50,15 @@ export const FreeWriteArticle = () => {
     setMedia(null);
     setShowConfirm(false);
     setSelection("");
+  };
+
+  const handleNavigation = (type) => {
+    if (!title.trim()) {
+      alert("Title cannot be empty!");
+      return;
+    }
+    addArticle(title, type);
+    navigate("/freeDashboard/manageArticles");
   };
 
   return (
@@ -115,7 +128,9 @@ export const FreeWriteArticle = () => {
 
               {/* Media Section */}
               <div className="mb-6">
-                <label className="text-2xl font-bold font-grotesk mb-1">Media :</label>
+                <label className="text-2xl font-bold font-grotesk mb-1">
+                  Media :
+                </label>
                 <div
                   className="flex items-center justify-center w-3/3 md:w-2/3 h-20 mt-1 border-2 border-dashed border-gray-400 rounded-lg bg-white cursor-pointer  gap-3"
                   onClick={() => document.getElementById("fileUpload").click()}
@@ -159,11 +174,20 @@ export const FreeWriteArticle = () => {
               <div className="flex justify-end gap-2 w-3/3 md:w-2/3">
                 <button
                   className="px-4 py-2 text-lg text-white bg-black rounded-lg shadow-md"
+                  onClick={() => handleNavigation("draft")}
+                >
+                  Save
+                </button>
+                <button
+                  className="px-4 py-2 text-lg text-white bg-black rounded-lg shadow-md"
                   onClick={() => setShowConfirm(true)}
                 >
                   Delete
                 </button>
-                <button className="px-4 py-2 text-lg text-white bg-black rounded-lg shadow-md">
+                <button
+                  className="px-4 py-2 text-lg text-white bg-black rounded-lg shadow-md"
+                  onClick={() => handleNavigation("posted")}
+                >
                   Post
                 </button>
               </div>
