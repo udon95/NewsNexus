@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import TopicList from "../components/topicList";
+import TopicsList from "../components/topicList";
 import { useNavigate } from "react-router-dom";
 import supabase from "../api/supabaseClient";
 
@@ -28,7 +28,7 @@ const TopicInterestsPage = ({ handleSubmit }) => {
   const [showError, setShowError] = useState(false); // Error state
   const navigate = useNavigate();
 
-  const toggleSelection = (topic) => {
+  const handleTopicSelection = (topic) => {
     if (selectedTopics.includes(topic)) {
       // If already selected, remove it
       setSelectedTopics(selectedTopics.filter((t) => t !== topic));
@@ -57,10 +57,10 @@ const TopicInterestsPage = ({ handleSubmit }) => {
           </p>
         )}
         <div className="flex justify-center w-full">
-          <TopicList
-            topics={topics}
+          <TopicsList
+            allTopics={topics}
             selectedTopics={selectedTopics}
-            toggleSelection={toggleSelection}
+            handleTopicSelection={handleTopicSelection}
           />
         </div>
         <button

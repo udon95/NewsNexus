@@ -1,20 +1,11 @@
 import React from "react";
 import ArticleList from "../articleList.jsx";
 import { useNavigate } from "react-router-dom";
-
-const postedArticles = [
-  "Personal Top 10 Singaporean Xiao Mei Mei",
-  "Latest Malaysian Forest Fire",
-  "US Currency Strengthens again",
-];
-
-const draftArticles = [
-  "Personal Reflection of 2024 Economics",
-  "An Objective View of ASEAN Political Landscape",
-];
+import { useArticleContext } from "/src/context/ArticleContext";
 
 export const FreeManageMyArticles = () => {
   const navigate = useNavigate();
+  const { postedArticles, draftArticles } = useArticleContext();
 
   // Function to Handle Clicking an Article
   const handleArticleClick = (article) => {
@@ -27,7 +18,7 @@ export const FreeManageMyArticles = () => {
       <main className="flex-grow w-full flex min-h-full overflow-auto">
         <div className="flex flex-grow max-md:flex-col min-h-full w-full">
           <section className="flex-1 min-h-full bg-indigo-50 max-md:w-full">
-            <div className="flex flex-col flex-grow min-h-full md:px-5 pt-8 w-full text-2xl font-medium text-black max-md:px-4 max-md:pb-24">
+            <div className="flex flex-col flex-grow min-h-full md:px-5 pt-8 w-full text-2xl font-grotesk font-medium text-black max-md:px-4 max-md:pb-24">
               <ArticleList
                 title="My Posted Articles :"
                 articles={postedArticles}

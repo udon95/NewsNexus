@@ -6,8 +6,8 @@ const ArticleList = ({ title, articles, isDraft, onArticleClick }) => {
 
   return (
     <div className="mt-6 first:mt-0 font-grotesk w-full flex flex-col items-start">
-      <h2 className="text-2xl font-bold mb-2 w-full max-w-[800px]">{title}</h2>
-      <ul className="w-full max-w-[800px] space-y-2 ">
+      <h2 className="text-2xl font-bold font-grotesk mb-2 w-3/3 md:w-2/3">{title}</h2>
+      <ul className="w-3/3 md:w-2/3 space-y-2 ">
         {articles.map((article, index) => (
           <li
             key={index}
@@ -27,7 +27,7 @@ const ArticleList = ({ title, articles, isDraft, onArticleClick }) => {
             {/* Three-Dot Menu Button */}
             <button
               className="p-2 text-lg font-bold text-gray-600 hover:text-black relative"
-              onClick={() => {
+              onClick={(e) => {
                 e.stopPropagation(); // Prevents triggering article click
                 setOpenMenuIndex(openMenuIndex === index ? null : index);
               }}

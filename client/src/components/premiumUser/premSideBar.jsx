@@ -32,7 +32,7 @@ export const PremSidebar = () => {
         {/* Sidebar Links */}
         <div className="flex flex-col gap-4 mt-2 text-lg font-grotesk">
           <a href="#" className="font-bold">
-            Manage My Articles &gt;
+           Expert &gt;
           </a>
           <a href="#" className="tracking-wide">
             Write Articles &gt;
