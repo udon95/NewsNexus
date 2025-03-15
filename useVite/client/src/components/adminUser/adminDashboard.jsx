@@ -1,17 +1,17 @@
 import React from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import AdminSidebar from "./adminSideBar.jsx";
-import AdminExperts from "../../components/adminUser/AdminExperts.jsx";
-import AdminProfile from "../../components/adminUser/AdminProfile.jsx";
-import AdminTestimonials from "../../components/adminUser/AdminTestimonials.jsx";
-import AdminCategories from "../../components/adminUser/AdminCategories.jsx";
-import AdminUserDetails from "../../components/adminUser/AdminUserDetails.jsx";
-import AdminGuidelines from "../../components/adminUser/AdminGuidelines.jsx";
-import AdminSubscription from "../../components/adminUser/AdminSubscription.jsx";
-import AdminFeatures from "../../components/adminUser/AdminFeatures.jsx";
-import AdminCommentReports from "../../components/adminUser/AdminCommentReports.jsx";
-import AdminArticleReports from "../../components/adminUser/AdminArticleReports.jsx";
-import AdminUsers from "../../components/adminUser/AdminUsers.jsx";
+import AdminExperts from "./AdminExperts.jsx";
+import AdminProfile from "./AdminProfile.jsx";
+import AdminTestimonials from "./AdminTestimonials.jsx";
+import AdminCategories from "./AdminCategories.jsx";
+import AdminUserDetails from "./AdminUserDetails.jsx";
+import AdminGuidelines from "./AdminGuidelines.jsx";
+import AdminSubscription from "./AdminSubscription.jsx";
+import AdminFeatures from "./AdminFeatures.jsx";
+import AdminCommentReports from "./AdminCommentReports.jsx";
+import AdminArticleReports from "./AdminArticleReports.jsx";
+import AdminUsers from "./AdminUsers.jsx";
 
 function AdminDashboard() {
   return (

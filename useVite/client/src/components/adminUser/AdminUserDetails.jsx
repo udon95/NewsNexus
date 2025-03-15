@@ -1,8 +1,8 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import "../index.css";
-import AdminSidebar from "../components/adminUser/adminSideBar.jsx";
-import Navbar from "../components/navBar.jsx";
+// import "../index.css";
+import AdminSidebar from "./adminSideBar.jsx";
+import Navbar from "../navBar.jsx";
 
 const AdminUserDetails = () => {
     const navigate = useNavigate();
