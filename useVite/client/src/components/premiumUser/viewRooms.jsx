@@ -1,252 +1,279 @@
-// import { useEffect, useState } from "react";
-// import { useNavigate, useSearchParams } from "react-router-dom";
+// import React, { useEffect, useState } from "react";
+// import { useParams, useNavigate } from "react-router-dom";
 // import supabase from "../../api/supabaseClient";
-// import Search from "../search.jsx";
-// import Navbar from "../navBar.jsx"; // Ensure correct import path
+// import Navbar from "../navBar"; // Ensure correct import
 
-// const ViewRoomsPage = () => {
-//   const [rooms, setRooms] = useState([]);
-//   const [user, setUser] = useState(null);
-//   const [searchParams, setSearchParams] = useSearchParams();
-//   const initialQuery = searchParams.get("query") || "";
-//   const [searchQuery, setSearchQuery] = useState(initialQuery);
+// const Room = () => {
+//   const { id: roomid } = useParams();
 //   const navigate = useNavigate();
+//   const [room, setRoom] = useState(null);
+//   const [isMember, setIsMember] = useState(false);
+//   const [loading, setLoading] = useState(true);
+//   const [user, setUser] = useState(null);
+//   const [articles, setArticles] = useState([]);
 
 //   useEffect(() => {
-//     // Fetch user from localStorage
 //     const storedUser = JSON.parse(localStorage.getItem("userProfile"));
 //     if (storedUser && storedUser.user && storedUser.user.userid) {
 //       setUser(storedUser.user);
 //     } else {
 //       console.warn("No user found in localStorage.");
 //     }
-
-//     // Fetch Rooms from Supabase
-//     const fetchRooms = async () => {
-//       const { data, error } = await supabase
-//         .from("rooms")
-//         .select("*") // Ensure image_url is included
-//         .order("member_count", { ascending: false });
-
-//       if (error) {
-//         console.error("Error fetching rooms:", error);
-//       } else {
-//         setRooms(data);
-//       }
-//     };
-//     fetchRooms();
 //   }, []);
 
-//   const handleSearch = (query) => {
-//     setSearchQuery(query);
-//     setSearchParams({ query });
-//   };
-
-//   const handleJoinAndRedirect = async (roomid, e) => {
-//     e.stopPropagation();
-//     if (!user) {
-//       alert("Please log in to join a room.");
+//   useEffect(() => {
+//     if (!roomid) {
+//       console.error("Room ID is undefined.");
 //       return;
 //     }
 
-//     const userId = user.userid; // Get user ID from localStorage
-
-//     const { data: existingMembership } = await supabase
-//       .from("room_members")
-//       .select("*")
-//       .eq("userid", userId)
-//       .eq("roomid", roomid);
-
-//     if (existingMembership.length === 0) {
-//       const { error } = await supabase.from("room_members").insert([
-//         { userid: userId, roomid, joined_at: new Date().toISOString() },
-//       ]);
+//     const fetchRoomDetails = async () => {
+//       setLoading(true);
+//       const { data, error } = await supabase
+//         .from("rooms")
+//         .select("name, description, member_count")
+//         .eq("roomid", roomid)
+//         .single();
 
 //       if (error) {
-//         console.error("Error joining room:", error);
-//         return;
+//         console.error("Error fetching room details:", error);
+//         setRoom(null);
+//       } else {
+//         setRoom(data);
 //       }
-//     }
+//       setLoading(false);
+//     };
 
-//     navigate(`/room/${roomid}`);
-//   };
+//     const checkMembership = async () => {
+//       if (!user) return;
 
-//   // Filter rooms based on search query
-//   const filteredRooms = rooms.filter((room) =>
-//     room.name.toLowerCase().includes(searchQuery.toLowerCase())
-//   );
+//       const { data, error } = await supabase
+//         .from("room_members")
+//         .select("*")
+//         .eq("userid", user.userid)
+//         .eq("roomid", roomid);
+
+//       if (error) {
+//         console.error("Error checking membership:", error);
+//       } else {
+//         setIsMember(data.length > 0);
+//       }
+//     };
+
+//     const fetchArticles = async () => {
+//       const { data, error } = await supabase
+//         .from("room_articles")
+//         .select("postid, title, content, created_at, userid, users:userid(username), room_comments(*)")
+//         .eq("roomid", roomid)
+//         .order("created_at", { ascending: false });
+
+//       if (error) {
+//         console.error("Error fetching articles:", error);
+//       } else {
+//         setArticles(data);
+//       }
+//     };
+
+//     fetchRoomDetails();
+//     checkMembership();
+//     fetchArticles();
+//   }, [roomid, user]);
 
 //   return (
-//     <div className="relative min-h-screen w-screen flex flex-col bg-white">
-//       {/* Navbar */}
+//     <div className="relative min-h-screen w-screen flex flex-col bg-gray-100">
+//       {/* Navbar Positioned at the Top */}
 //       <Navbar />
 
-//       {/* Search Bar (Styled to Match Explore Page) */}
-//       <div className="w-full flex justify-center mt-6 mb-6"> {/* Adjusted spacing here */}
-//         <div className="w-full max-w-3xl px-4">
-//           <Search onSearch={handleSearch} />
+//       <div className="w-full max-w-4xl mx-auto p-6">
+//         {/* Title and Buttons */}
+//         <div className="flex justify-between items-center mb-1">
+//           <h1 className="text-4xl font-bold">Room: {room ? room.name : "Not Found"}</h1>
+//           <div className="flex gap-3">
+//             <button
+//               className={`px-6 py-2 rounded-full text-lg font-semibold transition-all ${
+//                 isMember
+//                   ? "bg-blue-300 text-black hover:bg-blue-400"
+//                   : "bg-gray-300 text-gray-500 cursor-not-allowed"
+//               }`}
+//               disabled={!isMember}
+//             >
+//               Exit
+//             </button>
+
+//             <button
+//               className={`px-6 py-2 rounded-full text-lg font-semibold transition-all ${
+//                 isMember
+//                   ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+//                   : "bg-blue-300 text-black hover:bg-blue-400"
+//               }`}
+//               disabled={isMember}
+//             >
+//               {isMember ? "Joined" : "Join"}
+//             </button>
+//           </div>
 //         </div>
-//       </div>
 
-//       {/* Main Content Section */}
-//       <div className="flex flex-col flex-grow items-center w-full px-4">
-//         <div className="w-full max-w-5xl p-6 font-grotesk">
-//           <h1 className="text-4xl mb-8 font-grotesk text-left">
-//             Explore “All” Rooms:
-//           </h1>
+//         {/* Room Description */}
+//         <p className="text-gray-600 text-lg mb-6">{room ? room.description : "No description available."}</p>
 
-//           {/* Ranked Rooms - Fixed Image, Divider, and Name Position */}
-//           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6 w-full">
-//             {filteredRooms.slice(0, 3).map((room, index) => (
-//               <div
-//                 key={room.roomid}
-//                 onClick={() => navigate(`/room/${room.roomid}`)}
-//                 className="w-80 h-60 mx-auto border border-black rounded-2xl shadow-md cursor-pointer hover:shadow-lg transition bg-white flex flex-col"
-//               >
-//                 {/* Room Image Placeholder */}
-//                 <div className="w-full h-48 bg-gray-200 rounded-t-2xl overflow-hidden relative">
-//                   {room.image_url ? (
-//                     <img
-//                       src={room.image_url}
-//                       alt={room.name}
-//                       className="w-full h-full object-cover"
-//                     />
-//                   ) : (
-//                     <div className="w-full h-full flex justify-center items-center text-gray-500">
-//                       No Image Available
+//         {/* Check if there are articles */}
+//         {articles.length === 0 ? (
+//           <div className="bg-white shadow-md rounded-lg p-6 mt-6 text-center">
+//             <p className="text-gray-500 text-lg">No articles have been posted in this room yet.</p>
+//           </div>
+//         ) : (
+//           articles.map((article) => (
+//             <div key={article.postid} className="bg-white shadow-md rounded-lg p-6 mt-6">
+//               {/* Author Profile Icon */}
+//               <div className="relative bg-gray-300 h-85 rounded-lg flex items-center justify-center mb-4">
+//                 <div className="absolute top-3 left-3 bg-blue-500 text-white w-12 h-12 flex items-center justify-center font-bold rounded-lg">
+//                   {article.users?.username ? article.users.username.charAt(0).toUpperCase() : "?"}
+//                 </div>
+//               </div>
+
+//               {/* Article Title & Content */}
+//               <h2 className="text-2xl font-bold">{article.title}</h2>
+//               <p className="text-sm text-gray-600">
+//                 <span className="text-lg font-bold text-blue-900">@{article.users?.username || "Unknown"}</span>
+//                 <span className="text-black">
+//                   {" "}
+//                   {new Date(article.created_at).toLocaleDateString("en-GB", {
+//                     day: "2-digit",
+//                     month: "short",
+//                     year: "numeric",
+//                   })}
+//                 </span>
+//               </p>
+//               <p className="mt-2 text-gray-700">{article.content}</p>
+//               <button className="mt-3 px-4 py-2 bg-gray-700 text-white rounded-lg">Reply</button>
+
+//               {/* Check if article has comments */}
+//               {article.room_comments.length === 0 ? (
+//                 <div className="bg-gray-100 p-4 rounded-lg mt-4 text-center">
+//                   <p className="text-gray-500 text-sm">No comments yet. Be the first to comment!</p>
+//                 </div>
+//               ) : (
+//                 article.room_comments.map((comment) => (
+//                   <div key={comment.commentid} className="bg-gray-100 p-4 rounded-lg mt-4 flex items-start">
+//                     <div className="w-10 h-10 bg-blue-500 text-white flex items-center justify-center rounded-lg mr-3">
+//                       {comment.username?.charAt(0).toUpperCase() || "?"}
 //                     </div>
-//                   )}
-
-//                   {/* Rank Overlay */}
-//                   <div className="absolute top-2 left-2 bg-black text-white text-sm font-bold px-3 py-1 rounded-lg border-2 border-white">
-//                     Rank #{index + 1}
+//                     <div>
+//                       <span className="text-lg font-bold text-blue-900">@{comment.username}</span>
+//                       <span className="text-blue-900 text-sm ml-2">
+//                         {new Date(comment.created_at).toLocaleDateString("en-GB", {
+//                           day: "2-digit",
+//                           month: "short",
+//                           year: "numeric",
+//                         })}
+//                       </span>
+//                       <p className="mt-1 text-gray-700">{comment.content}</p>
+//                     </div>
 //                   </div>
-//                 </div>
-
-//                 {/* Line Divider */}
-//                 <div className="w-full border-t border-black"></div>
-
-//                 {/* Room Name */}
-//                 <p className="text-left text-black font-medium px-4 py-2">
-//                   {room.name}
-//                 </p>
-//               </div>
-//             ))}
-//           </div>
-
-//           {/* Room List */}
-//           <div className="w-full max-w-5xl space-y-4">
-//             {filteredRooms.map((room, index) => (
-//               <div
-//                 key={room.roomid}
-//                 onClick={() => navigate(`/room/${room.roomid}`)}
-//                 className={`flex items-center justify-between p-4 border border-black rounded-2xl shadow-md bg-white hover:shadow-lg transition cursor-pointer w-full ${
-//                   index === filteredRooms.length - 1 ? "mb-12" : "" // Extra spacing only for the last card
-//                 }`}
-//               >
-//                 <div>
-//                   <span className="text-lg font-bold">{room.name}</span>
-//                   <p className="text-sm text-gray-600">{room.description}</p>
-//                 </div>
-//                 <button
-//                   className="px-6 py-2 text-sm font-bold rounded-full bg-[#BFD8FF] text-black hover:bg-blue-300"
-//                   onClick={(e) => handleJoinAndRedirect(room.roomid, e)}
-//                 >
-//                   Join
-//                 </button>
-//               </div>
-//             ))}
-//           </div>
-//         </div>
+//                 ))
+//               )}
+//             </div>
+//           ))
+//         )}
 //       </div>
 //     </div>
 //   );
 // };
 
-// export default ViewRoomsPage;
+// export default Room;
 
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-import { useEffect, useState } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import supabase from "../../api/supabaseClient";
-import Search from "../search.jsx";
-import Navbar from "../navBar.jsx"; // Ensure correct import path
+import Navbar from "../navBar"; // Ensure correct import
 
-const ViewRoomsPage = () => {
-  const [rooms, setRooms] = useState([]);
-  const [user, setUser] = useState(null);
-  const [userRooms, setUserRooms] = useState(new Set()); // Stores room IDs where the user is a member
-  const [searchParams, setSearchParams] = useSearchParams();
-  const initialQuery = searchParams.get("query") || "";
-  const [searchQuery, setSearchQuery] = useState(initialQuery);
+const Room = () => {
+  const { id: roomid } = useParams();
   const navigate = useNavigate();
+  const [room, setRoom] = useState(null);
+  const [isMember, setIsMember] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState(null);
+  const [articles, setArticles] = useState([]);
 
   useEffect(() => {
-    // Fetch user from localStorage
     const storedUser = JSON.parse(localStorage.getItem("userProfile"));
     if (storedUser && storedUser.user && storedUser.user.userid) {
       setUser(storedUser.user);
     } else {
       console.warn("No user found in localStorage.");
     }
-
-    // Fetch Rooms from Supabase
-    const fetchRooms = async () => {
-      const { data, error } = await supabase
-        .from("rooms")
-        .select("*") // Ensure image_url is included
-        .order("member_count", { ascending: false });
-
-      if (error) {
-        console.error("Error fetching rooms:", error);
-      } else {
-        setRooms(data);
-      }
-    };
-    fetchRooms();
   }, []);
 
-  // Fetch user’s joined rooms
   useEffect(() => {
-    if (!user) return;
-
-    const fetchUserRooms = async () => {
-      const { data, error } = await supabase
-        .from("room_members")
-        .select("roomid")
-        .eq("userid", user.userid);
-
-      if (error) {
-        console.error("Error fetching user rooms:", error);
-      } else {
-        setUserRooms(new Set(data.map((room) => room.roomid))); // Store room IDs in a Set
-      }
-    };
-
-    fetchUserRooms();
-  }, [user]);
-
-  const handleSearch = (query) => {
-    setSearchQuery(query);
-    setSearchParams({ query });
-  };
-
-  const handleJoinAndRedirect = async (roomid, e) => {
-    e.stopPropagation();
-    if (!user) {
-      alert("Please log in to join a room.");
+    if (!roomid) {
+      console.error("Room ID is undefined.");
       return;
     }
 
-    const userId = user.userid; // Get user ID from localStorage
+    const fetchRoomDetails = async () => {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from("rooms")
+        .select("name, description, member_count")
+        .eq("roomid", roomid)
+        .single();
 
-    if (userRooms.has(roomid)) {
-      return; // Prevents joining again
+      if (error) {
+        console.error("Error fetching room details:", error);
+        setRoom(null);
+      } else {
+        setRoom(data);
+      }
+      setLoading(false);
+    };
+
+    const checkMembership = async () => {
+      if (!user) return;
+
+      const { data, error } = await supabase
+        .from("room_members")
+        .select("*")
+        .eq("userid", user.userid)
+        .eq("roomid", roomid);
+
+      if (error) {
+        console.error("Error checking membership:", error);
+      } else {
+        setIsMember(data.length > 0);
+      }
+    };
+
+    const fetchArticles = async () => {
+      const { data, error } = await supabase
+        .from("room_articles")
+        .select("postid, title, content, created_at, userid, users:userid(username), room_comments(*)")
+        .eq("roomid", roomid)
+        .order("created_at", { ascending: false });
+
+      if (error) {
+        console.error("Error fetching articles:", error);
+      } else {
+        setArticles(data);
+      }
+    };
+
+    fetchRoomDetails();
+    checkMembership();
+    fetchArticles();
+  }, [roomid, user]);
+
+  // Function to Join Room
+  const handleJoinRoom = async () => {
+    if (!user) {
+      alert("You need to be logged in to join this room.");
+      return;
     }
 
     const { error } = await supabase.from("room_members").insert([
-      { userid: userId, roomid, joined_at: new Date().toISOString() },
+      { userid: user.userid, roomid, joined_at: new Date().toISOString() },
     ]);
 
     if (error) {
@@ -254,107 +281,133 @@ const ViewRoomsPage = () => {
       return;
     }
 
-    // Update state to reflect membership
-    setUserRooms((prevRooms) => new Set([...prevRooms, roomid]));
-
-    navigate(`/room/${roomid}`);
+    // Update UI state
+    setIsMember(true);
   };
 
-  // Filter rooms based on search query
-  const filteredRooms = rooms.filter((room) =>
-    room.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // Function to Exit Room
+  const handleExitRoom = async () => {
+    if (!user) {
+      alert("You need to be logged in to exit the room.");
+      return;
+    }
+
+    const { error } = await supabase
+      .from("room_members")
+      .delete()
+      .eq("userid", user.userid)
+      .eq("roomid", roomid);
+
+    if (error) {
+      console.error("Error exiting room:", error);
+      return;
+    }
+
+    // Update UI state
+    setIsMember(false);
+  };
 
   return (
-    <div className="relative min-h-screen w-screen flex flex-col bg-white">
-      {/* Navbar */}
+    <div className="relative min-h-screen w-screen flex flex-col bg-gray-100">
+      {/* Navbar Positioned at the Top */}
       <Navbar />
 
-      {/* Search Bar (Styled to Match Explore Page) */}
-      <div className="w-full flex justify-center mt-6 mb-6"> {/* Adjusted spacing here */}
-        <div className="w-full max-w-3xl px-4">
-          <Search onSearch={handleSearch} />
+      <div className="w-full max-w-4xl mx-auto p-6">
+        {/* Title and Buttons */}
+        <div className="flex justify-between items-center mb-1">
+          <h1 className="text-4xl font-bold">Room: {room ? room.name : "Not Found"}</h1>
+          <div className="flex gap-3">
+            <button
+              className={`px-6 py-2 rounded-full text-lg font-semibold transition-all ${
+                isMember
+                  ? "bg-blue-500 text-white hover:bg-blue-600"
+                  : "bg-gray-300 text-gray-500 cursor-not-allowed"
+              }`}
+              onClick={handleExitRoom}
+              disabled={!isMember}
+            >
+              Exit
+            </button>
+
+            <button
+              className={`px-6 py-2 rounded-full text-lg font-semibold transition-all ${
+                isMember
+                  ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                  : "bg-green-500 text-white hover:bg-green-600"
+              }`}
+              onClick={handleJoinRoom}
+              disabled={isMember}
+            >
+              {isMember ? "Joined" : "Join"}
+            </button>
+          </div>
         </div>
-      </div>
 
-      {/* Main Content Section */}
-      <div className="flex flex-col flex-grow items-center w-full px-4">
-        <div className="w-full max-w-5xl p-6 font-grotesk">
-          <h1 className="text-4xl mb-8 font-grotesk text-left">
-            Explore “All” Rooms:
-          </h1>
+        {/* Room Description */}
+        <p className="text-gray-600 text-lg mb-6">{room ? room.description : "No description available."}</p>
 
-          {/* Ranked Rooms - Fixed Image, Divider, and Name Position */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6 w-full">
-            {filteredRooms.slice(0, 3).map((room, index) => (
-              <div
-                key={room.roomid}
-                onClick={() => navigate(`/room/${room.roomid}`)}
-                className="w-80 h-60 mx-auto border border-black rounded-2xl shadow-md cursor-pointer hover:shadow-lg transition bg-white flex flex-col"
-              >
-                {/* Room Image Placeholder */}
-                <div className="w-full h-48 bg-gray-200 rounded-t-2xl overflow-hidden relative">
-                  {room.image_url ? (
-                    <img
-                      src={room.image_url}
-                      alt={room.name}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex justify-center items-center text-gray-500">
-                      No Image Available
+        {/* Check if there are articles */}
+        {articles.length === 0 ? (
+          <div className="bg-white shadow-md rounded-lg p-6 mt-6 text-center">
+            <p className="text-gray-500 text-lg">No articles have been posted in this room yet.</p>
+          </div>
+        ) : (
+          articles.map((article) => (
+            <div key={article.postid} className="bg-white shadow-md rounded-lg p-6 mt-6">
+              {/* Author Profile Icon */}
+              <div className="relative bg-gray-300 h-85 rounded-lg flex items-center justify-center mb-4">
+                <div className="absolute top-3 left-3 bg-blue-500 text-white w-12 h-12 flex items-center justify-center font-bold rounded-lg">
+                  {article.users?.username ? article.users.username.charAt(0).toUpperCase() : "?"}
+                </div>
+              </div>
+
+              {/* Article Title & Content */}
+              <h2 className="text-2xl font-bold">{article.title}</h2>
+              <p className="text-sm text-gray-600">
+                <span className="text-lg font-bold text-blue-900">@{article.users?.username || "Unknown"}</span>
+                <span className="text-black">
+                  {" "}
+                  {new Date(article.created_at).toLocaleDateString("en-GB", {
+                    day: "2-digit",
+                    month: "short",
+                    year: "numeric",
+                  })}
+                </span>
+              </p>
+              <p className="mt-2 text-gray-700">{article.content}</p>
+              <button className="mt-3 px-4 py-2 bg-gray-700 text-white rounded-lg">Reply</button>
+
+              {/* Check if article has comments */}
+              {article.room_comments.length === 0 ? (
+                <div className="bg-gray-100 p-4 rounded-lg mt-4 text-center">
+                  <p className="text-gray-500 text-sm">No comments yet. Be the first to comment!</p>
+                </div>
+              ) : (
+                article.room_comments.map((comment) => (
+                  <div key={comment.commentid} className="bg-gray-100 p-4 rounded-lg mt-4 flex items-start">
+                    <div className="w-10 h-10 bg-blue-500 text-white flex items-center justify-center rounded-lg mr-3">
+                      {comment.username?.charAt(0).toUpperCase() || "?"}
                     </div>
-                  )}
-
-                  {/* Rank Overlay */}
-                  <div className="absolute top-2 left-2 bg-black text-white text-sm font-bold px-3 py-1 rounded-lg border-2 border-white">
-                    Rank #{index + 1}
+                    <div>
+                      <span className="text-lg font-bold text-blue-900">@{comment.username}</span>
+                      <span className="text-blue-900 text-sm ml-2">
+                        {new Date(comment.created_at).toLocaleDateString("en-GB", {
+                          day: "2-digit",
+                          month: "short",
+                          year: "numeric",
+                        })}
+                      </span>
+                      <p className="mt-1 text-gray-700">{comment.content}</p>
+                    </div>
                   </div>
-                </div>
-
-                {/* Line Divider */}
-                <div className="w-full border-t border-black"></div>
-
-                {/* Room Name */}
-                <p className="text-left text-black font-medium px-4 py-2">
-                  {room.name}
-                </p>
-              </div>
-            ))}
-          </div>
-
-          {/* Room List */}
-          <div className="w-full max-w-5xl space-y-4">
-            {filteredRooms.map((room, index) => (
-              <div
-                key={room.roomid}
-                onClick={() => navigate(`/room/${room.roomid}`)}
-                className={`flex items-center justify-between p-4 border border-black rounded-2xl shadow-md bg-white hover:shadow-lg transition cursor-pointer w-full ${
-                  index === filteredRooms.length - 1 ? "mb-12" : "" // Extra spacing only for the last card
-                }`}
-              >
-                <div>
-                  <span className="text-lg font-bold">{room.name}</span>
-                  <p className="text-sm text-gray-600">{room.description}</p>
-                </div>
-                <button
-                  className={`px-6 py-2 text-sm font-bold rounded-full ${
-                    userRooms.has(room.roomid)
-                      ? "bg-gray-300 text-gray-600 cursor-not-allowed"
-                      : "bg-[#BFD8FF] text-black hover:bg-blue-300"
-                  }`}
-                  onClick={(e) => handleJoinAndRedirect(room.roomid, e)}
-                  disabled={userRooms.has(room.roomid)} // Disable button if user is already a member
-                >
-                  {userRooms.has(room.roomid) ? "Joined" : "Join"}
-                </button>
-              </div>
-            ))}
-          </div>
-        </div>
+                ))
+              )}
+            </div>
+          ))
+        )}
       </div>
     </div>
   );
 };
 
-export default ViewRoomsPage;
+export default Room;
