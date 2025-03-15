@@ -1,6 +1,17 @@
 import React from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import AdminSidebar from "./adminSideBar.jsx";
+import AdminExperts from "../../components/adminUser/AdminExperts.jsx";
+import AdminProfile from "../../components/adminUser/AdminProfile.jsx";
+import AdminTestimonials from "../../components/adminUser/AdminTestimonials.jsx";
+import AdminCategories from "../../components/adminUser/AdminCategories.jsx";
+import AdminUserDetails from "../../components/adminUser/AdminUserDetails.jsx";
+import AdminGuidelines from "../../components/adminUser/AdminGuidelines.jsx";
+import AdminSubscription from "../../components/adminUser/AdminSubscription.jsx";
+import AdminFeatures from "../../components/adminUser/AdminFeatures.jsx";
+import AdminCommentReports from "../../components/adminUser/AdminCommentReports.jsx";
+import AdminArticleReports from "../../components/adminUser/AdminArticleReports.jsx";
+import AdminUsers from "../../components/adminUser/AdminUsers.jsx";
 
 function AdminDashboard() {
   return (
@@ -10,7 +21,6 @@ function AdminDashboard() {
           <AdminSidebar />
         </aside>
         <div className="flex-1 min-h-full bg-indigo-50 max-md:w-full w-full max-w-screen px-1 md:px-6">
-          dsadsasda
           <Routes>
             {/* Default Route: Redirect to Manage Articles */}
             {/* <Route index element={<Navigate to="expertApp" />} /> */}
@@ -19,9 +29,29 @@ function AdminDashboard() {
             {/* <Route path="manageArticles" element={<FreeManageArticle />} /> */}
 
             {/* Other Sidebar Pages */}
-            {/* <Route path="expertApp" element={<PremApplyExpert />} /> */}
-            {/* <Route path="manageProfile" element={<PremManageProfile />} /> */}
-            {/* <Route path="submitTest" element={<PremSubmitTest />} /> */}
+            <Route path="/AdminExperts/*" element={<AdminExperts />} />
+            <Route path="/AdminProfile/*" element={<AdminProfile />} />
+            <Route
+              path="/AdminTestimonials/*"
+              element={<AdminTestimonials />}
+            />
+            <Route path="/AdminCategories/*" element={<AdminCategories />} />
+            <Route path="/AdminUserDetails/*" element={<AdminUserDetails />} />
+            <Route path="/AdminGuidelines/*" element={<AdminGuidelines />} />
+            <Route
+              path="/AdminSubscription/*"
+              element={<AdminSubscription />}
+            />
+            <Route path="/AdminFeatures/*" element={<AdminFeatures />} />
+            <Route
+              path="/AdminCommentReports/*"
+              element={<AdminCommentReports />}
+            />
+            <Route
+              path="/AdminArticleReports/*"
+              element={<AdminArticleReports />}
+            />
+            <Route path="/AdminUsers/*" element={<AdminUsers />} />
           </Routes>
         </div>
       </main>

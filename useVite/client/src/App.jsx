@@ -11,7 +11,6 @@ import Privacy from "./pages/privacy.jsx";
 import Latest from "./components/latestNews.jsx";
 import Article from "./pages/article.jsx";
 import FreeDashboard from "./components/freeUser/freeDashboard.jsx";
-import Topic from "./pages/topic.jsx";
 import PremiumDashboard from "./components/premiumUser/premiumDashboard.jsx";
 import AdminDashboard from "./components/adminUser/adminDashboard.jsx";
 import ForgotPassword from "./pages/forgetPW";
@@ -20,8 +19,6 @@ import ViewRooms from "./components/premiumUser/viewRooms.jsx";
 import RoomPage from "./components/premiumUser/roomPage.jsx";
 import SubscriptionStatus from "./components/payment.jsx";
 
-import Profile from "./pages/testProfile.jsx";
-import Test from "./pages/testlogin.jsx";
 import supabase from "./api/supabaseClient.js";
 import "./index.css";
 
@@ -73,9 +70,7 @@ function App() {
           <Route path="/rooms" element={<ViewRooms />} />
           <Route path="/room/:id" element={<RoomPage />} />
 
-          {/* <Route path="/testprofile" element={<Profile />} /> */}
-          {/* <Route path="/testlogin" element={<Test/>}/> */}
-          {/* <Route path="/topic" element={<Topic />} /> */}
+    
 
         </Route>
       </Routes>
