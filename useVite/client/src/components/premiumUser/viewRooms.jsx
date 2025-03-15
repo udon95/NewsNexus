@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import supabase from "../../api/supabaseClient";
+import Search from "../search.jsx";
+import Navbar from "../navBar.jsx"; // Ensure correct import path
 
 const ViewRoomsPage = () => {
   const [rooms, setRooms] = useState([]);
@@ -19,12 +21,11 @@ const ViewRoomsPage = () => {
 
     fetchUser();
 
-    // Fetch rooms sorted by most members
     const fetchRooms = async () => {
       const { data, error } = await supabase
         .from("rooms")
-        .select("*")
-        .order("member_count", { ascending: false }); //Sorting by most members
+        .select("*") // Ensure image_url is included
+        .order("member_count", { ascending: false });
 
       if (error) {
         console.error("Error fetching rooms:", error);
@@ -63,50 +64,83 @@ const ViewRoomsPage = () => {
   };
 
   return (
-    <div className="p-6 max-w-5xl mx-auto bg-white min-h-screen">
-      <h2 className="text-2xl font-bold mb-6">Explore “All” Rooms:</h2>
+    <div className="relative min-h-screen w-screen flex flex-col bg-white">
+      {/* Navbar */}
+      <Navbar />
+      
 
-      {/* Ranked Rooms - Top 3 */}
-      <div className="grid grid-cols-3 gap-4 mb-6">
-        {[...rooms.slice(0, 3), ...Array(3 - rooms.length).fill(null)].map((room, index) => (
-          <div
-            key={room ? room.roomid : `placeholder-${index}`}
-            onClick={() => room && navigate(`/room/${room.roomid}`)}
-            className={`w-full h-56 border border-black rounded-2xl shadow-md flex flex-col justify-between cursor-pointer hover:shadow-lg transition p-4 ${
-              !room ? "opacity-50 cursor-default" : "bg-white"
-            }`}
-          >
-            <h3 className="text-lg font-bold">Rank #{index + 1}</h3>
-            <div className="flex-grow"></div>
-            <div className="w-full border-t border-black"></div>
-            <p className="text-left text-black font-medium">{room ? room.name : "Coming Soon..."}</p>
-          </div>
-        ))}
-      </div>
+      {/* Main Content Section */}
+      <div className="flex flex-col flex-grow items-center w-full px-4">
+        <div className="w-full max-w-5xl p-6 font-grotesk">
+          <h1 className="text-4xl mb-8 font-grotesk text-left">
+            Explore “All” Rooms:
+          </h1>
 
-      {/* Room List - All Rooms */}
-      <div className="space-y-4">
-        {rooms.map((room, index) => (
-          <div
-            key={room.roomid}
-            onClick={() => navigate(`/room/${room.roomid}`)}
-            className="flex items-center justify-between p-4 border border-black rounded-2xl shadow-md bg-white hover:shadow-lg transition cursor-pointer"
-          >
-            <div>
-              <span className="text-lg font-bold">{room.name}</span>
-              <p className="text-sm text-gray-600">{room.description}</p>
-            </div>
-            <button
-              className="px-6 py-2 text-sm font-bold rounded-full bg-[#BFD8FF] text-black hover:bg-blue-300"
-              onClick={(e) => handleJoinAndRedirect(room.roomid, e)}
-            >
-              Join
-            </button>
+          {/* Ranked Rooms - Fixed Image, Divider, and Name Position */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6 w-full">
+            {rooms.slice(0, 3).map((room, index) => (
+              <div
+                key={room.roomid}
+                onClick={() => navigate(`/room/${room.roomid}`)}
+                className="w-80 h-60 mx-auto border border-black rounded-2xl shadow-md cursor-pointer hover:shadow-lg transition bg-white flex flex-col"
+              >
+                {/* Room Image Placeholder (Now Stretches to Edges and Touches Divider) */}
+                <div className="w-full h-48 bg-gray-200 rounded-t-2xl overflow-hidden relative">
+                  {room.image_url ? (
+                    <img
+                      src={room.image_url}
+                      alt={room.name}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex justify-center items-center text-gray-500">
+                      No Image Available
+                    </div>
+                  )}
+
+                  {/* Rank Overlay (Already Correct) */}
+                  <div className="absolute top-2 left-2 bg-black text-white text-sm font-bold px-3 py-1 rounded-lg border-2 border-white">
+                    Rank #{index + 1}
+                  </div>
+                </div>
+
+                {/* Line Divider (Now Lowered to Match Blue Line) */}
+                <div className="w-full border-t border-black"></div>
+
+                {/* Room Name (Now Below Divider) */}
+                <p className="text-left text-black font-medium px-4 py-2">
+                  {room.name}
+                </p>
+              </div>
+            ))}
           </div>
-        ))}
+
+          {/* Room List - No Changes */}
+          <div className="w-full max-w-5xl space-y-4">
+            {rooms.map((room) => (
+              <div
+                key={room.roomid}
+                onClick={() => navigate(`/room/${room.roomid}`)}
+                className="flex items-center justify-between p-4 border border-black rounded-2xl shadow-md bg-white hover:shadow-lg transition cursor-pointer w-full"
+              >
+                <div>
+                  <span className="text-lg font-bold">{room.name}</span>
+                  <p className="text-sm text-gray-600">{room.description}</p>
+                </div>
+                <button
+                  className="px-6 py-2 text-sm font-bold rounded-full bg-[#BFD8FF] text-black hover:bg-blue-300"
+                  onClick={(e) => handleJoinAndRedirect(room.roomid, e)}
+                >
+                  Join
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   );
 };
 
 export default ViewRoomsPage;
+
