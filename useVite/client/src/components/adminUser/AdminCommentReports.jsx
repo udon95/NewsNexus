@@ -16,13 +16,13 @@ const AdminCommentReports = () => {
       }, []);
 
     return (
-        <div className="min-h-screen w-screen bg-white">
+        <div className="w-screen min-h-screen flex flex-col overflow-auto">
             {/* Navbar */}
-            <Navbar />
+            {/* <Navbar /> */}
             <div className="flex">
                 {/* Sidebar */}
-                <AdminSidebar />
-                <div className="flex-1">
+                {/* <AdminSidebar /> */}
+                <div className="flex-1 font-grotesk">
                 <div className="text-2xl sm:text-3xl text-left mt-8 ml-10 mb-5 font-bold">
                 Report details:
                     </div>

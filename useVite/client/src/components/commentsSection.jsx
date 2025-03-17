@@ -4,8 +4,10 @@ import IconButton from "@mui/material/IconButton";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
+import useAuthHook from "../hooks/useAuth";
 
 const CommentsSection = () => {
+  const {userType} = useAuthHook();
   const initialComments = [
     {
       id: 1,
@@ -115,14 +117,15 @@ const CommentsSection = () => {
           >
             <Pencil className="h-5 w-5 text-white" />
           </button>
-
+         
           <button className="w-10 h-10 p-2 bg-black rounded-lg hover:bg-gray-900 flex items-center justify-center">
             <Share2 className="h-5 w-5 text-white" />
           </button>
-
+          {userType === "Premium" && (
           <button className="w-10 h-10 p-2 bg-black rounded-lg hover:bg-gray-900 flex items-center justify-center">
             <Headphones className="h-5 w-5 text-white" />
           </button>
+          )}
         </div>
       </div>
 

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import "../index.css";
+// import "../index.css";
 import Navbar from "../components/navBar.jsx";
 import useAuthHook from "../hooks/useAuth.jsx";
 import PasswordInput from "../components/showPW.jsx";

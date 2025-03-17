@@ -4,9 +4,21 @@ import { EllipsisVertical } from "lucide-react";
 const ArticleList = ({ title, articles, isDraft, onArticleClick }) => {
   const [openMenuIndex, setOpenMenuIndex] = useState(null); // Tracks which article's menu is open
 
+  const calculateExpiryDate = (index) => {
+    const creationDate = new Date();
+    creationDate.setDate(creationDate.getDate() + 7);
+    return creationDate.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
+  };
+
   return (
     <div className="mt-6 first:mt-0 font-grotesk w-full flex flex-col items-start">
-      <h2 className="text-2xl font-bold font-grotesk mb-2 w-3/3 md:w-2/3">{title}</h2>
+      <h2 className="text-2xl font-bold font-grotesk mb-2 w-3/3 md:w-2/3">
+        {title}
+      </h2>
       <ul className="w-3/3 md:w-2/3 space-y-2 ">
         {articles.map((article, index) => (
           <li
@@ -34,7 +46,11 @@ const ArticleList = ({ title, articles, isDraft, onArticleClick }) => {
             >
               <EllipsisVertical />
             </button>
-
+            {isDraft && (
+              <div className="absolute bottom-2 left-4 text-gray-500 text-sm  border-gray-200 pt-2">
+                Expires: {calculateExpiryDate(index)}
+              </div>
+            )}
             {/* Dropdown Menu (Appears on Click) */}
             {openMenuIndex === index && (
               <div className="absolute top-full right-0 bg-white shadow-md border border-gray-300 rounded-lg min-w-[120px] z-50">

@@ -4,7 +4,7 @@ import Navbar from "../components/navBar.jsx";
 import Rate from "../components/rateAndFlag.jsx";
 import Content from "../components/articleContent.jsx";
 import Comments from "../components/commentsSection.jsx";
-
+import useAuthHook from "../hooks/useAuth.jsx";
 import { BookOpenIcon, XMarkIcon } from "@heroicons/react/24/outline"; // Text-to-Speech Icon
 
 const Article = () => {
@@ -15,6 +15,7 @@ const Article = () => {
   const [loading, setLoading] = useState(false);
   const [buttonPosition, setButtonPosition] = useState({ x: 0, y: 0 });
   const buttonRef = useRef(null);
+  const { userType } = useAuthHook();
 
   useEffect(() => {
     setTimeout(() => {
@@ -94,7 +95,7 @@ const Article = () => {
         <Comments articleRef={articleRef} />
 
         {/* Dictionary Button */}
-        {selectedText && (
+        {selectedText && userType === "Premium" && (
           <button
             ref={buttonRef}
             onClick={fetchDefinition}

@@ -1,6 +1,8 @@
 import React, { useState } from "react";
+import useAuthHook from "../../hooks/useAuth";
 
 const Room = () => {
+  const { user, userType } = useAuthHook(); // Get user and userType
   const [isMember, setIsMember] = useState(true);
   const [posts] = useState([
     {
@@ -37,7 +39,7 @@ const Room = () => {
   return (
     <div style={{ width: "55%", margin: "auto", fontFamily: "Arial, sans-serif" }}>
       <div style={headerStyle}>
-        <h2 style={titleStyle}>Room : Lee Hsien Long</h2>
+        <h2 style={titleStyle}>Room : Lee Hsien Loong</h2>
         <div style={buttonContainer}>
           <button style={exitButtonStyle} onClick={() => setIsMember(false)}><b>Exit</b></button>
           <button 

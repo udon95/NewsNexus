@@ -57,9 +57,19 @@ export const FreeWriteArticle = () => {
       alert("Title cannot be empty!");
       return;
     }
+  
+    // ✅ Enforce max word length (30 characters per word)
+    const words = title.split(" ");
+    for (let word of words) {
+      if (word.length > 20) {
+        alert("Please avoid long unbroken words (Max: 20 characters per word)");
+        return;
+      }
+    }
+  
     addArticle(title, type);
     navigate("/freeDashboard/manageArticles");
-  };
+  };  
 
   return (
     <div className="w-screen min-h-screen flex flex-col overflow-auto">

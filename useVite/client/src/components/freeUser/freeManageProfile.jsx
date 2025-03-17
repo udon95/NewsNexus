@@ -5,10 +5,8 @@ import axios from "axios";
 import PasswordInput from "../showPW";
 
 const FreeManageProfile = () => {
-  // const { interests } = useAuth(); //  Get interests from AuthContext
   const [selectedTopics, setSelectedTopics] = useState([]);
   const [userDetails, setUserDetails] = useState(null);
-  // const [profile, setProfile] = useState(null);
   const [error, setError, showError] = useState("");
   const { interests, profile: authProfile, user } = useAuthHook();
   const [passwordError, setPasswordError] = useState("");
@@ -65,7 +63,21 @@ const FreeManageProfile = () => {
       if (dobDate > today) {
         setDobError("Date of Birth cannot be later than today.");
       } else {
-        setDobError("");
+        // Calculate the age
+        let age = today.getFullYear() - dobDate.getFullYear();
+        const monthDiff = today.getMonth() - dobDate.getMonth();
+        if (
+          monthDiff < 0 ||
+          (monthDiff === 0 && today.getDate() < dobDate.getDate())
+        ) {
+          age--;
+        }
+        // Set error if age is less than 16
+        if (age < 16) {
+          setDobError("You must be at least 16 years old.");
+        } else {
+          setDobError("");
+        }
       }
     } else {
       setDobError("");
@@ -80,7 +92,7 @@ const FreeManageProfile = () => {
 
   const updateProfile = async () => {
     if (!isValidDOB(editDate)) {
-      alert("Date of Birth cannot be later than today.");
+      alert("Date of Birth cannot be later than today.", dobError);
       return;
     }
 

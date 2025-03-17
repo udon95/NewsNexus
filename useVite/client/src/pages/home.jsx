@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "../index.css";
 import Navbar from "../components/navBar.jsx";
-import Search from "../components/search.jsx";
+// import Search from "../components/search.jsx";
 import Testimonial from "../components/tesimonial.jsx";
 import TopicsList from "../components/topicList.jsx";
 import LatestNews from "../components/latestNews.jsx";
@@ -28,6 +28,7 @@ const topics = [
   "USA",
   "Luxury",
   "Korea",
+  "Others",
 ];
 
 function Home() {
@@ -39,12 +40,12 @@ function Home() {
     navigate(`/explore?topic=${topic}`);
   };
 
-  const handleSearchFromHome = (query) => {
-    if (query.trim() !== "") {
-      // Use encodeURIComponent to ensure special characters are handled
-      navigate(`/explore?query=${encodeURIComponent(query)}`);
-    }
-  };
+  // const handleSearchFromHome = (query) => {
+  //   if (query.trim() !== "") {
+  //     // Use encodeURIComponent to ensure special characters are handled
+  //     navigate(`/explore?query=${encodeURIComponent(query)}`);
+  //   }
+  // };
 
   if (loading) {
     return <p>Loading...</p>; // Prevents flickering before user is set
@@ -92,7 +93,7 @@ function Home() {
         </div>
       </div>
       <Navbar />
-      <Search onSearch={handleSearchFromHome} />
+      {/* <Search onSearch={handleSearchFromHome} /> */}
 
       <div className="flex justify-center w-full mt-10 font-grotesk">
         <div className="relative w-full max-w-[900px] bg-gray-300 rounded-lg shadow-lg overflow-hidden ">
@@ -110,6 +111,7 @@ function Home() {
       </div>
 
       <div className="flex justify-center w-full mt-12">
+        
         <button
           onClick={() => navigate("/rooms")}
           className="w-full max-w-[900px] bg-gray-100 text-left text-black text-3xl font-grotesk font-semibold px-6 py-3 rounded-lg shadow-md hover:bg-gray-200 transition"

@@ -1,22 +1,26 @@
 import React, { useState } from "react";
-import ArticleList from "../articleList.jsx";
-import { useNavigate } from "react-router-dom";
 import Rating from "@mui/material/Rating";
 
 export const FreeSubmitTest = ({ rating, setRating }) => {
-  const [test, setTest] = useState("");
+  const [share, setShare] = useState("");
+  const [areas, setAreas] = useState("");
 
   return (
     <div className="w-screen min-h-screen flex flex-col overflow-auto">
       <main className="flex-grow w-full flex min-h-full overflow-auto">
         <div className="flex flex-grow max-md:flex-col min-h-full w-full">
           <section className="flex-1 min-h-full bg-indigo-50 max-md:w-full">
-            <div className="flex flex-col flex-grow min-h-full md:px-5 pt-8 w-full text-2xl font-grotesk font-medium text-black max-md:px-4 max-md:pb-24">
+            <div className="flex flex-col flex-grow min-h-full md:px-5 pt-8 w-full font-grotesk font-medium text-black max-md:px-4 max-md:pb-24">
               <label className="text-2xl font-bold font-grotesk mb-1">
-                Rate:
+                Share Your Experience :
               </label>
-              {/* ⭐ Half-Star Rating with MUI */}
-              <div className="flex w-3/3 md:w-2/3 h-18 cursor-pointer gap-3">
+
+              {/* ⭐ Half-Star Rating Inside a Box */}
+              <div className="mb-4 w-3/3 md:w-2/3 h-18 p-3 border rounded-lg shadow-sm bg-white flex flex-col">
+                <label className="text-sm">
+                  Overall Experience 
+                </label>
+                
                 <Rating
                   name="half-rating"
                   value={rating}
@@ -26,16 +30,36 @@ export const FreeSubmitTest = ({ rating, setRating }) => {
                 />
               </div>
 
-              <div className="mb-4">
-                <label className="text-2xl font-bold font-grotesk mb-1">
-                  Share Your Experience :
-                </label>
-
+              <div className="mb-4 relative w-3/3 md:w-2/3">
                 <textarea
-                  value={test}
-                  onChange={(e) => setTest(e.target.value)}
-                  className=" flex w-3/3 md:w-2/3 h-96 p-2 border rounded-lg shadow-sm bg-white text-black focus:outline-none focus:ring-2 focus:ring-blue-400"
+                  id="floatingTextarea1"
+                  value={share}
+                  onChange={(e) => setShare(e.target.value)}
+                  placeholder=" " // Keeps the label floating while typing
+                  className="peer flex w-full h-40 p-2 pt-6 border rounded-lg shadow-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-400"
                 ></textarea>
+                <label
+                  htmlFor="floatingTextarea1"
+                  className="absolute left-2 top-2 text-sm bg-white px-1 transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:text-black peer-focus:top-2 peer-focus:text-sm peer-focus:text-blue-500"
+                >
+                  Share with others
+                </label>
+              </div>          
+
+              <div className="mb-4 relative w-3/3 md:w-2/3">
+                <textarea
+                  id="floatingTextarea2"
+                  value={areas}
+                  onChange={(e) => setAreas(e.target.value)}
+                  placeholder=" " // Keeps the label floating while typing
+                  className="peer flex w-full h-40 p-2 pt-6 border rounded-lg shadow-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-400"
+                ></textarea>
+                <label
+                  htmlFor="floatingTextarea2"
+                  className="absolute left-2 top-2 text-sm bg-white px-1 transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:text-black peer-focus:top-2 peer-focus:text-sm peer-focus:text-blue-500"
+                >
+                  Areas of improvement
+                </label>
               </div>
 
               <div className="flex justify-end gap-2 w-3/3 md:w-2/3">

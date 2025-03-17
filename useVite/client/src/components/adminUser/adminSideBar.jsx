@@ -25,40 +25,44 @@ export const AdminSidebar = () => {
         <button
           className="md:hidden absolute top-4 right-4 text-blue-900"
           onClick={() => setIsOpen(false)}
-        >
-          
-        </button>
+        ></button>
 
         {/* Sidebar Links */}
         <div className="flex flex-col gap-4 mt-2 text-lg font-grotesk">
-        <a href="/AdminGuidelines" className="font-bold">
+          <a href="/adminDashboard/AdminGuidelines" className="tracking-wide">
             Guidelines &gt;
           </a>
-          <a href="/AdminCategories" className="tracking-wide">
+          <a href="/adminDashboard/AdminCategories" className="tracking-wide">
             Categories &gt;
           </a>
-          <a href="/AdminProfile" className="tracking-wide">
-             Profile &gt;
+          <a href="/adminDashboard/AdminProfile" className="tracking-wide">
+            Profile &gt;
           </a>
-          <a href="/AdminSubscription" className="tracking-wide">
-             Subscription &gt;
-          </a>          
-          <a href="/AdminFeatures" className="tracking-wide">
-             Feature display &gt;
+          <a href="/adminDashboard/AdminSubscription" className="tracking-wide">
+            Subscription &gt;
           </a>
-          <a href="/AdminUsers" className="tracking-wide">
+          <a href="/adminDashboard/AdminFeatures" className="tracking-wide">
+            Feature display &gt;
+          </a>
+          <a href="/adminDashboard/AdminUsers" className="tracking-wide">
             Users &gt;
           </a>
-          <a href="/AdminTestimonials" className="tracking-wide">
+          <a href="/adminDashboard/AdminTestimonials" className="tracking-wide">
             Testimonial &gt;
           </a>
-          <a href="/AdminExperts" className="tracking-wide">
+          <a href="/adminDashboard/AdminExperts" className="tracking-wide">
             Expert Applications &gt;
           </a>
-          <a href="/AdminCommentReports" className="tracking-wide">
+          <a
+            href="/adminDashboard/AdminCommentReports"
+            className="tracking-wide"
+          >
             Comment Reports &gt;
           </a>
-          <a href="/AdminArticleReports" className="tracking-wide">
+          <a
+            href="/adminDashboard/AdminArticleReports"
+            className="tracking-wide"
+          >
             Article Reports &gt;
           </a>
         </div>

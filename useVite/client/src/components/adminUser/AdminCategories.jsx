@@ -20,13 +20,13 @@ const AdminCategories = () => {
     };
 
     return (
-        <div className="min-h-screen w-screen bg-white">
+        <div className="w-screen min-h-screen flex flex-col overflow-auto">
             {/* Navbar */}
-            <Navbar />
+            {/* <Navbar /> */}
             <div className="flex">
                 {/* Sidebar */}
-                <AdminSidebar />
-                <div className="flex-1">
+                
+                <div className="flex-1 font-grotesk">
                     <div className="flex">
                         {/* Display Selected Topic */}
                         <div className="ml-10 mt-5 min-w-150 bg-gray-100 rounded-2xl p-3 text-lg shadow-lg">

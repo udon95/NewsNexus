@@ -34,36 +34,37 @@ router.post("/login", async (req, res) => {
       .eq("auth_id", userId) // Match Supabase auth_id
       .single();
 
-      if (profileError || !userProfile) {
-        // If not found in users table, check if it's an admin
-        let { data: adminProfile, error: adminError } = await supabase
-          .from("admin")
-          .select("adminid, email, username, password")
-          .eq("email", email) // Admins are matched via email
-          .single();
-  
-        if (adminProfile) {
-          // Validate Admin Password
-          const isMatch = await bcrypt.compare(password, adminProfile.password);
-          if (!isMatch) return res.status(400).json({ error: "Invalid credentials" });
-  
-          // Return Admin Profile
-          return res.json({
-            message: "Admin Login Successful",
-            user: {
-              userid: adminProfile.adminid,
-              email: adminProfile.email,
-              username: adminProfile.username,
-              status: "Active",
-            },
-            role: "Admin",
-            
-            session: authData.session, // Supabase session
-          });
-        } else {
-          return res.status(404).json({ error: "User details not found" });
-        }
+    if (profileError || !userProfile) {
+      // If not found in users table, check if it's an admin
+      let { data: adminProfile, error: adminError } = await supabase
+        .from("admin")
+        .select("adminid, email, username, password")
+        .eq("email", email) // Admins are matched via email
+        .single();
+
+      if (adminProfile) {
+        // Validate Admin Password
+        const isMatch = await bcrypt.compare(password, adminProfile.password);
+        if (!isMatch)
+          return res.status(400).json({ error: "Invalid credentials" });
+
+        // Return Admin Profile
+        return res.json({
+          message: "Admin Login Successful",
+          user: {
+            userid: adminProfile.adminid,
+            email: adminProfile.email,
+            username: adminProfile.username,
+            status: "Active",
+          },
+          role: "Admin",
+
+          session: authData.session, // Supabase session
+        });
+      } else {
+        return res.status(404).json({ error: "User details not found" });
       }
+    }
     if (userProfile) {
       const isMatch = await bcrypt.compare(password, userProfile.password);
       if (!isMatch)
@@ -145,7 +146,27 @@ router.post("/register", async (req, res) => {
       password,
       options: { data: { username, dob, gender } },
     });
+
     if (authError) return res.status(400).json({ error: authError.message });
+   
+    // Calculate age from dob
+    const birthDate = new Date(dob);
+    const today = new Date();
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+    if (
+      monthDiff < 0 ||
+      (monthDiff === 0 && today.getDate() < birthDate.getDate())
+    ) {
+      age--;
+    }
+
+    // Check if the user is at least 16 years old
+    if (age < 16) {
+      return res
+        .status(400)
+        .json({ error: "You must be at least 16 years old to register." });
+    }
 
     const userId = authData.user.id;
 
@@ -377,7 +398,7 @@ router.post("/update-interests", async (req, res) => {
     // Update the topicinterest table with the new interests string.
     const { error } = await supabase
       .from("topicinterest")
-      .update({ interesttype: interests }) 
+      .update({ interesttype: interests })
       .eq("userid", userId);
 
     if (error) throw error;
@@ -399,12 +420,16 @@ router.post("/update-password", async (req, res) => {
 
   // Check that the new passwords match
   if (newPassword !== newPasswordConfirm) {
-    return res.status(400).json({ error: "New password and confirmation do not match" });
+    return res
+      .status(400)
+      .json({ error: "New password and confirmation do not match" });
   }
 
   // Check for minimum length
   if (newPassword.length < 8) {
-    return res.status(400).json({ error: "New password must be at least 8 characters long" });
+    return res
+      .status(400)
+      .json({ error: "New password must be at least 8 characters long" });
   }
 
   try {
@@ -422,9 +447,10 @@ router.post("/update-password", async (req, res) => {
     if (!isMatch) {
       return res.status(400).json({ error: "Old password is incorrect" });
     }
-    const { data: updateAuthData, error: updateAuthError } = await supabase.auth.updateUser({
-      password: newPassword,
-    });
+    const { data: updateAuthData, error: updateAuthError } =
+      await supabase.auth.updateUser({
+        password: newPassword,
+      });
     if (updateAuthError) throw updateAuthError;
     // Hash the new password
     const salt = await bcrypt.genSalt(10);
@@ -468,5 +494,56 @@ router.post("/verify-old-password", async (req, res) => {
     return res.status(500).json({ error: err.message });
   }
 });
+
+// In your Express router file (e.g. authRoute.js or a new file like publicProfile.js)
+router.get("/public-profile/:userid", async (req, res) => {
+  // const { userid } = req.params;
+  
+  // // 1. Fetch basic user details (e.g. username)
+  // const { data: userData, error: userError } = await supabase
+  //   .from("users")
+  //   .select("userid, username, usertype")
+  //   .eq("userid", userid)
+  //   .single();
+    
+  // if (userError || !userData) {
+  //   return res.status(404).json({ error: "User not found" });
+  // }
+  
+  // 2. Fetch articles written by the user
+  // const { data: articlesData, error: articlesError } = await supabase
+  //   .from("articles")
+  //   .select("articleid, title, summary, created_at")
+  //   .eq("authorid", userid);
+  
+  // 3. Fetch expert details if applicable (assuming expert status is determined by usertype)
+  // let biography = "";
+  // if (userData.usertype === "Expert") {
+  //   const { data: profileData, error: profileError } = await supabase
+  //     .from("profile")
+  //     .select("biography")
+  //     .eq("uuserid", userid)
+  //     .single();
+  //   if (profileData) {
+  //     biography = profileData.biography;
+  //   }
+  // }
+  
+  // // 4. Fetch list of public rooms the user has joined
+  // // Assumes you have a 'user_rooms' table with a flag 'is_public' and room details.
+  // const { data: roomsData, error: roomsError } = await supabase
+  //   .from("user_rooms")
+  //   .select("roomid, room_name")
+  //   .eq("userid", userid)
+  //   .eq("is_public", true);
+  
+  // return res.json({
+  //   user: userData,
+  //   articles: articlesData || [],
+  //   // biography,
+  //   // publicRooms: roomsData || []
+  // });
+});
+
 
 module.exports = router;

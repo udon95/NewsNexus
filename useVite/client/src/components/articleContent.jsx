@@ -1,12 +1,24 @@
 import React from "react";
-import {  useParams } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import articleImage from "../assets/test.png"; // Import the article image
+import useAuthHook from "../hooks/useAuth";
+import { ArrowLeft } from "lucide-react";
 
-const ArticleContent = ({articleRef}) => {
+const ArticleContent = ({ articleRef }) => {
   const { title } = useParams(); // Get the article title from URL
+  const { user } = useAuthHook();
+  const postDate = "22/01/2025"; // or dynamic date from article
+  const fakeAuthor = { userid: "fake123", username: "John Doe" };
+  const navigate = useNavigate();
 
   return (
     <div className="flex flex-col w-full px-4 sm:px-8 mx-auto max-w-4xl font-grotesk">
+      <button 
+        onClick={() => navigate(-1)} 
+        className="mb-4 text-blue-600 underline flex items-center"
+      >
+        <ArrowLeft/> Back
+      </button>
       {/* Article Title */}
       <h1 className="font-grotesk text-4xl sm:text-5xl font-bold text-black text-left">
         {decodeURIComponent(title)}
@@ -21,7 +33,14 @@ const ArticleContent = ({articleRef}) => {
 
       {/* 🔄 Moved Date to Bottom Left */}
       <span className="text-lg text-[#00317F] mb-4 self-start">
-        Posted by Author on 22/01/2025
+        Posted by{" "}
+        <Link
+          to={`/public-profile/${(user || fakeAuthor).userid}`}
+          className="underline hover:text-blue-600"
+        >
+          {(user || fakeAuthor).username}
+        </Link>{" "}
+        on {postDate}
       </span>
 
       {/* Expanded Article Content */}

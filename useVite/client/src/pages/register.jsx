@@ -33,8 +33,27 @@ function Register() {
       if (userData.password !== userData.confirmPassword)
         newErrors.confirmPassword = "Passwords do not match.";
       if (!userData.dob) newErrors.dob = "Date of birth is required.";
-      if (new Date(userData.dob) > new Date())
-        newErrors.dob = "DOB cannot be in the future.";
+      if (!userData.dob) {
+        newErrors.dob = "Date of birth is required.";
+      } else {
+        // Check that DOB is not in the future
+        if (new Date(userData.dob) > new Date()) {
+          newErrors.dob = "DOB cannot be in the future.";
+        } else {
+          // Calculate age from dob
+          const birthDate = new Date(userData.dob);
+          const today = new Date();
+          let age = today.getFullYear() - birthDate.getFullYear();
+          const monthDiff = today.getMonth() - birthDate.getMonth();
+          if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+            age--;
+          }
+          // Check if age is less than 16
+          if (age < 16) {
+            newErrors.dob = "You must be at least 16 years old to register.";
+          }
+        }
+      }
       if (!userData.gender) newErrors.gender = "Please select a gender.";
 
       setErrors(newErrors);

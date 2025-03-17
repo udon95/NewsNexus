@@ -18,6 +18,7 @@ import ResetPassword from "./pages/resetPW.jsx";
 import ViewRooms from "./components/premiumUser/viewRooms.jsx";
 import RoomPage from "./components/premiumUser/roomPage.jsx";
 import SubscriptionStatus from "./components/payment.jsx";
+import PublicProfile from "./components/publicProfile.jsx";
 
 import supabase from "./api/supabaseClient.js";
 import "./index.css";
@@ -60,6 +61,8 @@ function App() {
           <Route path="/privacy" element={<Privacy />} />
           <Route path="/latest" element={<Latest />} />
           <Route path="/article/:title" element={<Article />} />
+          <Route path="/public-profile/:userid" element={<PublicProfile />} />
+
           <Route path="/freeDashboard/*" element={<FreeDashboard />} />
           <Route path="/premiumDashboard/*" element={<PremiumDashboard />} />
           <Route path="/adminDashboard/*" element={<AdminDashboard />} />
