@@ -572,7 +572,7 @@ const Room = () => {
 
         {/* Render Reply-to-Reply as separate cards but indented further */}
         {comment.replies.filter(r => r.parent_commentid === reply.commentid).map((nestedReply) => (
-          <div key={nestedReply.commentid} className="bg-white shadow-md rounded-lg p-4 mt-2 ml-20 border border-gray-400">
+          <div key={nestedReply.commentid} className="bg-white shadow-md rounded-lg p-4 mt-2 ml-10 border border-gray-400">
             <div className="flex justify-between items-center">
               {/* Left: Profile & Username */}
                 <div className="flex items-center">
