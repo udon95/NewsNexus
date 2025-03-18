@@ -20,6 +20,18 @@ const Room = () => {
   const [commentMenu, setCommentMenu] = useState(null);
 
 
+  const toggleArticleMenu = (postid) => {
+    console.log("Toggling menu for post:", postid); // Debugging
+    setArticleMenu((prevMenu) => (prevMenu === postid ? null : postid));
+    setCommentMenu(null); // Ensure only one menu is open at a time
+  };  
+  
+  const toggleCommentMenu = (commentid) => {
+    console.log("Toggling comment menu for comment:", commentid); // Debugging
+    setCommentMenu((prevMenu) => (prevMenu === commentid ? null : commentid));
+    setArticleMenu(null); // Ensure only one menu is open at a time
+  };  
+
   useEffect(() => {
     const storedUser = JSON.parse(localStorage.getItem("userProfile"));
     if (storedUser?.user?.userid) {
@@ -28,6 +40,21 @@ const Room = () => {
       console.warn("No user found in localStorage.");
     }
   }, []);
+
+  useEffect(() => {
+    const handleOutsideClick = (event) => {
+      if (
+        !event.target.closest(".menu-container") &&
+        !event.target.closest(".menu-icon")
+      ) {
+        setArticleMenu(null);
+        setCommentMenu(null);
+      }
+    };
+  
+    document.addEventListener("click", handleOutsideClick);
+    return () => document.removeEventListener("click", handleOutsideClick);
+  }, []);  
 
   useEffect(() => {
     if (!roomid) {
@@ -50,18 +77,7 @@ const Room = () => {
         setRoom(data);
       }
       setLoading(false);
-    };
-
-    //Toggle Article Menu
-  const toggleArticleMenu = (postid) => {
-    setArticleMenu(articleMenu === postid ? null : postid);
-  };
-
-    //Toggle Comment Menu
-  const toggleCommentMenu = (commentid) => {
-    setCommentMenu(commentMenu === commentid ? null : commentid);
-  };
-
+    }; 
 
     const checkMembership = async () => {
       if (!user) return;
@@ -93,35 +109,42 @@ const Room = () => {
       }
     
       const articlesWithComments = data.map((article) => {
-        const filteredComments = article.room_comments.filter(comment => comment.postid === article.postid);
+        const commentMap = {}; // Store comments by ID
+        const topLevelComments = []; // Store parent comments
     
-        // Organizing comments into parent-child hierarchy
-        const allComments = [];
-        const commentMap = {}; // Store comments by ID for quick lookup
-    
-        filteredComments.forEach((comment) => {
-          comment.replies = [];
+        // Step 1: Organize comments into a map
+        article.room_comments.forEach((comment) => {
+          comment.replies = []; // Initialize replies array
           commentMap[comment.commentid] = comment;
+        });
     
-          if (!comment.parent_commentid) {
-            // This is a top-level comment
-            allComments.push(comment);
-          } else {
-            // Ensure replies to non-parent comments are correctly linked
+        // Step 2: Structure comments correctly
+        article.room_comments.forEach((comment) => {
+          if (comment.parent_commentid) {
             const parentComment = commentMap[comment.parent_commentid];
+    
             if (parentComment) {
-              parentComment.replies.push(comment);
-            } else {
-              // If the parent is missing, keep it as a top-level comment
-              allComments.push(comment);
+              // Check if parent is a top comment
+              if (!parentComment.parent_commentid) {
+                parentComment.replies.push(comment); // Add directly under top comment
+              } else {
+                // Ensure reply-to-reply is kept under the same top comment
+                let topComment = commentMap[parentComment.parent_commentid];
+                while (topComment?.parent_commentid) {
+                  topComment = commentMap[topComment.parent_commentid];
+                }
+                if (topComment) {
+                  topComment.replies.push(comment);
+                }
+              }
             }
+          } else {
+            // If no parent, it's a top-level comment
+            topLevelComments.push(comment);
           }
         });
     
-        return {
-          ...article,
-          room_comments: allComments, // Assign only relevant comments
-        };
+        return { ...article, room_comments: topLevelComments };
       });
     
       setArticles(articlesWithComments);
@@ -137,43 +160,60 @@ const Room = () => {
     setReplyText(`@${username} `); // Prefix reply with @username
   };
   
-  const handlePostReply = async (postid, parentCommentId, parentUsername = null) => {
-    if (!replyText.trim()) return; // Prevent empty replies
+  const handlePostReply = async (postid, parentCommentId = null, parentUsername = null) => {
+    if (!replyText.trim()) return;
     if (!user) {
       alert("You must be logged in to reply.");
       return;
     }
   
-    // Only add @username when replying to a non-parent comment, and check if it's already present
-    const isReplyToNonParent = parentUsername !== null;
-    const trimmedReplyText = isReplyToNonParent && !replyText.startsWith(`@${parentUsername}`)
-      ? `@${parentUsername} ${replyText}`
-      : replyText;
+    let formattedReplyText = replyText;
   
-    const { error } = await supabase.from("room_comments").insert([
+    // Only add @username if replying to a non-parent reply
+    if (parentUsername && !replyText.startsWith(`@${parentUsername}`)) {
+      formattedReplyText = `@${parentUsername} ${replyText}`;
+    }
+  
+    const { data, error } = await supabase.from("room_comments").insert([
       {
-        postid: postid, // Correctly linked to the article
+        postid,
         userid: user.userid,
         username: user.username,
-        content: trimmedReplyText, // Prevents duplicate @username
+        content: formattedReplyText,
         created_at: new Date().toISOString(),
-        parent_commentid: parentCommentId, // Correct parent ID
+        parent_commentid: parentCommentId, // Correctly assign parent comment
       },
-    ]);
+    ]).select("*");
   
     if (error) {
       console.error("Error posting reply:", error);
       return;
     }
   
-    // Reset the reply box
+    setArticles((prevArticles) =>
+      prevArticles.map((article) => {
+        if (article.postid === postid) {
+          // Update the correct comment thread
+          const updatedComments = article.room_comments.map((comment) => {
+            if (comment.commentid === parentCommentId) {
+              return {
+                ...comment,
+                replies: [...comment.replies, data[0]], // Append reply
+              };
+            }
+            return comment;
+          });
+          return { ...article, room_comments: updatedComments };
+        }
+        return article;
+      })
+    );
+  
     setReplyingTo(null);
     setReplyText("");
-  
-    // Refresh the comments immediately
-    fetchArticles();
   };  
   
+
   const handlePostArticleReply = async (postid) => {
     if (!articleReplyText.trim()) return;
     if (!user) {
@@ -293,17 +333,31 @@ const Room = () => {
               <div className="flex justify-between items-center">
                 <h2 className="text-2xl font-bold">{article.title}</h2>
                   <div className="relative">
-                    <MoreVertical 
-                      size={24} 
-                      className="text-gray-500 hover:text-black cursor-pointer" 
-                      onClick={() => toggleArticleMenu(article.postid)} 
-                    />
+                  <MoreVertical 
+                    size={24} 
+                      className="text-gray-500 hover:text-black cursor-pointer menu-icon" 
+                      onClick={(event) => {
+                        event.stopPropagation(); // Prevents menu from closing immediately
+                        toggleArticleMenu(article.postid);
+                      }} 
+                  />
                     {articleMenu === article.postid && (
-                      <div className="absolute right-0 mt-2 w-40 bg-white shadow-lg rounded-md p-2">
-                      <button className="block w-full text-left p-2 hover:bg-gray-100">Edit</button>
-                      <button className="block w-full text-left p-2 hover:bg-gray-100 text-red-500">Delete</button>
-                      </div>
-                    )}
+                    <div className="absolute right-0 mt-2 w-40 bg-white shadow-lg rounded-md p-2 z-50">
+                      <button 
+                        className="block w-full text-left p-2 hover:bg-gray-100 text-gray-700"
+                        onClick={() => console.log("Edit article", article.postid)}
+                      >
+                        Delete
+                      </button>
+                    <button 
+                      className="block w-full text-left p-2 hover:bg-gray-100 text-red-500"
+                        onClick={() => console.log("Delete article", article.postid)}
+                    >
+                        Report
+                    </button>
+                    </div>
+              )}
+
                   </div>
               </div>
 
@@ -349,90 +403,102 @@ const Room = () => {
 
 {article.room_comments.map((comment) => (
   <React.Fragment key={comment.commentid}>
-    {/* Top-Level Comment */}
-    <div className="bg-gray-100 p-4 rounded-lg mt-4">
-      {/* Comment Header - Username & 3-dot Menu Aligned */}
+    {/* Top-Level Comment (Parent) */}
+    <div className="bg-white shadow-md rounded-lg p-4 mt-4 border border-gray-200">
       <div className="flex justify-between items-center">
-        <div className="flex items-center">
-          <div className="w-10 h-10 bg-blue-500 text-white flex items-center justify-center rounded-lg mr-3">
-            {comment.username?.charAt(0).toUpperCase() || "?"}
-          </div>
-          <div>
-            <span className="text-lg font-bold text-blue-900">@{comment.username}</span>
-            <span className="text-blue-900 text-sm ml-2">
-                {new Date(comment.created_at).toLocaleDateString("en-GB", {
-                  day: "2-digit",
-                  month: "short",
-                  year: "numeric",
-                })}
-              </span>
-            </div>
+      {/* Left: Profile & Username */}
+      <div className="flex items-center">
+        <div className="w-10 h-10 bg-blue-500 text-white flex items-center font-bold justify-center rounded-lg mr-3">
+          {comment.username?.charAt(0).toUpperCase() || "?"}
         </div>
-
-      {/* 3-dot menu */}
-        <div className="relative">
-          <MoreVertical 
-            size={20} 
-            className="text-gray-500 hover:text-black cursor-pointer" 
-            onClick={() => toggleCommentMenu(comment.commentid)} 
-          />
-          {commentMenu === comment.commentid && (
-              <div className="absolute right-0 mt-2 w-40 bg-white shadow-lg rounded-md p-2">
-              <button className="block w-full text-left p-2 hover:bg-gray-100">Edit</button>
-              <button className="block w-full text-left p-2 hover:bg-gray-100 text-red-500">Delete</button>
-          </div>
-          )}
+        <div>
+          <span className="text-lg font-bold text-blue-900">@{comment.username}</span>
+          <span className="text-gray-500 text-sm ml-2">
+           {new Date(comment.created_at).toLocaleDateString("en-GB", {
+              day: "2-digit",
+             month: "short",
+             year: "numeric",
+           })}
+          </span>
         </div>
       </div>
 
+      {/* Right: 3-Dots Menu for Top Comment */}
+      <div className="relative ml-auto">
+       <MoreVertical
+         size={20}
+         className="text-gray-500 hover:text-black cursor-pointer menu-icon"
+         onClick={(event) => {
+            event.stopPropagation(); // Prevents menu from closing immediately
+            toggleCommentMenu(comment.commentid);
+          }}
+       />
+       {commentMenu === comment.commentid && (
+         <div className="absolute right-0 mt-2 w-40 bg-white shadow-lg rounded-md p-2 z-50 menu-container">
+            <button
+             className="block w-full text-left p-2 hover:bg-gray-100 text-gray-700"
+              onClick={() => console.log("Edit comment", comment.commentid)}
+           >
+            Delete
+            </button>
+            <button
+              className="block w-full text-left p-2 hover:bg-gray-100 text-red-500"
+              onClick={() => console.log("Delete comment", comment.commentid)}
+            >
+              Report
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+
+
       {/* Comment Content */}
-      <p className="mt-1 text-gray-700">{comment.content}</p>
+      <p className="mt-2 text-gray-700">{comment.content}</p>
 
       {/* Reply Button */}
-      <button
-        className="mt-2 text-blue-500 hover:underline"
-        onClick={() => handleReplyClick(comment.commentid)}
-      >
+      <button className="mt-2 text-blue-500 hover:underline"
+        onClick={() => {
+          setReplyingTo(comment.commentid);
+          setReplyText("");
+        }}>
         Reply
       </button>
 
-      {/* Show Reply Input Box (Positioned Below Comment) */}
+      {/* Show Reply Input Box for Top-Level Comments */}
       {replyingTo === comment.commentid && (
-        <div className="ml-6 mt-3">
+        <div className="mt-3">
           <textarea
             className="w-full p-2 border rounded"
             placeholder="Write your reply..."
             value={replyText}
             onChange={(e) => setReplyText(e.target.value)}
           />
-          <button
-            className="mt-2 px-4 py-2 bg-blue-500 text-white rounded"
-            onClick={() => handlePostReply(comment.postid, comment.commentid, null)}
-          >
+          <button className="mt-2 px-4 py-2 bg-blue-500 text-white rounded"
+            onClick={() => handlePostReply(comment.postid, comment.commentid, null)}>
             Post Reply
           </button>
-          <button
-            className="mt-2 ml-2 px-4 py-2 bg-gray-400 text-white rounded"
-            onClick={() => setReplyingTo(null)}
-          >
+          <button className="mt-2 ml-2 px-4 py-2 bg-gray-400 text-white rounded"
+            onClick={() => setReplyingTo(null)}>
             Cancel
           </button>
         </div>
       )}
     </div>
 
-{/* Replies (YouTube-Style: Non-parent replies stay at same level) */}
-{comment.replies.length > 0 && comment.replies.map((reply) => (
-  <div key={reply.commentid} className="bg-gray-200 p-3 rounded-lg mt-2 ml-10">
-    {/* Reply Header - Username & 3-dot Menu */}
-    <div className="flex justify-between items-center">
-      <div className="flex items-center">
-        <div className="w-8 h-8 bg-blue-500 text-white flex items-center justify-center rounded-lg mr-3">
-          {reply.username?.charAt(0).toUpperCase() || "?"}
+    {/* Render Replies - Separated but Indented */}
+    {comment.replies.filter(reply => reply.parent_commentid === comment.commentid).map((reply) => (
+      <React.Fragment key={reply.commentid}>
+        <div className="bg-white shadow-md rounded-lg p-4 mt-2 ml-10 border border-gray-300">
+        <div className="flex justify-between items-center">
+  {/* Left: Profile & Username */}
+  <div className="flex items-center">
+    <div className="w-10 h-10 bg-blue-500 text-white flex items-center justify-center font-bold rounded-lg mr-3">
+      {reply.username?.charAt(0).toUpperCase() || "?"}
         </div>
         <div>
           <span className="text-md font-bold text-blue-900">@{reply.username}</span>
-          <span className="text-blue-900 text-sm ml-2">
+          <span className="text-gray-500 text-sm ml-2">
             {new Date(reply.created_at).toLocaleDateString("en-GB", {
               day: "2-digit",
               month: "short",
@@ -442,64 +508,162 @@ const Room = () => {
         </div>
       </div>
 
-      {/* 3-dot menu for reply */}
-      <div className="relative">
-        <MoreVertical 
-          size={20} 
-          className="text-gray-500 hover:text-black cursor-pointer" 
-          onClick={() => toggleCommentMenu(reply.commentid)} 
+      {/* Right: 3-Dots Menu for Non-Parent Reply */}
+      <div className="relative ml-auto">
+        <MoreVertical
+          size={20}
+          className="text-gray-500 hover:text-black cursor-pointer menu-icon"
+          onClick={(event) => {
+            event.stopPropagation(); // Prevents menu from closing immediately
+            toggleCommentMenu(reply.commentid);
+          }}
         />
         {commentMenu === reply.commentid && (
-          <div className="absolute right-0 mt-2 w-40 bg-white shadow-lg rounded-md p-2">
-            <button className="block w-full text-left p-2 hover:bg-gray-100">Edit</button>
-            <button className="block w-full text-left p-2 hover:bg-gray-100 text-red-500">Delete</button>
+          <div className="absolute right-0 mt-2 w-40 bg-white shadow-lg rounded-md p-2 z-50 menu-container">
+            <button
+              className="block w-full text-left p-2 hover:bg-gray-100 text-gray-700"
+              onClick={() => console.log("Edit reply", reply.commentid)}
+            >
+              Delete
+            </button>
+            <button
+              className="block w-full text-left p-2 hover:bg-gray-100 text-red-500"
+              onClick={() => console.log("Delete reply", reply.commentid)}
+            >
+             Report
+            </button>
           </div>
         )}
       </div>
     </div>
 
-    {/* Reply Content */}
-    <p className="mt-1 text-gray-700">{reply.content}</p>
+          {/* Reply Content */}
+          <p className="mt-2 text-gray-700">{reply.content}</p>
 
-    {/* Reply Button for Nested Replies */}
-    <button
-      className="mt-2 text-blue-500 hover:underline"
-      onClick={() => {
-        setReplyingTo(reply.commentid);
-        setReplyText(`@${reply.username} `); // Auto-fill input with @username
-      }}
-    >
-      Reply
-    </button>
+          {/* Reply Button for Non-Parent Reply */}
+          <button className="mt-2 text-blue-500 hover:underline"
+            onClick={() => {
+              setReplyingTo(reply.commentid);
+              setReplyText(`@${reply.username} `);
+            }}>
+            Reply
+          </button>
 
-    {/* Show Reply Input Box (YouTube-Style: Keeps indentation, adds username) */}
-    {replyingTo === reply.commentid && (
-      <div className="ml-6 mt-3">
-        <textarea
-          className="w-full p-2 border rounded"
-          placeholder="Write your reply..."
-          value={replyText}
-          onChange={(e) => setReplyText(e.target.value)}
-        />
-        <button
-          className="mt-2 px-4 py-2 bg-blue-500 text-white rounded"
-          onClick={() => handlePostReply(reply.postid, reply.commentid, reply.username)}
-        >
-          Post Reply
-        </button>
-        <button
-          className="mt-2 ml-2 px-4 py-2 bg-gray-400 text-white rounded"
-          onClick={() => setReplyingTo(null)}
-        >
-          Cancel
-        </button>
-      </div>
-    )}
-  </div>
+          {/* Show Reply Input Box for Reply-to-Reply */}
+          {replyingTo === reply.commentid && (
+            <div className="mt-3">
+              <textarea
+                className="w-full p-2 border rounded"
+                placeholder="Write your reply..."
+                value={replyText}
+                onChange={(e) => setReplyText(e.target.value)}
+              />
+              <button className="mt-2 px-4 py-2 bg-blue-500 text-white rounded"
+                onClick={() => handlePostReply(reply.postid, reply.commentid, reply.username)}>
+                Post Reply
+              </button>
+              <button className="mt-2 ml-2 px-4 py-2 bg-gray-400 text-white rounded"
+                onClick={() => setReplyingTo(null)}>
+                Cancel
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* Render Reply-to-Reply as separate cards but indented further */}
+        {comment.replies.filter(r => r.parent_commentid === reply.commentid).map((nestedReply) => (
+          <div key={nestedReply.commentid} className="bg-white shadow-md rounded-lg p-4 mt-2 ml-20 border border-gray-400">
+            <div className="flex justify-between items-center">
+              {/* Left: Profile & Username */}
+                <div className="flex items-center">
+                <div className="w-10 h-10 bg-blue-500 text-white flex items-center font-bold justify-center rounded-lg mr-3">
+                {nestedReply.username?.charAt(0).toUpperCase() || "?"}
+             </div>
+             <div>
+                <span className="text-sm font-bold text-blue-900">@{nestedReply.username}</span>
+                <span className="text-gray-500 text-xs ml-2">
+                 {new Date(nestedReply.created_at).toLocaleDateString("en-GB", {
+                  day: "2-digit",
+                  month: "short",
+                  year: "numeric",
+                   })}
+                  </span>
+             </div>
+            </div>
+
+              {/* Right: 3-Dots Menu for Reply-to-Reply */}
+              <div className="relative ml-auto">
+                <MoreVertical
+                  size={20}
+                  className="text-gray-500 hover:text-black cursor-pointer menu-icon"
+                  onClick={(event) => {
+                   event.stopPropagation(); // Prevents menu from closing immediately
+                   toggleCommentMenu(nestedReply.commentid);
+                  }}
+                />
+                {commentMenu === nestedReply.commentid && (
+                 <div className="absolute right-0 mt-2 w-40 bg-white shadow-lg rounded-md p-2 z-50 menu-container">
+                   <button
+                      className="block w-full text-left p-2 hover:bg-gray-100 text-gray-700"
+                      onClick={() => console.log("Edit reply", nestedReply.commentid)}
+                   >
+                      Delete
+                   </button>
+                   <button
+                      className="block w-full text-left p-2 hover:bg-gray-100 text-red-500"
+                       onClick={() => console.log("Delete reply", nestedReply.commentid)}
+                    >
+                     Report
+                    </button>
+                  </div>
+                )}
+             </div>
+            </div>
+
+            {/* Reply Content (Show @username only for Reply-to-Reply) */}
+            <p className="mt-1 text-gray-700">
+              <span className="text-blue-900 font-bold">
+                @{reply.username}
+              </span>{" "}
+              {nestedReply.content.replace(/^@\S+\s/, '')}
+            </p>
+
+            {/* Reply Button for Reply-to-Reply */}
+            <button className="mt-2 text-blue-500 hover:underline"
+              onClick={() => {
+                setReplyingTo(nestedReply.commentid);
+                setReplyText(`@${nestedReply.username} `);
+              }}>
+              Reply
+            </button>
+
+            {/* Show Reply Input Box for Reply-to-Reply */}
+            {replyingTo === nestedReply.commentid && (
+              <div className="mt-3">
+                <textarea
+                  className="w-full p-2 border rounded"
+                  placeholder="Write your reply..."
+                  value={replyText}
+                  onChange={(e) => setReplyText(e.target.value)}
+                />
+                <button className="mt-2 px-4 py-2 bg-blue-500 text-white rounded"
+                  onClick={() => handlePostReply(nestedReply.postid, nestedReply.commentid, nestedReply.username)}>
+                  Post Reply
+                </button>
+                <button className="mt-2 ml-2 px-4 py-2 bg-gray-400 text-white rounded"
+                  onClick={() => setReplyingTo(null)}>
+                  Cancel
+                </button>
+              </div>
+            )}
+          </div>
+        ))}
+      </React.Fragment>
+    ))}
+  </React.Fragment>
 ))}
 
-</React.Fragment>
-))}
+
             </div>
           ))
         )}
@@ -509,3 +673,4 @@ const Room = () => {
 };
 
 export default Room;
+
