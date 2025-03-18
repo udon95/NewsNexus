@@ -4,10 +4,31 @@ import IconButton from "@mui/material/IconButton";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
-import useAuthHook from "../hooks/useAuth";
 
 const CommentsSection = () => {
-  const {userType} = useAuthHook();
+  const handleDeleteComment = (commentId, isReply, parentCommentId = null) => {
+    if (isReply) {
+      // ✅ Delete only the specific reply
+      setComments((prevComments) =>
+        prevComments.map((comment) =>
+          comment.id === parentCommentId
+            ? {
+                ...comment,
+                replies: comment.replies.filter((reply) => reply.id !== commentId),
+              }
+            : comment
+        )
+      );
+    } else {
+      // ✅ Delete the entire comment + its replies
+      setComments((prevComments) =>
+        prevComments.filter((comment) => comment.id !== commentId)
+      );
+    }
+  
+    handleMenuClose(commentId); // ✅ Close menu after deleting
+  };
+  
   const initialComments = [
     {
       id: 1,
@@ -18,7 +39,7 @@ const CommentsSection = () => {
       replies: [
         {
           id: 2,
-          author: "A",
+          author: "P",
           date: "Replied on 22/01/2025",
           content: "This is a reply to the first comment.",
           isReply: true,
@@ -117,15 +138,14 @@ const CommentsSection = () => {
           >
             <Pencil className="h-5 w-5 text-white" />
           </button>
-         
+
           <button className="w-10 h-10 p-2 bg-black rounded-lg hover:bg-gray-900 flex items-center justify-center">
             <Share2 className="h-5 w-5 text-white" />
           </button>
-          {userType === "Premium" && (
+
           <button className="w-10 h-10 p-2 bg-black rounded-lg hover:bg-gray-900 flex items-center justify-center">
             <Headphones className="h-5 w-5 text-white" />
           </button>
-          )}
         </div>
       </div>
 
@@ -158,6 +178,10 @@ const CommentsSection = () => {
                   <MenuItem onClick={() => handleMenuClose(comment.id)}>
                     Report Comment
                   </MenuItem>
+                  <MenuItem onClick={() => handleDeleteComment(comment.id, false)}>
+  Delete Comment
+</MenuItem>
+
                 </Menu>
               </div>
 
@@ -221,6 +245,11 @@ const CommentsSection = () => {
                     <MenuItem onClick={() => handleMenuClose(reply.id)}>
                       Report Comment
                     </MenuItem>
+                    <MenuItem onClick={() => handleDeleteComment(reply.id, true, comment.id)}>
+  Delete Comment
+</MenuItem>
+
+
                   </Menu>
                 </div>
               </div>
