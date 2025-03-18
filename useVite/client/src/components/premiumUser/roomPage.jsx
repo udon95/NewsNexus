@@ -151,7 +151,7 @@ const Room = () => {
     };    
 
     fetchRoomDetails();
-    checkMembership();
+    if (user) checkMembership();
     fetchArticles();
   }, [roomid, user]);
 
@@ -249,38 +249,98 @@ const Room = () => {
   
   
   // Function to Exit Room
-  const handleExitRoom = async () => {
-    if (!user) {
-      alert("You need to be logged in to exit the room.");
+const handleExitRoom = async () => {
+  if (!user) {
+    alert("You need to be logged in to exit the room.");
+    return;
+  }
+
+  try {
+    const { error: exitError } = await supabase
+      .from("room_members")
+      .update({ exited_at: new Date().toISOString() })
+      .eq("userid", user.userid)
+      .eq("roomid", roomid);
+
+    if (exitError) {
+      console.error("Error exiting room:", exitError);
       return;
     }
 
-    try {
-      const { error: exitError } = await supabase
+    const { error: countError } = await supabase.rpc("decrement_member_count", { room_id: roomid });
+
+    if (countError) {
+      console.error("Error updating member count:", countError);
+      return;
+    }
+
+    setTimeout(checkMembership, 500); // Ensure membership is rechecked
+    localStorage.setItem("refreshRooms", "true");
+
+  } catch (error) {
+    console.error("Unexpected error while exiting room:", error);
+  }
+};
+
+// Function to Join Room
+const handleJoinRoom = async () => {
+  if (!user) {
+    alert("You need to be logged in to join the room.");
+    return;
+  }
+
+  try {
+    // Check if user has a previous entry (exited before)
+    const { data: existingEntry, error: checkError } = await supabase
+      .from("room_members")
+      .select("exited_at")
+      .eq("userid", user.userid)
+      .eq("roomid", roomid)
+      .single();
+
+    if (checkError && checkError.code !== "PGRST116") {
+      console.error("Error checking previous membership:", checkError);
+      return;
+    }
+
+    if (existingEntry) {
+      // User has an old entry, update `exited_at` to null (rejoin)
+      const { error: updateError } = await supabase
         .from("room_members")
-        .update({ exited_at: new Date().toISOString() })
+        .update({ exited_at: null })
         .eq("userid", user.userid)
         .eq("roomid", roomid);
 
-      if (exitError) {
-        console.error("Error exiting room:", exitError);
+      if (updateError) {
+        console.error("Error rejoining room:", updateError);
         return;
       }
+    } else {
+      // First-time join, insert new entry
+      const { error: insertError } = await supabase
+        .from("room_members")
+        .insert([{ userid: user.userid, roomid, exited_at: null }]);
 
-      const { error: countError } = await supabase.rpc("decrement_member_count", { room_id: roomid });
-
-      if (countError) {
-        console.error("Error updating member count:", countError);
+      if (insertError) {
+        console.error("Error joining room:", insertError);
         return;
       }
-
-      setIsMember(false);
-      localStorage.setItem("refreshRooms", "true");
-
-    } catch (error) {
-      console.error("Unexpected error while exiting room:", error);
     }
-  };
+
+    // Increment member count
+    const { error: countError } = await supabase.rpc("increment_member_count", { room_id: roomid });
+
+    if (countError) {
+      console.error("Error updating member count:", countError);
+      return;
+    }
+
+    setTimeout(checkMembership, 500); // Ensure the UI updates after joining
+
+  } catch (error) {
+    console.error("Unexpected error while joining room:", error);
+  }
+};
 
   return (
     <div className="relative min-h-screen w-screen flex flex-col bg-gray-100">
@@ -305,6 +365,7 @@ const Room = () => {
               className={`px-6 py-2 rounded-full text-lg font-semibold transition-all ${
                 isMember ? "bg-gray-300 text-gray-500 cursor-not-allowed" : "bg-green-500 text-white hover:bg-green-600"
               }`}
+              onClick={handleJoinRoom}
               disabled={isMember} // This disables the button if the user is already a member
             >
               {isMember ? "Joined" : "Join"}
@@ -673,4 +734,3 @@ const Room = () => {
 };
 
 export default Room;
-
