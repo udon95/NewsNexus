@@ -29,6 +29,13 @@ const AdminTestimonials = () => {
             <div className="ml-10 mt-8 min-w-150 bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300">
               Testimonial 1
             </div>
+                        <button
+              type="submit"
+              className="px-6 py-3 bg-[#3F414C] flex ml-5 mt-8 text-white rounded-lg hover:bg-opacity-90 cursor-pointer"
+              onClick={() => handleClick(1)}
+            >
+              View
+            </button>
             <button
               type="submit"
               className="px-6 py-3 bg-[#3F414C] flex ml-5 mt-7 text-white rounded-lg hover:bg-opacity-90 cursor-pointer"
@@ -41,6 +48,13 @@ const AdminTestimonials = () => {
             <div className="ml-10 mt-7 min-w-150 bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300">
               Testimonial 2
             </div>
+                        <button
+              type="submit"
+              className="px-6 py-3 bg-[#3F414C] flex ml-5 mt-8 text-white rounded-lg hover:bg-opacity-90 cursor-pointer"
+              onClick={() => handleClick(1)}
+            >
+              View
+            </button>
             <button
               type="submit"
               className="px-6 py-3 bg-[#3F414C] flex ml-5 mt-7 text-white rounded-lg hover:bg-opacity-90 cursor-pointer"
@@ -52,7 +66,14 @@ const AdminTestimonials = () => {
           <div className="flex">
             <div className="ml-10 mt-7 min-w-150 bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300">
               Testimonial 3
-            </div>
+            </div>            
+            <button
+              type="submit"
+              className="px-6 py-3 bg-[#3F414C] flex ml-5 mt-8 text-white rounded-lg hover:bg-opacity-90 cursor-pointer"
+              onClick={() => handleClick(1)}
+            >
+              View
+            </button>
             <button
               type="submit"
               className="px-6 py-3 bg-[#3F414C] flex ml-5 mt-7 text-white rounded-lg hover:bg-opacity-90 cursor-pointer"
