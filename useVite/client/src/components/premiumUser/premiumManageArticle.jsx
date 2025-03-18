@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import ArticleList from "../articleList.jsx";
 import { useNavigate } from "react-router-dom";
 import { useArticleContext } from "../../context/ArticleContext.jsx";
-import SearchBar from "../Search.jsx"; // Import Search.jsx
+import SearchBar from "../search.jsx"; // Import Search.jsx
 
 export const PremManageArticle = () => {
   const navigate = useNavigate();

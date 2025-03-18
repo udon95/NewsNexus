@@ -5,7 +5,8 @@ import PremiumApplyExpert from "./premiumApplyExpert.jsx";
 import PremManageArticle from "./premiumManageArticle.jsx";
 import PremiumSubmitTest from "./premiumSubmitTest.jsx";
 import PremiumWriteArticle from "./premiumWriteArticle.jsx";
-import PremiumManageProfile from "./premiumManageProfile.jsx"
+import PremiumManageProfile from "./premiumManageProfile.jsx";
+import PremiumManageRooms from "./premiumManageRooms.jsx";
 
 function PremiumDashboard() {
   return (
@@ -17,17 +18,18 @@ function PremiumDashboard() {
         <div className="flex-1 min-h-full bg-indigo-50 max-md:w-full w-full max-w-screen px-1 md:px-6">
           <Routes>
             {/* Default Route: Redirect to Manage Articles */}
-            <Route index element={<Navigate to="manageArticles" />} />
+            <Route index element={<Navigate to="manageProfile" />} />
 
             {/* Manage My Articles (Default View) */}
-            <Route path="manageArticles" element={<PremManageArticle />} />
+            {/* <Route path="manageArticles" element={<PremManageArticle />} /> */}
 
             {/* Other Sidebar Pages */}
+            <Route path="manageArticles" element={<PremManageArticle />} />
             <Route path="writeArticle" element={<PremiumWriteArticle />} />
             <Route path="manageProfile" element={<PremiumManageProfile />} />
-            <Route path="submitTest" element={<PremiumSubmitTest />} />
-            <Route path="applyexpert" element={<PremiumApplyExpert />} /> {/* ✅ FIXED */}
-            
+            <Route path="submitTestimonial" element={<PremiumSubmitTest />} />
+            <Route path="manageRooms" element={<PremiumManageRooms />} />
+            <Route path="applyExpert" element={<PremiumApplyExpert />} />
           </Routes>
         </div>
       </main>

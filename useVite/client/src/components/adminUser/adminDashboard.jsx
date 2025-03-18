@@ -12,6 +12,7 @@ import AdminFeatures from "./AdminFeatures.jsx";
 import AdminCommentReports from "./AdminCommentReports.jsx";
 import AdminArticleReports from "./AdminArticleReports.jsx";
 import AdminUsers from "./AdminUsers.jsx";
+import AdminHome from "./AdminHome.jsx";
 
 function AdminDashboard() {
   return (
@@ -22,14 +23,13 @@ function AdminDashboard() {
         </aside>
         <div className="flex-1 min-h-full bg-indigo-50 max-md:w-full w-full max-w-screen px-1 md:px-6">
           <Routes>
+            <Route index element={<AdminHome />} />
+
             <Route path="AdminExperts/*" element={<AdminExperts />} />
             <Route path="AdminProfile/*" element={<AdminProfile />} />
             <Route path="AdminTestimonials/*" element={<AdminTestimonials />} />
             <Route path="AdminCategories/*" element={<AdminCategories />} />
-            <Route
-              path="AdminUserDetails/*"
-              element={<AdminUserDetails />}
-            />
+            <Route path="AdminUserDetails/*" element={<AdminUserDetails />} />
             <Route path="AdminGuidelines/*" element={<AdminGuidelines />} />
             <Route path="AdminSubscription/*" element={<AdminSubscription />} />
             <Route path="AdminFeatures/*" element={<AdminFeatures />} />

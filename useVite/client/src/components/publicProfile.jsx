@@ -124,16 +124,16 @@ const PublicProfile = () => {
   if (!profileData) return <div>Loading...</div>;
 
   return (
-    <div className="min-h-screen min-w-screen bg-gray-100 flex flex-col">
+    <div className="min-h-screen min-w-screen flex flex-col bg-white">
       <Navbar />
-      <div className="flex-grow container mx-auto px-4 sm:px-8 max-w-4xl font-grotesk py-8 bg-white">
+      <div className="flex-grow container mx-auto px-4 sm:px-8 max-w-4xl font-grotesk py-8 ">
         <button
           onClick={() => navigate(-1)}
           className="mb-4 text-blue-600 underline flex items-center"
         >
           <ArrowLeft className="mr-1" /> Back
         </button>
-        <div className="bg-gray-100 p-6 rounded-lg shadow">
+        <div className="bg-gray-200 p-6 rounded-lg shadow">
           <h1 className="text-3xl font-bold mb-4">
             {" "}
             {profileData.username}{" "}

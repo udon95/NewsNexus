@@ -2,7 +2,7 @@ import React from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import articleImage from "../assets/test.png"; // Import the article image
 import useAuthHook from "../hooks/useAuth";
-import { ArrowLeft } from "lucide-react";
+// import { ArrowLeft } from "lucide-react";
 
 const ArticleContent = ({ articleRef }) => {
   const { title } = useParams(); // Get the article title from URL
@@ -13,12 +13,12 @@ const ArticleContent = ({ articleRef }) => {
 
   return (
     <div className="flex flex-col w-full px-4 sm:px-8 mx-auto max-w-4xl font-grotesk">
-      <button 
+      {/* <button 
         onClick={() => navigate(-1)} 
         className="mb-4 text-blue-600 underline flex items-center"
       >
         <ArrowLeft/> Back
-      </button>
+      </button> */}
       {/* Article Title */}
       <h1 className="font-grotesk text-4xl sm:text-5xl font-bold text-black text-left">
         {decodeURIComponent(title)}

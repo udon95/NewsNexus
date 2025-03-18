@@ -12,7 +12,7 @@ const SubscriptionPage = () => {
   const [loading, setLoading] = useState(true);
   const [subscriptions, setSubscriptions] = useState([]);
   const [error, setError] = useState(null);
-  const [role, setRole] = useState(""); 
+  const [role, setRole] = useState("");
 
   useEffect(() => {
     const storedUserProfile = localStorage.getItem("userProfile");
@@ -135,32 +135,34 @@ const SubscriptionPage = () => {
           {loading && <p>⏳ Loading subscriptions...</p>}
           {error && <p className="error">{error}</p>}
 
-          {subscriptions.length > 0 ? (
-            subscriptions.map((sub) => (
-              <SubscriptionCard
-                key={sub.id}
-                title={sub.tier === "Free" ? "Free" : `$${sub.price}`}
-                content={
-                  <ul className="subscription-details">
-                    {sub.description ? (
-                      sub.description
-                        .split(",")
-                        .map((item, index) => (
-                          <li key={index}>{item.trim()}</li>
-                        ))
-                    ) : (
-                      <li>No description available</li>
-                    )}
-                  </ul>
-                }
-              />
-            ))
-          ) : (
-            <p>No subscriptions available.</p>
-          )}
+          <div className="space-y-12">
+            {subscriptions.length > 0 ? (
+              subscriptions.map((sub) => (
+                <SubscriptionCard
+                  key={sub.id} 
+                  title={sub.tier === "Free" ? "Free" : `$${sub.price}`}
+                  content={
+                    <ul className="subscription-details ">
+                      {sub.description ? (
+                        sub.description
+                          .split(",")
+                          .map((item, index) => (
+                            <li key={index}>{item.trim()}</li>
+                          ))
+                      ) : (
+                        <li>No description available</li>
+                      )}
+                    </ul>
+                  }
+                />
+              ))
+            ) : (
+              <p>No subscriptions available.</p>
+            )}
+          </div>
 
           {/* Upgrade Button */}
-          <div className="w-full flex justify-end">
+          <div className="w-full flex justify-end mt-6">
             <button
               className="bg-[#3F414C] text-white p-3 rounded-lg cursor-pointer text-sm"
               onClick={handleUpgrade}

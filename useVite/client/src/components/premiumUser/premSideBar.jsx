@@ -32,7 +32,7 @@ export const PremSidebar = () => {
 
         {/* Sidebar Links */}
         <div className="flex flex-col gap-4 mt-2 text-lg font-grotesk">
-          <Link to="/premiumDashboard/manageArticles" className="font-bold" onClick={() => setIsOpen(false)}>
+          <Link to="/premiumDashboard/manageArticles" className="tracking-wide" onClick={() => setIsOpen(false)}>
             Manage Articles &gt; 
           </Link>
           <Link to="/premiumDashboard/writeArticle" className="tracking-wide" onClick={() => setIsOpen(false)}>
@@ -41,10 +41,13 @@ export const PremSidebar = () => {
           <Link to="/premiumDashboard/manageProfile" className="tracking-wide" onClick={() => setIsOpen(false)}>
             Manage Profile &gt;
           </Link>
-          <Link to="/premiumDashboard/submitTest" className="tracking-wide" onClick={() => setIsOpen(false)}>
+          <Link to="/premiumDashboard/submitTestimonial" className="tracking-wide" onClick={() => setIsOpen(false)}>
             Submit Testimonial &gt;
           </Link>
-          <Link to="/premiumDashboard/applyexpert" className="tracking-wide" onClick={() => setIsOpen(false)}>
+          <Link to="/premiumDashboard/manageRooms" className="tracking-wide" onClick={() => setIsOpen(false)}>
+            Manage Rooms &gt;
+          </Link>
+          <Link to="/premiumDashboard/applyExpert" className="tracking-wide" onClick={() => setIsOpen(false)}>
             Apply to Expert &gt;
           </Link>
           <Link to="/" className="tracking-wide" onClick={() => setIsOpen(false)}>

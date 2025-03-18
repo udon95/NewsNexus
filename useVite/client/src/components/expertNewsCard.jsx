@@ -28,7 +28,7 @@ const ExpertNewsCard = ({ searchQuery = "", disableNavigation }) => {
             if (disableNavigation) {
               e.preventDefault();
               e.stopPropagation();
-              alert("You need to subscribe to access Expert articles!");
+              alert("You need to subscribe as Premium to access Expert articles!");
             }
           }}
         >

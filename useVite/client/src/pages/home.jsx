@@ -34,18 +34,21 @@ const topics = [
 function Home() {
   const navigate = useNavigate();
   const [selectedTopics, setSelectedTopics] = useState([]);
-  const { user, loading } = useAuthHook();
+  const { user, userType, loading } = useAuthHook();
 
   const handleTopicSelection = (topic) => {
     navigate(`/explore?topic=${topic}`);
   };
 
-  // const handleSearchFromHome = (query) => {
-  //   if (query.trim() !== "") {
-  //     // Use encodeURIComponent to ensure special characters are handled
-  //     navigate(`/explore?query=${encodeURIComponent(query)}`);
-  //   }
-  // };
+  const handleGoToDiscussionRooms = () => {
+    if (!user) {
+      alert("Please sign in and be a premium user to access Discussion Rooms.");
+      // navigate("/login");
+      return;
+    }
+    
+    navigate("/rooms");
+  };
 
   if (loading) {
     return <p>Loading...</p>; // Prevents flickering before user is set
@@ -113,7 +116,7 @@ function Home() {
       <div className="flex justify-center w-full mt-12">
         
         <button
-          onClick={() => navigate("/rooms")}
+          onClick={handleGoToDiscussionRooms}
           className="w-full max-w-[900px] bg-gray-100 text-left text-black text-3xl font-grotesk font-semibold px-6 py-3 rounded-lg shadow-md hover:bg-gray-200 transition"
         >
           Go To Discussion Rooms &gt;

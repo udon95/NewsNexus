@@ -82,10 +82,11 @@ const Article = () => {
       <Navbar />
 
       {/* Rating & Actions Section */}
-      <div className="w-full flex items-center justify-end px-6 sm:px-8 py-4 border-b space-x-4">
-        <Rate />
+      <div className="border-b w-full">
+        <div className="flex flex-col items-right w-full px-4 sm:px-8 py-4 mx-auto max-w-screen-lg">
+          <Rate />
+        </div>
       </div>
-
       {/* Main Content */}
       <main className="flex flex-col items-center w-full px-4 sm:px-8 py-10 mx-auto max-w-screen-lg">
         {/* Article Title */}

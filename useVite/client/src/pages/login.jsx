@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 // import "../index.css";
 import Navbar from "../components/navBar.jsx";
@@ -11,7 +11,9 @@ function LoginPage() {
   const { email, setEmail, password, setPassword, error, handleLogin } =
     useAuthHook();
   // const [showPassword, setShowPassword] = useState(false);
-
+  useEffect(() => {
+    window.scrollTo(0, 0); // Scroll to top when page loads
+  }, []);
   return (
     <div className="min-h-screen w-screen flex flex-col bg-white">
       <Navbar />

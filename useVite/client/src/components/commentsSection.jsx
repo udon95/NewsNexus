@@ -4,31 +4,35 @@ import IconButton from "@mui/material/IconButton";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
+import useAuthHook from "../hooks/useAuth";
 
 const CommentsSection = () => {
+  const { user, userType } = useAuthHook();
   const handleDeleteComment = (commentId, isReply, parentCommentId = null) => {
     if (isReply) {
-      // ✅ Delete only the specific reply
+      //  Delete only the specific reply
       setComments((prevComments) =>
         prevComments.map((comment) =>
           comment.id === parentCommentId
             ? {
                 ...comment,
-                replies: comment.replies.filter((reply) => reply.id !== commentId),
+                replies: comment.replies.filter(
+                  (reply) => reply.id !== commentId
+                ),
               }
             : comment
         )
       );
     } else {
-      // ✅ Delete the entire comment + its replies
+      //  Delete the entire comment + its replies
       setComments((prevComments) =>
         prevComments.filter((comment) => comment.id !== commentId)
       );
     }
-  
-    handleMenuClose(commentId); // ✅ Close menu after deleting
+
+    handleMenuClose(commentId); //  Close menu after deleting
   };
-  
+
   const initialComments = [
     {
       id: 1,
@@ -128,24 +132,29 @@ const CommentsSection = () => {
           placeholder="Write a comment..."
           value={newComment}
           onChange={(e) => setNewComment(e.target.value)}
-          className="flex-grow bg-gray-100 rounded-lg px-4 py-2 text-black placeholder-gray-500 focus:outline-none"
+          disabled={!user}
+          className={`flex-grow rounded-lg px-4 py-2 text-black placeholder-gray-500 focus:outline-none ${
+    !user ? "bg-gray-200 cursor-not-allowed" : "bg-gray-100"}`}
         />
 
         <div className="flex space-x-2 ml-3">
           <button
             className="w-10 h-10 p-2 bg-black rounded-lg hover:bg-gray-900 flex items-center justify-center"
             onClick={handlePostComment}
+            disabled={!user}
           >
-            <Pencil className="h-5 w-5 text-white" />
+            <Pencil className={`h-5 w-5 text-white ${!user ? " cursor-not-allowed" : "cursor-allowed"}`} />
           </button>
 
           <button className="w-10 h-10 p-2 bg-black rounded-lg hover:bg-gray-900 flex items-center justify-center">
             <Share2 className="h-5 w-5 text-white" />
           </button>
 
-          <button className="w-10 h-10 p-2 bg-black rounded-lg hover:bg-gray-900 flex items-center justify-center">
-            <Headphones className="h-5 w-5 text-white" />
-          </button>
+          {userType === "Premium" && (
+            <button className="w-10 h-10 p-2 bg-black rounded-lg hover:bg-gray-900 flex items-center justify-center">
+              <Headphones className="h-5 w-5 text-white" />
+            </button>
+          )}
         </div>
       </div>
 
@@ -178,10 +187,11 @@ const CommentsSection = () => {
                   <MenuItem onClick={() => handleMenuClose(comment.id)}>
                     Report Comment
                   </MenuItem>
-                  <MenuItem onClick={() => handleDeleteComment(comment.id, false)}>
-  Delete Comment
-</MenuItem>
-
+                  <MenuItem
+                    onClick={() => handleDeleteComment(comment.id, false)}
+                  >
+                    Delete Comment
+                  </MenuItem>
                 </Menu>
               </div>
 
@@ -220,7 +230,10 @@ const CommentsSection = () => {
 
             {/* Replies (Now With Profile & Three Dots) */}
             {comment.replies.map((reply) => (
-              <div key={reply.id} className="ml-10 bg-gray-200 p-4 rounded-lg mt-2">
+              <div
+                key={reply.id}
+                className="ml-10 bg-gray-200 p-4 rounded-lg mt-2"
+              >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-4">
                     <div className="w-12 h-12 flex items-center justify-center text-xl font-bold rounded-lg bg-blue-300">
@@ -245,11 +258,13 @@ const CommentsSection = () => {
                     <MenuItem onClick={() => handleMenuClose(reply.id)}>
                       Report Comment
                     </MenuItem>
-                    <MenuItem onClick={() => handleDeleteComment(reply.id, true, comment.id)}>
-  Delete Comment
-</MenuItem>
-
-
+                    <MenuItem
+                      onClick={() =>
+                        handleDeleteComment(reply.id, true, comment.id)
+                      }
+                    >
+                      Delete Comment
+                    </MenuItem>
                   </Menu>
                 </div>
               </div>
