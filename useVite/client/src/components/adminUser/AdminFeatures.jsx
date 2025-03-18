@@ -38,7 +38,7 @@ const AdminFeatures = () => {
           </button>
 
           <div className="text-2xl sm:text-3xl text-left mt-8 ml-10 font-bold">
-            Testimonials:
+            Feature Video:
           </div>
           <div className="flex">
             <div className="ml-10 mt-8 min-w-150 bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300">
@@ -50,6 +50,13 @@ const AdminFeatures = () => {
               onClick={() => handleClick(1)}
             >
               View
+            </button>
+            <button
+              type="submit"
+              className="px-6 py-3 bg-[#3F414C] flex ml-5 mt-8 text-white rounded-lg hover:bg-opacity-90 cursor-pointer"
+              onClick={() => handleClick(1)}
+            >
+              Displayed
             </button>
           </div>
           <div className="flex">
@@ -63,6 +70,13 @@ const AdminFeatures = () => {
             >
               View
             </button>
+            <button
+              type="submit"
+              className="px-6 py-3 bg-[#3F414C] flex ml-5 mt-8 text-white rounded-lg hover:bg-opacity-90 cursor-pointer"
+              onClick={() => handleClick(1)}
+            >
+              Select
+            </button>
           </div>
           <div className="flex">
             <div className="ml-10 mt-7 min-w-150 bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300">
@@ -74,6 +88,13 @@ const AdminFeatures = () => {
               onClick={() => handleClick(3)}
             >
               View
+            </button>
+                        <button
+              type="submit"
+              className="px-6 py-3 bg-[#3F414C] flex ml-5 mt-8 text-white rounded-lg hover:bg-opacity-90 cursor-pointer"
+              onClick={() => handleClick(1)}
+            >
+              Select
             </button>
           </div>
         </div>
