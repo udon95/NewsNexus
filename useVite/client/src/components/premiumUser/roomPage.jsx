@@ -497,7 +497,7 @@ const Room = () => {
       {reply.username?.charAt(0).toUpperCase() || "?"}
         </div>
         <div>
-          <span className="text-md font-bold text-blue-900">@{reply.username}</span>
+          <span className="text-lg font-bold text-blue-900">@{reply.username}</span>
           <span className="text-gray-500 text-sm ml-2">
             {new Date(reply.created_at).toLocaleDateString("en-GB", {
               day: "2-digit",
@@ -580,7 +580,7 @@ const Room = () => {
                 {nestedReply.username?.charAt(0).toUpperCase() || "?"}
              </div>
              <div>
-                <span className="text-sm font-bold text-blue-900">@{nestedReply.username}</span>
+                <span className="text-lg font-bold text-blue-900">@{nestedReply.username}</span>
                 <span className="text-gray-500 text-xs ml-2">
                  {new Date(nestedReply.created_at).toLocaleDateString("en-GB", {
                   day: "2-digit",
