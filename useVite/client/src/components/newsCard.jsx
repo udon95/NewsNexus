@@ -1,24 +1,10 @@
 import React from "react";
-import { useNavigate } from "react-router-dom"; // Import navigation hook
+import { useNavigate } from "react-router-dom";
+import { ThumbsUp, ThumbsDown } from "lucide-react"; // Import thumbs icons
 
-const NewsCard = ({ title, imageUrl, rating }) => {
+const NewsCard = ({ title, imageUrl }) => {
   const navigate = useNavigate();
 
-  // Function to generate stars
-  const renderStars = () => {
-    return [...Array(4)].map((_, index) => (
-      <span
-        key={index}
-        className={
-          index < rating ? "text-yellow-400 text-xl" : "text-gray-400 text-xl"
-        }
-      >
-        ★
-      </span>
-    ));
-  };
-
-  // Handle clicking on the card
   const handleCardClick = () => {
     navigate(`/article/${encodeURIComponent(title)}`); // Redirect to article page
   };
@@ -26,19 +12,25 @@ const NewsCard = ({ title, imageUrl, rating }) => {
   return (
     <div
       className="relative bg-white rounded-2xl shadow-lg border border-gray-300 overflow-hidden w-full max-w-[900px] mx-auto cursor-pointer hover:shadow-xl transition"
-      onClick={handleCardClick} // Make the whole card clickable
+      onClick={handleCardClick}
     >
-      {/* Image Section with Overlayed Vertical Stars */}
+      {/* Image Section */}
       <div className="relative w-full h-[200px]">
         <img
-          src={imageUrl || "test.png"} 
+          src={imageUrl || "test.png"}
           alt={title}
           className="w-full h-full object-cover"
         />
 
-        {/* Star Ratings - Now Vertical */}
-        <div className="absolute top-2 left-2 flex flex-col space-y-1 bg-opacity-50 p-1 rounded-lg">
-          {renderStars()}
+        {/* 👍👎 Thumbs Rating Box */}
+        <div className="absolute top-2 left-2 bg-gray-200 p-2 rounded-lg flex flex-col items-center shadow-md">
+          {/* Thumbs Up Icon */}
+          <ThumbsUp size={20} className="text-green-500" />
+          <span className="text-xs font-semibold text-black">1K+</span>
+          <div className="mt-3.5"></div> 
+          {/* Thumbs Down Icon */}
+          <ThumbsDown size={20} className="text-red-500 mt-1" />
+          <span className="text-xs font-semibold text-black">5</span>
         </div>
       </div>
 
