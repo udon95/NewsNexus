@@ -195,7 +195,7 @@ const CommentsSection = () => {
                 </Menu>
               </div>
 
-              <div className="flex justify-end">
+              {/* <div className="flex justify-end">
                 <button
                   className="mt-2 text-black hover:text-gray-700"
                   title="Reply"
@@ -205,9 +205,9 @@ const CommentsSection = () => {
                 >
                   <CornerDownLeft className="h-5 w-5" />
                 </button>
-              </div>
+              </div> */}
 
-              {replyingTo === comment.id && (
+              {/* {replyingTo === comment.id && (
                 <div className="mt-3 flex items-center space-x-2">
                   <input
                     type="text"
@@ -225,11 +225,11 @@ const CommentsSection = () => {
                     <Pencil className="h-4 w-4 text-white" />
                   </button>
                 </div>
-              )}
+              )} */}
             </div>
 
             {/* Replies (Now With Profile & Three Dots) */}
-            {comment.replies.map((reply) => (
+            {/* {comment.replies.map((reply) => (
               <div
                 key={reply.id}
                 className="ml-10 bg-gray-200 p-4 rounded-lg mt-2"
@@ -267,8 +267,8 @@ const CommentsSection = () => {
                     </MenuItem>
                   </Menu>
                 </div>
-              </div>
-            ))}
+              </div> */}
+            {/* ))} */}
           </div>
         ))}
       </div>

@@ -135,31 +135,29 @@ const SubscriptionPage = () => {
           {loading && <p>⏳ Loading subscriptions...</p>}
           {error && <p className="error">{error}</p>}
 
-          <div className="space-y-12">
-            {subscriptions.length > 0 ? (
-              subscriptions.map((sub) => (
+          
+          {subscriptions.length > 0 ? (
+            <div className="space-y-6">
+              {subscriptions.map((sub) => (
                 <SubscriptionCard
-                  key={sub.id} 
+                  key={sub.id}
                   title={sub.tier === "Free" ? "Free" : `$${sub.price}`}
                   content={
-                    <ul className="subscription-details ">
-                      {sub.description ? (
-                        sub.description
-                          .split(",")
-                          .map((item, index) => (
+                    <ul className="list-disc list-inside space-y-1">
+                      {sub.description
+                        ? sub.description.split(",").map((item, index) => (
                             <li key={index}>{item.trim()}</li>
                           ))
-                      ) : (
-                        <li>No description available</li>
-                      )}
+                        : <li>No description available</li>}
                     </ul>
                   }
                 />
-              ))
-            ) : (
-              <p>No subscriptions available.</p>
-            )}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <p>No subscriptions available.</p>
+          )}
+          
 
           {/* Upgrade Button */}
           <div className="w-full flex justify-end mt-6">

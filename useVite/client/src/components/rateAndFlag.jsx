@@ -2,11 +2,13 @@ import React, { useState } from "react";
 import { ThumbsUp, ThumbsDown, FlagIcon } from "lucide-react";
 import { ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import useAuthHook from "../hooks/useAuth";
 
 const RateAndFlag = () => {
   const [upvoted, setUpvoted] = useState(false);
   const [downvoted, setDownvoted] = useState(false);
   const navigate = useNavigate();
+  const { userType } = useAuthHook();
 
   const handleUpvote = () => {
     setUpvoted(!upvoted);
@@ -53,12 +55,14 @@ const RateAndFlag = () => {
           </button>
 
           {/* 🚩 Community Notes */}
-          <button
-            className="w-10 h-10 p-2 bg-gray-200 rounded-lg hover:bg-gray-300 flex items-center justify-center"
-            title="Community Notes"
-          >
-            <FlagIcon className="h-6 w-6 text-black" />
-          </button>
+          {userType === "Premium" && (
+            <button
+              className="w-10 h-10 p-2 bg-gray-200 rounded-lg hover:bg-gray-300 flex items-center justify-center"
+              title="Community Notes"
+            >
+              <FlagIcon className="h-6 w-6 text-black" />
+            </button>
+          )}
 
           {/* 🅁 Report Button */}
           <button

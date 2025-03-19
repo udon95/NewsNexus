@@ -15,66 +15,99 @@ const ArticleList = ({ title, articles, isDraft, onArticleClick }) => {
   };
 
   return (
-    <div className="mt-6 first:mt-0 font-grotesk w-full flex flex-col items-start">
+    <div className="mt-6  font-grotesk w-full ">
       <h2 className="text-2xl font-bold font-grotesk mb-2 w-3/3 md:w-2/3">
         {title}
       </h2>
-      <ul className="w-3/3 md:w-2/3 space-y-2 ">
+      <ul className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 max-w-[1000px]">
         {articles.map((article, index) => (
           <li
             key={index}
-            className="relative flex justify-between items-center gap-3 p-3 px-4 rounded-md bg-white shadow-md border border-gray-300 text-base w-full max-w-screen"
+            className="
+            relative 
+            bg-white 
+            rounded-md 
+            shadow-md 
+            border border-gray-300 
+            text-base 
+            aspect-square 
+            flex 
+            flex-col 
+            p-4 
+            cursor-pointer
+          "
           >
             {/* Number and Article Name */}
-            <button
-              className="flex items-start gap-2 font-grotesk w-full text-left focus:outline-none"
-              onClick={() => onArticleClick(article)} // Calls parent function when clicked
-            >
-              <span className="text-lg font-semibold text-black">
-                {index + 1}.
-              </span>
-              <span className="text-lg text-black flex-1">{article}</span>
-            </button>
+            <div className="flex-1 p-4 relative ">
+              <button
+                className="flex items-start gap-2 font-grotesk w-full text-left focus:outline-none"
+                onClick={() => onArticleClick(article)} // Calls parent function when clicked
+              >
+                <span
+                  className="
+                  inline-block
+                  w-full
+                  pr-10
+                  overflow-hidden
+                  whitespace-nowrap
+                  text-ellipsis
+                  text-lg
+                  font-semibold
+                  text-black
+                "
+                >
+                  {index + 1}. {article}
+                </span>
+                {/* <span className="text-lg text-black flex-1">{article}</span> */}
+              </button>
+              <div className="w-full h-30 mt-5 bg-gray-100 rounded-t-md " />
+              {!isDraft && (
+                <div className="absolute bottom-4 left-4 text-sm text-gray-700 space-y-1">
+                  <p>Views: 123</p>
+                  <p>Likes: 45</p>
+                </div>
+              )}
 
-            {/* Three-Dot Menu Button */}
-            <button
-              className="p-2 text-lg font-bold text-gray-600 hover:text-black relative"
-              onClick={(e) => {
-                e.stopPropagation(); // Prevents triggering article click
-                setOpenMenuIndex(openMenuIndex === index ? null : index);
-              }}
-            >
-              <EllipsisVertical />
-            </button>
-            {isDraft && (
-              <div className="absolute bottom-2 left-4 text-gray-500 text-sm  border-gray-200 pt-2">
-                Expires: {calculateExpiryDate(index)}
-              </div>
-            )}
-            {/* Dropdown Menu (Appears on Click) */}
-            {openMenuIndex === index && (
-              <div className="absolute top-full right-0 bg-white shadow-md border border-gray-300 rounded-lg min-w-[120px] z-50">
-                <ul className="flex flex-col">
-                  <li>
-                    <button className="block px-4 py-2 w-full text-left hover:bg-gray-100">
-                      Edit
-                    </button>
-                  </li>
-                  <li>
-                    <button className="block px-4 py-2 w-full text-left hover:bg-gray-100">
-                      Delete
-                    </button>
-                  </li>
-                  {!isDraft && ( // Show "Share" only if it's not a draft
+              {/* Three-Dot Menu Button */}
+              <button
+                className="absolute top-2 right-2 p-2 text-lg font-bold text-gray-600 hover:text-black"
+                onClick={(e) => {
+                  e.stopPropagation(); // Prevents triggering article click
+                  setOpenMenuIndex(openMenuIndex === index ? null : index);
+                }}
+              >
+                <EllipsisVertical />
+              </button>
+              {isDraft && (
+                <div className="absolute bottom-4 left-4 text-gray-500 text-sm">
+                  Expires: {calculateExpiryDate(index)}
+                </div>
+              )}
+              {/* Dropdown Menu (Appears on Click) */}
+              {openMenuIndex === index && (
+                <div className="absolute top-10 right-2 bg-white shadow-md border border-gray-300 rounded-lg min-w-[120px] z-50">
+                  <ul className="flex flex-col">
                     <li>
                       <button className="block px-4 py-2 w-full text-left hover:bg-gray-100">
-                        Share
+                        Edit
                       </button>
                     </li>
-                  )}
-                </ul>
-              </div>
-            )}
+                    <li>
+                      <button className="block px-4 py-2 w-full text-left hover:bg-gray-100">
+                        Delete
+                      </button>
+                    </li>
+                    {!isDraft && ( // Show "Share" only if it's not a draft
+                      <li>
+                        <button className="block px-4 py-2 w-full text-left hover:bg-gray-100">
+                          Share
+                        </button>
+                      </li>
+                    )}
+                  </ul>
+                </div>
+              )}
+            </div>
           </li>
         ))}
       </ul>
