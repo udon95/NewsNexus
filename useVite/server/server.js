@@ -3,6 +3,7 @@ const express = require("express");
 const cors = require("cors");
 const authRoute = require("./routes/authRoute");
 const subscriptionRoutes = require("./routes/subscriptionRoute");
+const aiRoute = require("./routes/aiRoute");
 const { createClient } = require("@supabase/supabase-js");
 
 // Use fetch correctly depending on Node.js version
@@ -29,6 +30,7 @@ const supabase = createClient(
 
 app.use("/auth", authRoute);
 app.use("/subscription", subscriptionRoutes);
+app.use('/api', aiRoute);
 
 // Start Server
 const PORT = process.env.PORT || 5000;
