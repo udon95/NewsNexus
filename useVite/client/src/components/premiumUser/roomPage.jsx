@@ -2,13 +2,12 @@ import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import supabase from "../../api/supabaseClient";
 import Navbar from "../navBar";
-import { MoreVertical } from "lucide-react"; // Import 3-dot icon
+import { MoreVertical, CornerDownLeft } from "lucide-react"; // Import 3-dot icon + comment icon
 
 const Room = () => {
   const { id: roomid } = useParams();
   const navigate = useNavigate();
   const [room, setRoom] = useState(null);
-  const [isMember, setIsMember] = useState(false);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState(null);
   const [articles, setArticles] = useState([]);
@@ -18,7 +17,14 @@ const Room = () => {
   const [articleReplyText, setArticleReplyText] = useState(""); // Stores reply text for article
   const [articleMenu, setArticleMenu] = useState(null);
   const [commentMenu, setCommentMenu] = useState(null);
+  const [isMember, setIsMember] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [reportTarget, setReportTarget] = useState(null); // { type: "article" | "comment", id: string }
+  const [selectedReason, setSelectedReason] = useState("");
 
+
+
+  console.log("Current replyingTo:", replyingTo);
 
   const toggleArticleMenu = (postid) => {
     console.log("Toggling menu for post:", postid); // Debugging
@@ -89,10 +95,18 @@ const Room = () => {
         .eq("roomid", roomid)
         .single();
 
-      if (error && error.code !== "PGRST116") {
-        console.error("Error checking membership:", error);
+      // if (error && error.code !== "PGRST116") {
+      //   console.error("Error checking membership:", error);
+      // } else {
+      //   setIsMember(data && data.exited_at === null);
+      // }
+    
+      // If no row or exited_at != null, user is not a member
+
+      if (error || !data || data.exited_at !== null) {
+        setIsMember(false);
       } else {
-        setIsMember(data && data.exited_at === null);
+        setIsMember(true);
       }
     };
 
@@ -107,45 +121,42 @@ const Room = () => {
         console.error("Error fetching articles:", error);
         return;
       }
-    
+
+      console.log("Fetched articles data:", JSON.stringify(data, null, 2)); // Debugging log
+      setArticles(data);
+          
       const articlesWithComments = data.map((article) => {
-        const commentMap = {}; // Store comments by ID
-        const topLevelComments = []; // Store parent comments
-    
-        // Step 1: Organize comments into a map
+        // Step 1: Map all comments by ID
+        const commentMap = new Map();
         article.room_comments.forEach((comment) => {
-          comment.replies = []; // Initialize replies array
-          commentMap[comment.commentid] = comment;
+          comment.replies = []; // initialize replies array
+          commentMap.set(comment.commentid, comment);
         });
-    
-        // Step 2: Structure comments correctly
+      
+        // Step 2: Flatten comments – attach all replies to their topmost parent
+        const topLevelComments = [];
+      
         article.room_comments.forEach((comment) => {
-          if (comment.parent_commentid) {
-            const parentComment = commentMap[comment.parent_commentid];
-    
-            if (parentComment) {
-              // Check if parent is a top comment
-              if (!parentComment.parent_commentid) {
-                parentComment.replies.push(comment); // Add directly under top comment
-              } else {
-                // Ensure reply-to-reply is kept under the same top comment
-                let topComment = commentMap[parentComment.parent_commentid];
-                while (topComment?.parent_commentid) {
-                  topComment = commentMap[topComment.parent_commentid];
-                }
-                if (topComment) {
-                  topComment.replies.push(comment);
-                }
-              }
-            }
-          } else {
-            // If no parent, it's a top-level comment
+          if (!comment.parent_commentid) {
             topLevelComments.push(comment);
+          } else {
+            let parent = commentMap.get(comment.parent_commentid);
+      
+            // Traverse up until top-level parent found
+            while (parent?.parent_commentid && commentMap.has(parent.parent_commentid)) {
+              parent = commentMap.get(parent.parent_commentid);
+            }
+      
+            if (parent) {
+              parent.replies.push(comment); // flatten under top-level parent
+            } else {
+              topLevelComments.push(comment); // fallback: treat as top-level if orphaned
+            }
           }
         });
-    
+      
         return { ...article, room_comments: topLevelComments };
-      });
+      });          
     
       setArticles(articlesWithComments);
     };    
@@ -155,192 +166,470 @@ const Room = () => {
     fetchArticles();
   }, [roomid, user]);
 
-  const handleReplyClick = (commentid) => {
-    setReplyingTo(commentid); // Store the comment ID that the user is replying to
-    setReplyText(`@${username} `); // Prefix reply with @username
+  const handleReplyClick = (commentid, username) => {
+    console.log("Reply button clicked for comment ID:", commentid);
+    if (replyingTo === commentid) {
+      setReplyingTo(null);
+      setReplyText("");
+    } else {
+      setReplyingTo(commentid);
+      const parentIsTopLevel = articles.some(article =>
+        article.room_comments.some(comment => comment.commentid === commentid && comment.parent_commentid === null)
+      );
+      
+      setReplyText(parentIsTopLevel ? "" : `@${username} `);
+          }
   };
+  
   
   const handlePostReply = async (postid, parentCommentId = null, parentUsername = null) => {
     if (!replyText.trim()) return;
     if (!user) {
-      alert("You must be logged in to reply.");
-      return;
+        alert("You must be logged in to reply.");
+        return;
     }
-  
+
     let formattedReplyText = replyText;
-  
-    // Only add @username if replying to a non-parent reply
-    if (parentUsername && !replyText.startsWith(`@${parentUsername}`)) {
-      formattedReplyText = `@${parentUsername} ${replyText}`;
+
+    if (parentCommentId && parentUsername) {
+      // Fetch the parent comment from current articles to check its parent_commentid
+      const parentIsTopLevel = articles
+        .flatMap(article => article.room_comments)
+        .some(comment =>
+          comment.commentid === parentCommentId && comment.parent_commentid === null
+        );
+    
+      // Only prefix @username if the parent is NOT top-level
+      if (!parentIsTopLevel && !replyText.startsWith(`@${parentUsername}`)) {
+        formattedReplyText = `@${parentUsername} ${replyText}`;
+      }
     }
-  
+    
+
     const { data, error } = await supabase.from("room_comments").insert([
-      {
-        postid,
-        userid: user.userid,
-        username: user.username,
-        content: formattedReplyText,
-        created_at: new Date().toISOString(),
-        parent_commentid: parentCommentId, // Correctly assign parent comment
-      },
+        {
+            postid,
+            userid: user.userid,
+            username: user.username,
+            content: formattedReplyText,
+            created_at: new Date().toISOString(),
+            parent_commentid: parentCommentId, // Ensure correct parent
+        },
     ]).select("*");
-  
+
     if (error) {
-      console.error("Error posting reply:", error);
-      return;
+        console.error("Error posting reply:", error);
+        return;
     }
-  
-    setArticles((prevArticles) =>
-      prevArticles.map((article) => {
-        if (article.postid === postid) {
-          // Update the correct comment thread
-          const updatedComments = article.room_comments.map((comment) => {
-            if (comment.commentid === parentCommentId) {
-              return {
-                ...comment,
-                replies: [...comment.replies, data[0]], // Append reply
-              };
-            }
-            return comment;
-          });
-          return { ...article, room_comments: updatedComments };
+
+    const newReply = data[0];
+
+    // **Recursive function to correctly append a reply at any depth**
+    const insertReplyInNestedStructure = (comments) => {
+      return comments.map((comment) => {
+        if (comment.commentid === parentCommentId) {
+          return { ...comment, replies: [...comment.replies, newReply] };
+        } else if (comment.replies && comment.replies.length > 0) {
+          return {
+            ...comment,
+            replies: insertReplyInNestedStructure(comment.replies),
+          };
+        } else {
+          return comment;
         }
-        return article;
-      })
+      });
+    };
+    
+    setArticles(prevArticles =>
+        prevArticles.map(article => {
+            if (article.postid === postid) {
+                return {
+                    ...article,
+                    room_comments: insertReplyInNestedStructure(article.room_comments)
+                };
+            }
+            return article;
+        })
     );
-  
+
     setReplyingTo(null);
     setReplyText("");
-  };  
-  
+};
 
-  const handlePostArticleReply = async (postid) => {
+const handlePostArticleReply = async (postid) => {
     if (!articleReplyText.trim()) return;
     if (!user) {
       alert("You must be logged in to comment.");
       return;
     }
   
-    const { error } = await supabase
-      .from("room_comments")
-      .insert([
-        { 
-          postid: postid, // Assign the article ID correctly
-          userid: user.userid, 
-          username: user.username,
-          content: articleReplyText, 
-          created_at: new Date().toISOString(),
-          parent_commentid: null // Ensures it is a top-level comment
+    const { data, error } = await supabase
+    .from("room_comments")
+    .insert([
+      { 
+        postid: postid,
+        userid: user.userid, 
+        username: user.username,
+        content: articleReplyText, 
+        created_at: new Date().toISOString(),
+        parent_commentid: null,
+      },
+    ])
+    .select("*");
+
+  if (error) {
+    console.error("Error posting comment:", error);
+    return;
+  }
+
+  const newComment = { ...data[0], replies: [] }; // add replies array for consistency
+
+    // Immediately update UI
+    setArticles((prevArticles) =>
+      prevArticles.map((article) => {
+        if (article.postid === postid) {
+          return {
+            ...article,
+            room_comments: [...article.room_comments, newComment],
+          };
         }
-      ]);
-  
-    if (error) {
-      console.error("Error posting comment:", error);
-      return;
-    }
+        return article;
+      })
+    );
   
     // Reset input box
     setReplyingToArticle(null);
     setArticleReplyText("");
-  
-    // Refresh comments immediately
-    fetchArticles();
+
   };
   
-  
   // Function to Exit Room
-const handleExitRoom = async () => {
-  if (!user) {
-    alert("You need to be logged in to exit the room.");
-    return;
-  }
-
-  try {
-    const { error: exitError } = await supabase
-      .from("room_members")
-      .update({ exited_at: new Date().toISOString() })
-      .eq("userid", user.userid)
-      .eq("roomid", roomid);
-
-    if (exitError) {
-      console.error("Error exiting room:", exitError);
+  const handleExitRoom = async () => {
+    if (isUpdating) return;
+    if (!user) {
+      alert("You need to be logged in to exit.");
       return;
+    } 
+    if (!isMember) return;
+  
+    setIsUpdating(true);
+  
+    try {
+      // 1. Set exited_at = now
+      const { error: updateError } = await supabase
+        .from("room_members")
+        .update({ exited_at: new Date().toISOString() })
+        .eq("userid", user.userid)
+        .eq("roomid", roomid);
+  
+      if (updateError) {
+        console.error("Failed to set exited_at:", updateError);
+        return;
+      }
+  
+      // 2. Increment exit_count separately
+      const { error: incrementError } = await supabase
+        .from("room_members")
+        .update({})
+        .eq("userid", user.userid)
+        .eq("roomid", roomid)
+        .increment("exit_count", 1);
+  
+      if (incrementError) {
+        console.error("Failed to increment exit_count:", incrementError);
+        return;
+      }
+  
+      // 3. Decrement member count
+      const { error: countError } = await supabase.rpc("decrement_member_count", {
+        room_id: roomid,
+      });
+  
+      if (countError) {
+        console.error("Error decrementing:", countError);
+        return;
+      }
+  
+      // 4. Update UI
+      setIsMember(false);
+      fetchRoomDetails();
+      localStorage.setItem("refreshRooms", "true");
+    } catch (err) {
+      console.error("Unexpected error in exit:", err);
+    } finally {
+      setIsUpdating(false);
     }
-
-    const { error: countError } = await supabase.rpc("decrement_member_count", { room_id: roomid });
-
-    if (countError) {
-      console.error("Error updating member count:", countError);
-      return;
-    }
-
-    setTimeout(checkMembership, 500); // Ensure membership is rechecked
-    localStorage.setItem("refreshRooms", "true");
-
-  } catch (error) {
-    console.error("Unexpected error while exiting room:", error);
-  }
-};
+  };
+  
 
 // Function to Join Room
+// const handleJoinRoom = async () => {
+//   if (!user) {
+//     alert("You need to be logged in to join the room.");
+//     return;
+//   }
+
+//   try {
+//     // Check if user has a previous entry (exited before)
+//     const { data: existingEntry, error: checkError } = await supabase
+//       .from("room_members")
+//       .select("exited_at")
+//       .eq("userid", user.userid)
+//       .eq("roomid", roomid)
+//       .single();
+
+//     if (checkError && checkError.code !== "PGRST116") {
+//       console.error("Error checking previous membership:", checkError);
+//       return;
+//     }
+
+//     if (existingEntry) {
+//       // User has an old entry, update `exited_at` to null (rejoin)
+//       const { error: updateError } = await supabase
+//         .from("room_members")
+//         .update({ exited_at: null })
+//         .eq("userid", user.userid)
+//         .eq("roomid", roomid);
+
+//       if (updateError) {
+//         console.error("Error rejoining room:", updateError);
+//         return;
+//       }
+//     } else {
+//       // First-time join, insert new entry
+//       const { error: insertError } = await supabase
+//         .from("room_members")
+//         .insert([{ userid: user.userid, roomid, exited_at: null }]);
+
+//       if (insertError) {
+//         console.error("Error joining room:", insertError);
+//         return;
+//       }
+//     }
+
+//     // Increment member count
+//     const { error: countError } = await supabase.rpc("increment_member_count", { room_id: roomid });
+
+//     if (countError) {
+//       console.error("Error updating member count:", countError);
+//       return;
+//     }
+
+//     setTimeout(checkMembership, 500); // Ensure the UI updates after joining
+
+//   } catch (error) {
+//     console.error("Unexpected error while joining room:", error);
+//   }
+// };
+
 const handleJoinRoom = async () => {
+  if (isUpdating) return;        // Prevent spamming
   if (!user) {
-    alert("You need to be logged in to join the room.");
+    alert("You need to be logged in to join.");
+    return;
+  }
+  if (isMember) {
+    // Already a member – do nothing
     return;
   }
 
+  setIsUpdating(true);
+
   try {
-    // Check if user has a previous entry (exited before)
+    // 1) Check if a membership row already exists
     const { data: existingEntry, error: checkError } = await supabase
       .from("room_members")
-      .select("exited_at")
+      .select("*")
       .eq("userid", user.userid)
       .eq("roomid", roomid)
       .single();
 
     if (checkError && checkError.code !== "PGRST116") {
-      console.error("Error checking previous membership:", checkError);
+      console.error("Check membership error:", checkError);
       return;
     }
 
     if (existingEntry) {
-      // User has an old entry, update `exited_at` to null (rejoin)
+      // 2) Rejoin: update row by setting exited_at = null and increment join_count
       const { error: updateError } = await supabase
         .from("room_members")
         .update({ exited_at: null })
         .eq("userid", user.userid)
-        .eq("roomid", roomid);
-
+        .eq("roomid", roomid)
+        .increment("join_count", 1); // Increment join_count
+        
       if (updateError) {
-        console.error("Error rejoining room:", updateError);
+        console.error("Error rejoining:", updateError);
         return;
       }
     } else {
-      // First-time join, insert new entry
+      // 3) First-time join: insert a new membership row with join_count = 1
       const { error: insertError } = await supabase
         .from("room_members")
-        .insert([{ userid: user.userid, roomid, exited_at: null }]);
-
+        .insert([{ userid: user.userid, roomid, exited_at: null, join_count: 1, exit_count: 0 }]);
       if (insertError) {
-        console.error("Error joining room:", insertError);
+        console.error("Error joining:", insertError);
         return;
       }
     }
 
-    // Increment member count
+    // 4) Increment member_count
     const { error: countError } = await supabase.rpc("increment_member_count", { room_id: roomid });
-
     if (countError) {
-      console.error("Error updating member count:", countError);
+      console.error("Error incrementing:", countError);
       return;
     }
 
-    setTimeout(checkMembership, 500); // Ensure the UI updates after joining
+    // 5) Optimistically set isMember = true
+    setIsMember(true);
 
-  } catch (error) {
-    console.error("Unexpected error while joining room:", error);
+    // 6) Re-fetch the room details so we get the updated member_count
+    fetchRoomDetails();
+  } catch (err) {
+    console.error("Unexpected join error:", err);
+  } finally {
+    setIsUpdating(false);
   }
 };
+
+
+const CommentCard = ({
+  comment,
+  replyingTo,
+  replyText,
+  setReplyText,
+  onReplyClick,
+  onPostReply,
+  user,
+  isReply = false // <- NEW PROP with default
+
+}) => {
+  const isReplying = replyingTo === comment.commentid;
+  const replyBoxRef = React.useRef(null);
+
+  useEffect(() => {
+    if (isReplying && replyBoxRef.current) {
+      replyBoxRef.current.focus();
+      // Optional: move cursor to end
+      const len = replyBoxRef.current.value.length;
+      replyBoxRef.current.setSelectionRange(len, len);
+    }
+  }, [isReplying]);  
+
+
+  return (
+<div className={`bg-white shadow-md rounded-lg p-4 mt-4 border border-gray-200 ${isReply ? "ml-6" : ""}`}>
+{/* Header: Avatar + Username */}
+<div className="flex justify-between items-center">
+  <div className="flex items-center">
+    <div className="w-10 h-10 bg-blue-500 text-white flex items-center justify-center font-bold rounded-lg mr-3">
+      {comment.username?.charAt(0).toUpperCase()}
+    </div>
+    <div>
+      <span className="text-lg font-bold text-blue-900">@{comment.username}</span>
+      <span className="text-gray-500 text-sm ml-2">
+        {new Date(comment.created_at).toLocaleDateString("en-GB")}
+      </span>
+    </div>
+  </div>
+
+  {/* 3-dot menu */}
+  <div className="relative">
+    <MoreVertical
+      size={20}
+      className="text-gray-500 hover:text-black cursor-pointer menu-icon"
+      onClick={(event) => {
+        event.stopPropagation();
+        toggleCommentMenu(comment.commentid);
+      }}
+    />
+{commentMenu === comment.commentid && (
+  <div className="absolute right-0 mt-2 w-40 bg-white shadow-lg rounded-md p-2 z-50 menu-container">
+    {user?.userid === comment.userid ? (
+      <>
+        <button
+          className="block w-full text-left p-2 hover:bg-gray-100 text-gray-700"
+          onClick={() => console.log("Edit comment", comment.commentid)}
+        >
+          Edit
+        </button>
+        <button
+          className="block w-full text-left p-2 hover:bg-gray-100 text-red-500"
+          onClick={() => console.log("Delete comment", comment.commentid)}
+        >
+          Delete
+        </button>
+      </>
+    ) : (
+      <button
+        className="block w-full text-left p-2 hover:bg-gray-100 text-red-500"
+        // onClick={() => console.log("Report comment", comment.commentid)}
+        onClick={() => setReportTarget({ type: "comment", id: comment.commentid })}
+      >
+        Report
+      </button>
+    )}
+  </div>
+)}
+
+</div>
+</div>
+
+      {/* Content */}
+      <p className="mt-2 text-gray-700">{comment.content}</p>
+
+      {/* Reply button */}
+      <div className="flex flex-col items-end mt-2">
+      {!isReplying && (
+        <button
+          className="text-blue-500 hover:text-blue-700"
+          onClick={() => onReplyClick(comment.commentid, comment.username)}
+          aria-label="Reply"
+        >
+          <CornerDownLeft size={18} />
+        </button>
+      )}
+
+   {/* Reply box (conditionally rendered) */}
+   {isReplying && (
+    <div className="w-full mt-3">
+      <textarea
+        ref={replyBoxRef}
+        className="w-full p-2 border rounded"
+        placeholder="Write your reply..."
+        value={replyingTo === comment.commentid ? replyText : ""}
+        onChange={(e) => {
+          if (replyingTo === comment.commentid) {
+            setReplyText(e.target.value);
+          }
+        }}
+      />
+      <div className="mt-2 flex justify-end gap-2">
+        <button
+          className="px-4 py-2 bg-blue-500 text-white rounded"
+          onClick={() =>
+            onPostReply(comment.postid, comment.commentid, comment.username)
+          }
+        >
+          Post Reply
+        </button>
+        <button
+          className="px-4 py-2 bg-gray-400 text-white rounded"
+          onClick={() => {
+            setReplyText("");
+            onReplyClick(null);
+          }}
+        >
+          Cancel
+          </button>
+        </div>
+      </div>
+    )}
+      </div>
+    </div>   
+  );
+};
+
 
   return (
     <div className="relative min-h-screen w-screen flex flex-col bg-gray-100">
@@ -350,7 +639,7 @@ const handleJoinRoom = async () => {
           <h1 className="text-4xl font-bold">Room: {room ? room.name : "Not Found"}</h1>
           <div className="flex gap-3">
             {/* Exit Button (Active Only If Member) */}
-            <button
+            {/* <button
               className={`px-6 py-2 rounded-full text-lg font-semibold transition-all ${
                 isMember ? "bg-blue-500 text-white hover:bg-blue-600" : "bg-gray-300 text-gray-500 cursor-not-allowed"
               }`}
@@ -358,10 +647,22 @@ const handleJoinRoom = async () => {
               disabled={!isMember}
             >
               Exit
+            </button> */}
+            <button
+              className={`px-6 py-2 rounded-full text-lg font-semibold transition-all ${
+                (!isMember || isUpdating) 
+                  ? "bg-gray-300 text-gray-500 cursor-not-allowed" 
+                  : "bg-blue-500 text-white hover:bg-blue-600"
+              }`}
+              onClick={handleExitRoom}
+              disabled={!isMember || isUpdating}
+            >
+              Exit
             </button>
 
+
             {/* Join Button (Disabled If Already a Member) */}
-            <button
+            {/* <button
               className={`px-6 py-2 rounded-full text-lg font-semibold transition-all ${
                 isMember ? "bg-gray-300 text-gray-500 cursor-not-allowed" : "bg-green-500 text-white hover:bg-green-600"
               }`}
@@ -369,7 +670,20 @@ const handleJoinRoom = async () => {
               disabled={isMember} // This disables the button if the user is already a member
             >
               {isMember ? "Joined" : "Join"}
+            </button> */}
+
+            <button
+              className={`px-6 py-2 rounded-full text-lg font-semibold transition-all ${
+                (isMember || isUpdating) 
+                  ? "bg-gray-300 text-gray-500 cursor-not-allowed" 
+                 : "bg-green-500 text-white hover:bg-green-600"
+              }`}
+              onClick={handleJoinRoom}
+              disabled={isMember || isUpdating}
+            >
+              {isMember ? "Joined" : "Join"}
             </button>
+
           </div>
         </div>
 
@@ -403,21 +717,44 @@ const handleJoinRoom = async () => {
                       }} 
                   />
                     {articleMenu === article.postid && (
-                    <div className="absolute right-0 mt-2 w-40 bg-white shadow-lg rounded-md p-2 z-50">
-                      <button 
-                        className="block w-full text-left p-2 hover:bg-gray-100 text-gray-700"
-                        onClick={() => console.log("Edit article", article.postid)}
-                      >
+                    <div className="absolute right-0 mt-2 w-45 bg-white shadow-lg rounded-md p-2 z-50 menu-container">
+                      {user?.userid === article.userid ? (
+                        <>
+                         {/* Owner sees Edit and Delete */}
+                         <button 
+                           className="block w-full text-left p-2 hover:bg-gray-100 text-black"
+                           onClick={() => console.log("Edit article", article.postid)}
+                          >
+                            Edit
+                        </button>
+                        <button 
+                          className="block w-full text-left p-2 hover:bg-gray-100 text-red-500"
+                          onClick={() => console.log("Delete article", article.postid)}
+                        >
                         Delete
+                          </button>
+                        </>
+                     ) : (
+                       <>
+                       {/* Owner sees Edit and Delete */}
+                       <button 
+                         className="block w-full text-left p-2 hover:bg-gray-100 text-black"
+                         onClick={() => console.log("Edit article", article.postid)}
+                        >
+                          + Comunity Note
                       </button>
-                    <button 
-                      className="block w-full text-left p-2 hover:bg-gray-100 text-red-500"
-                        onClick={() => console.log("Delete article", article.postid)}
-                    >
-                        Report
-                    </button>
-                    </div>
-              )}
+                      <button 
+                        className="block w-full text-left p-2 hover:bg-gray-100 text-red-500"
+                        // onClick={() => console.log("Report article", article.postid)}
+                        onClick={() => setReportTarget({ type: "article", id: article.postid })}
+                      >
+                      Report
+                        </button>
+                      </>
+                    )}
+                  </div>
+                )}
+
 
                   </div>
               </div>
@@ -437,7 +774,9 @@ const handleJoinRoom = async () => {
               <p className="mt-2 text-gray-700">{article.content}</p>
   
               <button className="mt-3 px-4 py-2 bg-gray-700 text-white rounded-lg"
-              onClick={() => setReplyingToArticle(article.postid)}>Reply</button>
+              onClick={() => setReplyingToArticle(article.postid)}>
+                Reply
+              </button>
 
 {replyingToArticle === article.postid && (
   <div className="mt-4">
@@ -464,267 +803,50 @@ const handleJoinRoom = async () => {
 
 {article.room_comments.map((comment) => (
   <React.Fragment key={comment.commentid}>
-    {/* Top-Level Comment (Parent) */}
-    <div className="bg-white shadow-md rounded-lg p-4 mt-4 border border-gray-200">
-      <div className="flex justify-between items-center">
-      {/* Left: Profile & Username */}
-      <div className="flex items-center">
-        <div className="w-10 h-10 bg-blue-500 text-white flex items-center font-bold justify-center rounded-lg mr-3">
-          {comment.username?.charAt(0).toUpperCase() || "?"}
-        </div>
-        <div>
-          <span className="text-lg font-bold text-blue-900">@{comment.username}</span>
-          <span className="text-gray-500 text-sm ml-2">
-           {new Date(comment.created_at).toLocaleDateString("en-GB", {
-              day: "2-digit",
-             month: "short",
-             year: "numeric",
-           })}
-          </span>
-        </div>
-      </div>
+    <CommentCard
+      comment={comment}
+      replyingTo={replyingTo}
+      replyText={replyText}
+      onReplyClick={handleReplyClick}
+      onPostReply={handlePostReply}
+      setReplyText={setReplyText}
+      user={user}
+      isReply={false}
+      toggleCommentMenu={toggleCommentMenu}
+      commentMenu={commentMenu}
+    />
 
-      {/* Right: 3-Dots Menu for Top Comment */}
-      <div className="relative ml-auto">
-       <MoreVertical
-         size={20}
-         className="text-gray-500 hover:text-black cursor-pointer menu-icon"
-         onClick={(event) => {
-            event.stopPropagation(); // Prevents menu from closing immediately
-            toggleCommentMenu(comment.commentid);
-          }}
-       />
-       {commentMenu === comment.commentid && (
-         <div className="absolute right-0 mt-2 w-40 bg-white shadow-lg rounded-md p-2 z-50 menu-container">
-            <button
-             className="block w-full text-left p-2 hover:bg-gray-100 text-gray-700"
-              onClick={() => console.log("Edit comment", comment.commentid)}
-           >
-            Delete
-            </button>
-            <button
-              className="block w-full text-left p-2 hover:bg-gray-100 text-red-500"
-              onClick={() => console.log("Delete comment", comment.commentid)}
-            >
-              Report
-            </button>
-          </div>
-        )}
-      </div>
-    </div>
-
-
-      {/* Comment Content */}
-      <p className="mt-2 text-gray-700">{comment.content}</p>
-
-      {/* Reply Button */}
-      <button className="mt-2 text-blue-500 hover:underline"
-        onClick={() => {
-          setReplyingTo(comment.commentid);
-          setReplyText("");
-        }}>
-        Reply
-      </button>
-
-      {/* Show Reply Input Box for Top-Level Comments */}
-      {replyingTo === comment.commentid && (
-        <div className="mt-3">
-          <textarea
-            className="w-full p-2 border rounded"
-            placeholder="Write your reply..."
-            value={replyText}
-            onChange={(e) => setReplyText(e.target.value)}
-          />
-          <button className="mt-2 px-4 py-2 bg-blue-500 text-white rounded"
-            onClick={() => handlePostReply(comment.postid, comment.commentid, null)}>
-            Post Reply
-          </button>
-          <button className="mt-2 ml-2 px-4 py-2 bg-gray-400 text-white rounded"
-            onClick={() => setReplyingTo(null)}>
-            Cancel
-          </button>
-        </div>
-      )}
-    </div>
-
-    {/* Render Replies - Separated but Indented */}
-    {comment.replies.filter(reply => reply.parent_commentid === comment.commentid).map((reply) => (
+    {comment.replies?.map((reply) => (
       <React.Fragment key={reply.commentid}>
-        <div className="bg-white shadow-md rounded-lg p-4 mt-2 ml-10 border border-gray-300">
-        <div className="flex justify-between items-center">
-  {/* Left: Profile & Username */}
-  <div className="flex items-center">
-    <div className="w-10 h-10 bg-blue-500 text-white flex items-center justify-center font-bold rounded-lg mr-3">
-      {reply.username?.charAt(0).toUpperCase() || "?"}
-        </div>
-        <div>
-          <span className="text-lg font-bold text-blue-900">@{reply.username}</span>
-          <span className="text-gray-500 text-sm ml-2">
-            {new Date(reply.created_at).toLocaleDateString("en-GB", {
-              day: "2-digit",
-              month: "short",
-              year: "numeric",
-            })}
-          </span>
-        </div>
-      </div>
-
-      {/* Right: 3-Dots Menu for Non-Parent Reply */}
-      <div className="relative ml-auto">
-        <MoreVertical
-          size={20}
-          className="text-gray-500 hover:text-black cursor-pointer menu-icon"
-          onClick={(event) => {
-            event.stopPropagation(); // Prevents menu from closing immediately
-            toggleCommentMenu(reply.commentid);
-          }}
+        <CommentCard
+          comment={reply}
+          replyingTo={replyingTo}
+          replyText={replyText}
+          onReplyClick={handleReplyClick}
+          onPostReply={handlePostReply}
+          setReplyText={setReplyText}
+          user={user}
+          isReply={true}
         />
-        {commentMenu === reply.commentid && (
-          <div className="absolute right-0 mt-2 w-40 bg-white shadow-lg rounded-md p-2 z-50 menu-container">
-            <button
-              className="block w-full text-left p-2 hover:bg-gray-100 text-gray-700"
-              onClick={() => console.log("Edit reply", reply.commentid)}
-            >
-              Delete
-            </button>
-            <button
-              className="block w-full text-left p-2 hover:bg-gray-100 text-red-500"
-              onClick={() => console.log("Delete reply", reply.commentid)}
-            >
-             Report
-            </button>
-          </div>
-        )}
-      </div>
-    </div>
 
-          {/* Reply Content */}
-          <p className="mt-2 text-gray-700">{reply.content}</p>
-
-          {/* Reply Button for Non-Parent Reply */}
-          <button className="mt-2 text-blue-500 hover:underline"
-            onClick={() => {
-              setReplyingTo(reply.commentid);
-              setReplyText(`@${reply.username} `);
-            }}>
-            Reply
-          </button>
-
-          {/* Show Reply Input Box for Reply-to-Reply */}
-          {replyingTo === reply.commentid && (
-            <div className="mt-3">
-              <textarea
-                className="w-full p-2 border rounded"
-                placeholder="Write your reply..."
-                value={replyText}
-                onChange={(e) => setReplyText(e.target.value)}
-              />
-              <button className="mt-2 px-4 py-2 bg-blue-500 text-white rounded"
-                onClick={() => handlePostReply(reply.postid, reply.commentid, reply.username)}>
-                Post Reply
-              </button>
-              <button className="mt-2 ml-2 px-4 py-2 bg-gray-400 text-white rounded"
-                onClick={() => setReplyingTo(null)}>
-                Cancel
-              </button>
-            </div>
-          )}
-        </div>
-
-        {/* Render Reply-to-Reply as separate cards but indented further */}
-        {comment.replies.filter(r => r.parent_commentid === reply.commentid).map((nestedReply) => (
-          <div key={nestedReply.commentid} className="bg-white shadow-md rounded-lg p-4 mt-2 ml-10 border border-gray-300">
-            <div className="flex justify-between items-center">
-              {/* Left: Profile & Username */}
-                <div className="flex items-center">
-                <div className="w-10 h-10 bg-blue-500 text-white flex items-center font-bold justify-center rounded-lg mr-3">
-                {nestedReply.username?.charAt(0).toUpperCase() || "?"}
-             </div>
-             <div>
-                <span className="text-lg font-bold text-blue-900">@{nestedReply.username}</span>
-                <span className="text-gray-500 text-xs ml-2">
-                 {new Date(nestedReply.created_at).toLocaleDateString("en-GB", {
-                  day: "2-digit",
-                  month: "short",
-                  year: "numeric",
-                   })}
-                  </span>
-             </div>
-            </div>
-
-              {/* Right: 3-Dots Menu for Reply-to-Reply */}
-              <div className="relative ml-auto">
-                <MoreVertical
-                  size={20}
-                  className="text-gray-500 hover:text-black cursor-pointer menu-icon"
-                  onClick={(event) => {
-                   event.stopPropagation(); // Prevents menu from closing immediately
-                   toggleCommentMenu(nestedReply.commentid);
-                  }}
-                />
-                {commentMenu === nestedReply.commentid && (
-                 <div className="absolute right-0 mt-2 w-40 bg-white shadow-lg rounded-md p-2 z-50 menu-container">
-                   <button
-                      className="block w-full text-left p-2 hover:bg-gray-100 text-gray-700"
-                      onClick={() => console.log("Edit reply", nestedReply.commentid)}
-                   >
-                      Delete
-                   </button>
-                   <button
-                      className="block w-full text-left p-2 hover:bg-gray-100 text-red-500"
-                       onClick={() => console.log("Delete reply", nestedReply.commentid)}
-                    >
-                     Report
-                    </button>
-                  </div>
-                )}
-             </div>
-            </div>
-
-            {/* Reply Content (Show @username only for Reply-to-Reply) */}
-            <p className="mt-1 text-gray-700">
-              <span className="text-blue-900 font-bold">
-                @{reply.username}
-              </span>{" "}
-              {nestedReply.content.replace(/^@\S+\s/, '')}
-            </p>
-
-            {/* Reply Button for Reply-to-Reply */}
-            <button className="mt-2 text-blue-500 hover:underline"
-              onClick={() => {
-                setReplyingTo(nestedReply.commentid);
-                setReplyText(`@${nestedReply.username} `);
-              }}>
-              Reply
-            </button>
-
-            {/* Show Reply Input Box for Reply-to-Reply */}
-            {replyingTo === nestedReply.commentid && (
-              <div className="mt-3">
-                <textarea
-                  className="w-full p-2 border rounded"
-                  placeholder="Write your reply..."
-                  value={replyText}
-                  onChange={(e) => setReplyText(e.target.value)}
-                />
-                <button className="mt-2 px-4 py-2 bg-blue-500 text-white rounded"
-                  onClick={() => handlePostReply(nestedReply.postid, nestedReply.commentid, nestedReply.username)}>
-                  Post Reply
-                </button>
-                <button className="mt-2 ml-2 px-4 py-2 bg-gray-400 text-white rounded"
-                  onClick={() => setReplyingTo(null)}>
-                  Cancel
-                </button>
-              </div>
-            )}
-          </div>
+        {/* Handle reply-to-reply */}
+        {reply.replies?.map((subReply) => (
+          <CommentCard
+            key={subReply.commentid}
+            comment={subReply}
+            replyingTo={replyingTo}
+            replyText={replyText}
+            onReplyClick={handleReplyClick}
+            onPostReply={handlePostReply}
+            setReplyText={setReplyText}
+            user={user}
+            isReply={true}
+          />
         ))}
       </React.Fragment>
     ))}
   </React.Fragment>
 ))}
-
-
             </div>
           ))
         )}
