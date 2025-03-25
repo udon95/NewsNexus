@@ -108,14 +108,6 @@ const Room = () => {
         .eq("roomid", roomid)
         .single();
 
-      // if (error && error.code !== "PGRST116") {
-      //   console.error("Error checking membership:", error);
-      // } else {
-      //   setIsMember(data && data.exited_at === null);
-      // }
-    
-      // If no row or exited_at != null, user is not a member
-
       if (error || !data || data.exited_at !== null) {
         setIsMember(false);
       } else {
@@ -241,17 +233,20 @@ const Room = () => {
     const insertReplyInNestedStructure = (comments) => {
       return comments.map((comment) => {
         if (comment.commentid === parentCommentId) {
-          return { ...comment, replies: [...comment.replies, newReply] };
-        } else if (comment.replies && comment.replies.length > 0) {
           return {
             ...comment,
-            replies: insertReplyInNestedStructure(comment.replies),
+            replies: [...(comment.replies || []), newReply],
           };
-        } else {
-          return comment;
         }
+    
+        const updatedReplies = comment.replies?.length
+          ? insertReplyInNestedStructure(comment.replies)
+          : [];
+    
+        return { ...comment, replies: updatedReplies };
       });
     };
+    
     
     setArticles(prevArticles =>
         prevArticles.map(article => {
@@ -315,141 +310,76 @@ const handlePostArticleReply = async (postid) => {
     setArticleReplyText("");
 
   };
-  
-  // Function to Exit Room
+
   const handleExitRoom = async () => {
     if (isUpdating) return;
     if (!user) {
       alert("You need to be logged in to exit.");
       return;
-    } 
+    }
     if (!isMember) return;
   
     setIsUpdating(true);
   
     try {
-      // 1. Set exited_at = now
+      const { data: existingEntry, error: fetchError } = await supabase
+        .from("room_members")
+        .select("*")
+        .eq("userid", user.userid)
+        .eq("roomid", roomid)
+        .single();
+  
+      if (fetchError || !existingEntry) {
+        console.error("Error fetching member info before exit:", fetchError);
+        return;
+      }
+  
+      const updatePayload = { exited_at: new Date().toISOString() };
+      if ('exit_count' in existingEntry) {
+        updatePayload.exit_count = (existingEntry.exit_count || 0) + 1;
+      }
+  
       const { error: updateError } = await supabase
         .from("room_members")
-        .update({ exited_at: new Date().toISOString() })
+        .update(updatePayload)
         .eq("userid", user.userid)
         .eq("roomid", roomid);
   
       if (updateError) {
-        console.error("Failed to set exited_at:", updateError);
+        console.error("Error updating exit info:", updateError);
         return;
       }
   
-      // 2. Increment exit_count separately
-      const { error: incrementError } = await supabase
-        .from("room_members")
-        .update({})
-        .eq("userid", user.userid)
-        .eq("roomid", roomid)
-        .increment("exit_count", 1);
-  
-      if (incrementError) {
-        console.error("Failed to increment exit_count:", incrementError);
-        return;
-      }
-  
-      // 3. Decrement member count
       const { error: countError } = await supabase.rpc("decrement_member_count", {
         room_id: roomid,
       });
   
       if (countError) {
-        console.error("Error decrementing:", countError);
+        console.error("Error decrementing member count:", countError);
         return;
       }
   
-      // 4. Update UI
       setIsMember(false);
       fetchRoomDetails();
       localStorage.setItem("refreshRooms", "true");
     } catch (err) {
-      console.error("Unexpected error in exit:", err);
+      console.error("Unexpected exit error:", err);
     } finally {
       setIsUpdating(false);
     }
   };
-  
-
-// Function to Join Room
-// const handleJoinRoom = async () => {
-//   if (!user) {
-//     alert("You need to be logged in to join the room.");
-//     return;
-//   }
-
-//   try {
-//     // Check if user has a previous entry (exited before)
-//     const { data: existingEntry, error: checkError } = await supabase
-//       .from("room_members")
-//       .select("exited_at")
-//       .eq("userid", user.userid)
-//       .eq("roomid", roomid)
-//       .single();
-
-//     if (checkError && checkError.code !== "PGRST116") {
-//       console.error("Error checking previous membership:", checkError);
-//       return;
-//     }
-
-//     if (existingEntry) {
-//       // User has an old entry, update `exited_at` to null (rejoin)
-//       const { error: updateError } = await supabase
-//         .from("room_members")
-//         .update({ exited_at: null })
-//         .eq("userid", user.userid)
-//         .eq("roomid", roomid);
-
-//       if (updateError) {
-//         console.error("Error rejoining room:", updateError);
-//         return;
-//       }
-//     } else {
-//       // First-time join, insert new entry
-//       const { error: insertError } = await supabase
-//         .from("room_members")
-//         .insert([{ userid: user.userid, roomid, exited_at: null }]);
-
-//       if (insertError) {
-//         console.error("Error joining room:", insertError);
-//         return;
-//       }
-//     }
-
-//     // Increment member count
-//     const { error: countError } = await supabase.rpc("increment_member_count", { room_id: roomid });
-
-//     if (countError) {
-//       console.error("Error updating member count:", countError);
-//       return;
-//     }
-
-//     setTimeout(checkMembership, 500); // Ensure the UI updates after joining
-
-//   } catch (error) {
-//     console.error("Unexpected error while joining room:", error);
-//   }
-// };
 
 const handleJoinRoom = async () => {
-  if (isUpdating) return;        // Prevent spamming
+  if (isUpdating) return;
   if (!user) {
     alert("You need to be logged in to join.");
     return;
   }
-  if (isMember) {
-    // Already a member – do nothing
-    return;
-  }
+  if (isMember) return;
 
   setIsUpdating(true);
 
   try {
-    // 1) Check if a membership row already exists
     const { data: existingEntry, error: checkError } = await supabase
       .from("room_members")
       .select("*")
@@ -463,41 +393,54 @@ const handleJoinRoom = async () => {
     }
 
     if (existingEntry) {
-      // 2) Rejoin: update row by setting exited_at = null and increment join_count
+      const updatePayload = { exited_at: null };
+      if ('join_count' in existingEntry) {
+        updatePayload.join_count = (existingEntry.join_count || 0) + 1;
+      }
+
       const { error: updateError } = await supabase
         .from("room_members")
-        .update({ exited_at: null })
+        .update(updatePayload)
         .eq("userid", user.userid)
-        .eq("roomid", roomid)
-        .increment("join_count", 1); // Increment join_count
-        
+        .eq("roomid", roomid);
+
       if (updateError) {
         console.error("Error rejoining:", updateError);
         return;
       }
     } else {
-      // 3) First-time join: insert a new membership row with join_count = 1
+      const newEntry = {
+        userid: user.userid,
+        roomid,
+        exited_at: null,
+      };
+
+      // Add counters only if expected
+      if ("join_count" in (await supabase.from("room_members").select("join_count").limit(1)).data?.[0] ?? {}) {
+        newEntry.join_count = 1;
+        newEntry.exit_count = 0;
+      }
+
       const { error: insertError } = await supabase
         .from("room_members")
-        .insert([{ userid: user.userid, roomid, exited_at: null, join_count: 1, exit_count: 0 }]);
+        .insert([newEntry]);
+
       if (insertError) {
         console.error("Error joining:", insertError);
         return;
       }
     }
 
-    // 4) Increment member_count
     const { error: countError } = await supabase.rpc("increment_member_count", { room_id: roomid });
+
     if (countError) {
-      console.error("Error incrementing:", countError);
+      console.error("Error incrementing member count:", countError);
       return;
     }
 
-    // 5) Optimistically set isMember = true
     setIsMember(true);
-
-    // 6) Re-fetch the room details so we get the updated member_count
     fetchRoomDetails();
+    localStorage.setItem("refreshRooms", "true");
   } catch (err) {
     console.error("Unexpected join error:", err);
   } finally {
@@ -598,7 +541,15 @@ const CommentCard = ({
       WebkitBoxOrient: 'vertical',
     }}
   >
-    {comment.content}
+      {comment.content.split(/(@\w+)/g).map((part, index) =>
+    part.startsWith("@") ? (
+      <strong key={index} className="text-blue-900 font-bold">
+        {part}
+      </strong>
+    ) : (
+      <span key={index}>{part}</span>
+    )
+  )}
   </p>
 
   {comment.content.length > 100 && (
