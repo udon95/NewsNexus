@@ -21,10 +21,23 @@ const Room = () => {
   const [isUpdating, setIsUpdating] = useState(false);
   const [reportTarget, setReportTarget] = useState(null); // { type: "article" | "comment", id: string }
   const [selectedReason, setSelectedReason] = useState("");
+  const [expandedComments, setExpandedComments] = useState({});
+  const [showReplies, setShowReplies] = useState(false);
+  const [visibleReplies, setVisibleReplies] = useState({});
 
+  const toggleReplies = (commentId) => {
+    setVisibleReplies(prev => ({
+      ...prev,
+      [commentId]: !prev[commentId]
+    }));
+  };  
 
-
-  console.log("Current replyingTo:", replyingTo);
+  const toggleContent = (commentId) => {
+    setExpandedComments(prev => ({
+      ...prev,
+      [commentId]: !prev[commentId]
+    }));
+  };  
 
   const toggleArticleMenu = (postid) => {
     console.log("Toggling menu for post:", postid); // Debugging
@@ -518,77 +531,98 @@ const CommentCard = ({
 
 
   return (
-<div className={`bg-white shadow-md rounded-lg p-4 mt-4 border border-gray-200 ${isReply ? "ml-6" : ""}`}>
-{/* Header: Avatar + Username */}
-<div className="flex justify-between items-center">
-  <div className="flex items-center">
-    <div className="w-10 h-10 bg-blue-500 text-white flex items-center justify-center font-bold rounded-lg mr-3">
-      {comment.username?.charAt(0).toUpperCase()}
+  <div className={`bg-white shadow-md rounded-lg p-4 mt-4 border border-gray-200 ${isReply ? "ml-6" : ""}`}>
+  {/* Header: Avatar + Username */}
+  <div className="flex justify-between items-center mb-[6px]">
+    <div className="flex items-center">
+      <div className="w-10 h-10 bg-blue-500 text-white flex items-center justify-center font-bold rounded-lg mr-3">
+       {comment.username?.charAt(0).toUpperCase()}
+     </div>
+      <div>
+        <span className="text-lg font-bold text-blue-900">@{comment.username}</span>
+        <span className="text-gray-500 text-sm ml-2">
+         {new Date(comment.created_at).toLocaleDateString("en-GB")}
+        </span>
+     </div>
     </div>
-    <div>
-      <span className="text-lg font-bold text-blue-900">@{comment.username}</span>
-      <span className="text-gray-500 text-sm ml-2">
-        {new Date(comment.created_at).toLocaleDateString("en-GB")}
-      </span>
-    </div>
-  </div>
 
-  {/* 3-dot menu */}
-  <div className="relative">
-    <MoreVertical
-      size={20}
-      className="text-gray-500 hover:text-black cursor-pointer menu-icon"
-      onClick={(event) => {
-        event.stopPropagation();
-        toggleCommentMenu(comment.commentid);
-      }}
+   {/* 3-dot menu */}
+   <div className="relative">
+     <MoreVertical
+       size={20}
+       className="text-gray-500 hover:text-black cursor-pointer menu-icon"
+       onClick={(event) => {
+         event.stopPropagation();
+         toggleCommentMenu(comment.commentid);
+       }}
     />
-{commentMenu === comment.commentid && (
-  <div className="absolute right-0 mt-2 w-40 bg-white shadow-lg rounded-md p-2 z-50 menu-container">
-    {user?.userid === comment.userid ? (
-      <>
-        <button
-          className="block w-full text-left p-2 hover:bg-gray-100 text-gray-700"
-          onClick={() => console.log("Edit comment", comment.commentid)}
-        >
-          Edit
-        </button>
-        <button
-          className="block w-full text-left p-2 hover:bg-gray-100 text-red-500"
-          onClick={() => console.log("Delete comment", comment.commentid)}
-        >
-          Delete
+  {commentMenu === comment.commentid && (
+    <div className="absolute right-0 mt-2 w-40 bg-white shadow-lg rounded-md p-2 z-50 menu-container">
+     {user?.userid === comment.userid ? (
+       <>
+         <button
+            className="block w-full text-left p-2 hover:bg-gray-100 text-gray-700"
+            onClick={() => console.log("Edit comment", comment.commentid)}
+         >
+           Edit
+         </button>
+         <button
+            className="block w-full text-left p-2 hover:bg-gray-100 text-red-500"
+           onClick={() => console.log("Delete comment", comment.commentid)}
+         >
+           Delete
         </button>
       </>
     ) : (
-      <button
-        className="block w-full text-left p-2 hover:bg-gray-100 text-red-500"
-        // onClick={() => console.log("Report comment", comment.commentid)}
-        onClick={() => setReportTarget({ type: "comment", id: comment.commentid })}
-      >
-        Report
-      </button>
-    )}
-  </div>
-)}
-
-</div>
-</div>
-
-      {/* Content */}
-      <p className="mt-2 text-gray-700">{comment.content}</p>
-
-      {/* Reply button */}
-      <div className="flex flex-col items-end mt-2">
-      {!isReplying && (
         <button
-          className="text-blue-500 hover:text-blue-700"
-          onClick={() => onReplyClick(comment.commentid, comment.username)}
-          aria-label="Reply"
+         className="block w-full text-left p-2 hover:bg-gray-100 text-red-500"
+          onClick={() => setReportTarget({ type: "comment", id: comment.commentid })}
         >
-          <CornerDownLeft size={18} />
+          Report
         </button>
       )}
+    </div>
+  )}
+  </div>
+  </div>
+
+      {/* Content of Comment Card */}
+      <div className="max-w-[calc(100%-3rem)]">
+  <p
+    className={`text-gray-700 whitespace-pre-wrap break-words transition-all duration-300 ease-in-out overflow-hidden ${
+      expandedComments[comment.commentid] ? "max-h-full" : "max-h-[3.3em]"
+    }`}
+    style={{
+      display: '-webkit-box',
+      WebkitLineClamp: expandedComments[comment.commentid] ? 'unset' : 2,
+      WebkitBoxOrient: 'vertical',
+    }}
+  >
+    {comment.content}
+  </p>
+
+  {comment.content.length > 100 && (
+    <span
+      onClick={() => toggleContent(comment.commentid)}
+      className="text-blue-500 cursor-pointer mt-1 inline-block"
+    >
+      {expandedComments[comment.commentid] ? "Show less" : "Show more"}
+    </span>
+  )}
+  </div>
+
+
+  {/* Reply button */}
+  <div className="flex flex-col items-end mt-2">
+    {!isReplying && (
+      <button
+        className="text-blue-500 hover:text-blue-700"
+        onClick={() => onReplyClick(comment.commentid, comment.username)}
+        aria-label="Reply"
+      >
+        <CornerDownLeft size={18} />
+        </button>
+    )}
 
    {/* Reply box (conditionally rendered) */}
    {isReplying && (
@@ -624,8 +658,10 @@ const CommentCard = ({
           </button>
         </div>
       </div>
+      
     )}
       </div>
+      {/* HERE */}
     </div>   
   );
 };
@@ -815,25 +851,24 @@ const CommentCard = ({
       toggleCommentMenu={toggleCommentMenu}
       commentMenu={commentMenu}
     />
+ {/* Toggle Button BELOW Top Comment Card */}
+ {comment.replies?.length > 0 && (
+      <div className="flex justify-end mt-1">
+        <button
+          className="text-sm text-blue-500 hover:underline"
+          onClick={() => toggleReplies(comment.commentid)}
+        >
+          {visibleReplies[comment.commentid] ? "Hide replies" : `View ${comment.replies.length} repl${comment.replies.length > 1 ? "ies" : "y"}`}
+        </button>
+      </div>
+    )}
 
-    {comment.replies?.map((reply) => (
-      <React.Fragment key={reply.commentid}>
-        <CommentCard
-          comment={reply}
-          replyingTo={replyingTo}
-          replyText={replyText}
-          onReplyClick={handleReplyClick}
-          onPostReply={handlePostReply}
-          setReplyText={setReplyText}
-          user={user}
-          isReply={true}
-        />
-
-        {/* Handle reply-to-reply */}
-        {reply.replies?.map((subReply) => (
+    {/* If visible, render replies */}
+    {visibleReplies[comment.commentid] &&
+      comment.replies?.map((reply) => (
+        <React.Fragment key={reply.commentid}>
           <CommentCard
-            key={subReply.commentid}
-            comment={subReply}
+            comment={reply}
             replyingTo={replyingTo}
             replyText={replyText}
             onReplyClick={handleReplyClick}
@@ -842,11 +877,25 @@ const CommentCard = ({
             user={user}
             isReply={true}
           />
-        ))}
+
+          {/* 🪜 Sub-replies (if any) */}
+          {reply.replies?.map((subReply) => (
+            <CommentCard
+              key={subReply.commentid}
+              comment={subReply}
+              replyingTo={replyingTo}
+              replyText={replyText}
+              onReplyClick={handleReplyClick}
+              onPostReply={handlePostReply}
+              setReplyText={setReplyText}
+              user={user}
+              isReply={true}
+            />
+          ))}
+          </React.Fragment>
+         ))}
       </React.Fragment>
     ))}
-  </React.Fragment>
-))}
             </div>
           ))
         )}
