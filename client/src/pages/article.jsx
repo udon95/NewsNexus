@@ -1,220 +1,123 @@
-import React, { useState, useEffect } from "react";
-// import React from "react";s
-import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect, useRef } from "react";
 import "../index.css";
-import Navbar from "../components/navbar.jsx";
-import articleImage from "../assets/lhl.png"; 
-
-import { StarIcon as StarFilled } from "@heroicons/react/24/solid"; // Filled star
-import { StarIcon as StarOutline } from "@heroicons/react/24/outline"; // Outline star
-import { FlagIcon } from "@heroicons/react/24/solid"; 
-import { PencilIcon, ShareIcon } from "@heroicons/react/24/solid"; // Submit & Share Icons
-import { SpeakerWaveIcon} from "@heroicons/react/24/outline"; // Text-to-Speech Icon
-
-
+import Navbar from "../components/navBar.jsx";
+import Rate from "../components/rateAndFlag.jsx";
+import Content from "../components/articleContent.jsx";
+import Comments from "../components/commentsSection.jsx";
+import useAuthHook from "../hooks/useAuth.jsx";
+import { BookOpenIcon, XMarkIcon } from "@heroicons/react/24/outline";
 
 const Article = () => {
-  const [rating, setRating] = useState(0); // ⭐ Track user rating
-  const [hover, setHover] = useState(0); // ⭐ Handle hover effect
+  const articleRef = useRef(null);
+  const [selectedText, setSelectedText] = useState("");
+  const [definition, setDefinition] = useState(null);
+  const [showDictionary, setShowDictionary] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [buttonPosition, setButtonPosition] = useState({ x: 0, y: 0 });
+  const buttonRef = useRef(null);
+  const { userType } = useAuthHook();
 
-  const [comments, setComments] = useState([]);
+  // TEMPORARY HARDCODED articleId (you'll replace this later)
+  const mockArticleId = "11111111-1111-1111-1111-111111111111";
 
   useEffect(() => {
-    // Simulated database fetch (Replace this with an API call in the future)
-    const fakeComments = [
-      {
-        id: 1,
-        author: "P",
-        date: "Commented on 22/01/2025",
-        content:
-          "Aut consequatur maxime aut harum repudiandae aut pariatur autem sed labore pariatur.",
-        hasReply: true,
-      },
-      {
-        id: 2,
-        author: "P",
-        date: "Replied on 22/01/2025",
-        content:
-          "Aut consequatur maxime aut harum repudiandae aut pariatur autem sed.",
-        isReply: true,
-      },
-    ];
-
-    setComments(fakeComments);
+    setTimeout(() => {
+      window.scrollTo(0, 0);
+    }, 100);
+    return () => {
+      window.speechSynthesis.cancel();
+    };
   }, []);
 
+  const handleTextSelection = () => {
+    const selection = window.getSelection();
+    const text = selection.toString().trim();
+
+    if (text) {
+      setSelectedText(text);
+      const range = selection.getRangeAt(0).getBoundingClientRect();
+      setButtonPosition({
+        x: range.left + window.scrollX,
+        y: range.top + window.scrollY - 40,
+      });
+    } else {
+      setSelectedText("");
+    }
+  };
+
+  const fetchDefinition = async () => {
+    if (!selectedText) return;
+
+    setLoading(true);
+    try {
+      const response = await fetch(
+        `https://api.dictionaryapi.dev/api/v2/entries/en/${selectedText}`
+      );
+      const data = await response.json();
+      if (Array.isArray(data) && data.length > 0) {
+        setDefinition(data[0].meanings[0].definitions[0].definition);
+      } else {
+        setDefinition("No definition found.");
+      }
+      setShowDictionary(true);
+    } catch (error) {
+      setDefinition("Error fetching definition.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
-    <div className="w-full min-h-screen flex flex-col bg-white">
-      {/* Navbar */}
+    <div
+      className="min-h-screen w-screen flex flex-col bg-white"
+      onMouseUp={handleTextSelection}
+    >
       <Navbar />
 
-      {/* Rating & Actions Section */}
-      <div className="w-full flex items-center justify-end px-6 sm:px-8 py-4 border-b space-x-4">
-        
-        {/* ⭐ Full-Star Rating System */}
-<div className="flex items-center space-x-1">
-  {[...Array(4)].map((_, index) => {
-    const ratingValue = index + 1;
-    
-    return (
-      <button
-        key={index}
-        className="focus:outline-none"
-        onMouseEnter={() => setHover(ratingValue)}
-        onMouseLeave={() => setHover(0)}
-        onClick={() => setRating(ratingValue)}
-      >
-        {ratingValue <= (hover || rating) ? (
-          <StarFilled className="h-6 w-6 text-black" />
-        ) : (
-          <StarOutline className="h-6 w-6 text-black" />
-        )}
-      </button>
-    );
-  })}
-</div>
-
-
-
-        {/* 🚩 Community Notes (Using Flag Icon) */}
-        <button
-          className="w-10 h-10 p-2 bg-gray-200 rounded-lg hover:bg-gray-300 flex items-center justify-center"
-          title="Community Notes"
-        >
-          <FlagIcon className="h-6 w-6 text-black" />
-        </button>
-
-        {/* 🅁 Report Button (Same size as flag button) */}
-        <button
-          className="w-10 h-10 p-2 bg-gray-200 rounded-lg hover:bg-gray-300 flex items-center justify-center font-bold text-black"
-          title="Report Article"
-        >
-          R
-        </button>
-
+      <div className="border-b w-full">
+        <div className="flex flex-col items-right w-full px-4 sm:px-8 py-4 mx-auto max-w-screen-lg">
+          <Rate />
+        </div>
       </div>
 
-      {/* Main Content */}
-      <main className="flex flex-col items-center w-full px-4 sm:px-8 py-10 mx-auto max-w-4xl">
-        {/* Article Title */}
-        <h1 className="font-grotesk text-4xl sm:text-5xl font-bold text-black text-left">
-          Personal Legacy of Lee Hsien Loong
-        </h1>
+      <main className="flex flex-col items-center w-full px-4 sm:px-8 py-10 mx-auto max-w-screen-lg">
+        <Content articleRef={articleRef} />
+        <Comments articleId={mockArticleId} />
 
-        {/* Article Image */}
-        <img
-          src={articleImage}
-          alt="Article"
-          className="w-full rounded-lg my-6 bg-gray-300"
-        />
+        {selectedText && userType === "Premium" && (
+          <button
+            ref={buttonRef}
+            onClick={fetchDefinition}
+            className="absolute bg-blue-500 text-white px-3 py-1 rounded-lg flex items-center space-x-2 shadow-md"
+            style={{
+              left: `${buttonPosition.x}px`,
+              top: `${buttonPosition.y}px`,
+              position: "absolute",
+              zIndex: 50,
+            }}
+          >
+            <BookOpenIcon className="h-5 w-5" />
+            <span>Define "{selectedText}"</span>
+          </button>
+        )}
 
-        {/* Article Date */}
-        <span className="font-grotesk text-lg text-[#00317F] mb-4">
-          Posted on 22/01/2025
-        </span>
-
-        {/* Article Content */}
-        <div className="text-lg sm:text-xl font-medium text-black leading-relaxed">
-          <p>
-            Lorem ipsum dolor sit amet. Eum error officiis est dolorem
-            architecto quo iusto quos rem ipsam maxime. Est nulla dolor cum
-            saepe esse qui quia fugiat ut numquam harum. Aut enim assumenda sed
-            quidem modi eos fugiat nisi et maxime delectus aut minus labore.
-          </p>
-          <p>
-            Sit voluptatem ipsam hic iste neque id sunt quia aut ipsa
-            necessitatibus et magni voluptatem aut ratione earum qui suscipit
-            ratione?
-          </p>
-          <p>
-            Lorem ipsum dolor sit amet. Eum error officiis est dolorem
-            architecto quo iusto quos rem ipsam maxime. Est nulla dolor cum
-            saepe esse qui quia fugiat ut numquam harum. Aut enim assumenda sed
-            quidem modi eos fugiat nisi et maxime delectus aut minus labore.
-          </p>
-          <p>
-            Sit voluptatem ipsam hic iste neque id sunt quia aut ipsa
-            necessitatibus et magni voluptatem aut ratione earum qui suscipit
-            ratione?
-          </p>
-          <p>
-            Lorem ipsum dolor sit amet. Eum error officiis est dolorem
-            architecto quo iusto quos rem ipsam maxime. Est nulla dolor cum
-            saepe esse qui quia fugiat ut numquam harum. Aut enim assumenda sed
-            quidem modi eos fugiat nisi et maxime delectus aut minus labore.
-          </p>
-          <p>
-            Sit voluptatem ipsam hic iste neque id sunt quia aut ipsa
-            necessitatibus et magni voluptatem aut ratione earum qui suscipit
-            ratione?
-          </p>
-        </div>
-
-        {/* Comment Input Section (Below Article, Above Comments) */}
-        <div className="w-full flex items-center justify-between px-6 sm:px-8 py-4">
-          {/* Comment Input Field */}
-          <input
-            type="text"
-            placeholder="Write a comment..."
-            className="flex-grow bg-gray-100 rounded-lg px-4 py-2 text-black placeholder-gray-500 focus:outline-none"
-          />
-
-          {/* Action Buttons (Submit, Share, Text-to-Speech) */}
-          <div className="flex space-x-2 ml-3">
-            {/* ✏ Submit Button */}
-            <button className="w-10 h-10 p-2 bg-gray-700 rounded-lg hover:bg-gray-800 flex items-center justify-center">
-              <PencilIcon className="h-5 w-5 text-white" />
-            </button>
-
-            {/* 🔗 Share Button */}
-            <button className="w-10 h-10 p-2 bg-gray-700 rounded-lg hover:bg-gray-800 flex items-center justify-center">
-              <ShareIcon className="h-5 w-5 text-white" />
-            </button>
-
-            {/* 🎧 Text-to-Speech Button */}
-            <button className="w-10 h-10 p-2 bg-gray-700 rounded-lg hover:bg-gray-800 flex items-center justify-center">
-              <SpeakerWaveIcon className="h-5 w-5 text-white" />
-            </button>
-
-          </div>
-        </div>
-
-
-        {/* Comments Section */}
-        <div className="w-full mt-10">
-          <h2 className="text-3xl font-bold text-black mb-4">Comments</h2>
-          {comments.length > 0 ? (
-            comments.map((comment) => (
-              <div
-                key={comment.id}
-                className={`w-full max-w-3xl bg-gray-200 p-4 rounded-lg mb-4 ${
-                  comment.isReply ? "ml-10 max-w-2xl" : ""
-                }`}
-              >
-                <div className="flex items-center gap-4">
-                  <div
-                    className={`w-12 h-12 flex items-center justify-center text-xl font-bold rounded-lg ${
-                      comment.isReply ? "bg-purple-300" : "bg-blue-300"
-                    }`}
-                  >
-                    {comment.author}
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-[#00317F] text-sm font-semibold">
-                      {comment.date}
-                    </p>
-                    <p className="text-lg text-black">{comment.content}</p>
-                  </div>
-                </div>
+        {showDictionary && (
+          <div className="fixed inset-0 flex items-center justify-center backdrop-blur-sm z-50">
+            <div className="bg-white shadow-lg rounded-lg p-6 w-[90%] max-w-md text-center">
+              <div className="flex justify-between items-center">
+                <h2 className="text-xl font-bold text-blue-700">Dictionary</h2>
+                <button onClick={() => setShowDictionary(false)}>
+                  <XMarkIcon className="h-6 w-6 text-gray-600 hover:text-black" />
+                </button>
               </div>
-            ))
-          ) : (
-            <p className="text-gray-500">No comments yet.</p>
-          )}
-        </div>
+              <p className="text-lg mt-2">
+                <strong>{selectedText}:</strong>{" "}
+                {loading ? "Loading..." : definition}
+              </p>
+            </div>
+          </div>
+        )}
       </main>
-
-      
     </div>
   );
 };
