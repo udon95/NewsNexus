@@ -878,7 +878,7 @@ const CommentCard = ({
             isReply={true}
           />
 
-          {/* 🪜 Sub-replies (if any) */}
+          {/* Sub-replies (if any) */}
           {reply.replies?.map((subReply) => (
             <CommentCard
               key={subReply.commentid}
