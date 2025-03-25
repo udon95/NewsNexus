@@ -661,7 +661,6 @@ const CommentCard = ({
       
     )}
       </div>
-      {/* HERE */}
     </div>   
   );
 };
@@ -853,12 +852,12 @@ const CommentCard = ({
     />
  {/* Toggle Button BELOW Top Comment Card */}
  {comment.replies?.length > 0 && (
-      <div className="flex justify-end mt-1">
+      <div className="flex justify-end pr-3 mt-4 mb-1">
         <button
-          className="text-sm text-blue-500 hover:underline"
+          className="text-sm text-blue-500 font-semibold hover:underline"
           onClick={() => toggleReplies(comment.commentid)}
         >
-          {visibleReplies[comment.commentid] ? "Hide replies" : `View ${comment.replies.length} repl${comment.replies.length > 1 ? "ies" : "y"}`}
+          {visibleReplies[comment.commentid] ? "Hide replies" : `View ${comment.replies.length} Repl${comment.replies.length > 1 ? "ies" : "y"}`}
         </button>
       </div>
     )}
