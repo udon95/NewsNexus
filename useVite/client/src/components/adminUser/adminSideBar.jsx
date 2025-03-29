@@ -1,67 +1,42 @@
 import React, { useState } from "react";
 import { Menu, X } from "lucide-react";
+import { Link } from "react-router-dom";
 
 export const AdminSidebar = () => {
-  const [isOpen, setIsOpen] = useState(false); // State to toggle menu
+  const [isOpen, setIsOpen] = useState(false);
 
   return (
     <>
-      {/* Hamburger Menu Button */}
+      {/* Mobile Menu Toggle Button */}
       <button
-        className="md:hidden absolute top-4 left-3 bg-blue-600 text-white p-2 rounded-md shadow-lg"
+        className="md:hidden absolute top-4 left-3 bg-blue-600 text-white p-2 rounded-md shadow-lg z-50"
         onClick={() => setIsOpen(!isOpen)}
       >
         {isOpen ? <X size={26} /> : <Menu size={26} />}
       </button>
 
-      {/* Sidebar (Hidden by Default, Slides in on Mobile) */}
+      {/* Sidebar */}
       <nav
-        className={`fixed md:relative md:top-0 top-18 left-0 h-full bg-blue-200 text-blue-900 shadow-xl p-6
-        transform transition-transform duration-300 ease-in-out z-50 
-        ${isOpen ? "translate-x-0" : "-translate-x-full"} md:translate-x-0 
-        w-full max-w-[210px] md:max-w-[280px]`}
+        className={`
+          bg-[#BFD8FF] text-blue-900 p-6 shadow-xl
+          md:relative md:translate-x-0 md:w-[280px] w-full
+          flex flex-col gap-3 text-[15px] font-grotesk
+          ${isOpen ? "translate-x-0" : "-translate-x-full"}
+          transform transition-transform duration-300 ease-in-out
+          md:min-h-screen min-h-full
+        `}
       >
-        {/* Close Button */}
-        <button
-          className="md:hidden absolute top-4 right-4 text-blue-900"
-          onClick={() => setIsOpen(false)}
-        >
-          
-        </button>
-
-        {/* Sidebar Links */}
-        <div className="flex flex-col gap-4 mt-2 text-lg font-grotesk">
-        <a href="/AdminGuidelines" className="font-bold">
-            Guidelines &gt;
-          </a>
-          <a href="/AdminCategories" className="tracking-wide">
-            Categories &gt;
-          </a>
-          <a href="/AdminProfile" className="tracking-wide">
-             Profile &gt;
-          </a>
-          <a href="/AdminSubscription" className="tracking-wide">
-             Subscription &gt;
-          </a>          
-          <a href="/AdminFeatures" className="tracking-wide">
-             Feature display &gt;
-          </a>
-          <a href="/AdminUsers" className="tracking-wide">
-            Users &gt;
-          </a>
-          <a href="/AdminTestimonials" className="tracking-wide">
-            Testimonial &gt;
-          </a>
-          <a href="/AdminExperts" className="tracking-wide">
-            Expert Applications &gt;
-          </a>
-          <a href="/AdminCommentReports" className="tracking-wide">
-            Comment Reports &gt;
-          </a>
-          <a href="/AdminArticleReports" className="tracking-wide">
-            Article Reports &gt;
-          </a>
-        </div>
+        <Link to="/admin-guidelines">Update Guidelines &gt;</Link>
+        <Link to="/admin-categories">Manage Categories &gt;</Link>
+        <Link to="/admin-profile">Manage Profile &gt;</Link>
+        <Link to="/admin-subscriptions">Manage Subscriptions &gt;</Link>
+        <Link to="/admin-features">Manage Feature Display &gt;</Link>
+        <Link to="/admin-users">Manage Users &gt;</Link>
+        <Link to="/admin-testimonials">Manage Testimonials &gt;</Link>
+        <Link to="/admin-applications">Manage Applications &gt;</Link>
+        <Link to="/admin-comment-reports">Comment Reports &gt;</Link>
+        <Link to="/admin-article-reports">Article Reports &gt;</Link>
+        <Link to="/admin-ratings">Ratings Report &gt;</Link>
       </nav>
     </>
   );
