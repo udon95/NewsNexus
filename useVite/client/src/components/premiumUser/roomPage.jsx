@@ -24,11 +24,33 @@ const Room = () => {
   const [expandedComments, setExpandedComments] = useState({});
   const [showReplies, setShowReplies] = useState(false);
   const [visibleReplies, setVisibleReplies] = useState({});
-  // const [editingCommentId, setEditingCommentId] = useState(null);
-  // const [editedCommentText, setEditedCommentText] = useState("");
+  const [editingCommentId, setEditingCommentId] = useState(null);
+  const [editedCommentText, setEditedCommentText] = useState("");
+  const [expandedCommentsForPost, setExpandedCommentsForPost] = useState({});
+  const [trueParentCommentId, setTrueParentCommentId] = useState(null);
+  const [carouselIndex, setCarouselIndex] = useState({});
 
+  const nextSlide = (postid, imageCount) => {
+    setCarouselIndex((prev) => ({
+      ...prev,
+      [postid]: (prev[postid] ?? 0) === imageCount - 1 ? 0 : (prev[postid] ?? 0) + 1,
+    }));
+  };
+  
+  const prevSlide = (postid, imageCount) => {
+    setCarouselIndex((prev) => ({
+      ...prev,
+      [postid]: (prev[postid] ?? 0) === 0 ? imageCount - 1 : (prev[postid] ?? 0) - 1,
+    }));
+  };  
 
-
+  const toggleExpandedComments = (postid) => {
+    setExpandedCommentsForPost((prev) => ({
+      ...prev,
+      [postid]: !prev[postid],
+    }));
+  };
+  
   const toggleReplies = (commentId) => {
     setVisibleReplies(prev => ({
       ...prev,
@@ -59,6 +81,49 @@ const Room = () => {
   
     setArticles((prev) => prev.filter((a) => a.postid !== postid));
     setArticleMenu(null);
+  };  
+
+  const handleDeleteComment = async (commentid, postid) => {
+    const confirmed = window.confirm("Delete this comment?");
+    if (!confirmed) return;
+  
+    const { error } = await supabase
+      .from("room_comments")
+      .update({ is_deleted: true })
+      .eq("commentid", commentid);
+  
+    if (error) {
+      console.error("Error deleting comment:", error);
+      return;
+    }
+  
+    // Update comment locally instead of removing it
+    const markCommentAsDeleted = (comments) =>
+      comments.map((comment) => {
+        if (comment.commentid === commentid) {
+          return { ...comment, is_deleted: true };
+        }
+        if (comment.replies?.length) {
+          return {
+            ...comment,
+            replies: markCommentAsDeleted(comment.replies),
+          };
+        }
+        return comment;
+      });
+  
+    setArticles((prev) =>
+      prev.map((article) =>
+        article.postid === postid
+          ? {
+              ...article,
+              room_comments: markCommentAsDeleted(article.room_comments),
+            }
+          : article
+      )
+    );
+  
+    setCommentMenu(null);
   };  
 
   const toggleArticleMenu = (postid) => {
@@ -120,39 +185,6 @@ const Room = () => {
       setLoading(false);
     }; 
 
-    const handleDeleteComment = async (commentid, postid) => {
-      const confirmed = window.confirm("Delete this comment?");
-      if (!confirmed) return;
-    
-      const { error } = await supabase
-        .from("room_comments")
-        .delete()
-        .eq("commentid", commentid);
-    
-      if (error) {
-        console.error("Error deleting comment:", error);
-        return;
-      }
-    
-      const removeNested = (comments) =>
-        comments
-          .filter((c) => c.commentid !== commentid)
-          .map((c) => ({
-            ...c,
-            replies: c.replies ? removeNested(c.replies) : [],
-          }));
-    
-      setArticles((prev) =>
-        prev.map((article) =>
-          article.postid === postid
-            ? { ...article, room_comments: removeNested(article.room_comments) }
-            : article
-        )
-      );
-    
-      setCommentMenu(null);
-    };    
-
     const checkMembership = async () => {
       if (!user) return;
 
@@ -173,7 +205,16 @@ const Room = () => {
     const fetchArticles = async () => {
       const { data, error } = await supabase
         .from("room_articles")
-        .select("postid, title, content, media_url, created_at, userid, users:userid(username), room_comments(*)")
+        .select(`
+          postid,
+          title,
+          content,
+          created_at,
+          userid,
+          users:userid(username),
+          room_comments(*),
+          room_article_images(image_url)
+        `)
         .eq("roomid", roomid)
         .order("created_at", { ascending: false });
     
@@ -238,6 +279,7 @@ const Room = () => {
       );
       
       setReplyText(parentIsTopLevel ? "" : `@${username} `);
+      setTrueParentCommentId(commentid); // store actual parent
           }
   };
   
@@ -273,7 +315,9 @@ const Room = () => {
             username: user.username,
             content: formattedReplyText,
             created_at: new Date().toISOString(),
-            parent_commentid: parentCommentId, // Ensure correct parent
+            // parent_commentid: parentCommentId, // Ensure correct parent
+            parent_commentid: trueParentCommentId,
+
         },
     ]).select("*");
 
@@ -287,20 +331,28 @@ const Room = () => {
     // **Recursive function to correctly append a reply at any depth**
     const insertReplyInNestedStructure = (comments) => {
       return comments.map((comment) => {
-        if (comment.commentid === parentCommentId) {
+          if (comment.commentid === trueParentCommentId) {
           return {
             ...comment,
             replies: [...(comment.replies || []), newReply],
           };
         }
     
-        const updatedReplies = comment.replies?.length
-          ? insertReplyInNestedStructure(comment.replies)
-          : [];
+        // Check inside deeper nested replies
+        if (comment.replies?.length) {
+          return {
+            ...comment,
+            replies: insertReplyInNestedStructure(comment.replies),
+          };
+        }
     
-        return { ...comment, replies: updatedReplies };
+        return comment;
       });
     };
+    setVisibleReplies((prev) => ({
+      ...prev,
+      [trueParentCommentId]: true
+    }));
     
     
     setArticles(prevArticles =>
@@ -317,7 +369,46 @@ const Room = () => {
 
     setReplyingTo(null);
     setReplyText("");
-};
+  };
+
+  const handleEditComment = async (commentid, postid) => { // ADDED HERE FOR EDIT COMMENT
+    if (!editedCommentText.trim()) return;
+  
+    const { error } = await supabase
+      .from("room_comments")
+      .update({ content: editedCommentText })
+      .eq("commentid", commentid);
+  
+    if (error) {
+      console.error("Error updating comment:", error);
+      return;
+    }
+  
+    // Update comment locally
+    const updateCommentText = (comments) => {
+      return comments.map((comment) => {
+        if (comment.commentid === commentid) {
+          return { ...comment, content: editedCommentText };
+        }
+        if (comment.replies?.length) {
+          return { ...comment, replies: updateCommentText(comment.replies) };
+        }
+        return comment;
+      });
+    };
+  
+    setArticles((prevArticles) =>
+      prevArticles.map((article) =>
+        article.postid === postid
+          ? { ...article, room_comments: updateCommentText(article.room_comments) }
+          : article
+      )
+    );
+  
+    setEditingCommentId(null);
+    setEditedCommentText("");
+    setCommentMenu(null);
+  };  
 
 const handlePostArticleReply = async (postid) => {
     if (!articleReplyText.trim()) return;
@@ -516,6 +607,7 @@ const CommentCard = ({
 }) => {
   const isReplying = replyingTo === comment.commentid;
   const replyBoxRef = React.useRef(null);
+  const editBoxRef = React.useRef(null);
 
   useEffect(() => {
     if (isReplying && replyBoxRef.current) {
@@ -526,6 +618,13 @@ const CommentCard = ({
     }
   }, [isReplying]);  
 
+  useEffect(() => {
+    if (editingCommentId === comment.commentid && editBoxRef.current) {
+      editBoxRef.current.focus();
+      const len = editBoxRef.current.value.length;
+      editBoxRef.current.setSelectionRange(len, len);
+    }
+  }, [editingCommentId]);
 
   return (
   <div className={`bg-white shadow-md rounded-lg p-4 mt-4 border border-gray-200 ${isReply ? "ml-6" : ""}`}>
@@ -559,7 +658,12 @@ const CommentCard = ({
        <>
          <button
             className="block w-full text-left p-2 hover:bg-gray-100 text-gray-700"
-            onClick={() => console.log("Edit comment", comment.commentid)}
+            // onClick={() => console.log("Edit comment", comment.commentid)} HERE ADDED FOR EDIT COMMENT
+            onClick={() => {
+              setEditingCommentId(comment.commentid);
+              setEditedCommentText(comment.content);
+              setCommentMenu(null);
+            }}
          >
            Edit
          </button>
@@ -584,53 +688,89 @@ const CommentCard = ({
   </div>
 
   {/* Content of Comment Card */}
-  <div className="max-w-[calc(100%-3rem)]">
-  <p
-    className={`text-gray-700 whitespace-pre-wrap break-words transition-all duration-300 ease-in-out overflow-hidden ${
-      expandedComments[comment.commentid] ? "max-h-full" : "max-h-[3.3em]"
-    }`}
-    style={{
-      display: '-webkit-box',
-      WebkitLineClamp: expandedComments[comment.commentid] ? 'unset' : 2,
-      WebkitBoxOrient: 'vertical',
-    }}
-  >
-      {comment.content.split(/(@\w+)/g).map((part, index) =>
-    part.startsWith("@") ? (
-      <strong key={index} className="text-blue-900 font-bold">
-        {part}
-      </strong>
+  <div className="w-full">
+    {editingCommentId === comment.commentid ? (
+      <div className="w-full mt-4 min-h-[100px]">
+        <textarea
+          ref={editBoxRef}
+          className="w-full p-2 border rounded"
+          value={editedCommentText}
+          onChange={(e) => setEditedCommentText(e.target.value)}
+        />
+      <div className="mt-2 flex justify-end gap-2">
+        <button
+          className="px-4 py-2 bg-blue-500 text-white rounded"
+          onClick={() => handleEditComment(comment.commentid, comment.postid)}
+        >
+          Save
+        </button>
+        <button
+          className="px-4 py-2 bg-gray-400 text-white rounded"
+          onClick={() => {
+            setEditingCommentId(null);
+            setEditedCommentText("");
+          }}
+        >
+          Cancel
+        </button>
+      </div>
+    </div>
     ) : (
-      <span key={index}>{part}</span>
-    )
-  )}
-  </p>
+    <>
+      {comment.is_deleted ? (
+        <p className="italic text-gray-500">This comment has been deleted</p>
+      ) : (
+        <p
+          className={`text-gray-700 whitespace-pre-wrap break-words transition-all duration-300 ease-in-out overflow-hidden ${
+            expandedComments[comment.commentid] ? "max-h-full" : "max-h-[3.3em]"
+          }`}
+          style={{
+            display: "-webkit-box",
+            WebkitLineClamp: expandedComments[comment.commentid] ? "unset" : 2,
+            WebkitBoxOrient: "vertical",
+          }}
+        >
+          {comment.content.split(/(@\w+)/g).map((part, index) =>
+            part.startsWith("@") ? (
+              <strong key={index} className="text-blue-900 font-bold">
+                {part}
+              </strong>
+            ) : (
+              <span key={index}>{part}</span>
+            )
+          )}
+        </p>
+      )}
 
-  {comment.content.length > 100 && (
-    <span
-      onClick={() => toggleContent(comment.commentid)}
-      className="text-blue-500 cursor-pointer mt-1 inline-block"
-    >
-      {expandedComments[comment.commentid] ? "Show less" : "Show more"}
-    </span>
-  )}
+      {comment.content.length > 100 && (
+        <span
+          onClick={() => toggleContent(comment.commentid)}
+          className="text-blue-500 cursor-pointer mt-1 inline-block"
+        >
+          {expandedComments[comment.commentid] ? "Show less" : "Show more"}
+        </span>
+      )}
+    </>
+    )}
   </div>
-
 
   {/* Reply button */}
   <div className="flex flex-col items-end mt-2">
-    {!isReplying && (
-      <button
-        className="text-blue-500 hover:text-blue-700"
-        onClick={() => onReplyClick(comment.commentid, comment.username)}
-        aria-label="Reply"
-      >
-        <CornerDownLeft size={18} />
+    {!isReplying &&
+      editingCommentId !== comment.commentid &&
+      !comment.is_deleted && (
+        <button
+          className="text-blue-500 hover:text-blue-700"
+          onClick={() => onReplyClick(comment.commentid, comment.username)}
+          aria-label="Reply"
+        >
+          <CornerDownLeft size={18} />
         </button>
-    )}
+      )}
+  </div>
 
    {/* Reply box (conditionally rendered) */}
-   {isReplying && (
+   {isReplying && !comment.is_deleted && (
     <div className="w-full mt-3">
       <textarea
         ref={replyBoxRef}
@@ -666,7 +806,6 @@ const CommentCard = ({
       
     )}
       </div>
-    </div>   
   );
 };
 
@@ -714,17 +853,35 @@ const CommentCard = ({
         ) : (
           articles.map((article) => (
             <div key={article.postid} className="bg-white shadow-md rounded-lg p-6 mt-6">
+              
             {/* Article Image or Placeholder */}
-            {article.media_url ? (
-              <div className="relative mb-4">
+            {article.room_article_images?.length > 0 ? (
+              <div className="relative w-full h-[400px] overflow-hidden mb-4 rounded-lg">
                 <img
-                  src={article.media_url}
+                  src={article.room_article_images[carouselIndex[article.postid] ?? 0]?.image_url}
                   alt="Article"
-                  className="w-full h-[400px] object-cover rounded-lg"
+                  className="w-full h-full object-cover rounded-lg"
                 />
-                <div className="absolute top-3 left-3 bg-blue-500 text-white w-12 h-12 flex items-center justify-center font-bold rounded-lg">
+                <div className="absolute top-3 left-3 bg-blue-500 text-white w-12 h-12 flex items-center justify-center font-bold rounded-lg z-20">
                   {article.users?.username?.charAt(0).toUpperCase() || "?"}
                 </div>
+
+                {article.room_article_images.length > 1 && (
+                  <>
+                    <button
+                      onClick={() => prevSlide(article.postid, article.room_article_images.length)}
+                      className="absolute left-4 top-1/2 transform -translate-y-1/2 px-4 py-2 w-10 h-10 bg-white text-gray rounded-full flex items-center justify-center"
+                    >
+                      ‹
+                    </button>
+                    <button
+                      onClick={() => nextSlide(article.postid, article.room_article_images.length)}
+                      className="absolute right-4 top-1/2 transform -translate-y-1/2 px-4 py-2 w-10 h-10 bg-white text-gray rounded-full flex items-center justify-center"
+                    >
+                      ›
+                    </button>
+                  </>
+                )}
               </div>
             ) : (
               <div className="relative w-full h-[300px] mb-4 rounded-lg overflow-hidden bg-gray-300 flex items-center justify-center">
@@ -831,7 +988,10 @@ const CommentCard = ({
   </div>
 )}
 
-{article.room_comments.map((comment) => (
+{(expandedCommentsForPost[article.postid] 
+  ? article.room_comments 
+  : article.room_comments.slice(0, 3)
+).map((comment) => (
   <React.Fragment key={comment.commentid}>
     <CommentCard
       comment={comment}
@@ -845,8 +1005,8 @@ const CommentCard = ({
       toggleCommentMenu={toggleCommentMenu}
       commentMenu={commentMenu}
     />
- {/* Toggle Button BELOW Top Comment Card */}
- {comment.replies?.length > 0 && (
+
+    {comment.replies?.length > 0 && (
       <div className="flex justify-end pr-3 mt-4 mb-1">
         <button
           className="text-sm text-blue-500 font-semibold hover:underline"
@@ -857,7 +1017,6 @@ const CommentCard = ({
       </div>
     )}
 
-    {/* If visible, render replies */}
     {visibleReplies[comment.commentid] &&
       comment.replies?.map((reply) => (
         <React.Fragment key={reply.commentid}>
@@ -871,8 +1030,6 @@ const CommentCard = ({
             user={user}
             isReply={true}
           />
-
-          {/* Sub-replies (if any) */}
           {reply.replies?.map((subReply) => (
             <CommentCard
               key={subReply.commentid}
@@ -886,17 +1043,30 @@ const CommentCard = ({
               isReply={true}
             />
           ))}
-          </React.Fragment>
-         ))}
-      </React.Fragment>
-    ))}
+        </React.Fragment>
+      ))}
+  </React.Fragment>
+))}
+
+{article.room_comments.length > 3 && (
+  <div className="flex justify-center mt-2">
+    <button
+      onClick={() => toggleExpandedComments(article.postid)}
+      className="text-md font-semibold text-grey-600 hover:underline"
+    >
+      {expandedCommentsForPost[article.postid]
+        ? "Show less comments"
+        : `Show all ${article.room_comments.length} comments`}
+    </button>
+  </div>
+)}
+
             </div>
           ))
         )}
         {reportTarget && (
-  // <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-<div className="fixed inset-0 backdrop-blur-sm bg-black/10 flex items-center justify-center z-50">
-<div className="bg-white rounded-xl shadow-lg w-[90%] max-w-md p-6 relative">
+          <div className="fixed inset-0 backdrop-blur-sm bg-black/10 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl shadow-lg w-[90%] max-w-md p-6 relative">
       {/* Close Button */}
       <button
         className="absolute top-3 right-4 text-gray-600 hover:text-black text-xl"
