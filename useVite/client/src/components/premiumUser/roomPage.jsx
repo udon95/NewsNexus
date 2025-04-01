@@ -24,6 +24,10 @@ const Room = () => {
   const [expandedComments, setExpandedComments] = useState({});
   const [showReplies, setShowReplies] = useState(false);
   const [visibleReplies, setVisibleReplies] = useState({});
+  // const [editingCommentId, setEditingCommentId] = useState(null);
+  // const [editedCommentText, setEditedCommentText] = useState("");
+
+
 
   const toggleReplies = (commentId) => {
     setVisibleReplies(prev => ({
@@ -37,6 +41,24 @@ const Room = () => {
       ...prev,
       [commentId]: !prev[commentId]
     }));
+  };  
+
+  const handleDeleteArticle = async (postid) => {
+    const confirmed = window.confirm("Are you sure you want to delete this article?");
+    if (!confirmed) return;
+  
+    const { error } = await supabase
+      .from("room_articles")
+      .delete()
+      .eq("postid", postid);
+  
+    if (error) {
+      console.error("Error deleting article:", error);
+      return;
+    }
+  
+    setArticles((prev) => prev.filter((a) => a.postid !== postid));
+    setArticleMenu(null);
   };  
 
   const toggleArticleMenu = (postid) => {
@@ -98,6 +120,39 @@ const Room = () => {
       setLoading(false);
     }; 
 
+    const handleDeleteComment = async (commentid, postid) => {
+      const confirmed = window.confirm("Delete this comment?");
+      if (!confirmed) return;
+    
+      const { error } = await supabase
+        .from("room_comments")
+        .delete()
+        .eq("commentid", commentid);
+    
+      if (error) {
+        console.error("Error deleting comment:", error);
+        return;
+      }
+    
+      const removeNested = (comments) =>
+        comments
+          .filter((c) => c.commentid !== commentid)
+          .map((c) => ({
+            ...c,
+            replies: c.replies ? removeNested(c.replies) : [],
+          }));
+    
+      setArticles((prev) =>
+        prev.map((article) =>
+          article.postid === postid
+            ? { ...article, room_comments: removeNested(article.room_comments) }
+            : article
+        )
+      );
+    
+      setCommentMenu(null);
+    };    
+
     const checkMembership = async () => {
       if (!user) return;
 
@@ -118,7 +173,7 @@ const Room = () => {
     const fetchArticles = async () => {
       const { data, error } = await supabase
         .from("room_articles")
-        .select("postid, title, content, created_at, userid, users:userid(username), room_comments(*)")
+        .select("postid, title, content, media_url, created_at, userid, users:userid(username), room_comments(*)")
         .eq("roomid", roomid)
         .order("created_at", { ascending: false });
     
@@ -369,16 +424,14 @@ const handlePostArticleReply = async (postid) => {
     }
   };
 
-const handleJoinRoom = async () => {
+  const handleJoinRoom = async () => {
   if (isUpdating) return;
-  if (!user) {
-    alert("You need to be logged in to join.");
-    return;
+      if (!user) {
+        alert("You need to be logged in to join.");
+        return;
   }
-  if (isMember) return;
-
-  setIsUpdating(true);
-
+        if (isMember) return;
+        setIsUpdating(true);
   try {
     const { data: existingEntry, error: checkError } = await supabase
       .from("room_members")
@@ -416,7 +469,8 @@ const handleJoinRoom = async () => {
       };
 
       // Add counters only if expected
-      if ("join_count" in (await supabase.from("room_members").select("join_count").limit(1)).data?.[0] ?? {}) {
+        const checkResult = (await supabase.from("room_members").select("join_count").limit(1)).data?.[0] || {};
+        if ("join_count" in checkResult) {        
         newEntry.join_count = 1;
         newEntry.exit_count = 0;
       }
@@ -511,8 +565,8 @@ const CommentCard = ({
          </button>
          <button
             className="block w-full text-left p-2 hover:bg-gray-100 text-red-500"
-           onClick={() => console.log("Delete comment", comment.commentid)}
-         >
+            onClick={() => handleDeleteComment(comment.commentid, comment.postid)}
+            >
            Delete
         </button>
       </>
@@ -529,8 +583,8 @@ const CommentCard = ({
   </div>
   </div>
 
-      {/* Content of Comment Card */}
-      <div className="max-w-[calc(100%-3rem)]">
+  {/* Content of Comment Card */}
+  <div className="max-w-[calc(100%-3rem)]">
   <p
     className={`text-gray-700 whitespace-pre-wrap break-words transition-all duration-300 ease-in-out overflow-hidden ${
       expandedComments[comment.commentid] ? "max-h-full" : "max-h-[3.3em]"
@@ -616,7 +670,6 @@ const CommentCard = ({
   );
 };
 
-
   return (
     <div className="relative min-h-screen w-screen flex flex-col bg-gray-100">
       <Navbar />
@@ -624,16 +677,6 @@ const CommentCard = ({
         <div className="flex justify-between items-center mb-1">
           <h1 className="text-4xl font-bold">Room: {room ? room.name : "Not Found"}</h1>
           <div className="flex gap-3">
-            {/* Exit Button (Active Only If Member) */}
-            {/* <button
-              className={`px-6 py-2 rounded-full text-lg font-semibold transition-all ${
-                isMember ? "bg-blue-500 text-white hover:bg-blue-600" : "bg-gray-300 text-gray-500 cursor-not-allowed"
-              }`}
-              onClick={handleExitRoom}
-              disabled={!isMember}
-            >
-              Exit
-            </button> */}
             <button
               className={`px-6 py-2 rounded-full text-lg font-semibold transition-all ${
                 (!isMember || isUpdating) 
@@ -645,18 +688,6 @@ const CommentCard = ({
             >
               Exit
             </button>
-
-
-            {/* Join Button (Disabled If Already a Member) */}
-            {/* <button
-              className={`px-6 py-2 rounded-full text-lg font-semibold transition-all ${
-                isMember ? "bg-gray-300 text-gray-500 cursor-not-allowed" : "bg-green-500 text-white hover:bg-green-600"
-              }`}
-              onClick={handleJoinRoom}
-              disabled={isMember} // This disables the button if the user is already a member
-            >
-              {isMember ? "Joined" : "Join"}
-            </button> */}
 
             <button
               className={`px-6 py-2 rounded-full text-lg font-semibold transition-all ${
@@ -683,12 +714,26 @@ const CommentCard = ({
         ) : (
           articles.map((article) => (
             <div key={article.postid} className="bg-white shadow-md rounded-lg p-6 mt-6">
-              {/* Author Profile Placeholder */}
-              <div className="relative bg-gray-300 h-85 rounded-lg flex items-center justify-center mb-4">
+            {/* Article Image or Placeholder */}
+            {article.media_url ? (
+              <div className="relative mb-4">
+                <img
+                  src={article.media_url}
+                  alt="Article"
+                  className="w-full h-[400px] object-cover rounded-lg"
+                />
                 <div className="absolute top-3 left-3 bg-blue-500 text-white w-12 h-12 flex items-center justify-center font-bold rounded-lg">
-                  {article.users?.username ? article.users.username.charAt(0).toUpperCase() : "?"}
+                  {article.users?.username?.charAt(0).toUpperCase() || "?"}
                 </div>
               </div>
+            ) : (
+              <div className="relative w-full h-[300px] mb-4 rounded-lg overflow-hidden bg-gray-300 flex items-center justify-center">
+                <span className="text-gray-600 font-medium z-10">No Image</span>
+                <div className="absolute top-3 left-3 bg-blue-500 text-white w-12 h-12 flex items-center justify-center font-bold rounded-lg z-20">
+                  {article.users?.username?.charAt(0).toUpperCase() || "?"}
+                </div>
+              </div>
+            )}
 
               {/* Article Title & 3-dot Menu (Correctly Aligned) */}
               <div className="flex justify-between items-center">
@@ -715,7 +760,7 @@ const CommentCard = ({
                         </button>
                         <button 
                           className="block w-full text-left p-2 hover:bg-gray-100 text-red-500"
-                          onClick={() => console.log("Delete article", article.postid)}
+                          onClick={() => handleDeleteArticle(article.postid)}
                         >
                         Delete
                           </button>
@@ -725,15 +770,14 @@ const CommentCard = ({
                        {/* Owner sees Edit and Delete */}
                        <button 
                          className="block w-full text-left p-2 hover:bg-gray-100 text-black"
-                         onClick={() => console.log("Edit article", article.postid)}
-                        >
+                         onClick={() => setReportTarget({ type: "community_note", id: article.postid })}
+                         >
                           + Comunity Note
                       </button>
                       <button 
                         className="block w-full text-left p-2 hover:bg-gray-100 text-red-500"
-                        // onClick={() => console.log("Report article", article.postid)}
                         onClick={() => setReportTarget({ type: "article", id: article.postid })}
-                      >
+                        >
                       Report
                         </button>
                       </>
@@ -849,6 +893,126 @@ const CommentCard = ({
             </div>
           ))
         )}
+        {reportTarget && (
+  // <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+<div className="fixed inset-0 backdrop-blur-sm bg-black/10 flex items-center justify-center z-50">
+<div className="bg-white rounded-xl shadow-lg w-[90%] max-w-md p-6 relative">
+      {/* Close Button */}
+      <button
+        className="absolute top-3 right-4 text-gray-600 hover:text-black text-xl"
+        onClick={() => {
+          setReportTarget(null);
+          setSelectedReason("");
+        }}
+      >
+        ×
+      </button>
+
+      {reportTarget.type === "community_note" ? (
+        <>
+          <h2 className="text-xl font-bold mb-2">Add Community Note</h2>
+          <p className="text-gray-600 text-sm mb-4">
+            Provide helpful context about this post.
+          </p>
+          <textarea
+            value={selectedReason}
+            onChange={(e) => setSelectedReason(e.target.value)}
+            className="w-full p-3 border rounded mb-4 resize-none h-28"
+            placeholder="Write your note..."
+          />
+          <button
+            disabled={!selectedReason.trim()}
+            className={`w-full py-2 rounded font-semibold ${
+              selectedReason.trim()
+                ? "bg-blue-600 text-white hover:bg-blue-700"
+                : "bg-gray-200 text-gray-500 cursor-not-allowed"
+            }`}
+            onClick={async () => {
+              const { error } = await supabase.from("community_notes").insert([
+                {
+                  target_id: reportTarget.id,
+                  target_type: "article",
+                  note: selectedReason,
+                  username: user?.username,
+                  userid: user?.userid,
+                  created_at: new Date().toISOString(),
+                },
+              ]);
+              if (error) {
+                console.error("Error submitting note:", error);
+              } else {
+                alert("Community Note submitted.");
+                setReportTarget(null);
+                setSelectedReason("");
+              }
+            }}
+          >
+            Submit Note
+          </button>
+        </>
+      ) : (
+        <>
+          <h2 className="text-xl font-bold mb-2">Report</h2>
+          <p className="text-gray-600 text-sm mb-4">
+            What's going on? We'll review against all community guidelines.
+          </p>
+
+          {[
+            "Sexual content",
+            "Violent or repulsive content",
+            "Hateful or abusive content",
+            "Harassment or bullying",
+            "Harmful or dangerous acts",
+            "Misinformation",
+          ].map((reason) => (
+            <label key={reason} className="flex items-center mb-2 cursor-pointer">
+              <input
+                type="radio"
+                className="mr-3 accent-blue-600"
+                name="report-reason"
+                value={reason}
+                checked={selectedReason === reason}
+                onChange={() => setSelectedReason(reason)}
+              />
+              {reason}
+            </label>
+          ))}
+
+          <button
+            disabled={!selectedReason}
+            className={`mt-4 w-full py-2 rounded font-semibold ${
+              selectedReason
+                ? "bg-red-600 text-white hover:bg-red-700"
+                : "bg-gray-200 text-gray-500 cursor-not-allowed"
+            }`}
+            onClick={async () => {
+              const { error } = await supabase.from("reports").insert([
+                {
+                  target_id: reportTarget.id,
+                  target_type: reportTarget.type,
+                  reason: selectedReason,
+                  username: user?.username,
+                  userid: user?.userid,
+                  created_at: new Date().toISOString(),
+                },
+              ]);
+              if (error) {
+                console.error("Error submitting report:", error);
+              } else {
+                alert("Report submitted.");
+                setReportTarget(null);
+                setSelectedReason("");
+              }
+            }}
+          >
+            Report
+          </button>
+        </>
+      )}
+    </div>
+  </div>
+)}
+
       </div>
     </div>
   );
