@@ -1,8 +1,8 @@
 Ensure node.js is downloaded before 
 
-`cd useVite`
+`cd NewsNexus`
 
-In useVite folder
+In NewsNexus folder
 
 To start client side
 
