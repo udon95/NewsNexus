@@ -1,9 +1,36 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import useAuthHook from "../hooks/useAuth";
+import supabase from "../api/supabaseClient";
 
 const Navbar = () => {
   const { user, userType } = useAuthHook(); // Get user and userType
+  const [isPromoActive, setIsPromoActive] = useState(false);
+
+  useEffect(() => {
+    const checkPromotion = async () => {
+      const { data, error } = await supabase
+        .from("subscriptions")
+        .select("promotion_active, promotion_end_date")
+        .eq("tier", "Premium")
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      console.log("PROMO CHECK:", data);
+
+      if (
+        data?.promotion_active &&
+        new Date(data.promotion_end_date) > new Date()
+      ) {
+        setIsPromoActive(true);
+      } else {
+        setIsPromoActive(false);
+      }
+    };
+
+    checkPromotion();
+  }, []);
 
   return (
     <nav className="w-full bg-[#BFD8FF] py-3 font-grotesk shadow-md overflow-x-auto">
@@ -23,36 +50,27 @@ const Navbar = () => {
     "
       >
         <div className="border-l border-blue-900 h-6"></div>
-        <a href="/" className="hover:underline px-4 sm:px-6 font-bold">
-          Home
-        </a>
+        <Link to="/" className="hover:underline px-4 sm:px-6 font-bold">Home</Link>
         <div className="border-l border-blue-900 h-6"></div>
-        <a href="/explore" className="hover:underline px-4 sm:px-6 font-bold">
-          Explore
-        </a>
+        <Link to="/explore" className="hover:underline px-4 sm:px-6 font-bold">Explore</Link>
+
         <div className="border-l border-blue-900 h-6"></div>
-        <a
-          href="/subscription"
-          className="hover:underline px-4 sm:px-6 font-bold"
-        >
+        <Link to="/subscription" className="relative hover:underline px-4 sm:px-6 font-bold">
           Subscription
-        </a>
+          {isPromoActive && (
+            <span className="absolute -top-0.2 -right-0.48 w-2.5 h-2.5 rounded-full bg-red-600"></span>
+          )}
+        </Link>
+
         <div className="border-l border-blue-900 h-6"></div>
-        <a
-          href="/guidelines"
-          className="hover:underline px-4 sm:px-6 font-bold"
-        >
-          Platform Guidelines
-        </a>
+        <Link to="/guidelines" className="hover:underline px-4 sm:px-6 font-bold">Platform Guidelines</Link>
+
         <div className="border-l border-blue-900 h-6"></div>
         {userType === "Premium" && (
           <>
-            <a
-              href="/rooms"
-              className="hover:underline px-4 sm:px-6 font-bold"
-            >
+            <Link to="/rooms" className="hover:underline px-4 sm:px-6 font-bold">
               Rooms
-            </a>
+            </Link>
             <div className="border-l border-blue-900 h-6"></div>
           </>
         )}

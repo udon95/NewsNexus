@@ -118,6 +118,12 @@ const SubscriptionPage = () => {
     setLoading(false);
   };
 
+  const calculateDiscount = (original, promo) => {
+    if (!original || !promo) return null;
+    return Math.round(((original - promo) / original) * 100);
+  };
+
+
   return (
     <div className="relative min-h-screen w-screen flex flex-col bg-white">
       <Navbar />
@@ -132,46 +138,74 @@ const SubscriptionPage = () => {
           </h1>
 
           {/* Subscription Cards */}
-          {loading && <p>⏳ Loading subscriptions...</p>}
+          {loading && <p>Loading subscriptions...</p>}
           {error && <p className="error">{error}</p>}
 
-          
           {subscriptions.length > 0 ? (
             <div className="space-y-6">
-              {subscriptions.map((sub) => (
-                <SubscriptionCard
-                  key={sub.id}
-                  title={sub.tier === "Free" ? "Free" : `$${sub.price}`}
-                  content={
-                    <ul className="list-disc list-inside space-y-1">
-                      {sub.description
-                        ? sub.description.split(",").map((item, index) => (
-                            <li key={index}>{item.trim()}</li>
-                          ))
-                        : <li>No description available</li>}
-                    </ul>
-                  }
-                />
-              ))}
+              {subscriptions.map((sub) => {
+                const isPromo = sub.promotion_active && sub.promotion_price && sub.promotion_end_date;
+                const discount = calculateDiscount(sub.default_price, sub.promotion_price);
+
+                return (
+                  <SubscriptionCard
+                    key={sub.id}                    
+                    title={
+                      sub.tier === "Free"
+                        ? "Free"
+                        : isPromo
+                        ? (
+                            <div className="relative w-[80px] flex flex-col items-center">
+                              {/* $4 with badge floated top-right of it */}
+                              <div className="relative">
+                                <span className="text-green-600 font-bold text-4xl ml-8.5">
+                                  ${sub.promotion_price}
+                                </span>
+                    
+                                {/* Perfectly positioned badge */}
+                                <span className="absolute -top-4.5 right-[-60px] bg-red-100 text-red-600 border border-red-400 text-xs font-semibold px-2 py-0.5 rounded-full whitespace-nowrap">
+                                  {discount}% OFF
+                                </span>
+                              </div>
+                    
+                              {/* $5 slashed price aligned under $4 --> To Be Considered Whether to Include or Not
+                              <div className="text-sm text-gray-500 line-through mt-1 self-start">
+                                ${sub.default_price}
+                              </div> */}
+                            </div>
+                          )
+                        : `$${sub.default_price}`
+                    }                    
+
+                    content={
+                      <ul className="list-disc list-inside space-y-1">
+                        {sub.description
+                          ? sub.description.split(",").map((item, index) => (
+                              <li key={index}>{item.trim()}</li>
+                            ))
+                          : <li>No description available</li>}
+                      </ul>
+                    }
+                  />
+                );
+              })}
             </div>
           ) : (
             <p>No subscriptions available.</p>
           )}
-          
 
-          {/* Upgrade Button */}
+          {/* Upgrade Button - Added Extra Spacing Above */}
           <div className="w-full flex justify-end mt-6">
             <button
               className="bg-[#3F414C] text-white p-3 rounded-lg cursor-pointer text-sm"
               onClick={handleUpgrade}
             >
-              {role === "Premium" ? "Unsubscribe" : "Upgrade"}
+              Upgrade
             </button>
           </div>
         </div>
       </div>
     </div>
-    // </div>
   );
 };
 

@@ -12,14 +12,14 @@ const ForgotPassword = () => {
     e.preventDefault();
 
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: "http://localhost:5173/reset-password", // ✅ Change this to your reset password page
+      redirectTo: "http://localhost:5173/reset-password", //  Change this to your reset password page
     });
 
     if (error) {
       setError(error.message);
       setMessage("");
     } else {
-      setMessage("✅ Password reset email sent. Check your inbox.");
+      setMessage(" Password reset email sent. Check your inbox.");
       setError("");
       setTimeout(() => navigate("/login"), 3000);
     }

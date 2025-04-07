@@ -8,28 +8,29 @@ import TopicsList from "../components/topicList.jsx";
 import LatestNews from "../components/latestNews.jsx";
 import downArrow from "../assets/DownArrow.svg";
 import useAuthHook from "../hooks/useAuth.jsx";
+import FetchTopics from "../components/fetchTopics.jsx";
 
-const topics = [
-  "Finance",
-  "Politics",
-  "Entertainment",
-  "Sports",
-  "Weather",
-  "Lifestyle",
-  "Beauty",
-  "Hollywood",
-  "China",
-  "Horticulture",
-  "Culinary",
-  "LGBTQ++",
-  "Singapore",
-  "Environment",
-  "Investment",
-  "USA",
-  "Luxury",
-  "Korea",
-  "Others",
-];
+// const topics = [
+//   "Finance",
+//   "Politics",
+//   "Entertainment",
+//   "Sports",
+//   "Weather",
+//   "Lifestyle",
+//   "Beauty",
+//   "Hollywood",
+//   "China",
+//   "Horticulture",
+//   "Culinary",
+//   "LGBTQ++",
+//   "Singapore",
+//   "Environment",
+//   "Investment",
+//   "USA",
+//   "Luxury",
+//   "Korea",
+//   "Others",
+// ];
 
 function Home() {
   const navigate = useNavigate();
@@ -46,7 +47,7 @@ function Home() {
       // navigate("/login");
       return;
     }
-    
+
     navigate("/rooms");
   };
 
@@ -97,7 +98,14 @@ function Home() {
       </div>
       <Navbar />
       {/* <Search onSearch={handleSearchFromHome} /> */}
-
+      <div className="flex justify-center w-full mt-12">
+        <button
+          onClick={handleGoToDiscussionRooms}
+          className="w-full max-w-[900px] bg-gray-100 text-left text-black text-3xl font-grotesk font-semibold px-6 py-3 rounded-lg shadow-md hover:bg-gray-200 transition"
+        >
+          Go To Discussion Rooms &gt;
+        </button>
+      </div>
       <div className="flex justify-center w-full mt-10 font-grotesk">
         <div className="relative w-full max-w-[900px] bg-gray-300 rounded-lg shadow-lg overflow-hidden ">
           {/* Text Overlay */}
@@ -113,15 +121,7 @@ function Home() {
         </div>
       </div>
 
-      <div className="flex justify-center w-full mt-12">
-        
-        <button
-          onClick={handleGoToDiscussionRooms}
-          className="w-full max-w-[900px] bg-gray-100 text-left text-black text-3xl font-grotesk font-semibold px-6 py-3 rounded-lg shadow-md hover:bg-gray-200 transition"
-        >
-          Go To Discussion Rooms &gt;
-        </button>
-      </div>
+      
       <div className="w-full font-grotesk mt-12">
         <h1 className="text-2xl sm:text-3xl mb-5 text-left max-w-[900px] mx-auto">
           Testimonials:
@@ -135,8 +135,7 @@ function Home() {
           Topics:
         </h1>
         <div className="flex justify-center w-full ">
-          <TopicsList
-            allTopics={topics}
+          <FetchTopics
             selectedTopics={selectedTopics}
             handleTopicSelection={handleTopicSelection}
           />
