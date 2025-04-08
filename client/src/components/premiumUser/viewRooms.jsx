@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import supabase from "../../api/supabaseClient";
 import Search from "../search.jsx";
-import Navbar from "../navBar.jsx";
+import Navbar from "../navbar.jsx";
 import useAuthHook from "../../hooks/useAuth.jsx";
 
 const ViewRoomsPage = () => {

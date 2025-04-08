@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import supabase from "../../api/supabaseClient";
-import Navbar from "../navBar";
+import Navbar from "../navbar";
 import { MoreVertical, CornerDownLeft } from "lucide-react"; // Import 3-dot icon + comment icon
 
 const Room = () => {
