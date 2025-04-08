@@ -29,6 +29,8 @@ import OrderedList from "@tiptap/extension-ordered-list";
 import TextStyle from "@tiptap/extension-text-style";
 import { Extension } from "@tiptap/core";
 import { Paragraph } from "@tiptap/extension-paragraph";
+import Collaboration from "@tiptap/extension-collaboration";
+import { HocuspocusProvider } from "@hocuspocus/provider";
 
 export const PremiumWriteArticle = () => {
   const [title, setTitle] = useState("");
@@ -51,6 +53,7 @@ export const PremiumWriteArticle = () => {
   const [linkUrl, setLinkUrl] = useState("");
   const [roomArticleType, setRoomArticleType] = useState("factual"); // only for Room
   const [aiFeedback, setAiFeedback] = useState("");
+  const [collabId, setCollabId] = useState("collab-id");
 
   // console.log("Auth session:", supabase.auth.getSession());
 
@@ -128,7 +131,7 @@ export const PremiumWriteArticle = () => {
         linkOnPaste: true,
       }),
     ],
-    content: "",
+    content: articleContent,
     onUpdate: ({ editor }) => {
       setArticleContent(editor.getHTML());
       const words = editor.getText().trim().split(/\s+/).filter(Boolean).length;
@@ -344,6 +347,18 @@ export const PremiumWriteArticle = () => {
   //   alert("Article posted!");
   //   handleClearInputs();
   // };
+
+  useEffect(() => {
+    if (!editor) return;
+
+    const provider = new HocuspocusProvider({
+      url: "ws://localhost:4000", // The WebSocket URL to your Hocuspocus server
+      document: editor,
+      collab: collabId, // Ensure each user joins the same room to sync their changes
+    });
+
+    return () => provider.disconnect();
+  }, [editor, collabId]);
 
   const handlePostArticle = async () => {
     // Retrieve user from localStorage

@@ -11,12 +11,15 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@hocuspocus/provider": "^2.15.2",
     "@supabase/supabase-js": "^2.49.1",
+    "@tiptap/extension-collaboration": "^2.11.7",
     "bcryptjs": "^3.0.2",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "node-fetch": "^2.7.0",
-    "stripe": "^17.6.0"
+    "stripe": "^17.6.0",
+    "y-prosemirror": "^1.3.1"
   }
 }
