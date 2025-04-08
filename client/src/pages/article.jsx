@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import "../index.css";
-import Navbar from "../components/navBar.jsx";
+import Navbar from "../components/navbar.jsx";
 import Rate from "../components/rateAndFlag.jsx";
 import Content from "../components/articleContent.jsx";
 import Comments from "../components/commentsSection.jsx";

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import "../index.css";
-import Navbar from "../components/navBar.jsx";
+import Navbar from "../components/navbar.jsx";
 import supabase from "../api/supabaseClient";
 
 function Guidelines() {

@@ -7,7 +7,7 @@ const PaymentStatus = () => {
   const navigate = useNavigate();
   const [isSuccess, setIsSuccess] = useState(null);
   const [showPopup, setShowPopup] = useState(false);
-  const { refreshUserProfile } = useAuth(); // ✅ Fetch updated user role
+  const { refreshUserProfile } = useAuth(); //  Fetch updated user role
 
 
   useEffect(() => {
@@ -25,14 +25,14 @@ const PaymentStatus = () => {
         })
           .then((res) => res.json())
           .then((data) => {
-            console.log("✅ Subscription updated:", data);
-            storedUser.role = "Premium"; // ✅ Update role in local storage
+            console.log(" Subscription updated:", data);
+            storedUser.role = "Premium"; //  Update role in local storage
             localStorage.setItem("userProfile", JSON.stringify(storedUser));
           })
           .catch((error) =>
             console.error("❌ Error updating subscription:", error)
           );
-          refreshUserProfile(); // ✅ Ensure frontend gets the updated role
+          refreshUserProfile(); //  Ensure frontend gets the updated role
 
       }
     } else if (location.pathname.includes("cancel")) {
