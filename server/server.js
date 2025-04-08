@@ -18,7 +18,7 @@ const app = express();
 app.use(express.json());
 app.use(
   cors({
-    origin: "*", // Allow only frontend requests
+    origin: "https://van.dpyq2cohucoc7.amplifyapp.com", // Allow only frontend requests
     credentials: true, // Allow cookies & authentication headers
   })
 );
@@ -35,5 +35,5 @@ app.use('/api', aiRoute);
 // Start Server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () =>
-  console.log(`Server running on http://localhost:${PORT}`)
+  console.log(`Server running on ${import.meta.env.VITE_API_BASE_URL}${PORT}`)
 );
