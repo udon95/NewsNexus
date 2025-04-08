@@ -352,7 +352,7 @@ export const PremiumWriteArticle = () => {
     if (!editor) return;
 
     const provider = new HocuspocusProvider({
-      url: "ws://bwnu7ju2ja.ap-southeast-1.awsapprunner.com:4000", // The WebSocket URL to your Hocuspocus server
+      url: "wss://lazg8po476.execute-api.ap-southeast-1.amazonaws.com/production/", // The WebSocket URL to your Hocuspocus server
       document: editor,
       collab: collabId, // Ensure each user joins the same room to sync their changes
     });
