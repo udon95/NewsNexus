@@ -1,9 +1,5 @@
 Ensure node.js is downloaded before 
 
-`cd NewsNexus`
-
-In NewsNexus folder
-
 To start client side
 
 `cd to client`
