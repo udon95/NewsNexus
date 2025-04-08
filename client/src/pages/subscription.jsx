@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import Navbar from "../components/navBar";
+import Navbar from "../components/navbar";
 import SubscriptionCard from "../components/subscriptionCard";
 import PaymentStatus from "../components/payment"; // Import the popup from payment.jsx
 import { useLocation, useNavigate } from "react-router-dom";
