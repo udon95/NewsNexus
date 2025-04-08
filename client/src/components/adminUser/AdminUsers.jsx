@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 // import "../index.css";
 import AdminSidebar from "./adminSideBar.jsx";
-import Navbar from "../navBar.jsx";
+import Navbar from "../navbar.jsx";
 import { useNavigate } from "react-router-dom";
 import AdminUserDetails from "./AdminUserDetails.jsx";
 

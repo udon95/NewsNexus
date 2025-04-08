@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 // import "../index.css";
 import AdminSidebar from "./adminSideBar.jsx";
-import Navbar from "../navBar.jsx";
+import Navbar from "../navbar.jsx";
 
 const AdminSubscription = () => {
   const handleClick = () => {
