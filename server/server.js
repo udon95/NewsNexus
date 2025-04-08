@@ -28,6 +28,10 @@ const supabase = createClient(
   process.env.SUPABASE_ANON_KEY
 );
 
+app.get('/', (req, res) => {
+  res.send('Hello, World!');
+});
+
 app.use("/auth", authRoute);
 app.use("/subscription", subscriptionRoutes);
 app.use('/api', aiRoute);
@@ -35,5 +39,5 @@ app.use('/api', aiRoute);
 // Start Server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () =>
-  console.log(`Server running on ${import.meta.env.VITE_API_BASE_URL}${PORT}`)
+  console.log(`Server running on ${PORT}`)
 );
