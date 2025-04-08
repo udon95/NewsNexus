@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 // import "../index.css";
-import Navbar from "../components/navBar.jsx";
+import Navbar from "../components/navbar.jsx";
 import useAuthHook from "../hooks/useAuth.jsx";
 import PasswordInput from "../components/showPW.jsx";
 
