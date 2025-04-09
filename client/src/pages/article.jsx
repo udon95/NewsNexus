@@ -1,11 +1,15 @@
 import React, { useState, useEffect, useRef } from "react";
 import "../index.css";
+import "../pages/article.css";
+import Logo from "../assets/Logo.svg";
 import Navbar from "../components/navBar.jsx";
 import Rate from "../components/rateAndFlag.jsx";
-import Content from "../components/articleContent.jsx";
+import ArticleContent from "../components/articleContent.jsx";
 import Comments from "../components/commentsSection.jsx";
 import useAuthHook from "../hooks/useAuth.jsx";
 import { BookOpenIcon, XMarkIcon } from "@heroicons/react/24/outline";
+import { useParams, useNavigate } from "react-router-dom";
+import supabase from "../api/supabaseClient";
 
 const Article = () => {
   const articleRef = useRef(null);
@@ -15,20 +19,91 @@ const Article = () => {
   const [loading, setLoading] = useState(false);
   const [buttonPosition, setButtonPosition] = useState({ x: 0, y: 0 });
   const buttonRef = useRef(null);
-  const { userType } = useAuthHook();
+  const { userType, user } = useAuthHook();
+  const { articleName } = useParams();  // Get article name from URL params
+  const navigate = useNavigate();
 
-  // TEMPORARY HARDCODED articleId (you'll replace this later)
-  const mockArticleId = "11111111-1111-1111-1111-111111111111";
+  const [articleData, setArticleData] = useState(null);
+  const [readArticlesCount, setReadArticlesCount] = useState(0);
+  const [showPaywall, setShowPaywall] = useState(false);
+  const [communityNote, setCommunityNote] = useState("");
+  const [showCommunityNote, setShowCommunityNote] = useState(false);
 
+  // Fetch article data from Supabase based on article name (title)
   useEffect(() => {
-    setTimeout(() => {
-      window.scrollTo(0, 0);
-    }, 100);
-    return () => {
-      window.speechSynthesis.cancel();
-    };
-  }, []);
+    const fetchArticle = async () => {
+      const { data, error } = await supabase
+        .from("articles")
+        .select(`
+          articleid,
+          title,
+          text,
+          imagepath,
+          time,
+          userid,
+          users (userid, username)
+        `)
+        .eq("title", articleName)  // Match article by title (articleName from URL)
+        .single();
 
+      if (error) {
+        console.error("Error fetching article:", error.message);
+      } else {
+        setArticleData(data);
+
+        // Insert record in reading_history table for tracking articles read
+        if (user) {
+          const { error: historyError } = await supabase.from("reading_history").upsert([ 
+            {
+              articleid: data.articleid,
+              userid: user.userid,  // This assumes `user` has a `userid` property
+              read_date: new Date().toISOString(),
+            },
+          ]);
+          if (historyError) {
+            console.error("Error saving reading history:", historyError.message);
+          }
+        }
+      }
+    };
+
+    fetchArticle();
+  }, [articleName, user]);
+
+  // Fetch the count of how many articles the user has read
+  useEffect(() => {
+    const fetchReadingHistory = async () => {
+      if (user) {
+        const { data, error } = await supabase
+          .from("reading_history")
+          .select("*")
+          .eq("userid", user.userid);
+
+        if (error) {
+          console.error("Error fetching reading history:", error);
+        } else {
+          setReadArticlesCount(data.length);
+        }
+      }
+    };
+
+    fetchReadingHistory();
+  }, [user]);
+
+  // Handle article reading limits for guests and free users
+  useEffect(() => {
+    if (user) {
+      if (userType === "Free" && readArticlesCount >= 10) {
+        setShowPaywall(true);  // Free users see the paywall after 10 articles
+      } else if (userType === "Guest" && readArticlesCount >= 3) {
+        setShowPaywall(true);  // Guests see the paywall after 3 articles
+      } else {
+        setShowPaywall(false);
+      }
+    }
+  }, [readArticlesCount, user, userType]);
+
+  // Handle text selection in the article
   const handleTextSelection = () => {
     const selection = window.getSelection();
     const text = selection.toString().trim();
@@ -45,6 +120,7 @@ const Article = () => {
     }
   };
 
+  // Fetch dictionary definition for the selected text
   const fetchDefinition = async () => {
     if (!selectedText) return;
 
@@ -54,16 +130,63 @@ const Article = () => {
         `https://api.dictionaryapi.dev/api/v2/entries/en/${selectedText}`
       );
       const data = await response.json();
-      if (Array.isArray(data) && data.length > 0) {
-        setDefinition(data[0].meanings[0].definitions[0].definition);
-      } else {
-        setDefinition("No definition found.");
-      }
+      setDefinition(
+        Array.isArray(data) && data.length > 0
+          ? data[0].meanings[0].definitions[0].definition
+          : "No definition found."
+      );
       setShowDictionary(true);
     } catch (error) {
       setDefinition("Error fetching definition.");
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Handle community note submission
+  const handleCommunityNoteSubmit = async () => {
+    if (communityNote.trim() !== "") {
+      const { error } = await supabase.from("community_notes").insert([{
+        target_id: articleData.articleid,
+        target_type: "article",
+        note: communityNote,
+        userid: user?.userid,
+        username: user?.username,
+        created_at: new Date().toISOString(),
+        Status: "pending",
+      }]);
+
+      if (error) {
+        console.error("Error submitting community note:", error);
+      } else {
+        setCommunityNote("");
+        setShowCommunityNote(false);
+        alert("Community Note added.");
+      }
+    }
+  };
+
+  // Handle the report submission for an article
+  const handleReportSubmit = async () => {
+    if (selectedReason && reportTarget) {
+      const { error } = await supabase.from("reports").insert([{
+        target_id: reportTarget.id,
+        target_type: reportTarget.type,
+        reason: selectedReason,
+        userid: user?.userid,
+        username: user?.username,
+        created_at: new Date().toISOString(),
+        resolved: false,
+        resolution: null,
+      }]);
+
+      if (error) {
+        console.error("Error submitting report:", error);
+      } else {
+        alert("Report submitted.");
+        setReportTarget(null);
+        setSelectedReason("");
+      }
     }
   };
 
@@ -73,50 +196,61 @@ const Article = () => {
       onMouseUp={handleTextSelection}
     >
       <Navbar />
-
-      <div className="border-b w-full">
-        <div className="flex flex-col items-right w-full px-4 sm:px-8 py-4 mx-auto max-w-screen-lg">
-          <Rate />
-        </div>
+      <div className="flex flex-col items-right w-full px-4 sm:px-8 py-4 mx-auto max-w-screen-lg">
+        <Rate articleId={articleData?.articleid} />
       </div>
-
       <main className="flex flex-col items-center w-full px-4 sm:px-8 py-10 mx-auto max-w-screen-lg">
-        <Content articleRef={articleRef} />
-        <Comments articleId={mockArticleId} />
-
-        {selectedText && userType === "Premium" && (
-          <button
-            ref={buttonRef}
-            onClick={fetchDefinition}
-            className="absolute bg-blue-500 text-white px-3 py-1 rounded-lg flex items-center space-x-2 shadow-md"
-            style={{
-              left: `${buttonPosition.x}px`,
-              top: `${buttonPosition.y}px`,
-              position: "absolute",
-              zIndex: 50,
-            }}
-          >
-            <BookOpenIcon className="h-5 w-5" />
-            <span>Define "{selectedText}"</span>
-          </button>
+        {articleData ? (
+          <>
+            <ArticleContent
+              articleRef={articleRef}
+              title={articleData.title}
+              text={articleData.text} // Use the original text with no modification
+              imagepath={articleData.imagepath}
+              postDate={new Date(articleData.time).toLocaleDateString()}
+              author={{
+                userid: articleData.users?.userid,
+                username: articleData.users?.username || "Unknown Author",
+              }}
+            />
+            <Comments articleRef={articleRef} articleId={articleData.articleid} />
+          </>
+        ) : (
+          <p>Loading article...</p>
         )}
 
-        {showDictionary && (
-          <div className="fixed inset-0 flex items-center justify-center backdrop-blur-sm z-50">
-            <div className="bg-white shadow-lg rounded-lg p-6 w-[90%] max-w-md text-center">
-              <div className="flex justify-between items-center">
-                <h2 className="text-xl font-bold text-blue-700">Dictionary</h2>
-                <button onClick={() => setShowDictionary(false)}>
-                  <XMarkIcon className="h-6 w-6 text-gray-600 hover:text-black" />
-                </button>
-              </div>
-              <p className="text-lg mt-2">
-                <strong>{selectedText}:</strong>{" "}
-                {loading ? "Loading..." : definition}
-              </p>
-            </div>
-          </div>
-        )}
+       {/* Paywall Modal */}
+{showPaywall && (
+  <div className="paywall-modal">
+    <div className="modal-content">
+      <img 
+        src={Logo} 
+        alt="NewsNexus Logo" 
+        className="mx-auto mb-4" // Optional class for centering and spacing
+      />
+      <h2>Want to Keep Reading?</h2>
+
+      {/* Conditional text for guest vs free users */}
+      {userType === "Guest" ? (
+        <p>Subscribe today to unlock unlimited access to all articles!</p>
+      ) : (
+        <p>Subscribe today to unlock unlimited access to all articles and many more!</p>
+      )}
+
+      {/* Subscribe Button */}
+      <p><button className="subscribe-button" onClick={() => navigate("/subscription")}>
+        Subscribe
+      </button></p>
+
+      {/* Sign In Button for already a subscriber */}
+      <p>
+        Already a Subscriber?{" "}
+        <a href="/login" className="sign-in-link">Sign In</a>
+      </p>
+    </div>
+  </div>
+)}
+
       </main>
     </div>
   );
