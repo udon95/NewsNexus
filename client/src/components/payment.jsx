@@ -18,7 +18,8 @@ const PaymentStatus = () => {
       setIsSuccess(true);
       setShowPopup(true);
       if (userId) {
-        fetch(`${import.meta.env.VITE_API_BASE_URL}/subscription/update-subscription`, {
+        // fetch(`${import.meta.env.VITE_API_BASE_URL}/subscription/update-subscription`, { //hosted not tested
+        fetch("http://localhost:5000/subscription/update-subscription", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ userId }),

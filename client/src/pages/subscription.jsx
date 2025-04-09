@@ -39,11 +39,16 @@ const SubscriptionPage = () => {
       }
 
       const userId = storedUser.user.userid;
-      if (role === "Premium") {
+      const selectedSubscription = subscriptions.find(
+        (sub) => sub.tier !== "Free"
+      );
+
+      if (selectedSubscription && selectedSubscription.tier === "Premium") {
         // Handle Unsubscribe logic for Premium users
         // You might call an API to update the user's subscription status in your backend
         const response = await fetch(
-          `${import.meta.env.VITE_API_BASE_URL}/subscription/unsubscribe`, // Replace with your backend unsubscribe endpoint
+          // `${import.meta.env.VITE_API_BASE_URL}/subscription/unsubscribe`, // Hosted not tested
+          "http://localhost:5000/subscription/unsubscribe",
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -55,16 +60,25 @@ const SubscriptionPage = () => {
         if (data.success) {
           alert("You have successfully unsubscribed.");
           setRole("Free"); // Update user type to Free
+          const updatedUserProfile = { ...storedUser, role: "Free" };
+          localStorage.setItem(
+            "userProfile",
+            JSON.stringify(updatedUserProfile)
+          );
         } else {
           console.error("Error unsubscribing");
         }
-      } else {
+      } else if (selectedSubscription) {
         const response = await fetch(
-          `${import.meta.env.VITE_API_BASE_URL}/subscription/create-checkout-session`,
+          // `${import.meta.env.VITE_API_BASE_URL}/subscription/create-checkout-session`, //hosted not tested
+          "http://localhost:5000/subscription/create-checkout-session",
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ userId }),
+            body: JSON.stringify({
+              userId,
+              promotion_price: selectedSubscription.promotion_price,
+            }),
           }
         );
 
@@ -123,7 +137,6 @@ const SubscriptionPage = () => {
     return Math.round(((original - promo) / original) * 100);
   };
 
-
   return (
     <div className="relative min-h-screen w-screen flex flex-col bg-white">
       <Navbar />
@@ -144,46 +157,55 @@ const SubscriptionPage = () => {
           {subscriptions.length > 0 ? (
             <div className="space-y-6">
               {subscriptions.map((sub) => {
-                const isPromo = sub.promotion_active && sub.promotion_price && sub.promotion_end_date;
-                const discount = calculateDiscount(sub.default_price, sub.promotion_price);
+                const isPromo =
+                  sub.promotion_active &&
+                  sub.promotion_price &&
+                  sub.promotion_end_date;
+                const discount = calculateDiscount(
+                  sub.default_price,
+                  sub.promotion_price
+                );
 
                 return (
                   <SubscriptionCard
-                    key={sub.id}                    
+                    key={sub.id}
                     title={
-                      sub.tier === "Free"
-                        ? "Free"
-                        : isPromo
-                        ? (
-                            <div className="relative w-[80px] flex flex-col items-center">
-                              {/* $4 with badge floated top-right of it */}
-                              <div className="relative">
-                                <span className="text-green-600 font-bold text-4xl ml-8.5">
-                                  ${sub.promotion_price}
-                                </span>
-                    
-                                {/* Perfectly positioned badge */}
-                                <span className="absolute -top-4.5 right-[-60px] bg-red-100 text-red-600 border border-red-400 text-xs font-semibold px-2 py-0.5 rounded-full whitespace-nowrap">
-                                  {discount}% OFF
-                                </span>
-                              </div>
-                    
-                              {/* $5 slashed price aligned under $4 --> To Be Considered Whether to Include or Not
+                      sub.tier === "Free" ? (
+                        "Free"
+                      ) : isPromo ? (
+                        <div className="relative w-[80px] flex flex-col items-center">
+                          {/* $4 with badge floated top-right of it */}
+                          <div className="relative">
+                            <span className="text-green-600 font-bold text-4xl ml-8.5">
+                              ${sub.promotion_price}
+                            </span>
+
+                            {/* Perfectly positioned badge */}
+                            <span className="absolute -top-4.5 right-[-60px] bg-red-100 text-red-600 border border-red-400 text-xs font-semibold px-2 py-0.5 rounded-full whitespace-nowrap">
+                              {discount}% OFF
+                            </span>
+                          </div>
+
+                          {/* $5 slashed price aligned under $4 --> To Be Considered Whether to Include or Not
                               <div className="text-sm text-gray-500 line-through mt-1 self-start">
                                 ${sub.default_price}
                               </div> */}
-                            </div>
-                          )
-                        : `$${sub.default_price}`
-                    }                    
-
+                        </div>
+                      ) : (
+                        `$${sub.default_price}`
+                      )
+                    }
                     content={
                       <ul className="list-disc list-inside space-y-1">
-                        {sub.description
-                          ? sub.description.split(",").map((item, index) => (
+                        {sub.description ? (
+                          sub.description
+                            .split(",")
+                            .map((item, index) => (
                               <li key={index}>{item.trim()}</li>
                             ))
-                          : <li>No description available</li>}
+                        ) : (
+                          <li>No description available</li>
+                        )}
                       </ul>
                     }
                   />

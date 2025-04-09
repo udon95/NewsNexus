@@ -2,6 +2,7 @@ import { createContext, useContext, useState, useEffect } from "react";
 import supabase from "../api/supabaseClient";
 import axios from "axios";
 import api from "../api/axios";
+// use axios.get for localhost, use api for hosted
 
 const AuthContext = createContext(undefined);
 
@@ -49,7 +50,7 @@ export const AuthProvider = ({ children }) => {
 
   const fetchUserRole = async (userId) => {
     try {
-      const response = await api.get(`/auth/user-role/${userId}`);
+      const response = await axios.get(`/auth/user-role/${userId}`);
       setUserType(response.data.role);
     } catch (error) {
       console.error("Failed to fetch user role:", error);
@@ -61,7 +62,7 @@ export const AuthProvider = ({ children }) => {
     try {
       // console.log("🔄 Fetching interests for user:", userId);
 
-      const response = await api.get(`/auth/user-interest/${userId}`);
+      const response = await axios.get(`/auth/user-interest/${userId}`);
       // console.log(" API Response:", response.data); //  Debugging: Ensure API response is received
 
       if (response.data.interests) {
@@ -90,7 +91,7 @@ export const AuthProvider = ({ children }) => {
 
   const signInWithPass = async (email, password) => {
     try {
-      const response = await api.post(`/auth/login`, {
+      const response = await axios.post("http://localhost:5000/auth/login", {
         email,
         password,
       });

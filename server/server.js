@@ -18,7 +18,8 @@ const app = express();
 app.use(express.json());
 app.use(
   cors({
-    origin: "https://van.dpyq2cohucoc7.amplifyapp.com", // Allow only frontend requests
+    // origin: "https://van.dpyq2cohucoc7.amplifyapp.com", //For Hosted 
+    origin: "http://localhost:5173", // localhost frontend 
     credentials: true, // Allow cookies & authentication headers
   })
 );
