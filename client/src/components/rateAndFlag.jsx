@@ -1,34 +1,310 @@
-import React from "react";
-import Rating from "@mui/material/Rating";
-import { FlagIcon } from "@heroicons/react/24/solid";
+import React, { useState, useEffect } from "react";
+import { ThumbsUp, ThumbsDown, FlagIcon, StickyNote } from "lucide-react";
+import useAuthHook from "../hooks/useAuth";
+import supabase from "../api/supabaseClient";
 
-const RateAndFlag = ({ rating, setRating }) => {
+const RateAndFlag = ({ articleId }) => {
+  const [upvoted, setUpvoted] = useState(false);
+  const [downvoted, setDownvoted] = useState(false);
+  const [reportTarget, setReportTarget] = useState(null);
+  const [communityNote, setCommunityNote] = useState("");
+  const [showCommunityNote, setShowCommunityNote] = useState(false);
+  const [selectedReason, setSelectedReason] = useState("");
+  const { userType, user } = useAuthHook();
+  const [votesCount, setVotesCount] = useState(0);
+
+  // Get the current vote status and count for the article
+  useEffect(() => {
+    const fetchVotes = async () => {
+      const { data, error } = await supabase
+        .from("ratings")
+        .select("vote_type")
+        .eq("articleid", articleId)
+        .eq("userid", user?.userid);
+
+      if (error) {
+        console.error("Error fetching vote status:", error);
+      } else {
+        const upvote = data.some((vote) => vote.vote_type === "upvote");
+        const downvote = data.some((vote) => vote.vote_type === "downvote");
+        setUpvoted(upvote);
+        setDownvoted(downvote);
+      }
+    };
+
+    const fetchVotesCount = async () => {
+      const { data, error } = await supabase
+        .from("ratings")
+        .select("vote_type")
+        .eq("articleid", articleId);
+
+      if (error) {
+        console.error("Error fetching vote count:", error);
+      } else {
+        const upvotes = data.filter((vote) => vote.vote_type === "upvote").length;
+        setVotesCount(upvotes); // Set the number of "liked this" votes
+      }
+    };
+
+    fetchVotes();
+    fetchVotesCount();
+  }, [articleId, user?.userid]);
+
+  const handleUpvote = async () => {
+    if (upvoted) {
+      // Update the vote to "upvote" if already upvoted
+      await supabase
+        .from("ratings")
+        .update({ vote_type: "upvote" })
+        .eq("articleid", articleId)
+        .eq("userid", user?.userid);
+    } else {
+      // Insert/upsert the upvote
+      await supabase.from("ratings").upsert([{
+        articleid: articleId,
+        userid: user?.userid,
+        vote_type: "upvote",
+      }]);
+
+
+      setUpvoted(true);
+
+      if (downvoted) {
+        // Update downvote to "upvote" if previously downvoted
+        await supabase
+          .from("ratings")
+          .update({ vote_type: "upvote" })
+          .eq("articleid", articleId)
+          .eq("userid", user?.userid);
+        
+        setDownvoted(false);
+      }
+    }
+
+    // Update the vote count after the change
+    const { data } = await supabase
+      .from("ratings")
+      .select("vote_type")
+      .eq("articleid", articleId);
+    const upvotes = data.filter((vote) => vote.vote_type === "upvote").length;
+    setVotesCount(upvotes);
+  };
+
+  const handleDownvote = async () => {
+    if (downvoted) {
+      // Update the vote to "downvote" if already downvoted
+      await supabase
+        .from("ratings")
+        .update({ vote_type: "downvote" })
+        .eq("articleid", articleId)
+        .eq("userid", user?.userid);
+    } else {
+      // Insert/upsert the downvote
+      await supabase.from("ratings").upsert([{
+        articleid: articleId,
+        userid: user?.userid,
+        vote_type: "downvote",
+      }]);
+
+
+      setDownvoted(true);
+
+      if (upvoted) {
+        // Update upvote to "downvote" if previously upvoted
+        await supabase
+          .from("ratings")
+          .update({ vote_type: "downvote" })
+          .eq("articleid", articleId)
+          .eq("userid", user?.userid);
+
+        setUpvoted(false);
+      }
+    }
+
+    // Update the vote count after the change
+    const { data } = await supabase
+      .from("ratings")
+      .select("vote_type")
+      .eq("articleid", articleId);
+    const upvotes = data.filter((vote) => vote.vote_type === "upvote").length;
+    setVotesCount(upvotes);
+  };
+
+  const handleReportSubmit = async () => {
+    if (selectedReason && reportTarget) {
+      const { error } = await supabase.from("reports").insert([{
+        target_id: reportTarget.id,
+        target_type: reportTarget.type,
+        reason: selectedReason,
+        userid: user?.userid,
+        username: user?.username,
+        created_at: new Date().toISOString(),
+        resolved: false,
+        resolution: null,
+      }]);
+
+      if (error) {
+        console.error("Error submitting report:", error);
+      } else {
+        alert("Report submitted.");
+        setReportTarget(null);
+        setSelectedReason("");
+      }
+    }
+  };
+
+  const handleCommunityNoteSubmit = async () => {
+    if (communityNote.trim() !== "") {
+      const { error } = await supabase.from("community_notes").insert([{
+        target_id: articleId,
+        target_type: "article",
+        note: communityNote,
+        userid: user?.userid,
+        username: user?.username,
+        created_at: new Date().toISOString(),
+        Status: "pending",
+      }]);
+
+      if (error) {
+        console.error("Error submitting community note:", error);
+      } else {
+        setCommunityNote("");
+        setShowCommunityNote(false);
+        alert("Community Note added.");
+      }
+    }
+  };
+
   return (
-    <div className="w-full flex items-center justify-end px-6 sm:px-8 py-4 border-b space-x-4">
-      {/* ⭐ Half-Star Rating with MUI */}
-      <Rating
-        name="half-rating"
-        value={rating}
-        precision={0.5}
-        onChange={(event, newValue) => setRating(newValue)}
-        max={4}
-      />
+    <div className="flex flex-col w-full px-4 sm:px-8 mx-auto max-w-4xl font-grotesk">
+      {/* The buttons */}
+      <div className="flex items-center justify-end border-none mb-0 mt-0 space-x-4"> {/* Added space-x-4 to add spacing between buttons */}
+        {/* 👍 Upvote Button */}
+        <div className="flex items-center space-x-4 p-2 bg-gray-200 rounded-lg">
+          <span className="text-black text-sm font-semibold">{votesCount} liked this</span>
+          <button
+            className={`transition-colors flex items-center space-x-2 ${
+              upvoted ? "text-green-500" : "text-gray-500"
+            } hover:text-green-500`}
+            onClick={handleUpvote}
+          >
+            <ThumbsUp size={24} />
+          </button>
 
-      {/* 🚩 Community Notes */}
-      <button
-        className="w-10 h-10 p-2 bg-gray-200 rounded-lg hover:bg-gray-300 flex items-center justify-center"
-        title="Community Notes"
-      >
-        <FlagIcon className="h-6 w-6 text-black" />
-      </button>
+          {/* 👎 Downvote Button */}
+          <button
+            className={`transition-colors ${
+              downvoted ? "text-red-500" : "text-gray-500"
+            } hover:text-red-500`}
+            onClick={handleDownvote}
+          >
+            <ThumbsDown size={24} />
+          </button>
+        </div>
 
-      {/* 🅁 Report Button */}
-      <button
-        className="w-10 h-10 p-2 bg-gray-200 rounded-lg hover:bg-gray-300 flex items-center justify-center font-bold text-black"
-        title="Report Article"
-      >
-        R
-      </button>
+        {/* 📝 Community Notes */}
+        {userType === "Premium" && (
+          <button
+            className="w-10 h-10 p-2 bg-gray-200 rounded-lg hover:bg-gray-300 flex items-center justify-center"
+            title="Add Community Notes"
+            onClick={() => setShowCommunityNote(true)}
+          >
+            <StickyNote className="h-6 w-6 text-black" />
+          </button>
+        )}
+
+        {/* 🚩 Report Button */}
+        <button
+          className="w-10 h-10 p-2 bg-gray-200 rounded-lg hover:bg-gray-300 flex items-center justify-center -ml-2"
+          title="Report Article"
+          onClick={() => setReportTarget({ id: articleId, type: "article" })}
+        >
+          <FlagIcon className="h-6 w-6 text-red-600" />
+        </button>
+      </div>
+
+      {/* Report Modal */}
+      {reportTarget && (
+        <div className="fixed inset-0 backdrop-blur-sm bg-black/10 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl shadow-lg w-[90%] max-w-md p-6 relative">
+            {/* Close Button */}
+            <button
+              className="absolute top-3 right-4 text-gray-600 hover:text-black text-xl"
+              onClick={() => {
+                setReportTarget(null);
+                setSelectedReason("");
+              }}
+            >
+              ×
+            </button>
+            <h2 className="text-xl font-bold mb-2">Report</h2>
+            <p className="text-gray-600 text-sm mb-4">
+              What's going on? We'll review against all community guidelines.
+            </p>
+
+            {/* Reasons */}
+            {["Sexual content", "Violent or repulsive content", "Hateful or abusive content", "Harassment or bullying", "Harmful or dangerous acts", "Misinformation"].map((reason) => (
+              <label key={reason} className="flex items-center mb-2 cursor-pointer">
+                <input
+                  type="radio"
+                  className="mr-3 accent-blue-600"
+                  name="report-reason"
+                  value={reason}
+                  checked={selectedReason === reason}
+                  onChange={() => setSelectedReason(reason)}
+                />
+                {reason}
+              </label>
+            ))}
+
+            {/* Submit Button */}
+            <button
+              disabled={!selectedReason}
+              className={`mt-4 w-full py-2 rounded font-semibold ${
+                selectedReason
+                  ? "bg-red-600 text-white hover:bg-red-700"
+                  : "bg-gray-200 text-gray-500 cursor-not-allowed"
+              }`}
+              onClick={handleReportSubmit}
+            >
+              Report
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Community Note Modal */}
+      {showCommunityNote && (
+        <div className="fixed inset-0 backdrop-blur-sm bg-black/10 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl shadow-lg w-[90%] max-w-md p-6 relative">
+            {/* Close Button */}
+            <button
+              className="absolute top-3 right-4 text-gray-600 hover:text-black text-xl"
+              onClick={() => setShowCommunityNote(false)}
+            >
+              ×
+            </button>
+            <h2 className="text-xl font-bold mb-2">Add Community Note</h2>
+            <textarea
+              className="w-full p-3 rounded-md border border-gray-300 mb-4"
+              placeholder="Enter your community note..."
+              value={communityNote}
+              onChange={(e) => setCommunityNote(e.target.value)}
+            />
+            <button
+              disabled={!communityNote.trim()}
+              className={`w-full py-2 rounded font-semibold ${
+                communityNote.trim()
+                  ? "bg-blue-600 text-white hover:bg-blue-700"
+                  : "bg-gray-200 text-gray-500 cursor-not-allowed"
+              }`}
+              onClick={handleCommunityNoteSubmit}
+            >
+              Submit Note
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
