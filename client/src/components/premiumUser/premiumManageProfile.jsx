@@ -3,8 +3,9 @@ import useAuthHook from "../../hooks/useAuth";
 import TopicList from "../../components/topicList";
 import axios from "axios";
 import PasswordInput from "../showPW";
+import { HexColorPicker } from "react-colorful";
 
-const FreeManageProfile = () => {
+const PremManageProfile = () => {
   const [selectedTopics, setSelectedTopics] = useState([]);
   const [userDetails, setUserDetails] = useState(null);
   const [error, setError, showError] = useState("");
@@ -20,6 +21,9 @@ const FreeManageProfile = () => {
   const [editOldPassword, setEditOldPassword] = useState("");
   const [editNewPassword, setEditNewPassword] = useState("");
   const [editNewPasswordConfirm, setEditNewPasswordConfirm] = useState("");
+
+  const [profileColor, setProfileColor] = useState("#ffffff");
+  const [hexCode, setHexCode] = useState("#ffffff");
 
   useEffect(() => {
     const fetchUserProfile = async () => {
@@ -125,6 +129,7 @@ const FreeManageProfile = () => {
             gender: editGender,
           };
           localStorage.setItem("userProfile", JSON.stringify(storedUser));
+          window.location.reload();
         }
       }
     } catch (error) {
@@ -267,6 +272,32 @@ const FreeManageProfile = () => {
     }
   }, [userDetails, authProfile]);
 
+  useEffect(() => {
+    const storedColor = localStorage.getItem("profileColor");
+    if (storedColor) {
+      setProfileColor(storedColor);
+      setHexCode(storedColor);
+    }
+  }, []);
+
+  const handleColorChange = (color) => {
+    setProfileColor(color);
+    setHexCode(color);
+    localStorage.setItem("profileColor", color);
+    // updateProfileColor(color);
+  };
+
+  const handleHexChange = (event) => {
+    const value = event.target.value;
+    if (/^#[0-9A-Fa-f]{6}$/.test(value)) {
+      // Basic hex validation (e.g., #ffffff)
+      setHexCode(value);
+      setProfileColor(value);
+      localStorage.setItem("profileColor", value);
+      // updateProfileColor(value);  // Send color to backend
+    }
+  };
+
   return (
     <div className="w-screen min-h-screen flex flex-col overflow-hidden">
       <div className="flex-grow w-full flex min-h-full overflow-hidden">
@@ -317,6 +348,30 @@ const FreeManageProfile = () => {
                     <option value="Female">Female</option>
                     <option value="Other">Prefer Not To Say</option>
                   </select>
+                </div>
+
+                Choose Profile Color:
+                <HexColorPicker
+                  color={profileColor}
+                  onChange={handleColorChange}
+                />
+                <div>
+                  Enter HexCode:
+                  <input
+                    type="text"
+                    value={hexCode}
+                    onChange={handleHexChange}
+                    placeholder="#FFFFFF"
+                    className="w-full p-2 border rounded-lg mt-2"
+                  />
+                  <p>Your selected color: {hexCode}</p>
+                </div>
+                <div
+                  className="preview"
+                  style={{ backgroundColor: profileColor }}
+                >
+                  {/* Profile color preview */}
+                  <p>Your selected color</p>
                 </div>
                 <button
                   onClick={updateProfile}
@@ -419,4 +474,4 @@ const FreeManageProfile = () => {
   );
 };
 
-export default FreeManageProfile;
+export default PremManageProfile;
