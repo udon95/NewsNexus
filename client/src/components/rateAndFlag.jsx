@@ -4,144 +4,143 @@ import useAuthHook from "../hooks/useAuth";
 import supabase from "../api/supabaseClient";
 
 const RateAndFlag = ({ articleId }) => {
+  const { userType, user } = useAuthHook();
   const [upvoted, setUpvoted] = useState(false);
   const [downvoted, setDownvoted] = useState(false);
+  const [votesCount, setVotesCount] = useState(0);
   const [reportTarget, setReportTarget] = useState(null);
+  const [selectedReason, setSelectedReason] = useState("");
   const [communityNote, setCommunityNote] = useState("");
   const [showCommunityNote, setShowCommunityNote] = useState(false);
-  const [selectedReason, setSelectedReason] = useState("");
-  const { userType, user } = useAuthHook();
-  const [votesCount, setVotesCount] = useState(0);
 
-  // Get the current vote status and count for the article
+  // ✅ Fetch current vote status and total votes
   useEffect(() => {
+    if (!user || !articleId) return;
+
     const fetchVotes = async () => {
-      const { data, error } = await supabase
+      // Fetch user-specific vote
+      const { data: userVote, error: userVoteError } = await supabase
         .from("ratings")
         .select("vote_type")
         .eq("articleid", articleId)
-        .eq("userid", user?.userid);
+        .eq("userid", user.userid);
 
-      if (error) {
-        console.error("Error fetching vote status:", error);
-      } else {
-        const upvote = data.some((vote) => vote.vote_type === "upvote");
-        const downvote = data.some((vote) => vote.vote_type === "downvote");
-        setUpvoted(upvote);
-        setDownvoted(downvote);
+      if (userVoteError) console.error("Error fetching user vote:", userVoteError);
+      else {
+        setUpvoted(userVote.some((v) => v.vote_type === "upvote"));
+        setDownvoted(userVote.some((v) => v.vote_type === "downvote"));
       }
-    };
 
-    const fetchVotesCount = async () => {
-      const { data, error } = await supabase
+      // Fetch all upvotes to display total
+      const { data: allVotes, error: allVotesError } = await supabase
         .from("ratings")
         .select("vote_type")
         .eq("articleid", articleId);
 
-      if (error) {
-        console.error("Error fetching vote count:", error);
-      } else {
-        const upvotes = data.filter((vote) => vote.vote_type === "upvote").length;
-        setVotesCount(upvotes); // Set the number of "liked this" votes
+      if (allVotesError) console.error("Error fetching vote count:", allVotesError);
+      else {
+        const upvotes = allVotes.filter((v) => v.vote_type === "upvote").length;
+        setVotesCount(upvotes);
+
+        // ✅ Update total_votes in articles table
+        await supabase
+          .from("articles")
+          .update({ total_votes: upvotes })
+          .eq("articleid", articleId);
       }
     };
 
     fetchVotes();
-    fetchVotesCount();
-  }, [articleId, user?.userid]);
+  }, [articleId, user]);
 
   const handleUpvote = async () => {
+    if (!user || !articleId) return;
+
     if (upvoted) {
-      // Update the vote to "upvote" if already upvoted
+      // Remove vote
       await supabase
         .from("ratings")
-        .update({ vote_type: "upvote" })
+        .delete()
         .eq("articleid", articleId)
-        .eq("userid", user?.userid);
+        .eq("userid", user.userid);
+      setUpvoted(false);
     } else {
-      // Insert/upsert the upvote
-      await supabase.from("ratings").upsert([{
-        articleid: articleId,
-        userid: user?.userid,
-        vote_type: "upvote",
-      }]);
-
-
+      await supabase.from("ratings").upsert([
+        {
+          articleid: articleId,
+          userid: user.userid,
+          vote_type: "upvote",
+        },
+      ]);
       setUpvoted(true);
-
-      if (downvoted) {
-        // Update downvote to "upvote" if previously downvoted
-        await supabase
-          .from("ratings")
-          .update({ vote_type: "upvote" })
-          .eq("articleid", articleId)
-          .eq("userid", user?.userid);
-        
-        setDownvoted(false);
-      }
+      setDownvoted(false);
     }
 
-    // Update the vote count after the change
-    const { data } = await supabase
+    // Refresh vote count and update article
+    const { data: updatedVotes } = await supabase
       .from("ratings")
       .select("vote_type")
       .eq("articleid", articleId);
-    const upvotes = data.filter((vote) => vote.vote_type === "upvote").length;
+
+    const upvotes = updatedVotes.filter((v) => v.vote_type === "upvote").length;
     setVotesCount(upvotes);
+
+    await supabase
+      .from("articles")
+      .update({ total_votes: upvotes })
+      .eq("articleid", articleId);
   };
 
   const handleDownvote = async () => {
+    if (!user || !articleId) return;
+
     if (downvoted) {
-      // Update the vote to "downvote" if already downvoted
       await supabase
         .from("ratings")
-        .update({ vote_type: "downvote" })
+        .delete()
         .eq("articleid", articleId)
-        .eq("userid", user?.userid);
+        .eq("userid", user.userid);
+      setDownvoted(false);
     } else {
-      // Insert/upsert the downvote
-      await supabase.from("ratings").upsert([{
-        articleid: articleId,
-        userid: user?.userid,
-        vote_type: "downvote",
-      }]);
-
-
+      await supabase.from("ratings").upsert([
+        {
+          articleid: articleId,
+          userid: user.userid,
+          vote_type: "downvote",
+        },
+      ]);
       setDownvoted(true);
-
-      if (upvoted) {
-        // Update upvote to "downvote" if previously upvoted
-        await supabase
-          .from("ratings")
-          .update({ vote_type: "downvote" })
-          .eq("articleid", articleId)
-          .eq("userid", user?.userid);
-
-        setUpvoted(false);
-      }
+      setUpvoted(false);
     }
 
-    // Update the vote count after the change
-    const { data } = await supabase
+    const { data: updatedVotes } = await supabase
       .from("ratings")
       .select("vote_type")
       .eq("articleid", articleId);
-    const upvotes = data.filter((vote) => vote.vote_type === "upvote").length;
+
+    const upvotes = updatedVotes.filter((v) => v.vote_type === "upvote").length;
     setVotesCount(upvotes);
+
+    await supabase
+      .from("articles")
+      .update({ total_votes: upvotes })
+      .eq("articleid", articleId);
   };
 
   const handleReportSubmit = async () => {
     if (selectedReason && reportTarget) {
-      const { error } = await supabase.from("reports").insert([{
-        target_id: reportTarget.id,
-        target_type: reportTarget.type,
-        reason: selectedReason,
-        userid: user?.userid,
-        username: user?.username,
-        created_at: new Date().toISOString(),
-        resolved: false,
-        resolution: null,
-      }]);
+      const { error } = await supabase.from("reports").insert([
+        {
+          target_id: reportTarget.id,
+          target_type: reportTarget.type,
+          reason: selectedReason,
+          userid: user?.userid,
+          username: user?.username,
+          created_at: new Date().toISOString(),
+          resolved: false,
+          resolution: null,
+        },
+      ]);
 
       if (error) {
         console.error("Error submitting report:", error);
@@ -155,15 +154,17 @@ const RateAndFlag = ({ articleId }) => {
 
   const handleCommunityNoteSubmit = async () => {
     if (communityNote.trim() !== "") {
-      const { error } = await supabase.from("community_notes").insert([{
-        target_id: articleId,
-        target_type: "article",
-        note: communityNote,
-        userid: user?.userid,
-        username: user?.username,
-        created_at: new Date().toISOString(),
-        Status: "pending",
-      }]);
+      const { error } = await supabase.from("community_notes").insert([
+        {
+          target_id: articleId,
+          target_type: "article",
+          note: communityNote,
+          userid: user?.userid,
+          username: user?.username,
+          created_at: new Date().toISOString(),
+          Status: "pending",
+        },
+      ]);
 
       if (error) {
         console.error("Error submitting community note:", error);
@@ -177,9 +178,8 @@ const RateAndFlag = ({ articleId }) => {
 
   return (
     <div className="flex flex-col w-full px-4 sm:px-8 mx-auto max-w-4xl font-grotesk">
-      {/* The buttons */}
-      <div className="flex items-center justify-end border-none mb-0 mt-0 space-x-4"> {/* Added space-x-4 to add spacing between buttons */}
-        {/* 👍 Upvote Button */}
+      <div className="flex items-center justify-end border-none mb-0 mt-0 space-x-4">
+        {/* 👍 Upvote */}
         <div className="flex items-center space-x-4 p-2 bg-gray-200 rounded-lg">
           <span className="text-black text-sm font-semibold">{votesCount} liked this</span>
           <button
@@ -190,8 +190,7 @@ const RateAndFlag = ({ articleId }) => {
           >
             <ThumbsUp size={24} />
           </button>
-
-          {/* 👎 Downvote Button */}
+          {/* 👎 Downvote */}
           <button
             className={`transition-colors ${
               downvoted ? "text-red-500" : "text-gray-500"
@@ -213,7 +212,7 @@ const RateAndFlag = ({ articleId }) => {
           </button>
         )}
 
-        {/* 🚩 Report Button */}
+        {/* 🚩 Report */}
         <button
           className="w-10 h-10 p-2 bg-gray-200 rounded-lg hover:bg-gray-300 flex items-center justify-center -ml-2"
           title="Report Article"
@@ -223,11 +222,10 @@ const RateAndFlag = ({ articleId }) => {
         </button>
       </div>
 
-      {/* Report Modal */}
+      {/* 🚩 Report Modal */}
       {reportTarget && (
         <div className="fixed inset-0 backdrop-blur-sm bg-black/10 flex items-center justify-center z-50">
           <div className="bg-white rounded-xl shadow-lg w-[90%] max-w-md p-6 relative">
-            {/* Close Button */}
             <button
               className="absolute top-3 right-4 text-gray-600 hover:text-black text-xl"
               onClick={() => {
@@ -242,8 +240,14 @@ const RateAndFlag = ({ articleId }) => {
               What's going on? We'll review against all community guidelines.
             </p>
 
-            {/* Reasons */}
-            {["Sexual content", "Violent or repulsive content", "Hateful or abusive content", "Harassment or bullying", "Harmful or dangerous acts", "Misinformation"].map((reason) => (
+            {[
+              "Sexual content",
+              "Violent or repulsive content",
+              "Hateful or abusive content",
+              "Harassment or bullying",
+              "Harmful or dangerous acts",
+              "Misinformation",
+            ].map((reason) => (
               <label key={reason} className="flex items-center mb-2 cursor-pointer">
                 <input
                   type="radio"
@@ -257,7 +261,6 @@ const RateAndFlag = ({ articleId }) => {
               </label>
             ))}
 
-            {/* Submit Button */}
             <button
               disabled={!selectedReason}
               className={`mt-4 w-full py-2 rounded font-semibold ${
@@ -273,11 +276,10 @@ const RateAndFlag = ({ articleId }) => {
         </div>
       )}
 
-      {/* Community Note Modal */}
+      {/* 📌 Community Note Modal */}
       {showCommunityNote && (
         <div className="fixed inset-0 backdrop-blur-sm bg-black/10 flex items-center justify-center z-50">
           <div className="bg-white rounded-xl shadow-lg w-[90%] max-w-md p-6 relative">
-            {/* Close Button */}
             <button
               className="absolute top-3 right-4 text-gray-600 hover:text-black text-xl"
               onClick={() => setShowCommunityNote(false)}
