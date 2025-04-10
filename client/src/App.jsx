@@ -61,7 +61,7 @@ function App() {
           <Route path="/guidelines" element={<Guidelines />} />
           <Route path="/privacy" element={<Privacy />} />
           <Route path="/latest" element={<Latest />} />
-          <Route path="/article/:title" element={<Article />} />
+          <Route path="/article/:articleName" element={<Article />} />
           <Route path="/public-profile/:userid" element={<PublicProfile />} />
 
           <Route path="/freeDashboard/*" element={<FreeDashboard />} />

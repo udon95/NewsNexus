@@ -147,7 +147,7 @@ function Home() {
           Latest News:
         </h1>
         <div className="flex justify-center w-full ">
-          <LatestNews />
+          <LatestNews displayLimit={3}/>
         </div>
       </div>
 

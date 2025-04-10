@@ -63,7 +63,7 @@ import { BadgeCheck, ArrowLeft } from "lucide-react";
 import Navbar from "./navbar.jsx";
 
 const PublicProfile = () => {
-  const { userid } = useParams();
+  const { userid, username } = useParams();
   const [profileData, setProfileData] = useState(null);
   const [error, setError] = useState("");
   const navigate = useNavigate();
@@ -102,7 +102,7 @@ const PublicProfile = () => {
       }
       try {
         const response = await axios.get(
-          `http://localhost:5000/users/${userid}`
+          `http://localhost:5000/users/${username}`
         );
         // Here, you might combine the user data with dummy articles/rooms if needed
         setProfileData({
@@ -154,7 +154,7 @@ const PublicProfile = () => {
             <ul>
               {profileData.articles.map((article) => (
                 <li key={article.articleid} className="mb-2">
-                   <Link
+                  <Link
                     to={`/article/${encodeURIComponent(article.title)}`}
                     className="text-blue-600 hover:underline font-medium"
                   >

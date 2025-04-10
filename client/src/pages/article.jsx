@@ -40,6 +40,8 @@ const Article = () => {
           imagepath,
           time,
           view_count,
+          rating,
+          status,
           userid,
           users (userid, username)
         `)

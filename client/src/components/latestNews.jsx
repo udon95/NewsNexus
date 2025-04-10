@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import NewsCard from "./newsCard";
 import supabase from "../api/supabaseClient";
 
-const LatestNews = ({ searchQuery = "", topic = "" }) => {
+const LatestNews = ({ searchQuery = "", topic = "", displayLimit }) => {
   const [latestArticles, setLatestArticles] = useState([]);
 
   useEffect(() => {
@@ -34,10 +34,14 @@ const LatestNews = ({ searchQuery = "", topic = "" }) => {
     fetchLatestArticles();
   }, [searchQuery, topic]);
 
+  const articlesToDisplay = displayLimit
+    ? latestArticles.slice(0, displayLimit)
+    : latestArticles;
+
   return (
     <div className="w-full max-w-[900px] mx-auto">
       <div className="space-y-6">
-        {latestArticles.map((article) => (
+        {articlesToDisplay.map((article) => (
           <NewsCard
             key={article.articleid}
             articleid={article.articleid}
