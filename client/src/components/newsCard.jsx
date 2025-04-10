@@ -1,47 +1,77 @@
-import React from "react";
-import { useNavigate } from "react-router-dom"; // Import navigation hook
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { ThumbsUp, ThumbsDown } from "lucide-react";
+import supabase from "../api/supabaseClient";
 
-const NewsCard = ({ title, imageUrl, rating }) => {
+const NewsCard = ({ articleid, title, imageUrl }) => {
   const navigate = useNavigate();
+  const [upvotes, setUpvotes] = useState(0);
+  const [downvotes, setDownvotes] = useState(0);
 
-  // Function to generate stars
-  // Function to generate stars (Now in black)
-  const renderStars = () => {
-    return [...Array(4)].map((_, index) => (
-      <span key={index} className={index < rating ? "text-black text-xl" : "text-gray-400 text-xl"}>
-        ★
-      </span>
-    ));
+  useEffect(() => {
+    const fetchVotes = async () => {
+      if (!articleid) return;
+
+      const { data, error } = await supabase
+        .from("ratings")
+        .select("vote_type")
+        .eq("articleid", articleid);
+
+      if (error) {
+        console.error("Error fetching votes:", error);
+        return;
+      }
+
+      const ups = data.filter((v) => v.vote_type === "upvote").length;
+      const downs = data.filter((v) => v.vote_type === "downvote").length;
+      setUpvotes(ups);
+      setDownvotes(downs);
+    };
+
+    fetchVotes();
+  }, [articleid]);
+
+  const formatCount = (count) => {
+    if (count >= 1000) return `${Math.floor(count / 1000)}K+`;
+    return count.toString();
   };
 
-
-  // Handle clicking on the card
   const handleCardClick = () => {
-    navigate(`/article/${encodeURIComponent(title)}`); // Redirect to article page
+    navigate(`/article/${encodeURIComponent(title)}`);
   };
 
   return (
     <div
       className="relative bg-white rounded-2xl shadow-lg border border-gray-300 overflow-hidden w-full max-w-[900px] mx-auto cursor-pointer hover:shadow-xl transition"
-      onClick={handleCardClick} // Make the whole card clickable
+      onClick={handleCardClick}
     >
-      {/* Image Section with Overlayed Vertical Stars */}
+      {/* Image */}
       <div className="relative w-full h-[200px]">
-        <img 
-          src={imageUrl || "https://via.placeholder.com/900x500"} // Default placeholder
+        <img
+          src={imageUrl || "test.png"}
           alt={title}
           className="w-full h-full object-cover"
         />
 
-        {/* Star Ratings - Now Vertical */}
-        <div className="absolute top-2 left-2 flex flex-col space-y-1 bg-opacity-50 p-1 rounded-lg">
-          {renderStars()}
+        {/* Votes Box */}
+        <div className="absolute top-2 left-2 bg-gray-200 p-2 rounded-lg flex flex-col items-center shadow-md">
+          <ThumbsUp size={20} className="text-green-500" />
+          <span className="text-xs font-semibold text-black">
+            {formatCount(upvotes)}
+          </span>
+
+          <div className="mt-3.5"></div>
+
+          <ThumbsDown size={20} className="text-red-500 mt-1" />
+          <span className="text-xs font-semibold text-black">
+            {formatCount(downvotes)}
+          </span>
         </div>
       </div>
 
-      {/* Article Title */}
+      {/* Title */}
       <div className="px-4 py-3 border-t bg-gray-100">
-        <p className="font-semibold text-black">{title}</p>
+        <p className="font-semibold text-black line-clamp-2">{title}</p>
       </div>
     </div>
   );
