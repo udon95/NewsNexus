@@ -1,0 +1,66 @@
+/* Article.css */
+
+/* Paywall Modal Styles */
+.paywall-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.7); /* Dark overlay */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+  }
+  
+  .modal-content {
+    background-color: white;
+    padding: 40px;
+    border-radius: 8px;
+    max-width: 600px;
+    text-align: center;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  }
+  
+  .modal-content h2 {
+    font-size: 24px;
+    font-weight: 600;
+    margin-bottom: 20px;
+  }
+  
+  .modal-content p {
+    font-size: 16px;
+    margin-bottom: 30px;
+  }
+  
+  .subscribe-button {
+    background-color: #0073e6;
+    color: white;
+    padding: 10px 30px;
+    font-size: 16px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    text-decoration: none; /* To remove underline from the link */
+  }
+  
+  .subscribe-button:hover {
+    background-color: #005bb5;
+  }
+  
+  .sign-in-link {
+    color: #0073e6;
+    text-decoration: underline;
+    font-size: 14px;
+  }
+  
+  .paywall-close {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    cursor: pointer;
+    font-size: 24px;
+  }
+  

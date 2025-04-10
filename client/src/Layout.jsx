@@ -16,6 +16,10 @@ const Layout = () => {
           {" "}
           Privacy Policy
         </a>
+        <span>&nbsp; &nbsp; | &nbsp; &nbsp;</span> 
+        <a href="/guidelines" className="underline">
+          Platform Guidelines
+        </a>
       </footer>
     </div>
   );

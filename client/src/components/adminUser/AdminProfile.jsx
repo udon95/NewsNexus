@@ -2,7 +2,7 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 // import "../index.css";
 import AdminSidebar from "./adminSideBar.jsx";
-import Navbar from "../navbar.jsx";
+// import Navbar from "../navbar.jsx";
 
 const AdminProfile = () => {
     const navigate = useNavigate();

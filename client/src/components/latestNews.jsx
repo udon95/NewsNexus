@@ -1,38 +1,48 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import NewsCard from "./newsCard";
+import supabase from "../api/supabaseClient";
 
-const newsData = [
-  {
-    title: "Latest Malaysian Forest Fire",
-    imageUrl: "/vite.svg",
-    rating: 4,
-  },
-  {
-    title: "US Currency Strengthens Again",
-    imageUrl: "",
-    rating: 3,
-  },
-  {
-    title: "Personal Top 5 Singaporean Xiao Mei Mei",
-    imageUrl: "",
-    rating: 2,
-  },
-];
+const LatestNews = ({ searchQuery = "", topic = "" }) => {
+  const [latestArticles, setLatestArticles] = useState([]);
 
-const LatestNews = ({ searchQuery = "" }) => {
-  const filteredNewsData = newsData.filter((news) =>
-    news.title.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  useEffect(() => {
+    const fetchLatestArticles = async () => {
+      let query = supabase
+        .from("articles")
+        .select("articleid, title, imagepath, topicid, time")
+        .order("time", { ascending: false })
+        .limit(20); // adjust if needed
+
+      if (topic) {
+        query = query.eq("topicid", topic);
+      }
+
+      if (searchQuery.trim()) {
+        query = query.or(`title.ilike.%${searchQuery}%,text.ilike.%${searchQuery}%`);
+      }
+
+      const { data, error } = await query;
+
+      if (error) {
+        console.error("Error fetching latest articles:", error);
+        return;
+      }
+
+      setLatestArticles(data);
+    };
+
+    fetchLatestArticles();
+  }, [searchQuery, topic]);
+
   return (
-    <div className="w-full max-w-[900px] mx-auto ">
-      {/* News Cards */}
+    <div className="w-full max-w-[900px] mx-auto">
       <div className="space-y-6">
-        {filteredNewsData.map((news, index) => (
+        {latestArticles.map((article) => (
           <NewsCard
-            key={index}
-            title={news.title}
-            imageUrl={news.imageUrl}
-            rating={news.rating}
+            key={article.articleid}
+            articleid={article.articleid}
+            title={article.title}
+            imageUrl={article.imagepath}
           />
         ))}
       </div>

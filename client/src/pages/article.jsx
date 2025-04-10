@@ -1,34 +1,141 @@
 import React, { useState, useEffect, useRef } from "react";
 import "../index.css";
+import "../pages/article.css";
+import Logo from "../assets/Logo.svg";
 import Navbar from "../components/navbar.jsx";
 import Rate from "../components/rateAndFlag.jsx";
-import Content from "../components/articleContent.jsx";
+import ArticleContent from "../components/articleContent.jsx";
 import Comments from "../components/commentsSection.jsx";
 import useAuthHook from "../hooks/useAuth.jsx";
+import { useParams, useNavigate } from "react-router-dom";
+import supabase from "../api/supabaseClient";
 import { BookOpenIcon, XMarkIcon } from "@heroicons/react/24/outline";
 
 const Article = () => {
   const articleRef = useRef(null);
+  const { userType, user } = useAuthHook();
+  const { articleName } = useParams();
+  const navigate = useNavigate();
+
+  const [articleData, setArticleData] = useState(null);
+  const [readArticlesCount, setReadArticlesCount] = useState(0);
+  const [showPaywall, setShowPaywall] = useState(false);
+
+  //  Dictionary states
   const [selectedText, setSelectedText] = useState("");
   const [definition, setDefinition] = useState(null);
   const [showDictionary, setShowDictionary] = useState(false);
   const [loading, setLoading] = useState(false);
   const [buttonPosition, setButtonPosition] = useState({ x: 0, y: 0 });
   const buttonRef = useRef(null);
-  const { userType } = useAuthHook();
-
-  // TEMPORARY HARDCODED articleId (you'll replace this later)
-  const mockArticleId = "11111111-1111-1111-1111-111111111111";
 
   useEffect(() => {
-    setTimeout(() => {
-      window.scrollTo(0, 0);
-    }, 100);
-    return () => {
-      window.speechSynthesis.cancel();
-    };
-  }, []);
+    const fetchArticle = async () => {
+      const { data, error } = await supabase
+        .from("articles")
+        .select(`
+          articleid,
+          title,
+          text,
+          imagepath,
+          time,
+          view_count,
+          userid,
+          users (userid, username)
+        `)
+        .eq("title", articleName)
+        .single();
 
+      if (error) {
+        console.error("Error fetching article:", error.message);
+        return;
+      }
+
+      setArticleData(data);
+
+      if (data?.articleid) {
+        const { data: currentView, error: viewErr } = await supabase
+          .from("articles")
+          .select("view_count")
+          .eq("articleid", data.articleid)
+          .single();
+
+        if (!viewErr && currentView) {
+          const updatedCount = (currentView.view_count || 0) + 1;
+          await supabase
+            .from("articles")
+            .update({ view_count: updatedCount })
+            .eq("articleid", data.articleid);
+        }
+      }
+
+      if (user && data?.articleid) {
+        await supabase.from("reading_history").insert([
+          {
+            articleid: data.articleid,
+            userid: user.userid,
+            read_date: new Date().toISOString(),
+          },
+        ]);
+      }
+    };
+
+    fetchArticle();
+  }, [articleName, user]);
+
+  useEffect(() => {
+    const fetchReadingHistory = async () => {
+      if (user) {
+        const startOfToday = new Date();
+        startOfToday.setHours(0, 0, 0, 0);
+
+        const { data, error } = await supabase
+          .from("reading_history")
+          .select("*")
+          .eq("userid", user.userid)
+          .gte("read_date", startOfToday.toISOString());
+
+        if (error) {
+          console.error("Error fetching reading history:", error);
+        } else {
+          setReadArticlesCount(data.length);
+        }
+      } else {
+        const today = new Date().toISOString().split("T")[0];
+        const guestData = JSON.parse(localStorage.getItem("guestViewLog") || "{}");
+
+        if (guestData.date !== today) {
+          guestData.date = today;
+          guestData.count = 0;
+        }
+
+        guestData.count = (guestData.count || 0) + 1;
+        localStorage.setItem("guestViewLog", JSON.stringify(guestData));
+
+        setReadArticlesCount(guestData.count);
+      }
+    };
+
+    fetchReadingHistory();
+  }, [user]);
+
+  useEffect(() => {
+    if (!articleData) return;
+
+    if (user && userType !== null) {
+      if (userType === "Free" && readArticlesCount > 10) {
+        setShowPaywall(true);
+      } else {
+        setShowPaywall(false);
+      }
+    }
+
+    if (!user && userType === null && readArticlesCount > 3) {
+      setShowPaywall(true);
+    }
+  }, [user, userType, articleData, readArticlesCount]);
+
+  // 📘 Handle text selection
   const handleTextSelection = () => {
     const selection = window.getSelection();
     const text = selection.toString().trim();
@@ -47,7 +154,6 @@ const Article = () => {
 
   const fetchDefinition = async () => {
     if (!selectedText) return;
-
     setLoading(true);
     try {
       const response = await fetch(
@@ -73,17 +179,31 @@ const Article = () => {
       onMouseUp={handleTextSelection}
     >
       <Navbar />
-
-      <div className="border-b w-full">
-        <div className="flex flex-col items-right w-full px-4 sm:px-8 py-4 mx-auto max-w-screen-lg">
-          <Rate />
-        </div>
+      <div className="flex flex-col items-right w-full px-4 sm:px-8 py-4 mx-auto max-w-screen-lg">
+        <Rate articleId={articleData?.articleid} />
       </div>
 
       <main className="flex flex-col items-center w-full px-4 sm:px-8 py-10 mx-auto max-w-screen-lg">
-        <Content articleRef={articleRef} />
-        <Comments articleId={mockArticleId} />
+        {articleData ? (
+          <>
+            <ArticleContent
+              articleRef={articleRef}
+              title={articleData.title}
+              text={articleData.text}
+              imagepath={articleData.imagepath}
+              postDate={new Date(articleData.time).toLocaleDateString()}
+              author={{
+                userid: articleData.users?.userid,
+                username: articleData.users?.username || "Unknown Author",
+              }}
+            />
+            <Comments articleRef={articleRef} articleId={articleData.articleid} />
+          </>
+        ) : (
+          <p>Loading article...</p>
+        )}
 
+        {/* 📘 Dictionary floating button (Premium only) */}
         {selectedText && userType === "Premium" && (
           <button
             ref={buttonRef}
@@ -101,6 +221,7 @@ const Article = () => {
           </button>
         )}
 
+        {/* 📘 Dictionary modal */}
         {showDictionary && (
           <div className="fixed inset-0 flex items-center justify-center backdrop-blur-sm z-50">
             <div className="bg-white shadow-lg rounded-lg p-6 w-[90%] max-w-md text-center">
@@ -113,6 +234,35 @@ const Article = () => {
               <p className="text-lg mt-2">
                 <strong>{selectedText}:</strong>{" "}
                 {loading ? "Loading..." : definition}
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* ✅ Paywall */}
+        {showPaywall && (
+          <div className="paywall-modal">
+            <div className="modal-content">
+              <img src={Logo} alt="NewsNexus Logo" className="mx-auto mb-4" />
+              <h2>Want to Keep Reading?</h2>
+              <p>
+                {!user
+                  ? "You’ve reached your daily limit of 3 free articles. Sign up or subscribe to continue reading!"
+                  : "You’ve reached your daily limit of 10 articles. Subscribe for unlimited access!"}
+              </p>
+              <p>
+                <button
+                  className="subscribe-button"
+                  onClick={() => navigate("/subscription")}
+                >
+                  Subscribe
+                </button>
+              </p>
+              <p>
+                Already a Subscriber?{" "}
+                <a href="/login" className="sign-in-link">
+                  Sign In
+                </a>
               </p>
             </div>
           </div>

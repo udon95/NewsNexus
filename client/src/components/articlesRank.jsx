@@ -1,62 +1,83 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import rank1Image from "../assets/test.png"; //  Rank #1 (LHL Article)
-import rank2Image from "../assets/test.png"; //  Rank #2 Image
-import rank3Image from "../assets/test.png"; //  Rank #3 Image
+import supabase from "../api/supabaseClient";
 
-const articles = [
-  {
-    id: 1,
-    title: "Personal Legacy of Lee Hsien Loong",
-    image: rank1Image,
-  },
-  { id: 2, title: "Rank #02 Article", image: rank2Image },
-  { id: 3, title: "Rank #03 Article", image: rank3Image },
-];
-
-const ArticlesRank = ({ searchQuery = "" }) => {
+const ArticlesRank = ({ searchQuery = "", topic = "" }) => {
+  const [articles, setArticles] = useState([]);
   const navigate = useNavigate();
 
-  const filteredArticles = articles.filter((news) =>
-    news.title.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  useEffect(() => {
+    const fetchRankedArticles = async () => {
+      let query = supabase
+        .from("articles")
+        .select("articleid, title, imagepath, total_votes, view_count, topicid");
+
+      if (topic) {
+        query = query.eq("topicid", topic);
+      }
+
+      if (searchQuery.trim()) {
+        query = query.or(`title.ilike.%${searchQuery}%,text.ilike.%${searchQuery}%`);
+      }
+
+      const { data, error } = await query;
+
+      if (error) {
+        console.error("Error fetching ranked articles:", error);
+        return;
+      }
+
+      const ranked = data
+        .map((article) => ({
+          ...article,
+          ranking_score:
+            article.view_count > 0
+              ? article.total_votes / article.view_count
+              : 0,
+        }))
+        .sort((a, b) => b.ranking_score - a.ranking_score)
+        .slice(0, 3); // top 3
+
+      setArticles(ranked);
+    };
+
+    fetchRankedArticles();
+  }, [searchQuery, topic]);
+
   const handleCardClick = (title) => {
     navigate(`/article/${encodeURIComponent(title)}`);
   };
+
   return (
-    <div className="w-full max-w-5xl mx-auto px-16 font-grotesk">
-      {/* Page Title */}
-      {/* <h1 className="text-2xl sm:text-3xl text-left mt-6">
-        <p>
-          Explore All <em>‘My’</em> Articles:{" "}
-        </p>
-      </h1> */}
-
-      {/* Article Ranking Boxes */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 max-w-[900px]">
-        {filteredArticles.map((article) => (
-          <button
-            key={article.id}
-            onClick={() => handleCardClick(article.title)}
-            className="bg-gray-100 rounded-xl shadow-lg p-4 flex flex-col items-center w-full border border-gray-300 cursor-pointer hover:bg-gray-200 transition"
-          >
-            {/* Rank Title */}
-            <h2 className="text-lg font-semibold mb-2">Rank #{article.id}</h2>
-
-            {/* Article Image */}
-            <img
-              src={article.image}
-              alt={article.title}
-              className="w-full h-40 object-cover rounded-lg mb-4 bg-gray-300"
-            />
-
-            {/* Bottom Divider */}
-            <div className="w-full h-auto bg-gray-300 mb-4">
-              {article.title}
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 max-w-[900px] w-full">
+      {articles.map((article, index) => (
+        <div
+          key={article.articleid}
+          onClick={() => handleCardClick(article.title)}
+          className="w-full h-60 border border-black rounded-2xl shadow-md cursor-pointer hover:shadow-lg transition bg-white flex flex-col"
+        >
+          <div className="w-full h-48 bg-gray-200 rounded-t-2xl overflow-hidden relative">
+            {article.imagepath ? (
+              <img
+                src={article.imagepath}
+                alt={article.title}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <div className="w-full h-full flex justify-center items-center text-gray-500">
+                No Image Available
+              </div>
+            )}
+            <div className="absolute top-2 left-2 bg-black text-white text-sm font-bold px-3 py-1 rounded-lg border-2 border-white">
+              Rank #{index + 1}
             </div>
-          </button>
-        ))}
-      </div>
+          </div>
+          <div className="w-full border-t border-black"></div>
+          <p className="text-left text-black font-medium px-4 py-2 line-clamp-2">
+            {article.title}
+          </p>
+        </div>
+      ))}
     </div>
   );
 };
