@@ -13,7 +13,7 @@ const CommentsSection = ({ articleId }) => {
   const [newComment, setNewComment] = useState("");
   const [menuAnchor, setMenuAnchor] = useState({});
   const [expandedComments, setExpandedComments] = useState({});
-  const [reportTarget, setReportTarget] = useState(null); // Track the comment being reported
+  const [reportTarget, setReportTarget] = useState(null);
   const [selectedReason, setSelectedReason] = useState("");
 
   useEffect(() => {
@@ -95,8 +95,8 @@ const CommentsSection = ({ articleId }) => {
           userid: user?.userid,
           username: user?.username,
           created_at: new Date().toISOString(),
-          resolved: false, // initially set to false
-          resolution: null, // empty resolution field
+          resolved: false,
+          resolution: null,
         },
       ]);
 
@@ -104,23 +104,20 @@ const CommentsSection = ({ articleId }) => {
         console.error("Error submitting report:", error);
       } else {
         alert("Report submitted.");
-        setReportTarget(null); // Close the report modal
-        setSelectedReason(""); // Clear the reason
+        setReportTarget(null);
+        setSelectedReason("");
       }
     }
   };
 
   const handleShareClick = () => {
-    const shareLink = window.location.href; // The URL of the article page
+    const shareLink = window.location.href;
     if (navigator.share) {
       navigator.share({
         title: document.title,
         url: shareLink,
-      })
-        .then(() => console.log("Shared successfully"))
-        .catch((error) => console.log("Error sharing:", error));
+      }).catch((error) => console.log("Error sharing:", error));
     } else {
-      // Fallback for browsers that do not support the Share API
       navigator.clipboard.writeText(shareLink)
         .then(() => alert("Link copied to clipboard!"))
         .catch((error) => console.log("Error copying to clipboard:", error));
@@ -152,7 +149,7 @@ const CommentsSection = ({ articleId }) => {
 
           <button
             className="w-10 h-10 p-2 bg-black rounded-lg hover:bg-gray-900 flex items-center justify-center"
-            onClick={handleShareClick} // Share link functionality
+            onClick={handleShareClick}
           >
             <Share2 className="h-5 w-5 text-white" />
           </button>
@@ -172,12 +169,10 @@ const CommentsSection = ({ articleId }) => {
           <div key={comment.commentid} className="mb-6">
             <div className="w-full bg-white p-4 rounded-lg mb-2 shadow-md">
               <div className="flex items-center justify-between gap-4">
-                {/* Avatar */}
                 <div className="w-12 h-12 flex items-center justify-center text-xl font-bold rounded-full bg-blue-500 text-white">
                   {comment.username?.[0]?.toUpperCase() || "U"}
                 </div>
 
-                {/* Username + Time + Comment */}
                 <div className="flex-1 min-w-0">
                   <p className="text-[#00317F] text-sm font-semibold">
                     <span className="font-bold text-black">{comment.username}</span>{" "}
@@ -195,8 +190,6 @@ const CommentsSection = ({ articleId }) => {
                   >
                     {comment.content}
                   </p>
-
-                  {/* Show More/Show Less toggle inside the comment box */}
                   {comment.content.length > 100 && (
                     <span
                       onClick={() => toggleContent(comment.commentid)}
@@ -207,7 +200,6 @@ const CommentsSection = ({ articleId }) => {
                   )}
                 </div>
 
-                {/* 3-dot Menu */}
                 {user && (
                   <>
                     <IconButton onClick={(e) => handleMenuOpen(e, comment.commentid)}>
@@ -246,6 +238,60 @@ const CommentsSection = ({ articleId }) => {
           </div>
         ))}
       </div>
+
+      {/* ✅ Report Modal for Comments */}
+      {reportTarget && (
+        <div className="fixed inset-0 backdrop-blur-sm bg-black/10 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl shadow-lg w-[90%] max-w-md p-6 relative">
+            <button
+              className="absolute top-3 right-4 text-gray-600 hover:text-black text-xl"
+              onClick={() => {
+                setReportTarget(null);
+                setSelectedReason("");
+              }}
+            >
+              ×
+            </button>
+            <h2 className="text-xl font-bold mb-2">Report Comment</h2>
+            <p className="text-gray-600 text-sm mb-4">
+              What's going on? We'll review against all community guidelines.
+            </p>
+
+            {[
+              "Sexual content",
+              "Violent or repulsive content",
+              "Hateful or abusive content",
+              "Harassment or bullying",
+              "Harmful or dangerous acts",
+              "Misinformation",
+            ].map((reason) => (
+              <label key={reason} className="flex items-center mb-2 cursor-pointer">
+                <input
+                  type="radio"
+                  className="mr-3 accent-blue-600"
+                  name="report-reason"
+                  value={reason}
+                  checked={selectedReason === reason}
+                  onChange={() => setSelectedReason(reason)}
+                />
+                {reason}
+              </label>
+            ))}
+
+            <button
+              disabled={!selectedReason}
+              className={`mt-4 w-full py-2 rounded font-semibold ${
+                selectedReason
+                  ? "bg-red-600 text-white hover:bg-red-700"
+                  : "bg-gray-200 text-gray-500 cursor-not-allowed"
+              }`}
+              onClick={handleReportSubmit}
+            >
+              Report
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
