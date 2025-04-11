@@ -9,6 +9,7 @@ import LatestNews from "../components/latestNews.jsx";
 import downArrow from "../assets/DownArrow.svg";
 import useAuthHook from "../hooks/useAuth.jsx";
 import FetchTopics from "../components/fetchTopics.jsx";
+import VideoComponent from "../components/featureVideo.jsx";
 
 // const topics = [
 //   "Finance",
@@ -73,10 +74,10 @@ function Home() {
           justify-center
           "
         >
-          <h1 className="text-black text-4xl w-[300px] font-bold font-grotesk">
+          <h1 className="sm:ml-10 text-black text-4xl w-[300px] font-bold font-grotesk">
             Navigating the Singaporean News Landscape
           </h1>
-          <div className="flex justify-left gap-3 mt-4 sm:mt-4">
+          <div className="flex justify-left gap-3 mt-4 sm:mt-4 sm:ml-10">
             {!user && !loading && (
               <>
                 <button
@@ -106,22 +107,8 @@ function Home() {
           Go To Discussion Rooms &gt;
         </button>
       </div>
-      <div className="flex justify-center w-full mt-10 font-grotesk">
-        <div className="relative w-full max-w-[900px] bg-gray-300 rounded-lg shadow-lg overflow-hidden ">
-          {/* Text Overlay */}
-          <p className="absolute top-3 left-4 text-black font-bold text-3xl z-10">
-            Features :
-          </p>
+      <VideoComponent />
 
-          {/* Video Element */}
-          <video autoPlay loop muted className="w-full max-h-[400px]" controls>
-            <source src="video.mp4" type="video/mp4" />
-            Your browser does not support the video tag.
-          </video>
-        </div>
-      </div>
-
-      
       <div className="w-full font-grotesk mt-12">
         <h1 className="text-2xl sm:text-3xl mb-5 text-left max-w-[900px] mx-auto">
           Testimonials:
@@ -147,7 +134,7 @@ function Home() {
           Latest News:
         </h1>
         <div className="flex justify-center w-full ">
-          <LatestNews displayLimit={3}/>
+          <LatestNews displayLimit={3} />
         </div>
       </div>
 

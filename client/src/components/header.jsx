@@ -72,7 +72,7 @@ const Header = () => {
           <img
             loading="lazy"
             src={logo}
-            className="h-10 sm:h-12  w-auto cursor-pointer"
+            className="sm:ml-10 h-10 sm:h-12  w-auto cursor-pointer"
             alt="NewsNexus Logo"
           />
         </Link>

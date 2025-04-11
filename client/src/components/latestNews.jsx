@@ -10,6 +10,7 @@ const LatestNews = ({ searchQuery = "", topic = "", displayLimit }) => {
       let query = supabase
         .from("articles")
         .select("articleid, title, imagepath, topicid, time")
+        .eq("status", "Published")
         .order("time", { ascending: false })
         .limit(20); // adjust if needed
 

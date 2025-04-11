@@ -4,6 +4,7 @@ import TopicList from "../../components/topicList";
 import axios from "axios";
 import PasswordInput from "../showPW";
 import { HexColorPicker } from "react-colorful";
+import FetchTopics from "../fetchTopics";
 
 const PremManageProfile = () => {
   const [selectedTopics, setSelectedTopics] = useState([]);
@@ -289,7 +290,8 @@ const PremManageProfile = () => {
 
   const handleHexChange = (event) => {
     const value = event.target.value;
-    if (/^#[0-9A-Fa-f]{6}$/.test(value)) {
+    setHexCode(value);
+    if (/^#[0-9A-Fa-f]{6}$/i.test(value)) {
       // Basic hex validation (e.g., #ffffff)
       setHexCode(value);
       setProfileColor(value);
@@ -308,13 +310,13 @@ const PremManageProfile = () => {
               <h3 className="text-2xl font-grotesk font-bold mb-1">
                 Profile Particulars:
               </h3>
-              <div className="p-4 bg-white shadow-md rounded-lg w-3/3 md:w-2/3">
+              <div className="p-4 bg-white shadow-md rounded-lg w-3/3 md:w-2/3 font-grotesk">
                 Name:
                 <input
                   type="text"
                   value={editUsername}
                   onChange={(e) => setEditUsername(e.target.value)}
-                  className="w-full p-2 border rounded-lg"
+                  className="w-full p-2 border rounded-lg mb-2"
                   placeholder="Username"
                 />
                 Email:
@@ -322,7 +324,7 @@ const PremManageProfile = () => {
                   type="email"
                   value={editEmail}
                   onChange={(e) => setEditEmail(e.target.value)}
-                  className="w-full p-2 border rounded-lg mt-2"
+                  className="w-full p-2 border rounded-lg mb-2"
                   placeholder="E-mail"
                 />
                 Date:
@@ -330,18 +332,18 @@ const PremManageProfile = () => {
                   type="date"
                   value={editDate}
                   onChange={(e) => setEditDate(e.target.value)}
-                  className="w-full p-2 border rounded-lg mt-2"
+                  className="w-full p-2 border rounded-lg mb-2"
                   placeholder="DOB"
                 />
                 {dobError && (
                   <p className="text-red-600 text-sm mt-2">{dobError}</p>
                 )}
                 <div>
-                  <label className="block font-bold">Gender:</label>
+                  Gender: 
                   <select
                     value={editGender}
                     onChange={(e) => setEditGender(e.target.value)}
-                    className="w-full p-2 border rounded-lg mt-2"
+                    className="w-full p-2 border rounded-lg mb-2"
                   >
                     <option value="">Select Gender</option>
                     <option value="Male">Male</option>
@@ -354,17 +356,17 @@ const PremManageProfile = () => {
                 <HexColorPicker
                   color={profileColor}
                   onChange={handleColorChange}
+                  className="mb-2"
                 />
                 <div>
-                  Enter HexCode:
+                  Or Enter HexCode: 
                   <input
                     type="text"
                     value={hexCode}
                     onChange={handleHexChange}
                     placeholder="#FFFFFF"
-                    className="w-full p-2 border rounded-lg mt-2"
+                    className="ml-2 p-2 border rounded-lg mb-2"
                   />
-                  <p>Your selected color: {hexCode}</p>
                 </div>
                 <div
                   className="preview"
@@ -428,27 +430,8 @@ const PremManageProfile = () => {
                 Interest Selection (Max 6):
               </h3>
               <div className="p-4 bg-white shadow-md rounded-lg w-3/3 md:w-2/3 mb-1">
-                <TopicList
-                  allTopics={[
-                    "Finance",
-                    "Politics",
-                    "Entertainment",
-                    "Sports",
-                    "Weather",
-                    "Lifestyle",
-                    "Beauty",
-                    "Hollywood",
-                    "China",
-                    "Horticulture",
-                    "Culinary",
-                    "LGBTQ++",
-                    "Singapore",
-                    "Environment",
-                    "Investment",
-                    "USA",
-                    "Luxury",
-                    "Korea",
-                  ]}
+                <FetchTopics
+                 
                   selectedTopics={selectedTopics} //  Pass selected topics
                   setSelectedTopics={setSelectedTopics} //  Allow updates
                   handleTopicSelection={handleTopicSelection}
