@@ -108,6 +108,7 @@ const PremManageProfile = () => {
         email: editEmail,
         dob: editDate,
         gender: editGender,
+        color: editColor,
       };
 
       const response = await axios.post(
@@ -128,10 +129,11 @@ const PremManageProfile = () => {
             ...storedUser.profile,
             dob: editDate,
             gender: editGender,
+            color: editColor,
           };
           localStorage.setItem("userProfile", JSON.stringify(storedUser));
-          window.location.reload();
         }
+        window.location.reload();
       }
     } catch (error) {
       console.error(
@@ -278,6 +280,8 @@ const PremManageProfile = () => {
     if (storedColor) {
       setProfileColor(storedColor);
       setHexCode(storedColor);
+    } else {
+      fetchProfileColor();
     }
   }, []);
 
@@ -285,7 +289,7 @@ const PremManageProfile = () => {
     setProfileColor(color);
     setHexCode(color);
     localStorage.setItem("profileColor", color);
-    // updateProfileColor(color);
+    updateProfileColor(color);
   };
 
   const handleHexChange = (event) => {
@@ -296,9 +300,40 @@ const PremManageProfile = () => {
       setHexCode(value);
       setProfileColor(value);
       localStorage.setItem("profileColor", value);
-      // updateProfileColor(value);  // Send color to backend
+      updateProfileColor(value); // Send color to backend
     }
   };
+
+  const fetchProfileColor = async (userId) => {
+    try {
+      const { data, error } = await supabase
+        .from("usertype") // Assuming the table name is "userprofile"
+        .select("color")
+        .eq("userid", userId); // Fetching color based on the user ID
+
+      if (error) throw error;
+
+      return data[0]?.color || "#ffffff"; // Return the color or default to white
+    } catch (error) {
+      console.error("Error fetching profile color:", error.message);
+      return "#ffffff"; // Return default color in case of error
+    }
+  };
+
+  // const updateProfileColor = async (userId, newColor) => {
+  //   try {
+  //     const { data, error } = await supabase
+  //       .from("usertype") // Assuming the table name is "userprofile"
+  //       .update({ color: newColor }) // Update the color column
+  //       .eq("userid", userId); // Update the record where userid matches
+
+  //     if (error) throw error;
+
+  //     console.log("Profile color updated successfully.");
+  //   } catch (error) {
+  //     console.error("Error updating profile color:", error.message);
+  //   }
+  // };
 
   return (
     <div className="w-screen min-h-screen flex flex-col overflow-hidden">
@@ -339,7 +374,7 @@ const PremManageProfile = () => {
                   <p className="text-red-600 text-sm mt-2">{dobError}</p>
                 )}
                 <div>
-                  Gender: 
+                  Gender:
                   <select
                     value={editGender}
                     onChange={(e) => setEditGender(e.target.value)}
@@ -351,7 +386,6 @@ const PremManageProfile = () => {
                     <option value="Other">Prefer Not To Say</option>
                   </select>
                 </div>
-
                 Choose Profile Color:
                 <HexColorPicker
                   color={profileColor}
@@ -359,7 +393,7 @@ const PremManageProfile = () => {
                   className="mb-2"
                 />
                 <div>
-                  Or Enter HexCode: 
+                  Or Enter HexCode:
                   <input
                     type="text"
                     value={hexCode}
@@ -431,7 +465,6 @@ const PremManageProfile = () => {
               </h3>
               <div className="p-4 bg-white shadow-md rounded-lg w-3/3 md:w-2/3 mb-1">
                 <FetchTopics
-                 
                   selectedTopics={selectedTopics} //  Pass selected topics
                   setSelectedTopics={setSelectedTopics} //  Allow updates
                   handleTopicSelection={handleTopicSelection}
