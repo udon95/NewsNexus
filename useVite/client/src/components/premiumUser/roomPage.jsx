@@ -29,6 +29,8 @@ const Room = () => {
   const [expandedCommentsForPost, setExpandedCommentsForPost] = useState({});
   const [trueParentCommentId, setTrueParentCommentId] = useState(null);
   const [carouselIndex, setCarouselIndex] = useState({});
+  const [expandedArticles, setExpandedArticles] = useState({});
+  
 
   const nextSlide = (postid, imageCount) => {
     setCarouselIndex((prev) => ({
@@ -36,6 +38,73 @@ const Room = () => {
       [postid]: (prev[postid] ?? 0) === imageCount - 1 ? 0 : (prev[postid] ?? 0) + 1,
     }));
   };
+
+  const toggleExpandedArticle = (postid) => {
+    setExpandedArticles((prev) => ({
+      ...prev,
+      [postid]: !prev[postid],
+    }));
+  }; 
+  
+
+  useEffect(() => {
+    const style = document.createElement('style');
+    style.innerHTML = `
+      .room-article-content h1 {
+        font-size: 1.5rem;
+        font-weight: bold;
+        margin: 1.5rem 0 1rem;
+      }
+      .room-article-content h2 {
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin: 1rem 0;
+      }
+      .room-article-content h3 {
+        font-size: 1.125rem;
+        font-weight: 500;
+        margin: 0.75rem 0;
+      }
+      .room-article-content p {
+        font-size: 1rem;
+        margin-bottom: 1.25rem;
+        line-height: 1.75;
+      }
+      .room-article-content ul {
+        list-style-type: disc;
+        margin-left: 1.5rem;
+        margin-bottom: 1rem;
+      }
+      .room-article-content ol {
+        list-style-type: decimal;
+        margin-left: 1.5rem;
+        margin-bottom: 1rem;
+      }
+      .room-article-content img {
+        max-width: 100%;
+        height: auto;
+        margin: 1rem 0;
+        border-radius: 8px;
+        display: block;
+      }
+      .room-article-content a {
+        color: #2563eb;
+        text-decoration: underline;
+        cursor: pointer;
+      }
+      .room-article-content mark {
+        background-color: #fde68a;
+        padding: 0 2px;
+        border-radius: 3px;
+      }
+      .room-article-content p[style*="text-indent"] {
+        text-indent: 2em;
+        transition: all 0.2s ease;
+      }
+    `;
+    document.head.appendChild(style);
+    return () => document.head.removeChild(style);
+  }, []);  
   
   const prevSlide = (postid, imageCount) => {
     setCarouselIndex((prev) => ({
@@ -202,66 +271,84 @@ const Room = () => {
       }
     };
 
-    const fetchArticles = async () => {
-      const { data, error } = await supabase
-        .from("room_articles")
-        .select(`
-          postid,
-          title,
-          content,
-          created_at,
-          userid,
-          users:userid(username),
-          room_comments(*),
-          room_article_images(image_url)
-        `)
-        .eq("roomid", roomid)
-        .order("created_at", { ascending: false });
-    
-      if (error) {
-        console.error("Error fetching articles:", error);
-        return;
+  const fetchArticles = async () => {
+    const { data: articlesData, error: articlesError } = await supabase
+      .from("room_articles")
+      .select(`
+        postid,
+        title,
+        content,
+        created_at,
+        userid,
+        users:userid(username),
+        room_comments(*),
+        room_article_images(image_url)
+      `)
+      .eq("roomid", roomid)
+      .order("created_at", { ascending: false });
+  
+    if (articlesError) {
+      console.error("Error fetching articles:", articlesError);
+      return;
+    }
+  
+    const { data: notesData, error: notesError } = await supabase
+      .from("community_notes")
+      .select("target_id, note, username, Status")
+      .in("target_id", articlesData.map(a => a.postid));
+  
+    if (notesError) {
+      console.error("Error fetching community notes:", notesError);
+      return;
+    }
+  
+    const notesMap = {};
+    notesData?.forEach((note) => {
+      if (note.Status === "Approved") {
+        if (!notesMap[note.target_id]) {
+          notesMap[note.target_id] = [];
+        }
+        notesMap[note.target_id].push(note);
       }
-
-      console.log("Fetched articles data:", JSON.stringify(data, null, 2)); // Debugging log
-      setArticles(data);
-          
-      const articlesWithComments = data.map((article) => {
-        // Step 1: Map all comments by ID
-        const commentMap = new Map();
-        article.room_comments.forEach((comment) => {
-          comment.replies = []; // initialize replies array
-          commentMap.set(comment.commentid, comment);
-        });
-      
-        // Step 2: Flatten comments – attach all replies to their topmost parent
-        const topLevelComments = [];
-      
-        article.room_comments.forEach((comment) => {
-          if (!comment.parent_commentid) {
-            topLevelComments.push(comment);
-          } else {
-            let parent = commentMap.get(comment.parent_commentid);
-      
-            // Traverse up until top-level parent found
-            while (parent?.parent_commentid && commentMap.has(parent.parent_commentid)) {
-              parent = commentMap.get(parent.parent_commentid);
-            }
-      
-            if (parent) {
-              parent.replies.push(comment); // flatten under top-level parent
-            } else {
-              topLevelComments.push(comment); // fallback: treat as top-level if orphaned
-            }
+    });
+  
+    const articlesWithComments = articlesData.map((article) => {
+      const commentMap = new Map();
+      article.room_comments.forEach((comment) => {
+        comment.replies = [];
+        commentMap.set(comment.commentid, comment);
+      });
+  
+      const topLevelComments = [];
+  
+      article.room_comments.forEach((comment) => {
+        if (!comment.parent_commentid) {
+          topLevelComments.push(comment);
+        } else {
+          let parent = commentMap.get(comment.parent_commentid);
+          while (parent?.parent_commentid && commentMap.has(parent.parent_commentid)) {
+            parent = commentMap.get(parent.parent_commentid);
           }
-        });
-      
-        return { ...article, room_comments: topLevelComments };
-      });          
-    
-      setArticles(articlesWithComments);
-    };    
-
+  
+          if (parent) {
+            parent.replies.push(comment);
+          } else {
+            topLevelComments.push(comment);
+          }
+        }
+      });
+  
+      return {
+        ...article,
+        room_comments: topLevelComments,
+        approvedNotes: notesMap[article.postid] || [],
+      };
+    });
+  
+    console.log("Fetched articles data:", JSON.stringify(articlesWithComments, null, 2)); // Optional debug
+    setArticles(articlesWithComments);
+  };
+  
     fetchRoomDetails();
     if (user) checkMembership();
     fetchArticles();
@@ -957,109 +1044,155 @@ const CommentCard = ({
                   })}
                 </span>
               </p>
+              {article.approvedNotes?.length > 0 && (
+  <div className="border border-purple-400 bg-[#f4edff] text-purple-800 rounded-md p-3 mt-3 mb-4">
+    <p className="font-semibold text-sm mb-1">Community Note:</p>
+    {article.approvedNotes.map((note, i) => (
+      <div key={i} className="mb-2">
+        <p className="text-sm">{note.note}</p>
+        <p className="text-xs text-right">– {note.username}</p>
+      </div>
+    ))}
+  </div>
+)}
+              
+              <div className="room-article-content mt-4 text-gray-800">
+                {(() => {
+                  const parser = new DOMParser();
+                  const doc = parser.parseFromString(article.content, "text/html");
+                  const paragraphs = Array.from(doc.body.querySelectorAll("p"));
 
-              <p className="mt-2 text-gray-700">{article.content}</p>
+                  if (paragraphs.length <= 2 || expandedArticles[article.postid]) {
+                    return (
+                      <>
+                        <div dangerouslySetInnerHTML={{ __html: article.content }} />
+                        {paragraphs.length > 2 && (
+                          <button
+                            onClick={() => toggleExpandedArticle(article.postid)}
+                            className="text-gray-500 hover:text-gray-700 font-semibold mt-4 mx-auto block text-center"
+                            >
+                            SHOW LESS
+                          </button>
+                        )}
+                      </>
+                    );
+                  } else {
+                    const firstTwo = paragraphs.slice(0, 2).map((p) => p.outerHTML).join("");
+                    return (
+                      <>
+                        <div dangerouslySetInnerHTML={{ __html: firstTwo }} />
+                        <button
+                          onClick={() => toggleExpandedArticle(article.postid)}
+                          className="text-gray-500 hover:text-gray-700 font-semibold mt-4 mx-auto block text-center"
+                          >
+                          SHOW MORE
+                        </button>
+                      </>
+                    );
+                  }
+                })()}
+              </div>
   
-              <button className="mt-3 px-4 py-2 bg-gray-700 text-white rounded-lg"
+              <button className="mt-3 px-4 py-2 bg-gray-700 text-white rounded-lg prose-p:mb-2"
               onClick={() => setReplyingToArticle(article.postid)}>
                 Reply
               </button>
 
-{replyingToArticle === article.postid && (
-  <div className="mt-4">
-    <textarea
-      className="w-full p-2 border rounded"
-      placeholder="Write your comment..."
-      value={articleReplyText}
-      onChange={(e) => setArticleReplyText(e.target.value)}
-    />
-    <button 
-      className="mt-2 px-4 py-2 bg-blue-500 text-white rounded"
-      onClick={() => handlePostArticleReply(article.postid)}
-    >
-      Post Comment
-    </button>
-    <button 
-      className="mt-2 ml-2 px-4 py-2 bg-gray-400 text-white rounded"
-      onClick={() => setReplyingToArticle(null)}
-    >
-      Cancel
-    </button>
-  </div>
-)}
+        {replyingToArticle === article.postid && (
+          <div className="mt-4">
+            <textarea
+              className="w-full p-2 border rounded"
+              placeholder="Write your comment..."
+              value={articleReplyText}
+              onChange={(e) => setArticleReplyText(e.target.value)}
+            />
+            <button 
+              className="mt-2 px-4 py-2 bg-blue-500 text-white rounded"
+              onClick={() => handlePostArticleReply(article.postid)}
+            >
+              Post Comment
+            </button>
+            <button 
+              className="mt-2 ml-2 px-4 py-2 bg-gray-400 text-white rounded"
+              onClick={() => setReplyingToArticle(null)}
+            >
+              Cancel
+            </button>
+          </div>
+        )}
 
-{(expandedCommentsForPost[article.postid] 
-  ? article.room_comments 
-  : article.room_comments.slice(0, 3)
-).map((comment) => (
-  <React.Fragment key={comment.commentid}>
-    <CommentCard
-      comment={comment}
-      replyingTo={replyingTo}
-      replyText={replyText}
-      onReplyClick={handleReplyClick}
-      onPostReply={handlePostReply}
-      setReplyText={setReplyText}
-      user={user}
-      isReply={false}
-      toggleCommentMenu={toggleCommentMenu}
-      commentMenu={commentMenu}
-    />
-
-    {comment.replies?.length > 0 && (
-      <div className="flex justify-end pr-3 mt-4 mb-1">
-        <button
-          className="text-sm text-blue-500 font-semibold hover:underline"
-          onClick={() => toggleReplies(comment.commentid)}
-        >
-          {visibleReplies[comment.commentid] ? "Hide replies" : `View ${comment.replies.length} Repl${comment.replies.length > 1 ? "ies" : "y"}`}
-        </button>
-      </div>
-    )}
-
-    {visibleReplies[comment.commentid] &&
-      comment.replies?.map((reply) => (
-        <React.Fragment key={reply.commentid}>
-          <CommentCard
-            comment={reply}
-            replyingTo={replyingTo}
-            replyText={replyText}
-            onReplyClick={handleReplyClick}
-            onPostReply={handlePostReply}
-            setReplyText={setReplyText}
-            user={user}
-            isReply={true}
-          />
-          {reply.replies?.map((subReply) => (
+        {(expandedCommentsForPost[article.postid] 
+          ? article.room_comments 
+          : article.room_comments.slice(0, 3)
+        ).map((comment) => (
+          <React.Fragment key={comment.commentid}>
             <CommentCard
-              key={subReply.commentid}
-              comment={subReply}
+              comment={comment}
               replyingTo={replyingTo}
               replyText={replyText}
               onReplyClick={handleReplyClick}
               onPostReply={handlePostReply}
               setReplyText={setReplyText}
               user={user}
-              isReply={true}
+              isReply={false}
+              toggleCommentMenu={toggleCommentMenu}
+              commentMenu={commentMenu}
             />
-          ))}
-        </React.Fragment>
-      ))}
-  </React.Fragment>
-))}
 
-{article.room_comments.length > 3 && (
-  <div className="flex justify-center mt-2">
-    <button
-      onClick={() => toggleExpandedComments(article.postid)}
-      className="text-md font-semibold text-grey-600 hover:underline"
-    >
-      {expandedCommentsForPost[article.postid]
-        ? "Show less comments"
-        : `Show all ${article.room_comments.length} comments`}
-    </button>
-  </div>
-)}
+            {comment.replies?.length > 0 && (
+              <div className="flex justify-end pr-3 mt-4 mb-1">
+                <button
+                  className="text-sm text-blue-500 font-semibold hover:underline"
+                  onClick={() => toggleReplies(comment.commentid)}
+                >
+                  {visibleReplies[comment.commentid] ? "Hide replies" : `View ${comment.replies.length} Repl${comment.replies.length > 1 ? "ies" : "y"}`}
+                </button>
+              </div>
+            )}
+
+            {visibleReplies[comment.commentid] &&
+              comment.replies?.map((reply) => (
+                <React.Fragment key={reply.commentid}>
+                  <CommentCard
+                    comment={reply}
+                    replyingTo={replyingTo}
+                    replyText={replyText}
+                    onReplyClick={handleReplyClick}
+                    onPostReply={handlePostReply}
+                    setReplyText={setReplyText}
+                    user={user}
+                    isReply={true}
+                  />
+                  {reply.replies?.map((subReply) => (
+                    <CommentCard
+                      key={subReply.commentid}
+                      comment={subReply}
+                      replyingTo={replyingTo}
+                      replyText={replyText}
+                      onReplyClick={handleReplyClick}
+                      onPostReply={handlePostReply}
+                      setReplyText={setReplyText}
+                      user={user}
+                      isReply={true}
+                    />
+                  ))}
+                </React.Fragment>
+              ))}
+          </React.Fragment>
+        ))}
+
+        {article.room_comments.length > 3 && (
+          <div className="flex justify-center mt-2">
+            <button
+              onClick={() => toggleExpandedComments(article.postid)}
+              className="text-md font-semibold text-grey-600 hover:underline"
+            >
+                {expandedCommentsForPost[article.postid]
+                  ? "Show less comments"
+                  : `Show all ${article.room_comments.length} comments`}
+            </button>
+          </div>
+        )}
 
             </div>
           ))
@@ -1182,7 +1315,6 @@ const CommentCard = ({
     </div>
   </div>
 )}
-
       </div>
     </div>
   );
