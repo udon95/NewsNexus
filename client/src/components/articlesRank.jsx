@@ -10,9 +10,12 @@ const ArticlesRank = ({ searchQuery = "", topic = "" }) => {
     const fetchRankedArticles = async () => {
       let query = supabase
         .from("articles")
-        .select("articleid, title, imagepath, total_votes, view_count, topicid");
+        .select("articleid, title, imagepath, total_votes, view_count, topicid, status, text") // Include status to filter
+        .eq("status", "Published"); // ✅ Hide drafts
 
-      if (topic) {
+      if (Array.isArray(topic) && topic.length > 0) {
+        query = query.in("topicid", topic);
+      } else if (typeof topic === "string" && topic) {
         query = query.eq("topicid", topic);
       }
 
