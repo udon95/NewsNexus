@@ -250,11 +250,31 @@ export const FreeWriteArticle = () => {
         if (!firstImageUrl) firstImageUrl = urlData.publicUrl; // Track first image URL
         updatedHTML = updatedHTML.replaceAll(img.previewUrl, urlData.publicUrl);        
       }
-    }      
+    }    
+    
+    let topicIdToUse;
+    const matchedTopic = topicOptions.find(
+      (t) => t.name.toLowerCase() === topics.toLowerCase()
+    );
+    if (matchedTopic) {
+      topicIdToUse = matchedTopic.topicid;
+    } else {
+      const { data: newTopic, error: insertError } = await supabase
+        .from("topic_categories")
+        .insert([{ name: topics, Creator: "User", created_at: new Date().toISOString() }])
+        .select("topicid")
+        .single();
+      if (insertError) {
+        alert("Failed to create new topic.");
+        return;
+      }
+      topicIdToUse = newTopic.topicid;
+    }
 
     const articleData = {
       title,
       content: updatedHTML,
+      topicid: topicIdToUse,
       created_by: session.userid, // Use session ID for the user
       created_at: new Date().toISOString(),
     };
@@ -267,7 +287,7 @@ export const FreeWriteArticle = () => {
           title: articleData.title,
           text: articleData.content,
           userid: articleData.created_by,
-          topicid: topics, // Insert the UUID
+          topicid: topicIdToUse, // Insert the UUID
           time: articleData.created_at,
           status: "Published",
           imagepath: firstImageUrl || null,
@@ -346,12 +366,31 @@ export const FreeWriteArticle = () => {
           updatedHTML = updatedHTML.replaceAll(img.previewUrl, urlData.publicUrl);
       }
     }
+
+    let topicIdToUse;
+    const matchedTopic = topicOptions.find(
+      (t) => t.name.toLowerCase() === topics.toLowerCase()
+    );
+    if (matchedTopic) {
+      topicIdToUse = matchedTopic.topicid;
+    } else {
+      const { data: newTopic, error: insertError } = await supabase
+        .from("topic_categories")
+        .insert([{ name: topics, Creator: "User", created_at: new Date().toISOString() }])
+        .select("topicid")
+        .single();
+      if (insertError) {
+        alert("Failed to create new topic.");
+        return;
+      }
+      topicIdToUse = newTopic.topicid;
+    }
   
     const articleData = {
       title,
       text: updatedHTML,
       userid: session.userid,
-      topicid: topics,
+      topicid: topicIdToUse,
       time: new Date().toISOString(),
       imagepath: firstImageUrl || null,
       status: "Draft",
@@ -555,48 +594,35 @@ return (
 
           <div>
             <label className="block text-xl font-semibold mb-1">Topic:</label>
-
-              <div className="flex items-center gap-2 w-full">
-              <div className="relative w-full">
-                <div
-                  onClick={() => setShowTopicsDropdown(!showTopicsDropdown)}
-                  className="p-2 border rounded-md bg-white w-full cursor-pointer flex justify-between items-center"
-                >
-                  {/* {topics || "Select a topic"} */}
-                  {topics ? topicOptions.find((t) => t.topicid === topics)?.name : "Select a topic"}
-                  <button
-                    className="ml-2 text-gray-500 text-sm"
-                    onClick={(e) => {
-                      e.stopPropagation(); // prevents double toggle
-                      setShowTopicsDropdown(!showTopicsDropdown);
-                    }}
-                  >
-                  {showTopicsDropdown ? "▲" : "▼"}
-                </button>  </div>
-
-                {showTopicsDropdown && (
-                  <div className="absolute z-10 w-full mt-1 bg-white border rounded-md shadow-md max-h-40 overflow-y-auto">
-                    {topicOptions.map((topic, i) => (
+            <div className="relative w-full">
+              <input
+                type="text"
+                value={topics}
+                onChange={(e) => setTopics(e.target.value)}
+                placeholder="Type topic..."
+                className="w-full p-2 border border-gray-300 rounded-md bg-white"
+                onFocus={() => setShowTopicsDropdown(true)}
+              />
+              {showTopicsDropdown && topics && (
+                <div className="absolute z-10 w-full mt-1 bg-white border rounded-md shadow-md max-h-40 overflow-y-auto">
+                  {topicOptions
+                    .filter((t) =>
+                    t.name.toLowerCase().includes(topics.toLowerCase())
+                    )
+                  .map((topic, i) => (
                       <div
-                        key={i}
-                        onClick={() => {
-                          setTopics(topic.topicid);
+                      key={i}
+                      onClick={() => {
+                          setTopics(topic.name);
                           setShowTopicsDropdown(false);
                         }}
-                          className="p-2 hover:bg-indigo-100 cursor-pointer text-black font-medium"
+                        className="p-2 hover:bg-indigo-100 cursor-pointer"
                       >
-                    {topic.name}
+                        {topic.name}
                       </div>
                     ))}
                 </div>
-                )}
-              </div>
-                  <button 
-                    className="bg-black text-white rounded-md p-2 flex items-center justify-center h-full"
-                      onClick={() => setShowTopicApplication(true)}
-                  >
-                    <Plus size={16} />
-                  </button>
+              )}
             </div>
           </div>
 
