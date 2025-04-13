@@ -23,11 +23,8 @@ const Article = () => {
   const [isSpeaking, setIsSpeaking] = useState(false);
   const speechRef = useRef(null);
 
-  // 🧠 Community Notes
   const [showNote, setShowNote] = useState(false);
   const [noteText, setNoteText] = useState("");
-
-  // 🚩 Report
   const [reportTarget, setReportTarget] = useState(null);
   const [selectedReason, setSelectedReason] = useState("");
 
@@ -60,17 +57,15 @@ const Article = () => {
 
   const handleSubmitNote = async () => {
     if (!noteText.trim()) return;
-    const { error } = await supabase.from("community_notes").insert([
-      {
-        target_id: articleData.articleid,
-        target_type: "article",
-        note: noteText,
-        userid: user?.userid,
-        username: user?.username,
-        created_at: new Date().toISOString(),
-        Status: "pending",
-      },
-    ]);
+    const { error } = await supabase.from("community_notes").insert([{
+      target_id: articleData.articleid,
+      target_type: "article",
+      note: noteText,
+      userid: user?.userid,
+      username: user?.username,
+      created_at: new Date().toISOString(),
+      Status: "pending",
+    }]);
     if (!error) {
       setShowNote(false);
       setNoteText("");
@@ -80,18 +75,16 @@ const Article = () => {
 
   const handleSubmitReport = async () => {
     if (!selectedReason || !reportTarget) return;
-    const { error } = await supabase.from("reports").insert([
-      {
-        target_id: reportTarget.id,
-        target_type: reportTarget.type,
-        reason: selectedReason,
-        userid: user?.userid,
-        username: user?.username,
-        created_at: new Date().toISOString(),
-        resolved: false,
-        resolution: null,
-      },
-    ]);
+    const { error } = await supabase.from("reports").insert([{
+      target_id: reportTarget.id,
+      target_type: "article",
+      reason: selectedReason,
+      userid: user?.userid,
+      username: user?.username,
+      created_at: new Date().toISOString(),
+      resolved: false,
+      resolution: null,
+    }]);
     if (!error) {
       setReportTarget(null);
       setSelectedReason("");
@@ -109,7 +102,6 @@ const Article = () => {
 
       if (!error) {
         setArticleData(data);
-
         if (data?.articleid) {
           const { data: currentView } = await supabase
             .from("articles")
@@ -121,9 +113,11 @@ const Article = () => {
           await supabase.from("articles").update({ view_count: updatedCount }).eq("articleid", data.articleid);
 
           if (user) {
-            await supabase.from("reading_history").insert([
-              { articleid: data.articleid, userid: user.userid, read_date: new Date().toISOString() },
-            ]);
+            await supabase.from("reading_history").insert([{
+              articleid: data.articleid,
+              userid: user.userid,
+              read_date: new Date().toISOString(),
+            }]);
           }
         }
       }
@@ -158,22 +152,22 @@ const Article = () => {
 
   useEffect(() => {
     if (!articleData) return;
-    if (user?.userType === "Free" && readArticlesCount > 10) setShowPaywall(true);
-    if (!user && readArticlesCount > 3) setShowPaywall(true);
+
+    const isGuest = !user;
+    const isFreeUser = user && userType === "Free";
+
+    if ((isFreeUser && readArticlesCount > 10) || (isGuest && readArticlesCount > 3)) {
+      setShowPaywall(true);
+    }
   }, [user, userType, articleData, readArticlesCount]);
 
   return (
     <div className="min-h-screen w-screen flex flex-col bg-white">
       <Navbar />
       <main className="flex flex-col items-center w-full px-4 sm:px-8 py-6 mx-auto max-w-[750px]">
-        {articleData ? (
+        {articleData && !showPaywall ? (
           <>
-            {/* Title */}
-            <h1 className="text-3xl sm:text-4xl font-bold text-black mb-2 text-left w-full">
-              {articleData.title}
-            </h1>
-
-            {/* Author Info */}
+            <h1 className="text-3xl sm:text-4xl font-bold text-black mb-2 text-left w-full">{articleData.title}</h1>
             <div className="flex items-center text-sm text-gray-600 mb-3 w-full">
               <span className="font-semibold text-black">
                 {articleData.users?.username || "Unknown Author"}
@@ -182,59 +176,36 @@ const Article = () => {
               <span>Published on {new Date(articleData.time).toLocaleDateString()}</span>
             </div>
 
-            {/* Toolbar */}
             <div className="flex justify-between items-center w-full mb-4">
               <Rate articleId={articleData.articleid} />
               <div className="flex items-center gap-3">
-                {/* Community Note */}
                 {userType === "Premium" && (
-                  <button
-                    onClick={() => setShowNote(true)}
-                    title="Add Community Note"
-                    className="w-10 h-10 p-2 bg-gray-200 rounded-lg hover:bg-gray-300 flex items-center justify-center"
-                  >
+                  <button onClick={() => setShowNote(true)} title="Add Community Note"
+                    className="w-10 h-10 p-2 bg-gray-200 rounded-lg hover:bg-gray-300 flex items-center justify-center">
                     <StickyNote className="h-5 w-5 text-black" />
                   </button>
                 )}
-
-                {/* Report */}
-                <button
-                  onClick={() => setReportTarget({ id: articleData.articleid, type: "article" })}
+                <button onClick={() => setReportTarget({ id: articleData.articleid, type: "article" })}
                   title="Report Article"
-                  className="w-10 h-10 p-2 bg-gray-200 rounded-lg hover:bg-gray-300 flex items-center justify-center"
-                >
+                  className="w-10 h-10 p-2 bg-gray-200 rounded-lg hover:bg-gray-300 flex items-center justify-center">
                   <Flag className="h-5 w-5 text-red-600" />
                 </button>
-
-                {/* TTS */}
                 {userType === "Premium" && (
-                  <button
-                    onClick={handleTTS}
-                    title="Text-to-Speech"
-                    className="w-10 h-10 p-2 bg-gray-200 rounded-lg hover:bg-gray-300 flex items-center justify-center"
-                  >
+                  <button onClick={handleTTS} title="Text-to-Speech"
+                    className="w-10 h-10 p-2 bg-gray-200 rounded-lg hover:bg-gray-300 flex items-center justify-center">
                     <Headphones className="h-5 w-5 text-black" />
                   </button>
                 )}
-
-                {/* Share */}
-                <button
-                  onClick={handleShareClick}
-                  title="Share"
-                  className="w-10 h-10 p-2 bg-gray-200 rounded-lg hover:bg-gray-300 flex items-center justify-center"
-                >
+                <button onClick={handleShareClick} title="Share"
+                  className="w-10 h-10 p-2 bg-gray-200 rounded-lg hover:bg-gray-300 flex items-center justify-center">
                   <Share2 className="h-5 w-5 text-black" />
                 </button>
               </div>
             </div>
 
-            {/* Image */}
             {articleData.imagepath && (
-              <img
-                src={articleData.imagepath}
-                alt="Article"
-                className="w-full rounded-xl mb-6 max-h-[450px] object-cover"
-              />
+              <img src={articleData.imagepath} alt="Article"
+                className="w-full rounded-xl mb-6 max-h-[450px] object-cover" />
             )}
 
             <ArticleContent
@@ -250,94 +221,7 @@ const Article = () => {
             />
             <Comments articleRef={articleRef} articleId={articleData.articleid} />
           </>
-        ) : (
-          <p>Loading article...</p>
-        )}
-
-        {/* Community Note Modal */}
-        {showNote && (
-          <div className="fixed inset-0 bg-black/10 backdrop-blur-sm flex justify-center items-center z-50">
-            <div className="bg-white p-6 rounded-xl shadow-xl w-[90%] max-w-md relative">
-              <button
-                onClick={() => setShowNote(false)}
-                className="absolute top-3 right-4 text-xl text-gray-600 hover:text-black"
-              >
-                ×
-              </button>
-              <h2 className="text-xl font-bold mb-2">Add Community Note</h2>
-              <textarea
-                className="w-full p-3 rounded-md border border-gray-300 mb-4"
-                placeholder="Write your note here..."
-                value={noteText}
-                onChange={(e) => setNoteText(e.target.value)}
-              />
-              <button
-                onClick={handleSubmitNote}
-                disabled={!noteText.trim()}
-                className={`w-full py-2 rounded font-semibold ${
-                  noteText.trim()
-                    ? "bg-blue-600 text-white hover:bg-blue-700"
-                    : "bg-gray-200 text-gray-500 cursor-not-allowed"
-                }`}
-              >
-                Submit Note
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* Report Modal */}
-        {reportTarget && (
-          <div className="fixed inset-0 bg-black/10 backdrop-blur-sm flex justify-center items-center z-50">
-            <div className="bg-white p-6 rounded-xl shadow-xl w-[90%] max-w-md relative">
-              <button
-                onClick={() => {
-                  setReportTarget(null);
-                  setSelectedReason("");
-                }}
-                className="absolute top-3 right-4 text-xl text-gray-600 hover:text-black"
-              >
-                ×
-              </button>
-              <h2 className="text-xl font-bold mb-2">Report Article</h2>
-              <p className="text-sm text-gray-600 mb-4">Choose a reason:</p>
-              {[
-                "Sexual content",
-                "Violent or repulsive content",
-                "Hateful or abusive content",
-                "Harassment or bullying",
-                "Harmful or dangerous acts",
-                "Misinformation",
-              ].map((reason) => (
-                <label key={reason} className="flex items-center mb-2 cursor-pointer">
-                  <input
-                    type="radio"
-                    name="report-reason"
-                    className="mr-3 accent-blue-600"
-                    value={reason}
-                    checked={selectedReason === reason}
-                    onChange={() => setSelectedReason(reason)}
-                  />
-                  {reason}
-                </label>
-              ))}
-              <button
-                onClick={handleSubmitReport}
-                disabled={!selectedReason}
-                className={`mt-4 w-full py-2 rounded font-semibold ${
-                  selectedReason
-                    ? "bg-red-600 text-white hover:bg-red-700"
-                    : "bg-gray-200 text-gray-500 cursor-not-allowed"
-                }`}
-              >
-                Submit Report
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* Paywall */}
-        {showPaywall && (
+        ) : showPaywall ? (
           <div className="paywall-modal">
             <div className="modal-content">
               <img src={Logo} alt="NewsNexus Logo" className="mx-auto mb-4" />
@@ -347,16 +231,11 @@ const Article = () => {
                   ? "You’ve reached your daily limit of 3 free articles. Sign up or subscribe to continue reading!"
                   : "You’ve reached your daily limit of 10 articles. Subscribe for unlimited access!"}
               </p>
-              <button className="subscribe-button" onClick={() => navigate("/subscription")}>
-                Subscribe
-              </button>
-              <p>
-                Already a Subscriber?{" "}
-                <a href="/login" className="sign-in-link">Sign In</a>
-              </p>
+              <button className="subscribe-button" onClick={() => navigate("/subscription")}>Subscribe</button>
+              <p>Already a Subscriber? <a href="/login" className="sign-in-link">Sign In</a></p>
             </div>
           </div>
-        )}
+        ) : <p>Loading article...</p>}
       </main>
     </div>
   );
