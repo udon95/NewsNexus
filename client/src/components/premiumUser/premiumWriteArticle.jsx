@@ -54,6 +54,7 @@ export const PremiumWriteArticle = () => {
   const [roomArticleType, setRoomArticleType] = useState("factual"); // only for Room
   const [aiFeedback, setAiFeedback] = useState("");
   const [collabId, setCollabId] = useState("collab-id");
+  const [showDraftNotification, setShowDraftNotification] = useState(false);
 
   // console.log("Auth session:", supabase.auth.getSession());
 
@@ -707,6 +708,7 @@ export const PremiumWriteArticle = () => {
         }
       }
     }
+    setShowDraftNotification(true);
 
     alert("Draft saved!");
     handleClearInputs();
@@ -1348,6 +1350,33 @@ export const PremiumWriteArticle = () => {
                   className="bg-gray-300 px-4 py-2 rounded-md"
                 >
                   Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {showDraftNotification && (
+          <div className="fixed inset-0 backdrop-blur-sm bg-white/5 flex items-center justify-center z-50">
+            <div
+              className="bg-white p-6 rounded-lg shadow-xl text-left"
+              style={{ maxWidth: "400px", width: "auto" }}
+            >
+              <p className="text-lg font-semibold mb-2">
+                Draft saved successfully!
+              </p>
+              <p className="text-sm text-gray-500 mt-2">
+                Your draft will expire in 7 days. Don't forget to publish it
+                before then!
+              </p>
+
+              {/* OK Button to acknowledge the notification */}
+              <div className="flex justify-end mt-4">
+                <button
+                  onClick={() => setShowDraftNotification(false)} // Close the notification
+                  className="bg-blue-600 text-white px-4 py-2 rounded-md"
+                >
+                  OK
                 </button>
               </div>
             </div>

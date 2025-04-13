@@ -58,7 +58,7 @@ const TestimonialSlider = () => {
         pagination={{ clickable: true }}
         autoplay={{ delay: 3000, disableOnInteraction: false }}
         loop={true}
-        className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden"
+        className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden "
       >
         {testimonials.map((testimonial, index) => (
           <SwiperSlide key={index} className="p-6">

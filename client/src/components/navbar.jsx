@@ -50,25 +50,40 @@ const Navbar = () => {
     "
       >
         <div className="border-l border-blue-900 h-6"></div>
-        <Link to="/" className="hover:underline px-4 sm:px-6 font-bold">Home</Link>
+        <Link to="/" className="hover:underline px-4 sm:px-6 font-bold">
+          Home
+        </Link>
         <div className="border-l border-blue-900 h-6"></div>
-        <Link to="/explore" className="hover:underline px-4 sm:px-6 font-bold">Explore</Link>
+        <Link to="/explore" className="hover:underline px-4 sm:px-6 font-bold">
+          Explore
+        </Link>
 
         <div className="border-l border-blue-900 h-6"></div>
-        <Link to="/subscription" className="relative hover:underline px-4 sm:px-6 font-bold">
+        <Link
+          to="/subscription"
+          className="relative hover:underline px-4 sm:px-6 font-bold"
+        >
           Subscription
           {isPromoActive && (
             <span className="absolute -top-0.2 -right-0.48 w-2.5 h-2.5 rounded-full bg-red-600"></span>
           )}
         </Link>
 
-        <div className="border-l border-blue-900 h-6"></div>
-        <Link to="/guidelines" className="hover:underline px-4 sm:px-6 font-bold">Platform Guidelines</Link>
+        {/* <div className="border-l border-blue-900 h-6"></div>
+        <Link
+          to="/guidelines"
+          className="hover:underline px-4 sm:px-6 font-bold"
+        >
+          Platform Guidelines
+        </Link> */}
 
         <div className="border-l border-blue-900 h-6"></div>
         {userType === "Premium" && (
           <>
-            <Link to="/rooms" className="hover:underline px-4 sm:px-6 font-bold">
+            <Link
+              to="/rooms"
+              className="hover:underline px-4 sm:px-6 font-bold"
+            >
               Rooms
             </Link>
             <div className="border-l border-blue-900 h-6"></div>

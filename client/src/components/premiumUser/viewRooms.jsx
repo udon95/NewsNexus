@@ -12,8 +12,25 @@ const ViewRoomsPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const initialQuery = searchParams.get("query") || "";
   const [searchQuery, setSearchQuery] = useState(initialQuery);
+  const [roomImages, setRoomImages] = useState({});
   const navigate = useNavigate();
   const { userType } = useAuthHook();
+
+  useEffect(() => {
+    const fetchRoomImages = async () => {
+      const roomImagesData = {};
+      for (const room of rooms) {
+        const image = await getRoomImage(room.roomid);
+        roomImagesData[room.roomid] = image;
+      }
+      setRoomImages(roomImagesData); // Update the state with all the images
+    };
+
+    if (rooms.length > 0) {
+      // Only fetch images if rooms are available
+      fetchRoomImages();
+    }
+  }, [rooms]); // Runs whenever rooms are updated
 
   useEffect(() => {
     const storedUser = JSON.parse(localStorage.getItem("userProfile"));
@@ -147,6 +164,43 @@ const ViewRoomsPage = () => {
     room.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  const getRoomImage = async (roomid) => {
+    try {
+      // Fetch the oldest article's postid in the room by ordering articles by their creation date
+      const { data: oldestArticleData, error: articleError } = await supabase
+        .from("room_articles")
+        .select("postid")
+        .eq("roomid", roomid) // Filter by roomid
+        .order("created_at", { ascending: true }) // Order by creation date (oldest first)
+        .limit(1) // Get only the oldest article
+        .single();
+
+      if (articleError || !oldestArticleData?.postid) {
+        console.log("No article found for room:", roomid);
+        return "/default-image.png"; // Fallback image if no article is found
+      }
+
+      // Fetch the images associated with the oldest article's postid
+      const { data: roomImageData, error: roomImageError } = await supabase
+        .from("room_article_images")
+        .select("image_url")
+        .eq("postid", oldestArticleData.postid) // Filter by the postid of the oldest article
+        .order("created_at", { ascending: true }) // Order images by their creation date (oldest first)
+        .limit(1) // Get the first (oldest) image
+        .single(); // Only get one image
+
+      if (roomImageError || !roomImageData?.image_url) {
+        console.log("No image found for the oldest article in room:", roomid);
+        return "/default-image.png"; // Fallback image if no image is found
+      }
+
+      return roomImageData.image_url; // Return the URL of the oldest image
+    } catch (error) {
+      console.error("Error fetching room image:", error);
+      return "/default-image.png"; // Fallback image in case of error
+    }
+  };
+
   const handleRoomClick = (roomid) => {
     if (userType === "Free") {
       alert("Upgrade to Premium to view room details.");
@@ -179,17 +233,11 @@ const ViewRoomsPage = () => {
                 className="w-80 h-60 mx-auto border border-black rounded-2xl shadow-md cursor-pointer hover:shadow-lg transition bg-white flex flex-col"
               >
                 <div className="w-full h-48 bg-gray-200 rounded-t-2xl overflow-hidden relative">
-                  {room.image_url ? (
-                    <img
-                      src={room.image_url}
-                      alt={room.name}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex justify-center items-center text-gray-500">
-                      No Image Available
-                    </div>
-                  )}
+                  <img
+                    src={roomImages[room.roomid] || "/default-image.png"} // <-- Ensure we use roomImages state
+                    alt={room.name}
+                    className="w-full h-full object-cover"
+                  />
 
                   <div className="absolute top-2 left-2 bg-black text-white text-sm font-bold px-3 py-1 rounded-lg border-2 border-white">
                     Rank #{index + 1}

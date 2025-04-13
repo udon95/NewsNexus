@@ -495,7 +495,6 @@ router.post("/verify-old-password", async (req, res) => {
   }
 });
 
-// In your Express router file (e.g. authRoute.js or a new file like publicProfile.js)
 router.get("/public-profile/:userid", async (req, res) => {
   // const { userid } = req.params;
   
