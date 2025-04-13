@@ -19,7 +19,6 @@ import ViewRooms from "./components/premiumUser/viewRooms.jsx";
 import RoomPage from "./components/premiumUser/roomPage.jsx";
 import SubscriptionStatus from "./components/payment.jsx";
 import PublicProfile from "./components/publicProfile.jsx";
-import FactCheck from "./components/factCheck.jsx";
 
 import supabase from "./api/supabaseClient.js";
 import "./index.css";
@@ -62,7 +61,7 @@ function App() {
           <Route path="/privacy" element={<Privacy />} />
           <Route path="/latest" element={<Latest />} />
           <Route path="/article/:articleName" element={<Article />} />
-          <Route path="/public-profile/:userid" element={<PublicProfile />} />
+          <Route path="/public-profile/:username" element={<PublicProfile />} />
 
           <Route path="/freeDashboard/*" element={<FreeDashboard />} />
           <Route path="/premiumDashboard/*" element={<PremiumDashboard />} />
@@ -74,7 +73,6 @@ function App() {
           <Route path="/rooms" element={<ViewRooms />} />
           <Route path="/room/:id" element={<RoomPage />} />
           
-          <Route path="/factcheck" element={<FactCheck/>}/>
         </Route>
       </Routes>
   );

@@ -148,7 +148,7 @@ router.post("/register", async (req, res) => {
     });
 
     if (authError) return res.status(400).json({ error: authError.message });
-   
+
     // Calculate age from dob
     const birthDate = new Date(dob);
     const today = new Date();
@@ -495,54 +495,83 @@ router.post("/verify-old-password", async (req, res) => {
   }
 });
 
-router.get("/public-profile/:userid", async (req, res) => {
-  // const { userid } = req.params;
-  
-  // // 1. Fetch basic user details (e.g. username)
-  // const { data: userData, error: userError } = await supabase
-  //   .from("users")
-  //   .select("userid, username, usertype")
-  //   .eq("userid", userid)
-  //   .single();
-    
-  // if (userError || !userData) {
-  //   return res.status(404).json({ error: "User not found" });
-  // }
-  
-  // 2. Fetch articles written by the user
-  // const { data: articlesData, error: articlesError } = await supabase
-  //   .from("articles")
-  //   .select("articleid, title, summary, created_at")
-  //   .eq("authorid", userid);
-  
-  // 3. Fetch expert details if applicable (assuming expert status is determined by usertype)
-  // let biography = "";
-  // if (userData.usertype === "Expert") {
-  //   const { data: profileData, error: profileError } = await supabase
-  //     .from("profile")
-  //     .select("biography")
-  //     .eq("uuserid", userid)
-  //     .single();
-  //   if (profileData) {
-  //     biography = profileData.biography;
-  //   }
-  // }
-  
-  // // 4. Fetch list of public rooms the user has joined
-  // // Assumes you have a 'user_rooms' table with a flag 'is_public' and room details.
-  // const { data: roomsData, error: roomsError } = await supabase
-  //   .from("user_rooms")
-  //   .select("roomid, room_name")
-  //   .eq("userid", userid)
-  //   .eq("is_public", true);
-  
-  // return res.json({
-  //   user: userData,
-  //   articles: articlesData || [],
-  //   // biography,
-  //   // publicRooms: roomsData || []
-  // });
-});
+router.get("/public-profile/:username", async (req, res) => {
+  const { username } = req.params;
+  try {
+    // 1. Fetch basic user details (e.g. username)
+    const { data: userData, error: userError } = await supabase
+      .from("users")
+      .select(`userid, username, status, usertype:usertype ( usertype )`)
+      .eq("username", username)
+      .single();
 
+    if (userError || !userData) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    const userId = userData.userid;
+
+    // 2. Fetch articles written by the user
+    const { data: articlesData, error: articlesError } = await supabase
+      .from("articles")
+      .select(
+        "articleid, userid, title, imagepath, text, rating, time, status, topicid"
+      )
+      .eq("userid", userId);
+
+    if (articlesError) {
+      return res.status(500).json({ error: "Failed to fetch articles" });
+    }
+
+    // 3. Fetch list of public rooms the user has joined
+    let publicRooms = [];
+    if (userData.usertype === "Premium") {
+      const { data: userRooms, error: roomsError } = await supabase
+        .from("room_members")
+        .select(
+          `
+          roomid,
+          joined_at,
+          exited_at,
+          join_count,
+          exit_count,
+          rooms (
+            name
+          )
+        `
+        )
+        .eq("userid", userId);
+
+      if (roomsError) {
+        return res.status(500).json({ error: "Failed to fetch user rooms" });
+      }
+
+      if (userRooms) {
+        publicRooms = userRooms.map((rm) => ({
+          roomid: rm.roomid,
+          joined_at: rm.joined_at,
+          exited_at: rm.exited_at,
+          join_count: rm.join_count,
+          exit_count: rm.exit_count,
+          room_name: rm.rooms?.name || "",
+        }));
+      }
+    }
+
+    return res.json({
+      user: {
+        userid: userData.userid,
+        username: userData.username,
+        usertype: userData.usertype, // front-end can check if usertype === "Expert" to show icon
+        status: userData.status,
+      },
+      articles: articlesData || [],
+      rooms: publicRooms || [],
+    });
+  } catch (err) {
+    console.error("Error fetching public profile:", err);
+    return res.status(500).json({ error: "An unexpected error occurred" });
+  }
+});
 
 module.exports = router;

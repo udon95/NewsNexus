@@ -25,6 +25,9 @@ const ArticleContent = ({ articleRef, text, postDate, author, imagepath }) => {
     return doc.body.innerHTML;
   })();
 
+  const usernameValue = (typeof author === "object" && author?.username) || author;
+
+
   return (
     <div className="flex flex-col w-full font-grotesk">
 
@@ -32,10 +35,10 @@ const ArticleContent = ({ articleRef, text, postDate, author, imagepath }) => {
       <span className="text-lg text-[#00317F] mb-4 self-start">
         Posted by{" "}
         <Link
-          to={`/public-profile/${author?.userid}`}
+          to={`/public-profile/${usernameValue}`}
           className="underline hover:text-blue-600"
         >
-          {author?.username}
+          {usernameValue}
         </Link>{" "}
         on {postDate}
       </span>

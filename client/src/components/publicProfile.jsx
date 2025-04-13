@@ -63,62 +63,53 @@ import { BadgeCheck, ArrowLeft } from "lucide-react";
 import Navbar from "./navbar.jsx";
 
 const PublicProfile = () => {
-  const { userid, username } = useParams();
+  const { username } = useParams();
   const [profileData, setProfileData] = useState(null);
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
   // Dummy data to use for a fake user
-  const dummyData = {
-    userid: "fake123",
-    username: "John",
-    usertype: "Expert",
-    articles: [
-      {
-        articleid: 1,
-        title: "Dummy Article One",
-        summary: "Summary for article one.",
-      },
-      {
-        articleid: 2,
-        title: "Dummy Article Two",
-        summary: "Summary for article two.",
-      },
-    ],
-    publicRooms: [
-      { roomid: 1, room_name: "Public Room A" },
-      { roomid: 2, room_name: "Public Room B" },
-    ],
-    biography:
-      "I have a PHD in Computer Science, and have been working in the industry for 20 years.",
-  };
+  // const dummyData = {
+  //   userid: "fake123",
+  //   username: "John",
+  //   usertype: "Expert",
+  //   articles: [
+  //     {
+  //       articleid: 1,
+  //       title: "Dummy Article One",
+  //       summary: "Summary for article one.",
+  //     },
+  //     {
+  //       articleid: 2,
+  //       title: "Dummy Article Two",
+  //       summary: "Summary for article two.",
+  //     },
+  //   ],
+  //   publicRooms: [
+  //     { roomid: 1, room_name: "Public Room A" },
+  //     { roomid: 2, room_name: "Public Room B" },
+  //   ],
+  //   biography:
+  //     "I have a PHD in Computer Science, and have been working in the industry for 20 years.",
+  // };
 
   useEffect(() => {
     const fetchUserData = async () => {
       // If using a fake ID, directly set dummy data
-      if (userid === "fake123") {
-        setProfileData(dummyData);
-        return;
-      }
+
       try {
         const response = await axios.get(
-          `http://localhost:5000/users/${username}`
+          `http://localhost:5000/auth/public-profile/${username}`
         );
         // Here, you might combine the user data with dummy articles/rooms if needed
-        setProfileData({
-          ...response.data,
-          articles: dummyData.articles,
-          publicRooms: dummyData.publicRooms,
-          biography:
-            response.data.usertype === "Expert" ? dummyData.biography : "",
-        });
+        setProfileData(response.data);
       } catch (err) {
         setError(err.response?.data?.error || "Error fetching user data");
       }
     };
 
     fetchUserData();
-  }, [userid]);
+  }, [username]);
 
   if (error) return <div className="text-red-500">{error}</div>;
   if (!profileData) return <div>Loading...</div>;
@@ -127,28 +118,27 @@ const PublicProfile = () => {
     <div className="min-h-screen min-w-screen flex flex-col bg-white">
       <Navbar />
       <div className="flex-grow container mx-auto px-4 sm:px-8 max-w-4xl font-grotesk py-8 ">
-        <button
-          onClick={() => navigate(-1)}
-          className="mb-4 text-blue-600 underline flex items-center"
-        >
-          <ArrowLeft className="mr-1" /> Back
-        </button>
-        <div className="bg-gray-200 p-6 rounded-lg shadow">
-          <h1 className="text-3xl font-bold mb-4">
-            {" "}
-            {profileData.username}{" "}
-            {profileData.usertype === "Expert" && (
+        <div className="bg-gray-200 p-6 rounded-lg shadow mb-2">
+          <h2 className="text-2xl font-semibold">
+            {profileData.user.username}
+
+            {profileData.user.usertype.usertype === "Expert" && (
               <BadgeCheck className="inline-block ml-2 text-blue-500" />
             )}
-          </h1>
+            {profileData.user.usertype.usertype === "Premium" && (
+              <span className="ml-2 px-2 py-1 text-sm bg-yellow-400 text-black rounded-full">
+                Premium
+              </span>
+            )}
+            {profileData.user.usertype.usertype === "Free" && (
+              <span className="ml-2 px-2 py-1 text-sm bg-yellow-400 text-black rounded-full">
+                Free
+              </span>
+            )}
+          </h2>
+        </div>
 
-          {profileData.usertype === "Expert" && (
-            <section className="mb-6 ">
-              <h2 className="text-2xl font-semibold">Biography</h2>
-              <p>{profileData.biography}</p>
-            </section>
-          )}
-
+        <div className="bg-gray-200 p-6 rounded-lg shadow">
           <section className="mb-6 ">
             <h2 className="text-2xl font-semibold">Articles</h2>
             <ul>
@@ -160,7 +150,7 @@ const PublicProfile = () => {
                   >
                     {article.title}
                   </Link>
-                  <p>{article.summary}</p>
+                  {/* <p>{article.summary}</p> */}
                 </li>
               ))}
             </ul>
@@ -169,7 +159,7 @@ const PublicProfile = () => {
           <section className="mb-6 ">
             <h2 className="text-2xl font-semibold">Public Rooms Joined</h2>
             <ul>
-              {profileData.publicRooms.map((room) => (
+              {profileData.rooms.map((room) => (
                 <li key={room.roomid} className="mb-1">
                   <Link
                     to={`/room/${room.roomid}`}

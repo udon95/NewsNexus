@@ -22,6 +22,9 @@ function Register() {
   const [isValid, setIsValid] = useState(false); // Track form validation state
   const navigate = useNavigate();
 
+  const [categories, setCategories] = useState([]);
+  const [dropdownValues, setDropdownValues] = useState(Array(6).fill(""));
+
   useEffect(() => {
     const validateForm = () => {
       const newErrors = {};
@@ -45,7 +48,10 @@ function Register() {
           const today = new Date();
           let age = today.getFullYear() - birthDate.getFullYear();
           const monthDiff = today.getMonth() - birthDate.getMonth();
-          if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+          if (
+            monthDiff < 0 ||
+            (monthDiff === 0 && today.getDate() < birthDate.getDate())
+          ) {
             age--;
           }
           // Check if age is less than 16
@@ -63,6 +69,25 @@ function Register() {
     validateForm();
   }, [userData]);
 
+  useEffect(() => {
+    async function fetchCategories() {
+      const { data, error } = await supabase
+        .from("topic_categories")
+        .select("*");
+      if (error) {
+        console.error("Error fetching categories:", error);
+      } else {
+        setCategories(data);
+      }
+    }
+    fetchCategories();
+  }, []);
+
+  useEffect(() => {
+    const selected = dropdownValues.filter((val) => val !== "");
+    setSelectedTopics(selected);
+  }, [dropdownValues]);
+
   const handleInputChange = (e) => {
     setUserData((prev) => ({
       ...prev,
@@ -70,14 +95,20 @@ function Register() {
     }));
   };
 
-  const handleTopicsSelect = (topics) => {
-    setSelectedTopics(
-      (prevTopics) =>
-        prevTopics.includes(topics)
-          ? prevTopics.filter((item) => item !== topics) // Remove if already selected
-          : [...prevTopics, topics] // Add if not selected
-    );
+  const handleDropdownChange = (index, e) => {
+    const newValues = [...dropdownValues];
+    newValues[index] = e.target.value;
+    setDropdownValues(newValues);
   };
+
+  // const handleTopicsSelect = (topics) => {
+  //   setSelectedTopics(
+  //     (prevTopics) =>
+  //       prevTopics.includes(topics)
+  //         ? prevTopics.filter((item) => item !== topics) // Remove if already selected
+  //         : [...prevTopics, topics] // Add if not selected
+  //   );
+  // };
 
   const handleNext = () => {
     if (isValid) {
@@ -270,25 +301,44 @@ function Register() {
             </form>
           </div>
         ) : (
-          <Topic
-            selectedTopics={selectedTopics}
-            handleTopicSelect={handleTopicsSelect} //  Pass function
-            handleSubmit={handleFinalSubmit}
-
-            // handleInterestSelect={(interest) =>
-            //   setSelectedInterests((prev) =>
-            //     prev.includes(interest)
-            //       ? prev.filter((i) => i !== interest)
-            //       : [...prev, interest]
-            //   )
-            // }
-            // handleSubmit={() => {
-            //   console.log("User Data:", userData);
-            //   console.log("Selected Interests:", selectedInterests);
-            //   alert("A verification email has been sent to your email.");
-            //   navigate("/");
-            // }}
-          />
+          // <Topic
+          //   selectedTopics={selectedTopics}
+          //   handleTopicSelect={handleTopicsSelect} //  Pass function
+          //   handleSubmit={handleFinalSubmit}
+          <div className="flex flex-col items-center">
+            <h2 className="text-2xl font-bold mb-4">Select Your Interests</h2>
+            <h2 className="text-xl mb-4">
+              (At least 1, max. 6. Starting from Most Interested)
+            </h2>
+            {/* <div className="grid grid-cols-1 gap-4"> */}
+              {Array.from({ length: 6 }).map((_, index) => (
+                <div key={index} className="flex flex-row mb-4">
+                  <label className="mt-1 mr-2 font-grotesk text-2xl">
+                    {index + 1}.{" "}
+                  </label>
+                  <select
+                    value={dropdownValues[index]}
+                    onChange={(e) => handleDropdownChange(index, e)}
+                    className="p-2 border rounded-lg"
+                  >
+                    <option value="">Select a category</option>
+                    {categories.map((cat) => (
+                      <option key={cat.id} value={cat.name}>
+                        {cat.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              ))}
+            {/* </div> */}
+            <button
+              type="button"
+              onClick={() => handleFinalSubmit(selectedTopics)}
+              className="mt-4 px-4 py-2 bg-blue-500 text-white rounded-lg"
+            >
+              Submit
+            </button>
+          </div>
         )}
       </main>
     </div>
