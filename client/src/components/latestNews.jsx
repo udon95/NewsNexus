@@ -12,9 +12,12 @@ const LatestNews = ({ searchQuery = "", topic = "", displayLimit }) => {
         .select("articleid, title, imagepath, topicid, time")
         .eq("status", "Published")
         .order("time", { ascending: false })
-        .limit(20); // adjust if needed
+        .limit(20);
 
-      if (topic) {
+      // 🔧 handle array or string topic
+      if (Array.isArray(topic) && topic.length > 0) {
+        query = query.in("topicid", topic);
+      } else if (typeof topic === "string" && topic) {
         query = query.eq("topicid", topic);
       }
 
