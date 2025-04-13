@@ -1,31 +1,32 @@
 import React from "react";
-import { useParams, Link, useNavigate } from "react-router-dom";
-import articleImage from "../assets/test.png"; // Import the article image
-import useAuthHook from "../hooks/useAuth";
-// import { ArrowLeft } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
 
-const ArticleContent = ({ articleRef, title, text, imagepath, postDate, author }) => {
-  // const { title } = useParams(); // Get the article title from URL
-  // const { user } = useAuthHook();
-  // const postDate = "22/01/2025"; // or dynamic date from article
-  // const fakeAuthor = { userid: "fake123", username: "John Doe" };
+const ArticleContent = ({ articleRef, text, postDate, author, imagepath }) => {
   const navigate = useNavigate();
 
-  return (
-    <div className="flex flex-col w-full px-4 sm:px-8 mx-auto max-w-4xl font-grotesk">
-      {/* Title */}
-      <h1 className="font-grotesk text-4xl sm:text-5xl font-bold text-black text-left">
-        {title}
-      </h1>
+  const cleanedHTML = (() => {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(text, "text/html");
 
-      {/* Image at the top */}
-      {imagepath && (
-        <img
-          src={imagepath}
-          alt="Article"
-          className="w-full h-auto object-cover my-6 bg-gray-300"  // Full width, maintain aspect ratio
-        />
-      )}
+    // Remove <img> tags that match the imagepath
+    if (imagepath) {
+      const imgTags = doc.querySelectorAll("img");
+      imgTags.forEach((img) => {
+        if (img.src === imagepath) {
+          img.remove();
+        } else {
+          // Add styling class to other images
+          img.className =
+            "w-full h-auto object-cover my-6 bg-gray-300";
+        }
+      });
+    }
+
+    return doc.body.innerHTML;
+  })();
+
+  return (
+    <div className="flex flex-col w-full font-grotesk">
 
       {/* Post Meta */}
       <span className="text-lg text-[#00317F] mb-4 self-start">
@@ -43,12 +44,7 @@ const ArticleContent = ({ articleRef, title, text, imagepath, postDate, author }
       <div
         ref={articleRef}
         className="text-lg sm:text-xl font-medium text-black leading-relaxed space-y-6"
-        dangerouslySetInnerHTML={{
-          __html: text.replace(
-            /<img/g,
-            '<img class="w-full h-auto object-cover my-6 bg-gray-300"'
-          )
-        }}
+        dangerouslySetInnerHTML={{ __html: cleanedHTML }}
       />
     </div>
   );
