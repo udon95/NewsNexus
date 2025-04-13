@@ -199,6 +199,32 @@ export const FreeWriteArticle = () => {
       }
     }      
 
+    let topicIdToUse;
+
+    // Check if topic exists (case-insensitive match)
+    const matchedTopic = topicOptions.find(
+      (t) => t.name.toLowerCase() === topics.toLowerCase()
+    );
+
+    if (matchedTopic) {
+      topicIdToUse = matchedTopic.topicid;
+    } else {
+      // Insert new topic
+      const { data: newTopic, error: insertError } = await supabase
+        .from("topic_categories")
+        .insert([{ name: topics, Creator: "User", created_at: new Date().toISOString() }])
+        .select("topicid")
+        .single();
+
+      if (insertError) {
+        alert("Failed to create new topic.");
+        return;
+      }
+
+      topicIdToUse = newTopic.topicid;
+    }
+
+
     const articleData = {
       title,
       content: updatedHTML,
@@ -214,7 +240,8 @@ export const FreeWriteArticle = () => {
           title: articleData.title,
           text: articleData.content,
           userid: articleData.created_by,
-          topicid: topics, // Insert the UUID
+          topicid: topicIdToUse,
+          
           time: articleData.created_at,
           status: "Published",
           imagepath: firstImageUrl || null,
@@ -293,12 +320,36 @@ export const FreeWriteArticle = () => {
           updatedHTML = updatedHTML.replaceAll(img.previewUrl, urlData.publicUrl);
       }
     }
+
+    let topicIdToUse;
+
+    // Check if topic exists (case-insensitive match)
+    const matchedTopic = topicOptions.find(
+      (t) => t.name.toLowerCase() === topics.toLowerCase()
+    );
+
+    if (matchedTopic) {
+      topicIdToUse = matchedTopic.topicid;
+    } else {
+      const { data: newTopic, error: insertError } = await supabase
+        .from("topic_categories")
+        .insert([{ name: topics, Creator: "User", created_at: new Date().toISOString() }])
+        .select("topicid")
+        .single();
+
+      if (insertError) {
+        alert("Failed to create new topic.");
+        return;
+      }
+
+      topicIdToUse = newTopic.topicid;
+    }
   
     const articleData = {
       title,
       text: updatedHTML,
       userid: session.userid,
-      topicid: topics,
+      topicid: topicIdToUse,
       time: new Date().toISOString(),
       imagepath: firstImageUrl || null,
       status: "Draft",
@@ -411,95 +462,57 @@ export const FreeWriteArticle = () => {
     return () => document.head.removeChild(style); // Cleanup
   }, []);    
 
-  const handleSubmitTopicApplication = async () => {
-    if (!newTopicName.trim()) {
-      alert("Please enter a topic name.");
-      return;
-    }
-  
-    const { error } = await supabase
-      .from("topic_applications")
-      .insert([
-        {
-          requested_by: userId,
-          topic_name: newTopicName.trim(),
-          status: "Pending",
-          created_at: new Date().toISOString(),
-        }
-      ]);
-  
-    if (error) {
-      alert("Failed to apply for topic.");
-    } else {
-      alert("Topic application submitted! Admins will review it when enough users request it.");
-      setShowTopicApplication(false);
-      setNewTopicName("");
-    }
-  };      
+  return (
+      <div className="w-full min-h-screen bg-indigo-50 text-black font-grotesk flex justify-center">
+        <main className="w-full max-w-4xl p-10 flex flex-col gap-6">
+          <h1 className="text-3xl font-bold mb-1">Publish Your Articles :</h1>
 
-return (
-    <div className="w-full min-h-screen bg-indigo-50 text-black font-grotesk flex justify-center">
-      <main className="w-full max-w-4xl p-10 flex flex-col gap-6">
-        <h1 className="text-3xl font-bold mb-1">Publish Your Articles :</h1>
-
-        <div className="flex flex-col gap-5 w-full">
-          <div>
-            <label className="block text-xl font-semibold mb-1">Article Title:</label>
-            <input
-              type="text"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="Enter title..."
-              className="w-full p-2 border border-gray-300 rounded-md bg-white"
-            />
-          </div>
-
-          <div>
-            <label className="block text-xl font-semibold mb-1">Topic:</label>
-
-              <div className="flex items-center gap-2 w-full">
-              <div className="relative w-full">
-                <div
-                  onClick={() => setShowTopicsDropdown(!showTopicsDropdown)}
-                  className="p-2 border rounded-md bg-white w-full cursor-pointer flex justify-between items-center"
-                >
-                  {/* {topics || "Select a topic"} */}
-                  {topics ? topicOptions.find((t) => t.topicid === topics)?.name : "Select a topic"}
-                  <button
-                    className="ml-2 text-gray-500 text-sm"
-                    onClick={(e) => {
-                      e.stopPropagation(); // prevents double toggle
-                      setShowTopicsDropdown(!showTopicsDropdown);
-                    }}
-                  >
-                  {showTopicsDropdown ? "▲" : "▼"}
-                </button>  </div>
-
-                {showTopicsDropdown && (
-                  <div className="absolute z-10 w-full mt-1 bg-white border rounded-md shadow-md max-h-40 overflow-y-auto">
-                    {topicOptions.map((topic, i) => (
-                      <div
-                        key={i}
-                        onClick={() => {
-                          setTopics(topic.topicid);
-                          setShowTopicsDropdown(false);
-                        }}
-                          className="p-2 hover:bg-indigo-100 cursor-pointer text-black font-medium"
-                      >
-                    {topic.name}
-                      </div>
-                    ))}
-                </div>
-                )}
-              </div>
-                  <button 
-                    className="bg-black text-white rounded-md p-2 flex items-center justify-center h-full"
-                      onClick={() => setShowTopicApplication(true)}
-                  >
-                    <Plus size={16} />
-                  </button>
+          <div className="flex flex-col gap-5 w-full">
+            <div>
+              <label className="block text-xl font-semibold mb-1">Article Title:</label>
+              <input
+                type="text"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                placeholder="Enter title..."
+                className="w-full p-2 border border-gray-300 rounded-md bg-white"
+              />
             </div>
-          </div>
+
+            <div>
+    <label className="block text-xl font-semibold mb-1">Topic:</label>
+    <div className="relative w-full">
+      <input
+        type="text"
+        value={topics}
+        onChange={(e) => setTopics(e.target.value)}
+        placeholder="Type topic..."
+        className="w-full p-2 border border-gray-300 rounded-md bg-white"
+        onFocus={() => setShowTopicsDropdown(true)}
+      />
+      {showTopicsDropdown && topics && (
+        <div className="absolute z-10 w-full mt-1 bg-white border rounded-md shadow-md max-h-40 overflow-y-auto">
+          {topicOptions
+            .filter((t) =>
+              t.name.toLowerCase().includes(topics.toLowerCase())
+            )
+            .map((topic, i) => (
+              <div
+                key={i}
+                onClick={() => {
+                  setTopics(topic.name);
+                  setShowTopicsDropdown(false);
+                }}
+                className="p-2 hover:bg-indigo-100 cursor-pointer"
+              >
+                {topic.name}
+              </div>
+            ))}
+        </div>
+      )}
+    </div>
+  </div>
+
 
           <div>
             <label className="block text-xl font-semibold mb-1">Article Content:</label>
@@ -633,44 +646,7 @@ return (
             </div>
           </div>
         )}
-        {showTopicApplication && (
-          <div className="fixed inset-0 backdrop-blur-sm bg-white/10 flex items-center justify-center z-50">
-            <div className="bg-white p-6 rounded-lg shadow-xl w-[90%] max-w-md text-center">
-              <h2 className="text-xl font-semibold mb-3 text-left">Topic Application</h2>
-              <div className="text-gray-600 text-sm mb-4">
-              <ul className="text-gray-600 text-sm mb-4 list-disc list-inside text-left space-y-2">
-                <li>Your requested topic will be reviewed by our admins.</li>
-                <li>Approved if 15 or more users apply for the same topic.</li>
-                <li>Please post under an existing topic in the meantime.</li>
-              </ul>
-              </div>
-              <input
-                type="text"
-                value={newTopicName}
-                onChange={(e) => setNewTopicName(e.target.value)}
-                placeholder="Enter your proposed topic name..."
-                className="w-full p-2 mb-4 border border-gray-300 rounded-md"
-              />
-              <div className="flex justify-end gap-3">
-                <button
-                  className="bg-blue-600 text-white px-4 py-2 rounded-md"
-                  onClick={handleSubmitTopicApplication}
-                >
-                  Apply
-                </button>
-                <button
-                  className="bg-gray-300 text-black px-4 py-2 rounded-md"
-                  onClick={() => {
-                    setNewTopicName("");
-                    setShowTopicApplication(false);
-                  }}
-                >
-                  Cancel
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
+
       {showLinkModal && (
         <div className="fixed inset-0 flex items-center justify-center backdrop-blur-sm bg-white/10 z-50">
         <div className="bg-white rounded-md p-6 shadow-lg w-[90%] max-w-sm">
