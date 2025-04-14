@@ -444,18 +444,27 @@ export const PremiumWriteArticle = () => {
 
   const [pendingImages, setPendingImages] = useState([]);
 
-  const handleEditorImageUpload = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const previewUrl = URL.createObjectURL(file);
-      setPendingImages((prev) => [...prev, { file, previewUrl }]);
+const handleEditorImageUpload = (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
 
-      if (postType === "General") {
-        editor.chain().focus().setImage({ src: previewUrl }).run();
-      }          
-    }
-    e.target.value = null;
-  };    
+  const MAX_SIZE_MB = 50;
+  const MAX_SIZE_BYTES = MAX_SIZE_MB * 1024 * 1024;
+
+  if (file.size > MAX_SIZE_BYTES) {
+    alert("Image exceeds 50MB limit. Please upload a smaller image.");
+    return;
+  }
+
+  const previewUrl = URL.createObjectURL(file);
+  setPendingImages((prev) => [...prev, { file, previewUrl }]);
+
+  if (postType === "General") {
+    editor.chain().focus().setImage({ src: previewUrl }).run();
+  }
+
+  e.target.value = null;
+};    
 
   // Fetch Topics from `topic_categories`
   useEffect(() => {
