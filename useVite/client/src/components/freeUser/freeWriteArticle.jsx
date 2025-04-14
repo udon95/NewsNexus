@@ -15,6 +15,14 @@ import OrderedList from '@tiptap/extension-ordered-list';
 import { Extension } from '@tiptap/core';
 import { Paragraph } from '@tiptap/extension-paragraph';
 
+function formatTopicName(name) {
+  return name
+    .trim()
+    .toLowerCase()
+    .split(/\s+/)
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+}
 
 export const FreeWriteArticle = () => {
   const [title, setTitle] = useState("");
@@ -200,18 +208,20 @@ export const FreeWriteArticle = () => {
     }      
 
     let topicIdToUse;
-    const normalizedTopicName = topics.trim().toLowerCase();
+    const inputNormalized = topics.trim().toLowerCase();
+    const displayName = formatTopicName(topics);
     
     const matchedTopic = topicOptions.find(
-      (t) => t.name.trim().toLowerCase() === normalizedTopicName
-    );
+      (t) => t.name.trim().toLowerCase() === inputNormalized
+    );    
     
     if (matchedTopic) {
       topicIdToUse = matchedTopic.topicid;
     } else {
       const { data: newTopic, error: insertError } = await supabase
         .from("topic_categories")
-        .insert([{ name: normalizedTopicName, Creator: "User", created_at: new Date().toISOString() }])
+        // .insert([{ name: normalizedTopicName, Creator: "User", created_at: new Date().toISOString() }])
+        .insert([{ name: displayName, Creator: "User", created_at: new Date().toISOString() }])
         .select("topicid")
         .single();
     
@@ -321,18 +331,20 @@ export const FreeWriteArticle = () => {
     }
 
     let topicIdToUse;
-    const normalizedTopicName = topics.trim().toLowerCase();
+    const inputNormalized = topics.trim().toLowerCase();
+    const displayName = formatTopicName(topics);
     
     const matchedTopic = topicOptions.find(
-      (t) => t.name.trim().toLowerCase() === normalizedTopicName
-    );
+      (t) => t.name.trim().toLowerCase() === inputNormalized
+    );    
     
     if (matchedTopic) {
       topicIdToUse = matchedTopic.topicid;
     } else {
       const { data: newTopic, error: insertError } = await supabase
         .from("topic_categories")
-        .insert([{ name: normalizedTopicName, Creator: "User", created_at: new Date().toISOString() }])
+        // .insert([{ name: normalizedTopicName, Creator: "User", created_at: new Date().toISOString() }])
+        .insert([{ name: displayName, Creator: "User", created_at: new Date().toISOString() }])
         .select("topicid")
         .single();
     
