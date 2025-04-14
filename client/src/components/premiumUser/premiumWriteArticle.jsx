@@ -47,7 +47,6 @@ export const PremiumWriteArticle = () => {
   const storedUser = JSON.parse(localStorage.getItem("userProfile"));
   const userId = storedUser?.user?.userid;
   const editorRef = useRef(null);
-  const [showTopicApplication, setShowTopicApplication] = useState(false);
   const [newTopicName, setNewTopicName] = useState("");
   const [showLinkModal, setShowLinkModal] = useState(false);
   const [linkUrl, setLinkUrl] = useState("");
@@ -348,6 +347,30 @@ export const PremiumWriteArticle = () => {
   //   alert("Article posted!");
   //   handleClearInputs();
   // };
+  const getOrCreateTopicId = async (topicName) => {
+    const matchedTopic = topicOptions.find(
+      (t) => t.name.toLowerCase() === topicName.toLowerCase()
+    );
+    if (matchedTopic) return matchedTopic.topicid;
+
+    const { data: newTopic, error: insertError } = await supabase
+      .from("topic_categories")
+      .insert([
+        {
+          name: topicName,
+          Creator: "User",
+          created_at: new Date().toISOString(),
+        },
+      ])
+      .select("topicid")
+      .single();
+
+    if (insertError) {
+      alert("Failed to create new topic.");
+      return null;
+    }
+    return newTopic.topicid;
+  };
 
   useEffect(() => {
     if (!editor) return;
@@ -1246,48 +1269,7 @@ export const PremiumWriteArticle = () => {
             </div>
           </div>
         )}
-        {showTopicApplication && (
-          <div className="fixed inset-0 backdrop-blur-sm bg-white/10 flex items-center justify-center z-50">
-            <div className="bg-white p-6 rounded-lg shadow-xl w-[90%] max-w-md text-center">
-              <h2 className="text-xl font-semibold mb-3 text-left">
-                Topic Application
-              </h2>
-              <p className="text-gray-600 text-sm mb-4">
-                <ul className="text-gray-600 text-sm mb-4 list-disc list-inside text-left space-y-2">
-                  <li>Your requested topic will be reviewed by our admins.</li>
-                  <li>
-                    Approved if 15 or more users apply for the same topic.
-                  </li>
-                  <li>Please post under an existing topic in the meantime.</li>
-                </ul>
-              </p>
-              <input
-                type="text"
-                value={newTopicName}
-                onChange={(e) => setNewTopicName(e.target.value)}
-                placeholder="Enter your proposed topic name..."
-                className="w-full p-2 mb-4 border border-gray-300 rounded-md"
-              />
-              <div className="flex justify-end gap-3">
-                <button
-                  className="bg-blue-600 text-white px-4 py-2 rounded-md"
-                  onClick={handleSubmitTopicApplication}
-                >
-                  Apply
-                </button>
-                <button
-                  className="bg-gray-300 text-black px-4 py-2 rounded-md"
-                  onClick={() => {
-                    setNewTopicName("");
-                    setShowTopicApplication(false);
-                  }}
-                >
-                  Cancel
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
+        
         {showLinkModal && (
           <div className="fixed inset-0 flex items-center justify-center backdrop-blur-sm bg-white/10 z-50">
             <div className="bg-white rounded-md p-6 shadow-lg w-[90%] max-w-sm">

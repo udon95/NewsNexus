@@ -1,66 +1,182 @@
 import React, { useState, useEffect, useRef } from "react";
-// import "../index.css";
-import AdminSidebar from "./adminSideBar.jsx";
-// import Navbar from "../navbar.jsx";
+import supabase from "../../api/supabaseClient.js";
+import { useNavigate } from "react-router-dom";
 
 const AdminArticleReports = () => {
-  const [selectedButton, setSelectedButton] = useState(null); // Track selected button
+  const [selectedItem, setSelectedItem] = useState(null);
+  const [rows, setRows] = useState([]);
+  const targetType = "article";
+  const [link, setLink] = useState([]);
+  let count = 0;
+  const navigate = useNavigate();
+  const [resolvedStatus, setResolvedStatus] = useState(false);
+  const [displayedRows, setDisplayedRows] = useState([]);
+  const [article, setArticle] = useState(null);
+  const openReport = (row) => {
+    fetchArticleLink(row.target_id);
+    console.log(article);
 
-  const handleClick = (id) => {
-    setSelectedButton(id); // Set clicked button as selected
+    setSelectedItem(row);
+    console.log(row.target_id);
+  };
+
+  const fetchArticleLink = async (target_id) => {
+    const { data, error } = await supabase
+      .from("articles")
+      .select("*")
+      .eq("articleid", target_id)
+      .single();
+    if (error) {
+      console.error("Error fetching data:", error);
+    } else {
+      setLink("/article/" + data.title);
+      setArticle(data);
+      console.log(data);
+    }
+  };
+
+  const articleRedirect = () => {
+    navigate(link);
+  };
+
+  const suspendArticle = async (target_id, bool) => {
+    console.log(target_id);
+
+    const { data, error } = await supabase
+      .from("articles")
+      .update({ Suspended: bool })
+      .eq("articleid", target_id);
+
+    if (error) {
+      console.error("Error fetching data:", error);
+    } else {
+      const { data, error } = await supabase
+        .from("reports")
+        .update({
+          resolved: true,
+          resolution: bool ? "Article suspended" : "No further action",
+        })
+        .eq("target_id", target_id)
+        .single();
+      if (error) {
+        console.error("Error fetching data:", error);
+      }
+    }
+    window.location.reload();
   };
 
   useEffect(() => {
-    setSelectedButton(1);
-  }, []);
+    const fetchRows = async () => {
+      const { data, error } = await supabase
+        .from("reports")
+        .select("*")
+        .eq("target_type", targetType);
+      if (error) {
+        console.error("Error fetching data:", error);
+      } else {
+        setRows(data);
+      }
+    };
+    fetchRows();
+  }, [targetType]);
+
+  useEffect(() => {
+    setDisplayedRows(rows.filter((row) => row.resolved === resolvedStatus));
+  }, [resolvedStatus, rows]);
+
+  const handleResolvedStatusChange = () => {
+    const statusElement = document.getElementById("status");
+    setResolvedStatus(statusElement.value === "resolved");
+    setDisplayedRows(rows.filter((row) => row.resolved === resolvedStatus));
+  };
 
   return (
     <div className="w-screen min-h-screen flex flex-col overflow-auto">
-      {/* Navbar */}
-      {/* <Navbar /> */}
       <div className="flex">
-        {/* Sidebar */}
-        {/* <AdminSidebar /> */}
         <div className="flex-1 font-grotesk">
-          <div className="text-2xl sm:text-3xl text-left mt-8 ml-10 mb-5 font-bold">
-            Report details:
-          </div>
-          <div className="ml-10 mt-5 max-w-[500px] bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300">
-            Username
-          </div>
-          <div className="ml-10 mt-5 max-w-[500px] bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300">
-            "Article"
-          </div>
-          <div className="ml-10 mt-5 max-w-[500px] min-h-[200px] bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300">
-            Details of infringement
-          </div>
+          {selectedItem ? (
+            <div>
+              <div className="text-2xl sm:text-3xl text-left mt-8 ml-10 mb-5 font-bold">
+                Report Details:
+              </div>
+              <div className="ml-10 mt-5 max-w-[500px] bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300">
+                Username : &emsp;{selectedItem ? selectedItem.username : ""}
+              </div>
+              <div className="ml-10 mt-5 max-w-[500px] bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300">
+                Infringement : &emsp;{selectedItem ? selectedItem.reason : ""}
+              </div>
+              <div
+                className="ml-10 mt-5 max-w-[500px] bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none underline focus:ring-2 focus:ring-gray-300 cursor-pointer"
+                onClick={() => articleRedirect()}
+              >
+                Article Link : <br />
+                {article ? article.title : ""}
+              </div>
+              <div className="ml-10 mt-5 max-w-[500px] bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300">
+                Article Status : &emsp;
+                {selectedItem ? selectedItem.resolution : ""}
+              </div>
+              <div className="flex">
+                <button
+                  type="button"
+                  className="px-6 py-3 bg-[#3F414C] flex ml-10 mt-7 text-white rounded-lg hover:bg-opacity-90 cursor-pointer"
+                  onClick={() =>
+                    suspendArticle(selectedItem.target_id, !article.Suspended)
+                  }
+                >
+                  {article && article.Suspended == true
+                    ? "Unsuspend"
+                    : "Suspend"}{" "}
+                  Article
+                </button>
+                {selectedItem.resolved == false ? (
+                  <button
+                    type="button"
+                    className="px-6 py-3 bg-[#3F414C] flex ml-5 mt-7 text-white rounded-lg hover:bg-opacity-90 cursor-pointer"
+                    onClick={() =>
+                      suspendArticle(selectedItem.target_id, false)
+                    }
+                  >
+                    Reject Report
+                  </button>
+                ) : (
+                  <div></div>
+                )}
+              </div>
+            </div>
+          ) : (
+            <div></div>
+          )}
           <div className="flex">
-            <button
-              type="button"
-              className="px-6 py-3 bg-[#3F414C] flex ml-10 mt-7 text-white rounded-lg hover:bg-opacity-90 cursor-pointer"
-              onClick={handleClick}
+            <div className="text-2xl sm:text-3xl text-left mt-8 ml-10 font-bold">
+              Article Reports:
+            </div>
+            <select
+              id="status"
+              name="status"
+              className=" sm:text-xl text-left mt-8 ml-40 font-bold"
+              onChange={handleResolvedStatusChange}
             >
-              Approve
-            </button>
-            <button
-              type="button"
-              className="px-6 py-3 bg-[#3F414C] flex ml-5 mt-7 text-white rounded-lg hover:bg-opacity-90 cursor-pointer"
-              onClick={handleClick}
-            >
-              Reject
-            </button>
+              <option value="unresolved">Unresolved</option>
+              <option value="resolved">Resolved</option>
+            </select>
           </div>
-          <div className="text-2xl sm:text-3xl text-left mt-8 ml-10 font-bold">
-            Article Reports:
-          </div>
-          <div className="ml-10 mt-8 max-w-150 bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300">
-            Report 1
-          </div>
-          <div className="ml-10 mt-7 max-w-150 bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300">
-            Report 2
-          </div>
-          <div className="ml-10 mt-7 max-w-150 bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300">
-            Report 3
+
+          <div>
+            {displayedRows.length > 0 ? (
+              displayedRows.map((row) => (
+                <div key={row.id}>
+                  <div
+                    className="ml-10 mt-8 max-w-150 bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300 cursor-pointer"
+                    onClick={() => openReport(row)}
+                  >
+                    Report {++count} : &emsp;{row.reason}
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="ml-10 mt-8">0 results</div>
+            )}
           </div>
         </div>
       </div>

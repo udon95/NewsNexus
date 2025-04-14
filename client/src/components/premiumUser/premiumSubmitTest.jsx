@@ -5,6 +5,35 @@ export const PremiumSubmitTest = ({ rating, setRating }) => {
   const [share, setShare] = useState("");
   const [areas, setAreas] = useState("");
 
+  const handleSubmit = async () => {
+    const feedbackData = {
+      rating,
+      share,
+      areas,
+    };
+  
+    try {
+      const response = await fetch("http://localhost:5000/rooms/feedback", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(feedbackData),
+      });
+  
+      const result = await response.json();
+  
+      if (response.ok) {
+        alert("Feedback submitted successfully");
+      } else {
+        alert(result.message || "Submission failed");
+      }
+    } catch (error) {
+      console.error("Error occurred while submitting feedback:", error);
+      alert("Server error, please try again later");
+    }
+  };
+
   return (
     <div className="w-screen min-h-screen flex flex-col overflow-auto">
       <main className="flex-grow w-full flex min-h-full overflow-auto">
@@ -32,39 +61,26 @@ export const PremiumSubmitTest = ({ rating, setRating }) => {
 
               <div className="mb-4 relative w-3/3 md:w-2/3">
                 <textarea
-                  id="floatingTextarea1"
-                  value={share}
-                  onChange={(e) => setShare(e.target.value)}
-                  placeholder=" " // Keeps the label floating while typing
-                  className="peer flex w-full h-40 p-2 pt-6 border rounded-lg shadow-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-400"
-                ></textarea>
-                <label
-                  htmlFor="floatingTextarea1"
-                  className="absolute left-2 top-2 text-sm bg-white px-1 transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:text-black peer-focus:top-2 peer-focus:text-sm peer-focus:text-blue-500"
-                >
-                  Share with others
-                </label>
-              </div>          
-
-              <div className="mb-4 relative w-3/3 md:w-2/3">
-                <textarea
                   id="floatingTextarea2"
                   value={areas}
                   onChange={(e) => setAreas(e.target.value)}
-                  placeholder=" " // Keeps the label floating while typing
+                  placeholder=" "
                   className="peer flex w-full h-40 p-2 pt-6 border rounded-lg shadow-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-400"
                 ></textarea>
                 <label
                   htmlFor="floatingTextarea2"
                   className="absolute left-2 top-2 text-sm bg-white px-1 transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:text-black peer-focus:top-2 peer-focus:text-sm peer-focus:text-blue-500"
                 >
-                  Areas of improvement
+                    Areas of improvement
                 </label>
               </div>
 
               <div className="flex justify-end gap-2 w-3/3 md:w-2/3">
-                <button className="px-4 py-2 text-lg text-white bg-black rounded-lg shadow-md">
-                  Submit
+                <button
+                  onClick={handleSubmit}
+                  className="px-4 py-2 text-lg text-white bg-black rounded-lg shadow-md"
+                >
+                   Submit
                 </button>
               </div>
             </div>
