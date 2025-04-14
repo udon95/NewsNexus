@@ -17,6 +17,14 @@ import TextStyle from '@tiptap/extension-text-style';
 import { Extension } from '@tiptap/core';
 import { Paragraph } from '@tiptap/extension-paragraph';
 
+function formatTopicName(name) {
+  return name
+    .trim()
+    .toLowerCase()
+    .split(/\s+/)
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+}
 
 export const PremiumWriteArticle = () => {
   const [title, setTitle] = useState("");
@@ -153,6 +161,7 @@ export const PremiumWriteArticle = () => {
 
   const getOrCreateTopicId = async (topicName) => {
     const normalizedName = topicName.trim().toLowerCase();
+    const displayName = formatTopicName(topicName);
   
     const matchedTopic = topicOptions.find(
       (t) => t.name.trim().toLowerCase() === normalizedName
@@ -162,7 +171,7 @@ export const PremiumWriteArticle = () => {
   
     const { data: newTopic, error: insertError } = await supabase
       .from("topic_categories")
-      .insert([{ name: normalizedName, Creator: "User", created_at: new Date().toISOString() }])
+      .insert([{ name: displayName, Creator: "User", created_at: new Date().toISOString() }])
       .select("topicid")
       .single();
   
@@ -444,27 +453,18 @@ export const PremiumWriteArticle = () => {
 
   const [pendingImages, setPendingImages] = useState([]);
 
-const handleEditorImageUpload = (e) => {
-  const file = e.target.files[0];
-  if (!file) return;
+  const handleEditorImageUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const previewUrl = URL.createObjectURL(file);
+      setPendingImages((prev) => [...prev, { file, previewUrl }]);
 
-  const MAX_SIZE_MB = 50;
-  const MAX_SIZE_BYTES = MAX_SIZE_MB * 1024 * 1024;
-
-  if (file.size > MAX_SIZE_BYTES) {
-    alert("Image exceeds 50MB limit. Please upload a smaller image.");
-    return;
-  }
-
-  const previewUrl = URL.createObjectURL(file);
-  setPendingImages((prev) => [...prev, { file, previewUrl }]);
-
-  if (postType === "General") {
-    editor.chain().focus().setImage({ src: previewUrl }).run();
-  }
-
-  e.target.value = null;
-};    
+      if (postType === "General") {
+        editor.chain().focus().setImage({ src: previewUrl }).run();
+      }          
+    }
+    e.target.value = null;
+  };    
 
   // Fetch Topics from `topic_categories`
   useEffect(() => {
