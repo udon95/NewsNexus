@@ -15,6 +15,14 @@ import OrderedList from '@tiptap/extension-ordered-list';
 import { Extension } from '@tiptap/core';
 import { Paragraph } from '@tiptap/extension-paragraph';
 
+function normalizeAndFormatTopic(name) {
+  const normalized = name.trim().toLowerCase();
+  const formatted = normalized
+    .split(/\s+/)
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+  return { normalized, formatted };
+}
 
 export const FreeWriteArticle = () => {
   const [title, setTitle] = useState("");
@@ -251,20 +259,25 @@ export const FreeWriteArticle = () => {
         updatedHTML = updatedHTML.replaceAll(img.previewUrl, urlData.publicUrl);        
       }
     }    
-    
-    let topicIdToUse;
-    const normalizedTopicName = topics.trim().toLowerCase();
+
+    const { normalized, formatted } = normalizeAndFormatTopic(topics);
 
     const matchedTopic = topicOptions.find(
-      (t) => t.name.trim().toLowerCase() === normalizedTopicName
+      (t) => t.name.trim().toLowerCase() === normalized
     );
+
     
     if (matchedTopic) {
       topicIdToUse = matchedTopic.topicid;
     } else {
       const { data: newTopic, error: insertError } = await supabase
-        .from("topic_categories")
-        .insert([{ name: normalizedTopicName, Creator: "User", created_at: new Date().toISOString() }])
+        .from("topic_categories")    
+        .insert([{ 
+          name: formatted,
+          Creator: "User",
+          created_at: new Date().toISOString()
+        }])
+            
         .select("topicid")
         .single();    
       if (insertError) {
@@ -371,18 +384,24 @@ export const FreeWriteArticle = () => {
     }
 
     let topicIdToUse;
-    const normalizedTopicName = topics.trim().toLowerCase();
-    
+    const { normalized, formatted } = normalizeAndFormatTopic(topics);
+
     const matchedTopic = topicOptions.find(
-      (t) => t.name.trim().toLowerCase() === normalizedTopicName
+      (t) => t.name.trim().toLowerCase() === normalized
     );
+
     
     if (matchedTopic) {
       topicIdToUse = matchedTopic.topicid;
     } else {
       const { data: newTopic, error: insertError } = await supabase
-        .from("topic_categories")
-        .insert([{ name: normalizedTopicName, Creator: "User", created_at: new Date().toISOString() }])
+        .from("topic_categories")    
+        .insert([{ 
+          name: formatted,
+          Creator: "User",
+          created_at: new Date().toISOString()
+        }])
+
         .select("topicid")
         .single();
       if (insertError) {
@@ -482,7 +501,8 @@ export const FreeWriteArticle = () => {
   // Fetch both topicid and name from the topic_categories table
   const { data, error } = await supabase
     .from("topic_categories")
-    .select("topicid, name");
+    // .select("topicid, name");
+    .select("topicid,name");
 
   if (!error && data) {
     setTopicOptions(data); // Data is an array of objects like { topicid, name }
@@ -612,7 +632,11 @@ return (
               <input
                 type="text"
                 value={topics}
-                onChange={(e) => setTopics(e.target.value)}
+                onChange={(e) => {
+                  setTopics(e.target.value);
+                  setShowTopicsDropdown(true); // Always show dropdown while typing
+                }}    
+                onBlur={() => setTimeout(() => setShowTopicsDropdown(false), 200)} // Close on blur after delay            
                 placeholder="Type topic..."
                 className="w-full p-2 border border-gray-300 rounded-md bg-white"
                 onFocus={() => setShowTopicsDropdown(true)}
@@ -621,8 +645,8 @@ return (
                 <div className="absolute z-10 w-full mt-1 bg-white border rounded-md shadow-md max-h-40 overflow-y-auto">
                   {topicOptions
                     .filter((t) =>
-                    t.name.toLowerCase().includes(topics.toLowerCase())
-                    )
+                    t.name.toLowerCase().includes(topics.trim().toLowerCase())
+                  )
                   .map((topic, i) => (
                       <div
                       key={i}
