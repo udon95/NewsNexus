@@ -480,7 +480,7 @@ export const FreeWriteArticle = () => {
             </div>
 
             <div>
-    <label className="block text-xl font-semibold mb-1">Topic:</label>
+    <label className="block text-xl font-semibold mb-1">Select or Create Topic:</label>
     <div className="relative w-full">
       <input
         type="text"
