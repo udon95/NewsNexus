@@ -152,21 +152,25 @@ export const PremiumWriteArticle = () => {
   const MAX_WORDS = postType === "Room" ? 400 : 1000;
 
   const getOrCreateTopicId = async (topicName) => {
+    const normalizedName = topicName.trim().toLowerCase();
+  
     const matchedTopic = topicOptions.find(
-      (t) => t.name.toLowerCase() === topicName.toLowerCase()
+      (t) => t.name.trim().toLowerCase() === normalizedName
     );
+  
     if (matchedTopic) return matchedTopic.topicid;
   
     const { data: newTopic, error: insertError } = await supabase
       .from("topic_categories")
-      .insert([{ name: topicName, Creator: "User", created_at: new Date().toISOString() }])
+      .insert([{ name: normalizedName, Creator: "User", created_at: new Date().toISOString() }])
       .select("topicid")
       .single();
-      
+  
     if (insertError) {
       alert("Failed to create new topic.");
       return null;
     }
+  
     return newTopic.topicid;
   };  
   
