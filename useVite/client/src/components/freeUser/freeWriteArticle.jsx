@@ -200,29 +200,28 @@ export const FreeWriteArticle = () => {
     }      
 
     let topicIdToUse;
-
-    // Check if topic exists (case-insensitive match)
+    const normalizedTopicName = topics.trim().toLowerCase();
+    
     const matchedTopic = topicOptions.find(
-      (t) => t.name.toLowerCase() === topics.toLowerCase()
+      (t) => t.name.trim().toLowerCase() === normalizedTopicName
     );
-
+    
     if (matchedTopic) {
       topicIdToUse = matchedTopic.topicid;
     } else {
-      // Insert new topic
       const { data: newTopic, error: insertError } = await supabase
         .from("topic_categories")
-        .insert([{ name: topics, Creator: "User", created_at: new Date().toISOString() }])
+        .insert([{ name: normalizedTopicName, Creator: "User", created_at: new Date().toISOString() }])
         .select("topicid")
         .single();
-
+    
       if (insertError) {
         alert("Failed to create new topic.");
         return;
       }
-
+    
       topicIdToUse = newTopic.topicid;
-    }
+    }   
 
 
     const articleData = {
@@ -322,28 +321,28 @@ export const FreeWriteArticle = () => {
     }
 
     let topicIdToUse;
-
-    // Check if topic exists (case-insensitive match)
+    const normalizedTopicName = topics.trim().toLowerCase();
+    
     const matchedTopic = topicOptions.find(
-      (t) => t.name.toLowerCase() === topics.toLowerCase()
+      (t) => t.name.trim().toLowerCase() === normalizedTopicName
     );
-
+    
     if (matchedTopic) {
       topicIdToUse = matchedTopic.topicid;
     } else {
       const { data: newTopic, error: insertError } = await supabase
         .from("topic_categories")
-        .insert([{ name: topics, Creator: "User", created_at: new Date().toISOString() }])
+        .insert([{ name: normalizedTopicName, Creator: "User", created_at: new Date().toISOString() }])
         .select("topicid")
         .single();
-
+    
       if (insertError) {
         alert("Failed to create new topic.");
         return;
       }
-
+    
       topicIdToUse = newTopic.topicid;
-    }
+    }    
   
     const articleData = {
       title,
