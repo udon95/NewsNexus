@@ -21,6 +21,7 @@
     "@tailwindcss/vite": "^4.0.6",
     "axios": "^1.7.9",
     "bcryptjs": "^3.0.2",
+    "dotenv": "^16.4.7",
     "lucide-react": "^0.475.0",
     "mui": "^0.0.1",
     "react": "^19.0.0",

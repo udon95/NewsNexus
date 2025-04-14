@@ -1,70 +1,125 @@
-import React from "react";
-import { useNavigate } from "react-router-dom";
-// import "../index.css";
-import AdminSidebar from "./adminSideBar.jsx";
-import Navbar from "../navBar.jsx";
+import React, { useState, useEffect } from "react";
+import supabase from "../../api/supabaseClient";
 
 const AdminProfile = () => {
-    const navigate = useNavigate();
+    const [admin, setAdmin] = useState([]);
+    const [newEmail, setNewEmail] = useState('');
+    const [oldPass, setOldPass] = useState('');
+    const [newPass, setNewPass] = useState('');
 
-    const handleClick = () => {
-        navigate("/AdminUserDetails");
+
+  const updateUserEmail = async () => {
+      if (!newEmail) {
+        alert('Please enter a new email address.');
+        return;
+      }
+      const { data, error } = await supabase.auth.updateUser({ email: newEmail });
+      if (error) {
+        console.error('Error updating email:', error.message);
+        alert('Failed to update email.');
+      } else {
+        alert('Email update initiated. Please check your new email to confirm the change.');
+      }
     };
 
-    return (
-        <div className="w-screen min-h-screen flex flex-col overflow-auto">
-            {/* Navbar */}
-            {/* <Navbar /> */}
-            <div className="flex">
-                {/* Sidebar */}
-                <div className="flex-1 font-grotesk">
-                    <div className="text-2xl sm:text-3xl text-left mt-8 ml-10 mb-5 font-bold">
-                        Profile particulars:
-                    </div>
+  const updatePassword = async () => {
+    if (!oldPass || !newPass) {
+      alert('Please enter both current and new passwords.');
+      return;
+    }
+    const {
+      data: { user },
+      error: userError,
+    } = await supabase.auth.getUser();
 
-                    {/* Administrator Name */}
-                    <div className="ml-10 mt-5 max-w-[500px] bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300">
-                        Administrator1
-                    </div>
+    if (userError || !user) {
+      alert("Could not get current user.");
+      console.error("User fetch error:", userError?.message);
+      return;
+    }
+    const { error: signInError } = await supabase.auth.signInWithPassword({
+      email: user.email,
+      password: oldPass,
+    });
+    if (signInError) {
+      console.error('Authentication error:', signInError.message);
+      alert('Current password is incorrect.');
+      return;
+    }
+    const { error: updateError } = await supabase.auth.updateUser({
+      password: newPass,
+    });
+    if (updateError) {
+      console.error('Error updating password:', updateError.message);
+      alert('Failed to update password.');
+    } else {
+      alert('Password updated successfully.');
+    }
+  };
+      
 
-                    {/* Email Input */}
-                    <div className="flex">
-                        <input
-                            className="ml-10 mt-8 min-w-[500px] bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300"
-                            value="Administrator1@email.com"
-                            readOnly
-                        />
-                        <button
-                            type="button"
-                            className="px-6 py-3 bg-[#3F414C] flex ml-10 mt-8 text-white rounded-lg hover:bg-opacity-90 cursor-pointer"
-                            onClick={handleClick}>
-                            Update
-                        </button>
-                    </div>
+    useEffect(() => {
+    const fetchRows = async () => {
+        const { data, error } = await supabase
+        .from("admin")
+        .select("*")
+        .single()
+        if (error) {
+        console.error('Error fetching data:', error);
+        } else {
+        setAdmin(data);
+        }
+    };
+    fetchRows();
+    }, []);
 
-                    <div className="text-2xl sm:text-3xl text-left mt-8 ml-10 mb-5 font-bold">
-                        Manage password:
-                    </div>
-                    <div className="flex">
-                    <input
-                            className="ml-10 mt-8 min-w-[300px] bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300"
-                            placeholder="Old password"
-                        />                        
-                    <input
-                        className="ml-10 mt-8 min-w-[300px] bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300"
-                        placeholder="New password"
-                    />
-                    <button
-                        type="button"
-                        className="px-6 py-3 bg-[#3F414C] flex ml-10 mt-8 text-white rounded-lg hover:bg-opacity-90 cursor-pointer">
-                        Update
-                    </button>
-                    </div>
-
-                </div>
-            </div>
+return (
+  <div className="w-screen min-h-screen flex-col overflow-auto">
+      <div className="flex-1 font-grotesk">
+        <div className="text-2xl sm:text-3xl text-left mt-8 ml-10 mb-5 font-bold">
+          Profile particulars:
         </div>
-    );
-};
+        <div className="ml-10 mt-5 max-w-[500px] bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300">
+          {admin.username}
+        </div>
+          <input
+            className="ml-10 mt-8 min-w-[500px] bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300"
+            placeholder={admin.email}
+            id="emailInput"
+            onChange={(e) => setNewEmail(e.target.value)}
+          />
+          <button
+            type="button"
+            className="px-6 py-3 bg-[#3F414C] flex ml-10 mt-8 text-white rounded-lg hover:bg-opacity-90 cursor-pointer"
+            onClick={updateUserEmail}>
+            Update
+          </button>
+        <div className="text-2xl sm:text-3xl text-left mt-8 ml-10 mb-5 font-bold">
+            Manage password:
+        </div>
+        <div className="flex flex-col">
+        <input
+                className="flex-1 ml-10 mt-5 max-w-[500px] bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300"
+                placeholder="Old password"
+                id="oldPass"
+                onChange={(e) => setOldPass(e.target.value)}
+            />                        
+        <input
+            className="ml-10 mt-8 max-w-[500px] bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300"
+            placeholder="New password"                           
+            id="newPass"
+            onChange={(e) => setNewPass(e.target.value)}
+        />
+        <button
+            type="button"
+            className="max-w-[105px] px-6 py-3 bg-[#3F414C] flex ml-10 mt-8 text-white rounded-lg hover:bg-opacity-90 cursor-pointer"
+            onClick={updatePassword}>
+            Update
+        </button>
+        </div>
+
+      </div>
+    </div>
+);};
 
 export default AdminProfile;

@@ -21,6 +21,21 @@ import SubscriptionStatus from "./components/payment.jsx";
 import PublicProfile from "./components/publicProfile.jsx";
 import FactCheck from "./components/factCheck.jsx";
 
+
+import AdminExperts from "./components/adminUser/AdminExperts.jsx";
+import AdminProfile from "./components/adminUser/AdminProfile.jsx";
+import AdminTestimonials from "./components/adminUser/AdminTestimonials.jsx";
+import AdminCategories from "./components/adminUser/AdminCategories.jsx";
+import AdminUserDetails from "./components/adminUser/AdminUserDetails.jsx";
+import AdminGuidelines from "./components/adminUser/AdminGuidelines.jsx";
+import AdminSubscription from "./components/adminUser/AdminSubscription.jsx";
+import AdminFeatures from "./components/adminUser/AdminFeatures.jsx";
+import AdminCommentReports from "./components/adminUser/AdminCommentReports.jsx";
+import AdminArticleReports from "./components/adminUser/AdminArticleReports.jsx";
+import AdminUsers from "./components/adminUser/AdminUsers.jsx";
+import AdminHome from "./components/adminUser/AdminHome.jsx";
+
+
 import supabase from "./api/supabaseClient.js";
 import "./index.css";
 
@@ -71,6 +86,20 @@ function App() {
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
 
+          <Route path="/AdminExperts/*" element={<AdminExperts />} />
+          <Route path="/AdminProfile/*" element={<AdminProfile />} />
+          <Route path="/AdminTestimonials/*" element={<AdminTestimonials />} />
+          <Route path="/AdminCategories/*" element={<AdminCategories />} />
+          <Route path="/AdminUserDetails/*" element={<AdminUserDetails />} />
+          <Route path="/AdminGuidelines/*" element={<AdminGuidelines />} />
+          <Route path="/AdminSubscription/*" element={<AdminSubscription />} />
+          <Route path="/AdminFeatures/*" element={<AdminFeatures />} />
+          <Route path="/AdminCommentReports/*" element={<AdminCommentReports />} />
+          <Route path="/AdminArticleReports/*" element={<AdminArticleReports />} />
+          <Route path="/AdminUsers/*" element={<AdminUsers />} />
+          <Route path="/AdminHome/*" element={<AdminHome />} />
+
+          
           <Route path="/rooms" element={<ViewRooms />} />
           <Route path="/room/:id" element={<RoomPage />} />
           
