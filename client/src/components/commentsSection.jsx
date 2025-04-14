@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Pencil, Share2, Headphones } from "lucide-react";
+import { Pencil } from "lucide-react";
 import IconButton from "@mui/material/IconButton";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
@@ -16,77 +16,11 @@ const CommentsSection = ({ articleId }) => {
   const [reportTarget, setReportTarget] = useState(null);
   const [selectedReason, setSelectedReason] = useState("");
 
-  // TTS
-  const [isPlaying, setIsPlaying] = useState(false); // Track TTS play state
-  const [canRestart, setCanRestart] = useState(false); // Track restart availability
-  const speechRef = useRef(null); // Reference to Speech API object
-
-  const handleTTS = () => {
-    // If speech is already playing, toggle pause/resume
-    if (isPlaying) {
-      window.speechSynthesis.pause();
-      setIsPlaying(false);
-      return;
-    }
-
-    // If speech was paused, resume it
-    if (window.speechSynthesis.paused) {
-      window.speechSynthesis.resume();
-      setIsPlaying(true);
-      return;
-    }
-
-    window.speechSynthesis.cancel(); // Stop previous speech
-
-    // Extract text from the article content
-    if (!articleId.current) {
-      alert("No article content found.");
-      return;
-    }
-
-    const articleText =
-      articleId.current.innerText || "No article content found.";
-
-    const speech = new SpeechSynthesisUtterance();
-    speech.text = articleText;
-    speech.lang = "en-US";
-    speech.rate = 1; // Normal speed
-    speech.pitch = 1; // Normal pitch
-
-    // When speech starts, update play state & show restart button
-    speech.onstart = () => {
-      setIsPlaying(true);
-      setCanRestart(true);
-    };
-
-    // When speech ends, reset state
-    speech.onend = () => {
-      setIsPlaying(false);
-      setCanRestart(false);
-    };
-
-    speechRef.current = speech;
-    window.speechSynthesis.speak(speech);
-  };
-
-  // Function to restart TTS from the beginning
-  const handleRestartTTS = () => {
-    if (!speechRef.current) return;
-    window.speechSynthesis.cancel();
-    handleTTS(); // Restart speech from beginning
-  };
-  
-  useEffect(() => {
-    setTimeout(() => {
-      window.scrollTo(0, 0);
-    }, 100);
-    return () => {
-      window.speechSynthesis.cancel(); // Stop speech when component unmounts or page refreshes
-    };
-  }, []);
+  const inputRef = useRef(null);
 
   useEffect(() => {
-    window.scrollTo(0, 0); // Scroll to top when page loads
+    setTimeout(() => window.scrollTo(0, 0), 100);
+    return () => window.speechSynthesis.cancel(); // stop TTS just in case
   }, []);
 
   useEffect(() => {
@@ -100,11 +34,7 @@ const CommentsSection = ({ articleId }) => {
       .eq("articleid", articleId)
       .order("created_at", { ascending: false });
 
-    if (error) {
-      console.error("Error fetching comments:", error);
-    } else {
-      setComments(data);
-    }
+    if (!error) setComments(data);
   };
 
   const handlePostComment = async () => {
@@ -119,9 +49,7 @@ const CommentsSection = ({ articleId }) => {
       },
     ]);
 
-    if (error) {
-      console.error("Error posting comment:", error);
-    } else {
+    if (!error) {
       setNewComment("");
       fetchComments();
     }
@@ -138,9 +66,7 @@ const CommentsSection = ({ articleId }) => {
       .delete()
       .eq("commentid", commentId);
 
-    if (error) {
-      console.error("Error deleting comment:", error);
-    } else {
+    if (!error) {
       setComments((prev) => prev.filter((c) => c.commentid !== commentId));
     }
   };
@@ -175,30 +101,11 @@ const CommentsSection = ({ articleId }) => {
         },
       ]);
 
-      if (error) {
-        console.error("Error submitting report:", error);
-      } else {
+      if (!error) {
         alert("Report submitted.");
         setReportTarget(null);
         setSelectedReason("");
       }
-    }
-  };
-
-  const handleShareClick = () => {
-    const shareLink = window.location.href;
-    if (navigator.share) {
-      navigator
-        .share({
-          title: document.title,
-          url: shareLink,
-        })
-        .catch((error) => console.log("Error sharing:", error));
-    } else {
-      navigator.clipboard
-        .writeText(shareLink)
-        .then(() => alert("Link copied to clipboard!"))
-        .catch((error) => console.log("Error copying to clipboard:", error));
     }
   };
 
@@ -224,22 +131,6 @@ const CommentsSection = ({ articleId }) => {
           >
             <Pencil className="h-5 w-5 text-white" />
           </button>
-
-          <button
-            className="w-10 h-10 p-2 bg-black rounded-lg hover:bg-gray-900 flex items-center justify-center"
-            onClick={handleShareClick}
-          >
-            <Share2 className="h-5 w-5 text-white" />
-          </button>
-
-          {userType === "Premium" && (
-            <button
-              className="w-10 h-10 p-2 bg-black rounded-lg hover:bg-gray-900 flex items-center justify-center"
-              onClick={handleTTS}
-            >
-              <Headphones className="h-5 w-5 text-white" />
-            </button>
-          )}
         </div>
       </div>
 
@@ -336,7 +227,7 @@ const CommentsSection = ({ articleId }) => {
         ))}
       </div>
 
-      {/* ✅ Report Modal for Comments */}
+      {/* ✅ Report Modal */}
       {reportTarget && (
         <div className="fixed inset-0 backdrop-blur-sm bg-black/10 flex items-center justify-center z-50">
           <div className="bg-white rounded-xl shadow-lg w-[90%] max-w-md p-6 relative">
