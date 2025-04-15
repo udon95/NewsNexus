@@ -545,7 +545,7 @@ export const FreeWriteArticle = () => {
       return;
     }
   
-    // 🔍 Check if topic already exists in `topic_categories`
+    // Check if topic already exists in `topic_categories`
     const { data: existingTopics, error: topicFetchError } = await supabase
       .from("topic_categories")
       .select("name");
@@ -564,7 +564,7 @@ export const FreeWriteArticle = () => {
       return;
     }
   
-    // 🔍 Check if user already applied for this topic
+    // Check if user already applied for this topic
     const { data: userApplications, error: appFetchError } = await supabase
       .from("topic_applications")
       .select("topic_name")
@@ -585,7 +585,7 @@ export const FreeWriteArticle = () => {
       return;
     }
   
-    // ✅ Insert the application
+    // Insert the application
     const { error: insertError } = await supabase
       .from("topic_applications")
       .insert([
