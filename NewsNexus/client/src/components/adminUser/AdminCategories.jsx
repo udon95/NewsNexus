@@ -6,6 +6,7 @@ const AdminCategories = () => {
     const [topics, setTopics] = useState([]);
     const [suggestedTopics, setSuggestedTopics] = useState([]);
     const [newTopic, setNewTopic] = useState([]);
+    const [topicCount, setTopicCount] = useState([]);
 
     useEffect(() => {
         const fetchTopics = async () => {
@@ -25,6 +26,7 @@ const AdminCategories = () => {
             .from("topic_applications")
             .select("*")
             .eq('status', "Pending");
+
             if (error) {
               console.error("Error fetching users:", error);
             } else {
@@ -35,8 +37,25 @@ const AdminCategories = () => {
 
         fetchTopics();
         fetchSuggestedTopics();
+
+
       }, []);
 
+      useEffect(() => {
+        const grouped = Object.entries(
+            suggestedTopics.reduce((acc, item) => {
+              acc[item.topic_name] = (acc[item.topic_name] || 0) + 1;
+              return acc;
+            }, {})
+          ).map(([topic_name, count]) => ({ topic_name, count }));
+          
+          setTopicCount(grouped);
+      }, [suggestedTopics]);
+
+      useEffect(() => {
+        console.log(topicCount);
+      }, [topicCount]);
+      
     const createTopic = async () =>  {
         const { data, error } = await supabase
         .from('topic_categories')
@@ -49,28 +68,32 @@ const AdminCategories = () => {
         }
     };
 
-    const createTopicDeleteSuggestion = async (cat) =>  {
-        const { data, error } = await supabase
-        .from('topic_categories')
-        .insert([{ name: cat.topic_name}])
+    const createTopicFromSuggestion = async (topic) => {
+        const { data: updateData, error: updateError } = await supabase
+        .from('topic_applications')
+        .update({ status: 'Approved' })
+        .eq('topic_name', topic.topic_name)
         .select();
-        if (error) {
-            console.error('Error inserting data:', error);
-        } else {
-            const { data1, error } = await supabase
-            .from('topic_applications')
-            .update({ status: "Resolved" })
-            .eq('application_id', cat.application_id);
+      if (updateError) {
+        console.error('Error updating application:', updateError);
+        return;
+      }
 
-            console.log('Matching row:', data1);
-
-        } if (error) {
-            console.error('Error inserting data:', error);
-        } else {
-        alert('Added topic : '+ cat.topic_name );
-        window.location.reload();
+      const { data: insertData, error: insertError } = await supabase
+          .from('topic_categories')
+          .insert([{ name: topic.topic_name }])
+          .select();
+        if (insertError) {
+          console.error('Error inserting topic:', insertError);
+          return;
         }
-    };
+      
+        console.log(topic.topic_name);
+        console.log('Matching row:', updateData);
+        alert('Added topic: ' + topic.topic_name);
+        window.location.reload();
+      };
+      
 
     return (
         <div className="w-screen min-h-screen flex flex-col overflow-auto">
@@ -104,21 +127,20 @@ const AdminCategories = () => {
                     <div className="text-2xl sm:text-3xl text-left mt-8 ml-10 font-bold">
                     User Suggested Categories:
                     </div>
-                    {suggestedTopics.length > 0 ? (
-                        suggestedTopics.map((row) => (
-                            <div className="flex" key={row.application_id}>
+                    {topicCount.length > 0 ? (
+                        topicCount.map((topic) => (
+                            <div className="flex" key={topic.topic_name}>
                             <div className="ml-10 mt-5 min-w-100 bg-gray-100 rounded-2xl p-3 text-lg shadow-lg">
-                                {row.topic_name}
+                            {topic.topic_name}: &emsp;{topic.count} suggestions
                             </div>
                             <button
                                 className="px-6 py-3 bg-[#3F414C] ml-5 mt-7 text-white rounded-lg hover:bg-opacity-90 cursor-pointer"
-                                onClick={() => createTopicDeleteSuggestion(row)}
+                                onClick={() => createTopicFromSuggestion(topic)}
                             >
                                 Add
                             </button>
                             </div>
-                        ))
-                        ) : (
+                        ))) : (
                         <div className="ml-10 mt-8">0 results</div>
                         )}
                 </div>
