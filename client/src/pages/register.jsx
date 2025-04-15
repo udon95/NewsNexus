@@ -125,7 +125,7 @@ function Register() {
 
     try {
       // Send everything (personal info + topics) to the server
-      const response = await fetch("http://localhost:5000/auth/register", {
+      const response = await fetch("https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/ /auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
