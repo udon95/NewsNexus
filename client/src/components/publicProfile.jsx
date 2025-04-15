@@ -61,6 +61,7 @@ import { useParams, Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { BadgeCheck, ArrowLeft } from "lucide-react";
 import Navbar from "./navbar.jsx";
+import api from "../api/axios.jsx";
 
 const PublicProfile = () => {
   const { username } = useParams();
