@@ -156,6 +156,7 @@ export const PremiumWriteArticle = () => {
 
     checkSession();
   }, []);
+
   //NEW
   useEffect(() => {
     supabase.auth.onAuthStateChange((event, session) => {
@@ -347,42 +348,43 @@ export const PremiumWriteArticle = () => {
   //   alert("Article posted!");
   //   handleClearInputs();
   // };
-  const getOrCreateTopicId = async (topicName) => {
-    const matchedTopic = topicOptions.find(
-      (t) => t.name.toLowerCase() === topicName.toLowerCase()
-    );
-    if (matchedTopic) return matchedTopic.topicid;
 
-    const { data: newTopic, error: insertError } = await supabase
-      .from("topic_categories")
-      .insert([
-        {
-          name: topicName,
-          Creator: "User",
-          created_at: new Date().toISOString(),
-        },
-      ])
-      .select("topicid")
-      .single();
+  // const getOrCreateTopicId = async (topicName) => {
+  //   const matchedTopic = topicOptions.find(
+  //     (t) => t.name.toLowerCase() === topicName.toLowerCase()
+  //   );
+  //   if (matchedTopic) return matchedTopic.topicid;
 
-    if (insertError) {
-      alert("Failed to create new topic.");
-      return null;
-    }
-    return newTopic.topicid;
-  };
+  //   const { data: newTopic, error: insertError } = await supabase
+  //     .from("topic_categories")
+  //     .insert([
+  //       {
+  //         name: topicName,
+  //         Creator: "User",
+  //         created_at: new Date().toISOString(),
+  //       },
+  //     ])
+  //     .select("topicid")
+  //     .single();
 
-  useEffect(() => {
-    if (!editor) return;
+  //   if (insertError) {
+  //     alert("Failed to create new topic.");
+  //     return null;
+  //   }
+  //   return newTopic.topicid;
+  // };
 
-    const provider = new HocuspocusProvider({
-      url: "wss://lazg8po476.execute-api.ap-southeast-1.amazonaws.com/production/", // The WebSocket URL to your Hocuspocus server
-      document: editor,
-      collab: collabId, // Ensure each user joins the same room to sync their changes
-    });
+  // useEffect(() => {
+  //   if (!editor) return;
 
-    return () => provider.disconnect();
-  }, [editor, collabId]);
+  //   const provider = new HocuspocusProvider({
+  //     url: "wss://lazg8po476.execute-api.ap-southeast-1.amazonaws.com/production/", // The WebSocket URL to your Hocuspocus server
+  //     document: editor,
+  //     collab: collabId, // Ensure each user joins the same room to sync their changes
+  //   });
+
+  //   return () => provider.disconnect();
+  // }, [editor, collabId]);
 
   const handlePostArticle = async () => {
     // Retrieve user from localStorage
@@ -400,7 +402,7 @@ export const PremiumWriteArticle = () => {
       return;
     }
 
-    console.log("User from localStorage:", session);
+    // console.log("User from localStorage:", session);
 
     // Proceed if all necessary fields are filled
 
@@ -883,26 +885,70 @@ export const PremiumWriteArticle = () => {
   }, []);
 
   const handleSubmitTopicApplication = async () => {
-    if (!newTopicName.trim()) {
+    const rawInput = newTopicName.trim();
+    const normalizedInput = rawInput.toLowerCase();
+
+    if (!normalizedInput) {
       alert("Please enter a topic name.");
       return;
     }
 
-    const { error } = await supabase.from("topic_applications").insert([
-      {
-        requested_by: userId,
-        topic_name: newTopicName.trim(),
-        status: "Pending",
-        created_at: new Date().toISOString(),
-      },
-    ]);
+    // 🔍 Check if topic already exists in `topic_categories`
+    const { data: existingTopics, error: topicFetchError } = await supabase
+      .from("topic_categories")
+      .select("name");
 
-    if (error) {
+    if (topicFetchError) {
+      alert("Error checking existing topics.");
+      return;
+    }
+
+    const topicExists = existingTopics.some(
+      (topic) => topic.name.trim().toLowerCase() === normalizedInput
+    );
+
+    if (topicExists) {
+      alert("This topic already exists. Please choose an existing topic.");
+      return;
+    }
+
+    // 🔍 Check if user already applied for this topic
+    const { data: userApplications, error: appFetchError } = await supabase
+      .from("topic_applications")
+      .select("topic_name")
+      .eq("requested_by", userId)
+      .eq("status", "Pending");
+
+    if (appFetchError) {
+      alert("Error checking your previous applications.");
+      return;
+    }
+
+    const alreadyApplied = userApplications.some(
+      (app) => app.topic_name.trim().toLowerCase() === normalizedInput
+    );
+
+    if (alreadyApplied) {
+      alert("You’ve already applied for this topic.");
+      return;
+    }
+
+    // Insert the application
+    const { error: insertError } = await supabase
+      .from("topic_applications")
+      .insert([
+        {
+          requested_by: userId,
+          topic_name: rawInput, // keep original casing for admin view
+          status: "Pending",
+          created_at: new Date().toISOString(),
+        },
+      ]);
+
+    if (insertError) {
       alert("Failed to apply for topic.");
     } else {
-      alert(
-        "Topic application submitted! Admins will review it when enough users request it."
-      );
+      alert("Topic application submitted!");
       setShowTopicApplication(false);
       setNewTopicName("");
     }
@@ -1269,7 +1315,7 @@ export const PremiumWriteArticle = () => {
             </div>
           </div>
         )}
-        
+
         {showLinkModal && (
           <div className="fixed inset-0 flex items-center justify-center backdrop-blur-sm bg-white/10 z-50">
             <div className="bg-white rounded-md p-6 shadow-lg w-[90%] max-w-sm">

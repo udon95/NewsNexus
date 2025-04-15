@@ -3,8 +3,9 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import FreeSidebar from "./freeSideBar";
 import FreeManageArticle from "./freeManageArticle";
 import FreeManageProfile from "./freeManageProfile";
-import FreeWriteArticle from "./freeWriteArticle";
+import FreeWriteArticle from "./freeWriteArticlePostControl";
 import FreeSubmitTest from "./freeSubmitTest";
+import FreeEditPosted from "./freeEditPosted";
 
 function FreeDashboard() {
   return (
@@ -17,23 +18,18 @@ function FreeDashboard() {
           <Routes>
             <Route index element={<Navigate to="manageArticles" />} />
 
+            <Route path="manageArticles" element={<FreeManageArticle />} />
+            <Route path="writeArticle" element={<FreeWriteArticle />} />
             <Route
-              path="manageArticles"
-              element={<FreeManageArticle />}
-            />
-
-            <Route
-              path="writeArticle"
+              path="writeArticle/:articleid"
               element={<FreeWriteArticle />}
             />
             <Route
-              path="manageProfile"
-              element={<FreeManageProfile />}
+              path="editPosted/:articletitle"
+              element={<FreeEditPosted />}
             />
-            <Route
-              path="submitTest"
-              element={<FreeSubmitTest />}
-            />
+            <Route path="manageProfile" element={<FreeManageProfile />} />
+            <Route path="submitTest" element={<FreeSubmitTest />} />
           </Routes>
         </div>
       </main>

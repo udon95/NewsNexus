@@ -1,94 +1,107 @@
 import React, { useState } from "react";
 import Rating from "@mui/material/Rating";
+import supabase from "../../api/supabaseClient";
 
-export const PremiumSubmitTest = ({ rating, setRating }) => {
+export const PremiumSubmitTest = () => {
+  const [rating, setRating] = useState(null);
   const [share, setShare] = useState("");
   const [areas, setAreas] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = async () => {
-    const feedbackData = {
-      rating,
-      share,
-      areas,
-    };
-  
-    try {
-      const response = await fetch("http://localhost:5000/rooms/feedback", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(feedbackData),
-      });
-  
-      const result = await response.json();
-  
-      if (response.ok) {
-        alert("Feedback submitted successfully");
-      } else {
-        alert(result.message || "Submission failed");
-      }
-    } catch (error) {
-      console.error("Error occurred while submitting feedback:", error);
-      alert("Server error, please try again later");
+  const handleSubmitTest = async () => {
+    const storedUser = localStorage.getItem("userProfile");
+    if (!storedUser) {
+      alert("User not authenticated. Cannot upload.");
+      return;
     }
+
+    const parsedUser = JSON.parse(storedUser);
+    const session = parsedUser?.user;
+
+    if (!session) {
+      alert("User not authenticated. Cannot upload.");
+      return;
+    }
+
+    if (rating == null || share.trim() === "" || areas.trim() === "") {
+      alert("Please fill in all required fields.");
+      return;
+    }
+
+    setIsLoading(true);
+    const { error } = await supabase.from("testimonial").insert([
+      {
+        userid: session.userid,
+        rating: rating,
+        share_experience: share,
+        areas_to_improve: areas,
+      },
+    ]);
+    setIsLoading(false);
+
+    if (error) {
+      alert("Something went wrong. Try again.");
+      return;
+    }
+
+    alert("Testimonial submitted successfully!");
+    setShare("");
+    setAreas("");
+    setRating(null);
   };
 
   return (
-    <div className="w-screen min-h-screen flex flex-col overflow-auto">
-      <main className="flex-grow w-full flex min-h-full overflow-auto">
-        <div className="flex flex-grow max-md:flex-col min-h-full w-full">
-          <section className="flex-1 min-h-full bg-indigo-50 max-md:w-full">
-            <div className="flex flex-col flex-grow min-h-full md:px-5 pt-8 w-full font-grotesk font-medium text-black max-md:px-4 max-md:pb-24">
-              <label className="text-2xl font-bold font-grotesk mb-1">
-                Share Your Experience :
-              </label>
-
-              {/* ⭐ Half-Star Rating Inside a Box */}
-              <div className="mb-4 w-3/3 md:w-2/3 h-18 p-3 border rounded-lg shadow-sm bg-white flex flex-col">
-                <label className="text-sm">
-                  Overall Experience 
-                </label>
-                
-                <Rating
-                  name="half-rating"
-                  value={rating}
-                  precision={0.5}
-                  onChange={(event, newValue) => setRating(newValue)}
-                  max={4}
-                />
-              </div>
-
-              <div className="mb-4 relative w-3/3 md:w-2/3">
-                <textarea
-                  id="floatingTextarea2"
-                  value={areas}
-                  onChange={(e) => setAreas(e.target.value)}
-                  placeholder=" "
-                  className="peer flex w-full h-40 p-2 pt-6 border rounded-lg shadow-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-400"
-                ></textarea>
-                <label
-                  htmlFor="floatingTextarea2"
-                  className="absolute left-2 top-2 text-sm bg-white px-1 transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:text-black peer-focus:top-2 peer-focus:text-sm peer-focus:text-blue-500"
-                >
-                    Areas of improvement
-                </label>
-              </div>
-
-              <div className="flex justify-end gap-2 w-3/3 md:w-2/3">
-                <button
-                  onClick={handleSubmit}
-                  className="px-4 py-2 text-lg text-white bg-black rounded-lg shadow-md"
-                >
-                   Submit
-                </button>
-              </div>
+    <div className="w-full min-h-screen bg-indigo-50 text-black font-grotesk flex justify-center">
+      <main className="w-full max-w-4xl p-10 max-md:flex-col gap-6">
+        <div className="flex flex-col w-full">
+          <label className="text-3xl font-bold mb-1">
+            Share Your Experience :
+          </label>
+          <div className="mb-4 relative">
+            <label className="text-xl font-semibold mb-1">
+              Share with others
+            </label>
+            <div className="h-12 p-3 border rounded-t-lg shadow-sm bg-white flex flex-col">
+              <Rating
+                name="half-rating"
+                value={rating}
+                precision={0.5}
+                onChange={(event, newValue) => setRating(newValue)}
+                max={4}
+              />
             </div>
-          </section>
+            <textarea
+              id="Textarea1"
+              value={share}
+              onChange={(e) => setShare(e.target.value)}
+              className="flex w-full h-40 p-2 border rounded-b-lg shadow-sm bg-white"
+            ></textarea>
+          </div>
+
+          <div className="mb-4 relative">
+            <label className="text-xl font-semibold mb-1">
+              Areas of improvement
+            </label>
+            <textarea
+              id="Textarea2"
+              value={areas}
+              onChange={(e) => setAreas(e.target.value)}
+              className="flex w-full h-40 p-2 border rounded-lg shadow-sm bg-white"
+            ></textarea>
+          </div>
+
+          <div className="flex justify-end gap-2">
+            <button
+              className="px-4 py-2 text-lg text-white bg-black rounded-lg shadow-md disabled:opacity-50"
+              onClick={handleSubmitTest}
+              disabled={isLoading}
+            >
+              {isLoading ? "Submitting..." : "Submit"}
+            </button>
+          </div>
         </div>
       </main>
     </div>
   );
 };
-
 export default PremiumSubmitTest;

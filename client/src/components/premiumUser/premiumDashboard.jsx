@@ -7,6 +7,7 @@ import PremiumSubmitTest from "./premiumSubmitTest.jsx";
 import PremiumWriteArticle from "./premiumWriteArticle.jsx";
 import PremiumManageProfile from "./premiumManageProfile.jsx";
 import PremiumManageRooms from "./premiumManageRooms.jsx";
+import PremiumEditPosted from "./premiumEditPosted";
 
 function PremiumDashboard() {
   return (
@@ -26,6 +27,8 @@ function PremiumDashboard() {
             {/* Other Sidebar Pages */}
             <Route path="manageArticles" element={<PremManageArticle />} />
             <Route path="writeArticle" element={<PremiumWriteArticle />} />
+            <Route path="writeArticle/:id" element={<PremiumWriteArticle />} />
+            <Route path="editPosted/:postType/:articletitle" element={<PremiumEditPosted />} />
             <Route path="manageProfile" element={<PremiumManageProfile />} />
             <Route path="submitTestimonial" element={<PremiumSubmitTest />} />
             <Route path="manageRooms" element={<PremiumManageRooms />} />

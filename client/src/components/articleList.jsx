@@ -56,7 +56,7 @@ const ArticleList = ({ title, articles, isDraft, onArticleClick }) => {
                   text-black
                 "
                 >
-                  {index + 1}. {article}
+                  {index + 1}. {article.title}
                 </span>
                 {/* <span className="text-lg text-black flex-1">{article}</span> */}
               </button>

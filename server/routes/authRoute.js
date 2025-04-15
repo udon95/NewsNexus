@@ -219,7 +219,7 @@ router.post("/forgot-password", async (req, res) => {
   }
 
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: "http://localhost:5173/reset-password", //  Change to your frontend reset page
+    redirectTo: "https://van.dpyq2cohucoc7.amplifyapp.com/reset-password", //  Change to your frontend reset page
   });
 
   if (error) {

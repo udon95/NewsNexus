@@ -227,7 +227,7 @@ const CommentsSection = ({ articleId }) => {
         ))}
       </div>
 
-      {/* ✅ Report Modal */}
+      {/* Report Modal */}
       {reportTarget && (
         <div className="fixed inset-0 backdrop-blur-sm bg-black/10 flex items-center justify-center z-50">
           <div className="bg-white rounded-xl shadow-lg w-[90%] max-w-md p-6 relative">

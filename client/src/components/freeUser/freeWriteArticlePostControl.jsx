@@ -1,20 +1,31 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Plus, Bold, Italic, Underline as UnderlineIcon, List, ListOrdered, AlignLeft, AlignCenter, AlignRight, Link as LinkIcon, Highlighter } from "lucide-react";
+import {
+  Plus,
+  Bold,
+  Italic,
+  Underline as UnderlineIcon,
+  List,
+  ListOrdered,
+  AlignLeft,
+  AlignCenter,
+  AlignRight,
+  Link as LinkIcon,
+  Highlighter,
+} from "lucide-react";
 import supabase from "../../api/supabaseClient";
-import { useEditor, EditorContent } from '@tiptap/react';
-import StarterKit from '@tiptap/starter-kit';
-import Image from '@tiptap/extension-image';
-import UnderlineExtension from '@tiptap/extension-underline'; 
-import TiptapLink from '@tiptap/extension-link'; 
-import Highlight from '@tiptap/extension-highlight'
-import TextAlign from '@tiptap/extension-text-align'
-import Placeholder from '@tiptap/extension-placeholder'
-import Heading from '@tiptap/extension-heading'
-import BulletList from '@tiptap/extension-bullet-list';
-import OrderedList from '@tiptap/extension-ordered-list';
-import { Extension } from '@tiptap/core';
-import { Paragraph } from '@tiptap/extension-paragraph';
-
+import { useEditor, EditorContent } from "@tiptap/react";
+import StarterKit from "@tiptap/starter-kit";
+import Image from "@tiptap/extension-image";
+import UnderlineExtension from "@tiptap/extension-underline";
+import TiptapLink from "@tiptap/extension-link";
+import Highlight from "@tiptap/extension-highlight";
+import TextAlign from "@tiptap/extension-text-align";
+import Placeholder from "@tiptap/extension-placeholder";
+import Heading from "@tiptap/extension-heading";
+import BulletList from "@tiptap/extension-bullet-list";
+import OrderedList from "@tiptap/extension-ordered-list";
+import { Extension } from "@tiptap/core";
+import { Paragraph } from "@tiptap/extension-paragraph";
 
 export const FreeWriteArticle = () => {
   const [title, setTitle] = useState("");
@@ -34,8 +45,6 @@ export const FreeWriteArticle = () => {
   const [linkUrl, setLinkUrl] = useState("");
   const [showDraftNotification, setShowDraftNotification] = useState(false);
   const [monthlyPostCount, setMonthlyPostCount] = useState(0);
-  
-
 
   console.log("Auth session:", supabase.auth.getSession());
 
@@ -43,25 +52,25 @@ export const FreeWriteArticle = () => {
   //   const checkSession = async () => {
   //     const { data, error } = await supabase.auth.getSession();
   //     console.log("Session check:", data?.session);
-  
+
   //     if (!data?.session) {
   //       alert("You're not logged in");
   //       return;
   //     }
-  
+
   //     console.log("Logged in user:", data.session.user);
   //   };
-  
+
   //   checkSession();
-  // }, []);  
+  // }, []);
 
   const CustomParagraph = Paragraph.extend({
     addAttributes() {
       return {
         style: {
           default: null,
-          parseHTML: element => element.getAttribute('style'),
-          renderHTML: attributes => {
+          parseHTML: (element) => element.getAttribute("style"),
+          renderHTML: (attributes) => {
             return {
               style: attributes.style || null,
             };
@@ -70,20 +79,20 @@ export const FreeWriteArticle = () => {
       };
     },
   });
-  
+
   const IndentExtension = Extension.create({
-    name: 'custom-indent',
+    name: "custom-indent",
     addKeyboardShortcuts() {
       return {
         Tab: () => {
-          this.editor.commands.updateAttributes('paragraph', {
-            style: 'text-indent: 2em',
+          this.editor.commands.updateAttributes("paragraph", {
+            style: "text-indent: 2em",
           });
           return true;
         },
-        'Shift-Tab': () => {
-          this.editor.commands.updateAttributes('paragraph', {
-            style: 'text-indent: 0',
+        "Shift-Tab": () => {
+          this.editor.commands.updateAttributes("paragraph", {
+            style: "text-indent: 0",
           });
           return true;
         },
@@ -105,15 +114,15 @@ export const FreeWriteArticle = () => {
       Image,
       IndentExtension, //INDENT
       Heading.configure({ levels: [1, 2, 3] }),
-      TextAlign.configure({ types: ['heading', 'paragraph'] }),
-      Placeholder.configure({ placeholder: 'Start writing your article...' }),
+      TextAlign.configure({ types: ["heading", "paragraph"] }),
+      Placeholder.configure({ placeholder: "Start writing your article..." }),
       TiptapLink.configure({
         autolink: true,
         openOnClick: true,
         linkOnPaste: true,
       }),
     ],
-    content: '',
+    content: "",
     onUpdate: ({ editor }) => {
       setArticleContent(editor.getHTML());
       const words = editor.getText().trim().split(/\s+/).filter(Boolean).length;
@@ -123,29 +132,42 @@ export const FreeWriteArticle = () => {
 
   useEffect(() => {
     const checkSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
       console.log("Session:", session);
-  
+
       if (!session?.user) {
         console.warn("No active Supabase session!");
       } else {
         console.log("Supabase user is authenticated");
       }
     };
-  
+
     checkSession();
   }, []);
-  
+
   useEffect(() => {
     const fetchMonthlyPostCount = async () => {
       const storedUser = JSON.parse(localStorage.getItem("userProfile"));
       const session = storedUser?.user;
       if (!session) return;
-  
+
       const now = new Date();
-      const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
-      const lastDayOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59).toISOString();
-  
+      const firstDayOfMonth = new Date(
+        now.getFullYear(),
+        now.getMonth(),
+        1
+      ).toISOString();
+      const lastDayOfMonth = new Date(
+        now.getFullYear(),
+        now.getMonth() + 1,
+        0,
+        23,
+        59,
+        59
+      ).toISOString();
+
       const { data, error } = await supabase
         .from("articles")
         .select("articleid")
@@ -153,14 +175,14 @@ export const FreeWriteArticle = () => {
         .eq("status", "Published")
         .gte("time", firstDayOfMonth)
         .lte("time", lastDayOfMonth);
-  
+
       if (!error && data) {
         setMonthlyPostCount(data.length);
       }
     };
-  
+
     fetchMonthlyPostCount();
-  }, []);  
+  }, []);
 
   useEffect(() => {
     supabase.auth.onAuthStateChange((event, session) => {
@@ -170,10 +192,10 @@ export const FreeWriteArticle = () => {
         console.log(" Logged out");
       }
     });
-  }, []);    
+  }, []);
 
   const MAX_WORDS = 1000;
-  
+
   const handlePostArticle = async () => {
     // Retrieve user from localStorage
     const storedUser = localStorage.getItem("userProfile");
@@ -187,8 +209,19 @@ export const FreeWriteArticle = () => {
 
     // Check if user has posted 4 or more articles this month
     const now = new Date();
-    const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
-    const lastDayOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59).toISOString();
+    const firstDayOfMonth = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      1
+    ).toISOString();
+    const lastDayOfMonth = new Date(
+      now.getFullYear(),
+      now.getMonth() + 1,
+      0,
+      23,
+      59,
+      59
+    ).toISOString();
 
     const { data: monthlyPosts, error: countError } = await supabase
       .from("articles")
@@ -205,7 +238,9 @@ export const FreeWriteArticle = () => {
     }
 
     if (monthlyPosts.length >= 4) {
-      alert("You have reached your monthly article post limit (4 per month). Please try again next month.");
+      alert(
+        "You have reached your monthly article post limit (4 per month). Please try again next month."
+      );
       return;
     }
 
@@ -214,7 +249,7 @@ export const FreeWriteArticle = () => {
       return;
     }
 
-    console.log("User from localStorage:", session);
+    // console.log("User from localStorage:", session);
 
     if (!title || !articleContent || !topics) {
       alert("Please fill in all required fields.");
@@ -225,32 +260,37 @@ export const FreeWriteArticle = () => {
     const bucket = "articles-images";
     let firstImageUrl = null;
 
-    const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+    const { data: sessionData, error: sessionError } =
+      await supabase.auth.getSession();
 
     for (const img of pendingImages) {
       const file = img.file;
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+      const fileExt = file.name.split(".").pop();
+      const fileName = `${Date.now()}-${Math.random()
+        .toString(36)
+        .substring(2)}.${fileExt}`;
 
       const { data: authSession } = await supabase.auth.getSession();
       const supabaseUid = authSession?.session?.user?.id;
       const filePath = `${supabaseUid}/${fileName}`;
-    
+
       const { error: uploadError } = await supabase.storage
         .from(bucket)
         .upload(filePath, file);
-    
+
       if (uploadError) {
         alert("Image upload failed.");
         return;
       }
-    
-      const { data: urlData } = supabase.storage.from(bucket).getPublicUrl(filePath);
+
+      const { data: urlData } = supabase.storage
+        .from(bucket)
+        .getPublicUrl(filePath);
       if (urlData?.publicUrl) {
         if (!firstImageUrl) firstImageUrl = urlData.publicUrl; // Track first image URL
-        updatedHTML = updatedHTML.replaceAll(img.previewUrl, urlData.publicUrl);        
+        updatedHTML = updatedHTML.replaceAll(img.previewUrl, urlData.publicUrl);
       }
-    }      
+    }
 
     const articleData = {
       title,
@@ -259,94 +299,196 @@ export const FreeWriteArticle = () => {
       created_at: new Date().toISOString(),
     };
 
-      articleData.topic = topics;
+    const topicName = topicOptions.find((t) => t.topicid === topics)?.name;
 
-      const { data, error } = await supabase
-        .from("articles")
-        .insert([{
-          title: articleData.title,
-          text: articleData.content,
-          userid: articleData.created_by,
-          topicid: topics, // Insert the UUID
-          time: articleData.created_at,
-          status: "Published",
-          imagepath: firstImageUrl || null,
-        }])
-        .select("articleid");
+  //   const { data, error } = await supabase
+  //     .from("articles")
+  //     .insert([
+  //       {
+  //         title: articleData.title,
+  //         text: articleData.content,
+  //         userid: articleData.created_by,
+  //         topicid: topics, // Insert the UUID
+  //         time: articleData.created_at,
+  //         status: "Published",
+  //         imagepath: firstImageUrl || null,
+  //       },
+  //     ])
+  //     .select("articleid");
 
+  //   console.log(articleData.topic, error);
 
-      console.log(articleData.topic,error);
+  //   if (error) {
+  //     alert("Failed to post article.");
+  //     return;
+  //   }
 
-      if (error) {
-        alert("Failed to post article.");
+  //   const articleid = data?.[0]?.articleid;
+
+  //   for (const img of pendingImages) {
+  //     const fileExt = img.file.name.split(".").pop();
+  //     const fileName = `${Date.now()}-${Math.random()
+  //       .toString(36)
+  //       .substring(2)}.${fileExt}`;
+  //     const filePath = `${session.id}/${fileName}`;
+
+  //     await supabase.storage
+  //       .from("articles-images")
+  //       .upload(filePath, img.file, {
+  //         cacheControl: "3600",
+  //         upsert: false,
+  //       });
+
+  //     const { data: urlData } = supabase.storage
+  //       .from("articles-images")
+  //       .getPublicUrl(filePath);
+  //     const imageUrl = urlData?.publicUrl;
+
+  //     await supabase
+  //       .from("article_images")
+  //       .insert([{ articleid, image_url: imageUrl }]);
+  //   }
+
+  //   alert("Article posted!");
+  //   handleClearInputs();
+  if (postType === "General") {
+        const response = await fetch("http://localhost:5000/api/submit-article", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            title,
+            content: updatedHTML,
+            type: "factual",
+            authorId: session.userid,
+            topicid: topics,
+            topicName,
+          }),
+        });
+  
+        const result = await response.json();
+  
+        if (!response.ok) {
+          console.log(result);
+          if (result.highlightedHTML) {
+            console.log("🔴 AI Feedback returned:", result.highlightedHTML);
+            setAiFeedback(result.highlightedHTML);
+            alert(
+              "❌ Article flagged by AI. Please review the highlighted sections."
+            );
+          } else {
+            alert(result.error || "Submission failed.");
+          }
+  
+          // ✅ This is important to prevent saving
+          return;
+        }
+  
+        if (result.verdict === "true") {
+          if (result.explanation) {
+            alert(`✅ Article passed AI check:\n${result.explanation}`);
+          } else {
+            alert("✅ Article passed AI check.");
+          }
+        }
+  
+        //  Save to articles table
+        const { data, error } = await supabase
+          .from("articles")
+          .insert([
+            {
+              title: articleData.title,
+              text: articleData.content,
+              userid: articleData.created_by,
+              topicid: topics, // Insert the UUID
+              time: articleData.created_at,
+              status: "Published",
+              imagepath: firstImageUrl || null,
+            },
+          ])
+          .select("articleid");
+  
+        if (error) {
+          alert("Failed to save article.");
+          return;
+        }
+  
+        const articleid = data?.[0]?.articleid;
+  
+        // Save multiple images to article_images
+        for (const img of pendingImages) {
+          const fileExt = img.file.name.split(".").pop();
+          const fileName = `${Date.now()}-${Math.random()
+            .toString(36)
+            .substring(2)}.${fileExt}`;
+          const filePath = `${session.id}/${fileName}`;
+  
+          await supabase.storage
+            .from("articles-images")
+            .upload(filePath, img.file, {
+              cacheControl: "3600",
+              upsert: false,
+            });
+  
+          const { data: urlData } = supabase.storage
+            .from("articles-images")
+            .getPublicUrl(filePath);
+          const imageUrl = urlData?.publicUrl;
+  
+          await supabase
+            .from("article_images")
+            .insert([{ articleid, image_url: imageUrl }]);
+        }
+  
+        alert("Article posted successfully.");
+        handleClearInputs();
         return;
       }
-
-      const articleid = data?.[0]?.articleid;
-
-      for (const img of pendingImages) {
-        const fileExt = img.file.name.split('.').pop();
-        const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
-        const filePath = `${session.id}/${fileName}`;
-
-        await supabase.storage.from("articles-images").upload(filePath, img.file, {
-          cacheControl: "3600",
-          upsert: false,
-        });
-
-        const { data: urlData } = supabase.storage.from("articles-images").getPublicUrl(filePath);
-        const imageUrl = urlData?.publicUrl;
-
-        await supabase.from("article_images").insert([
-          { articleid, image_url: imageUrl }
-        ]);
-      }
-
-    
-
-    alert("Article posted!");
-    handleClearInputs();
   };
 
   const handleSaveDraft = async () => {
     const storedUser = localStorage.getItem("userProfile");
     if (!storedUser) return alert("User not authenticated. Cannot save draft.");
-  
+
     const parsedUser = JSON.parse(storedUser);
     const session = parsedUser?.user;
     if (!session) return alert("User not authenticated.");
-  
+
     if (!title || !articleContent || !topics) {
       alert("Please fill in all required fields.");
       return;
     }
-  
+
     let updatedHTML = articleContent;
     const bucket = "articles-images";
     let firstImageUrl = null;
-  
+
     for (const img of pendingImages) {
       const file = img.file;
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+      const fileExt = file.name.split(".").pop();
+      const fileName = `${Date.now()}-${Math.random()
+        .toString(36)
+        .substring(2)}.${fileExt}`;
       const { data: authSession } = await supabase.auth.getSession();
       const supabaseUid = authSession?.session?.user?.id;
       const filePath = `${supabaseUid}/${fileName}`;
 
-  
-      const { error: uploadError } = await supabase.storage.from(bucket).upload(filePath, file);
+      const { error: uploadError } = await supabase.storage
+        .from(bucket)
+        .upload(filePath, file);
       if (uploadError) {
         alert("Image upload failed.");
         return;
       }
-  
-      const { data: urlData } = supabase.storage.from(bucket).getPublicUrl(filePath);
+
+      const { data: urlData } = supabase.storage
+        .from(bucket)
+        .getPublicUrl(filePath);
       if (urlData?.publicUrl) {
         if (!firstImageUrl) firstImageUrl = urlData.publicUrl;
-          updatedHTML = updatedHTML.replaceAll(img.previewUrl, urlData.publicUrl);
+        updatedHTML = updatedHTML.replaceAll(img.previewUrl, urlData.publicUrl);
       }
     }
-  
+
     const articleData = {
       title,
       text: updatedHTML,
@@ -356,83 +498,83 @@ export const FreeWriteArticle = () => {
       imagepath: firstImageUrl || null,
       status: "Draft",
     };
-  
+
     const { error } = await supabase.from("articles").insert([articleData]);
-    if (error) return alert("Failed to save draft.");  
+    if (error) return alert("Failed to save draft.");
 
     // Trigger the pop-up notification for successful draft save
     setShowDraftNotification(true);
 
     alert("Draft saved!");
     handleClearInputs();
-  };    
+  };
 
-  const [pendingImages, setPendingImages] = useState([]); 
-  
+  const [pendingImages, setPendingImages] = useState([]);
+
   const handleEditorImageUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
-  
+
     const storedUser = JSON.parse(localStorage.getItem("userProfile"));
     const userId = storedUser?.user?.userid;
-  
+
     if (!userId) {
       alert("User not authenticated.");
       return;
     }
-  
+
     // Fetch usertype from Supabase
     const { data: userTypeData, error } = await supabase
       .from("usertype")
       .select("usertype")
       .eq("userid", userId)
       .single();
-  
+
     if (error || !userTypeData) {
       alert("Failed to verify user type.");
       return;
     }
-  
+
     const userType = userTypeData.usertype.toLowerCase();
-  
+
     if (userType === "free" && pendingImages.length >= 1) {
       alert("Free users can only upload 1 image. Upgrade to Premium for more.");
       return;
     }
-  
+
     const previewUrl = URL.createObjectURL(file);
     setPendingImages((prev) => [...prev, { file, previewUrl }]);
-  
+
     editor.chain().focus().setImage({ src: previewUrl }).run();
     e.target.value = null;
-  };  
+  };
 
   const handleRemoveImage = (indexToRemove) => {
     const updatedImages = [...pendingImages];
     updatedImages.splice(indexToRemove, 1);
     setPendingImages(updatedImages);
-  
+
     // Remove the image from the editor content as well
     const domParser = new DOMParser();
-    const doc = domParser.parseFromString(editor.getHTML(), 'text/html');
-    const imgs = doc.querySelectorAll('img');
-  
+    const doc = domParser.parseFromString(editor.getHTML(), "text/html");
+    const imgs = doc.querySelectorAll("img");
+
     if (imgs[indexToRemove]) {
       imgs[indexToRemove].remove();
       editor.commands.setContent(doc.body.innerHTML);
     }
-  };  
+  };
 
   // Fetch Topics from `topic_categories`
   useEffect(() => {
     const fetchTopics = async () => {
-  // Fetch both topicid and name from the topic_categories table
-  const { data, error } = await supabase
-    .from("topic_categories")
-    .select("topicid, name");
+      // Fetch both topicid and name from the topic_categories table
+      const { data, error } = await supabase
+        .from("topic_categories")
+        .select("topicid, name");
 
-  if (!error && data) {
-    setTopicOptions(data); // Data is an array of objects like { topicid, name }
+      if (!error && data) {
+        setTopicOptions(data); // Data is an array of objects like { topicid, name }
       }
     };
     fetchTopics();
@@ -445,7 +587,7 @@ export const FreeWriteArticle = () => {
     setImages([]);
     setShowConfirm(false);
     setPendingImages([]);
-  
+
     // Reset Tiptap editor content (this is the key)
     if (editor) {
       editor.commands.clearContent();
@@ -453,7 +595,7 @@ export const FreeWriteArticle = () => {
   };
 
   useEffect(() => {
-    const style = document.createElement('style');
+    const style = document.createElement("style");
     style.innerHTML = `
       .ProseMirror h1 {
         font-size: 1.5rem;
@@ -508,42 +650,88 @@ export const FreeWriteArticle = () => {
     `;
     document.head.appendChild(style);
     return () => document.head.removeChild(style); // Cleanup
-  }, []);    
+  }, []);
 
   const handleSubmitTopicApplication = async () => {
-    if (!newTopicName.trim()) {
+    const rawInput = newTopicName.trim();
+    const normalizedInput = rawInput.toLowerCase();
+
+    if (!normalizedInput) {
       alert("Please enter a topic name.");
       return;
     }
-  
-    const { error } = await supabase
+
+    // Check if topic already exists in `topic_categories`
+    const { data: existingTopics, error: topicFetchError } = await supabase
+      .from("topic_categories")
+      .select("name");
+
+    if (topicFetchError) {
+      alert("Error checking existing topics.");
+      return;
+    }
+
+    const topicExists = existingTopics.some(
+      (topic) => topic.name.trim().toLowerCase() === normalizedInput
+    );
+
+    if (topicExists) {
+      alert("This topic already exists. Please choose an existing topic.");
+      return;
+    }
+
+    // Check if user already applied for this topic
+    const { data: userApplications, error: appFetchError } = await supabase
+      .from("topic_applications")
+      .select("topic_name")
+      .eq("requested_by", userId)
+      .eq("status", "Pending");
+
+    if (appFetchError) {
+      alert("Error checking your previous applications.");
+      return;
+    }
+
+    const alreadyApplied = userApplications.some(
+      (app) => app.topic_name.trim().toLowerCase() === normalizedInput
+    );
+
+    if (alreadyApplied) {
+      alert("You’ve already applied for this topic.");
+      return;
+    }
+
+    // Insert the application
+    const { error: insertError } = await supabase
       .from("topic_applications")
       .insert([
         {
           requested_by: userId,
-          topic_name: newTopicName.trim(),
+          topic_name: rawInput, // keep original casing for admin view
           status: "Pending",
           created_at: new Date().toISOString(),
-        }
+        },
       ]);
-  
-    if (error) {
+
+    if (insertError) {
       alert("Failed to apply for topic.");
     } else {
-      alert("Topic application submitted! Admins will review it when enough users request it.");
+      alert("Topic application submitted!");
       setShowTopicApplication(false);
       setNewTopicName("");
     }
-  };      
+  };
 
-return (
+  return (
     <div className="w-full min-h-screen bg-indigo-50 text-black font-grotesk flex justify-center">
       <main className="w-full max-w-4xl p-10 flex flex-col gap-6">
         <h1 className="text-3xl font-bold mb-1">Publish Your Articles :</h1>
 
         <div className="flex flex-col gap-5 w-full">
           <div>
-            <label className="block text-xl font-semibold mb-1">Article Title:</label>
+            <label className="block text-xl font-semibold mb-1">
+              Article Title:
+            </label>
             <input
               type="text"
               value={title}
@@ -556,14 +744,16 @@ return (
           <div>
             <label className="block text-xl font-semibold mb-1">Topic:</label>
 
-              <div className="flex items-center gap-2 w-full">
+            <div className="flex items-center gap-2 w-full">
               <div className="relative w-full">
                 <div
                   onClick={() => setShowTopicsDropdown(!showTopicsDropdown)}
                   className="p-2 border rounded-md bg-white w-full cursor-pointer flex justify-between items-center"
                 >
                   {/* {topics || "Select a topic"} */}
-                  {topics ? topicOptions.find((t) => t.topicid === topics)?.name : "Select a topic"}
+                  {topics
+                    ? topicOptions.find((t) => t.topicid === topics)?.name
+                    : "Select a topic"}
                   <button
                     className="ml-2 text-gray-500 text-sm"
                     onClick={(e) => {
@@ -571,8 +761,9 @@ return (
                       setShowTopicsDropdown(!showTopicsDropdown);
                     }}
                   >
-                  {showTopicsDropdown ? "▲" : "▼"}
-                </button>  </div>
+                    {showTopicsDropdown ? "▲" : "▼"}
+                  </button>{" "}
+                </div>
 
                 {showTopicsDropdown && (
                   <div className="absolute z-10 w-full mt-1 bg-white border rounded-md shadow-md max-h-40 overflow-y-auto">
@@ -583,113 +774,181 @@ return (
                           setTopics(topic.topicid);
                           setShowTopicsDropdown(false);
                         }}
-                          className="p-2 hover:bg-indigo-100 cursor-pointer text-black font-medium"
+                        className="p-2 hover:bg-indigo-100 cursor-pointer text-black font-medium"
                       >
-                    {topic.name}
+                        {topic.name}
                       </div>
                     ))}
-                </div>
+                  </div>
                 )}
               </div>
-                  <button 
-                    className="bg-black text-white rounded-md p-2 flex items-center justify-center h-full"
-                      onClick={() => setShowTopicApplication(true)}
-                  >
-                    <Plus size={16} />
-                  </button>
+              <button
+                className="bg-black text-white rounded-md p-2 flex items-center justify-center h-full"
+                onClick={() => setShowTopicApplication(true)}
+              >
+                <Plus size={16} />
+              </button>
             </div>
           </div>
 
           <div>
-            <label className="block text-xl font-semibold mb-1">Article Content:</label>
+            <label className="block text-xl font-semibold mb-1">
+              Article Content:
+            </label>
             {editor ? (
               <>
-              <input
-                type="file"
-                accept="image/*"
-                id="imageUploadInput"
-                className="hidden"
-                onChange={handleEditorImageUpload}
-              />
-              <button
-                className="w-full mt-2 bg-indigo-600 text-white px-4 py-2 rounded-md"
-                onClick={() => document.getElementById("imageUploadInput").click()}
-              >
-                Upload Image
-              </button>
+                <input
+                  type="file"
+                  accept="image/*"
+                  id="imageUploadInput"
+                  className="hidden"
+                  onChange={handleEditorImageUpload}
+                />
+                <button
+                  className="w-full mt-2 bg-indigo-600 text-white px-4 py-2 rounded-md"
+                  onClick={() =>
+                    document.getElementById("imageUploadInput").click()
+                  }
+                >
+                  Upload Image
+                </button>
 
-              {pendingImages.length > 0 && (
-                <div className="flex flex-wrap gap-4 mt-4">
-                  {pendingImages.map((img, index) => (
-                    <div key={index} className="relative w-32 h-32 border rounded overflow-hidden">
-                      <img src={img.previewUrl} alt="Preview" className="object-cover w-full h-full" />
-                      <button
-                        onClick={() => handleRemoveImage(index)}
-                        className="absolute top-1 right-1 bg-red-600 text-white text-xs px-2 py-1 rounded"
+                {pendingImages.length > 0 && (
+                  <div className="flex flex-wrap gap-4 mt-4">
+                    {pendingImages.map((img, index) => (
+                      <div
+                        key={index}
+                        className="relative w-32 h-32 border rounded overflow-hidden"
                       >
-                        ✕
-                      </button>
-                    </div>
-                  ))}
+                        <img
+                          src={img.previewUrl}
+                          alt="Preview"
+                          className="object-cover w-full h-full"
+                        />
+                        <button
+                          onClick={() => handleRemoveImage(index)}
+                          className="absolute top-1 right-1 bg-red-600 text-white text-xs px-2 py-1 rounded"
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                <div className="flex flex-wrap items-center gap-2 bg-white p-3 mt-4 border rounded-lg shadow-md text-sm font-medium">
+                  <select
+                    onChange={(e) => {
+                      const level = parseInt(e.target.value);
+                      if (level === 0) {
+                        editor.chain().focus().setParagraph().run();
+                      } else {
+                        editor.chain().focus().toggleHeading({ level }).run();
+                      }
+                    }}
+                    className="border rounded px-2 py-1"
+                    defaultValue="0"
+                  >
+                    <option value="0">Normal</option>
+                    <option value="1">H1</option>
+                    <option value="2">H2</option>
+                    <option value="3">H3</option>
+                  </select>
+
+                  <button
+                    onClick={() => editor.chain().focus().toggleBold().run()}
+                    className="p-1 hover:bg-gray-100 rounded"
+                  >
+                    <Bold size={16} />
+                  </button>
+                  <button
+                    onClick={() => editor.chain().focus().toggleItalic().run()}
+                    className="p-1 hover:bg-gray-100 rounded"
+                  >
+                    <Italic size={16} />
+                  </button>
+                  <button
+                    onClick={() =>
+                      editor.chain().focus().toggleUnderline().run()
+                    }
+                    className="p-1 hover:bg-gray-100 rounded"
+                  >
+                    <UnderlineIcon size={16} />
+                  </button>
+                  <button
+                    onClick={() =>
+                      editor.chain().focus().toggleOrderedList().run()
+                    }
+                    className="p-1 hover:bg-gray-100 rounded"
+                  >
+                    <ListOrdered size={16} />
+                  </button>
+                  <button
+                    onClick={() =>
+                      editor.chain().focus().toggleBulletList().run()
+                    }
+                    className="p-1 hover:bg-gray-100 rounded"
+                  >
+                    <List size={16} />
+                  </button>
+                  <button
+                    onClick={() =>
+                      editor.chain().focus().setTextAlign("left").run()
+                    }
+                    className="p-1 hover:bg-gray-100 rounded"
+                  >
+                    <AlignLeft size={16} />
+                  </button>
+                  <button
+                    onClick={() =>
+                      editor.chain().focus().setTextAlign("center").run()
+                    }
+                    className="p-1 hover:bg-gray-100 rounded"
+                  >
+                    <AlignCenter size={16} />
+                  </button>
+                  <button
+                    onClick={() =>
+                      editor.chain().focus().setTextAlign("right").run()
+                    }
+                    className="p-1 hover:bg-gray-100 rounded"
+                  >
+                    <AlignRight size={16} />
+                  </button>
+                  <button
+                    onClick={() =>
+                      editor.chain().focus().toggleHighlight().run()
+                    }
+                    className="p-1 hover:bg-gray-100 rounded"
+                  >
+                    <Highlighter size={16} />
+                  </button>
+                  <button
+                    onClick={() => {
+                      setLinkUrl("");
+                      setShowLinkModal(true);
+                    }}
+                    className="p-1 hover:bg-gray-100 rounded"
+                  >
+                    <LinkIcon size={16} />
+                  </button>
                 </div>
-              )}
 
-            <div className="flex flex-wrap items-center gap-2 bg-white p-3 mt-4 border rounded-lg shadow-md text-sm font-medium">
-            <select
-              onChange={(e) => {
-                const level = parseInt(e.target.value)
-                if (level === 0) {
-                  editor.chain().focus().setParagraph().run()
-                } else {
-                  editor.chain().focus().toggleHeading({ level }).run()
-                }
-              }}
-              className="border rounded px-2 py-1"
-              defaultValue="0"
-            >
-              <option value="0">Normal</option>
-              <option value="1">H1</option>
-              <option value="2">H2</option>
-              <option value="3">H3</option>
-              </select>
-
-            <button onClick={() => editor.chain().focus().toggleBold().run()} className="p-1 hover:bg-gray-100 rounded"><Bold size={16} /></button>
-            <button onClick={() => editor.chain().focus().toggleItalic().run()} className="p-1 hover:bg-gray-100 rounded"><Italic size={16} /></button>
-            <button onClick={() => editor.chain().focus().toggleUnderline().run()} className="p-1 hover:bg-gray-100 rounded"><UnderlineIcon size={16} /></button>
-            <button onClick={() => editor.chain().focus().toggleOrderedList().run()} className="p-1 hover:bg-gray-100 rounded"><ListOrdered size={16} /></button>
-            <button onClick={() => editor.chain().focus().toggleBulletList().run()} className="p-1 hover:bg-gray-100 rounded"><List size={16} /></button>
-            <button onClick={() => editor.chain().focus().setTextAlign('left').run()} className="p-1 hover:bg-gray-100 rounded"><AlignLeft size={16} /></button>
-            <button onClick={() => editor.chain().focus().setTextAlign('center').run()} className="p-1 hover:bg-gray-100 rounded"><AlignCenter size={16} /></button>
-            <button onClick={() => editor.chain().focus().setTextAlign('right').run()} className="p-1 hover:bg-gray-100 rounded"><AlignRight size={16} /></button>
-            <button onClick={() => editor.chain().focus().toggleHighlight().run()} className="p-1 hover:bg-gray-100 rounded"><Highlighter size={16} /></button>
-            <button
-              onClick={() => {
-                setLinkUrl("");
-                setShowLinkModal(true);
-              }}
-                className="p-1 hover:bg-gray-100 rounded"
-            >
-              <LinkIcon size={16} />
-            </button>
-
-          </div>
-
-          <div
-            className="min-h-[400px] max-h-[600px] overflow-y-auto border rounded-md bg-white p-4 mt-3 focus-within:outline-none"
-            onClick={() => editor.commands.focus()}
-          >
-          <EditorContent
-            editor={editor}
-            className="min-h-[200px] w-full outline-none p-2 text-base leading-relaxed"
-            style={{ lineHeight: '1.75' }}
-            onKeyDown={(e) => {
-              if (e.key === 'Tab') {
-                e.preventDefault();
-              }
-            }}
-          />
-
-          </div>
+                <div
+                  className="min-h-[400px] max-h-[600px] overflow-y-auto border rounded-md bg-white p-4 mt-3 focus-within:outline-none"
+                  onClick={() => editor.commands.focus()}
+                >
+                  <EditorContent
+                    editor={editor}
+                    className="min-h-[200px] w-full outline-none p-2 text-base leading-relaxed"
+                    style={{ lineHeight: "1.75" }}
+                    onKeyDown={(e) => {
+                      if (e.key === "Tab") {
+                        e.preventDefault();
+                      }
+                    }}
+                  />
+                </div>
                 <p className="text-sm text-gray-500 mt-1">
                   Word Count: {wordCount} / {MAX_WORDS}
                 </p>
@@ -701,7 +960,8 @@ return (
 
           {userId && (
             <p className="text-right text-sm text-red-600 mb-1">
-              You’ve posted {monthlyPostCount} out of 4 articles this month. Update your subscription for unlimited posts..!!
+              You’ve posted {monthlyPostCount} out of 4 articles this month.
+              Update your subscription for unlimited posts..!!
             </p>
           )}
 
@@ -716,7 +976,8 @@ return (
               Clear
             </button>
 
-            <button className="bg-gray-600 text-white px-4 py-2 rounded-md"
+            <button
+              className="bg-gray-600 text-white px-4 py-2 rounded-md"
               onClick={handleSaveDraft}
             >
               Save Draft
@@ -724,21 +985,21 @@ return (
 
             <button
               className={`px-4 py-2 rounded-md ${
-                monthlyPostCount >= 4 ? "bg-gray-400 cursor-not-allowed" : "bg-blue-600"
+                monthlyPostCount >= 4
+                  ? "bg-gray-400 cursor-not-allowed"
+                  : "bg-blue-600"
               } text-white`}
-                onClick={monthlyPostCount >= 4 ? null : handlePostArticle}
+              onClick={monthlyPostCount >= 4 ? null : handlePostArticle}
               disabled={monthlyPostCount >= 4}
             >
               Post
             </button>
-
-
           </div>
         </div>
 
         {showConfirm && (
           <div className="fixed inset-0 backdrop-blur-sm bg-white/5 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg shadow-xl text-center">
+            <div className="bg-white p-6 rounded-lg shadow-xl text-center">
               <p className="text-lg font-semibold mb-4">Clear all fields?</p>
               <div className="flex justify-center gap-4">
                 <button
@@ -760,13 +1021,17 @@ return (
         {showTopicApplication && (
           <div className="fixed inset-0 backdrop-blur-sm bg-white/10 flex items-center justify-center z-50">
             <div className="bg-white p-6 rounded-lg shadow-xl w-[90%] max-w-md text-center">
-              <h2 className="text-xl font-semibold mb-3 text-left">Topic Application</h2>
+              <h2 className="text-xl font-semibold mb-3 text-left">
+                Topic Application
+              </h2>
               <div className="text-gray-600 text-sm mb-4">
-              <ul className="text-gray-600 text-sm mb-4 list-disc list-inside text-left space-y-2">
-                <li>Your requested topic will be reviewed by our admins.</li>
-                <li>Approved if 15 or more users apply for the same topic.</li>
-                <li>Please post under an existing topic in the meantime.</li>
-              </ul>
+                <ul className="text-gray-600 text-sm mb-4 list-disc list-inside text-left space-y-2">
+                  <li>Your requested topic will be reviewed by our admins.</li>
+                  <li>
+                    Approved if 15 or more users apply for the same topic.
+                  </li>
+                  <li>Please post under an existing topic in the meantime.</li>
+                </ul>
               </div>
               <input
                 type="text"
@@ -795,82 +1060,99 @@ return (
             </div>
           </div>
         )}
-      {showLinkModal && (
-        <div className="fixed inset-0 flex items-center justify-center backdrop-blur-sm bg-white/10 z-50">
-        <div className="bg-white rounded-md p-6 shadow-lg w-[90%] max-w-sm">
-            <h2 className="text-lg font-semibold mb-4">Insert Link</h2>
-            <input
-              type="text"
-              value={linkUrl}
-              onChange={(e) => setLinkUrl(e.target.value)}
-              placeholder="https://example.com"
-              className="w-full p-2 border border-gray-300 rounded-md mb-4"
-            />
-          <div className="flex justify-end gap-2">
-              <button
+        {showLinkModal && (
+          <div className="fixed inset-0 flex items-center justify-center backdrop-blur-sm bg-white/10 z-50">
+            <div className="bg-white rounded-md p-6 shadow-lg w-[90%] max-w-sm">
+              <h2 className="text-lg font-semibold mb-4">Insert Link</h2>
+              <input
+                type="text"
+                value={linkUrl}
+                onChange={(e) => setLinkUrl(e.target.value)}
+                placeholder="https://example.com"
+                className="w-full p-2 border border-gray-300 rounded-md mb-4"
+              />
+              <div className="flex justify-end gap-2">
+                <button
                   onClick={() => {
-                  if (!linkUrl.trim()) return;
+                    if (!linkUrl.trim()) return;
 
-                  const hasSelection = editor && editor.view.state.selection?.from !== editor.view.state.selection?.to;
+                    const hasSelection =
+                      editor &&
+                      editor.view.state.selection?.from !==
+                        editor.view.state.selection?.to;
 
-                  if (hasSelection) {
-                    editor.chain().focus().extendMarkRange('link').setLink({ href: linkUrl }).run();
-                  } else {
-                    editor.chain().focus().insertContent([
-                      {
-                        type: 'text',
-                        text: 'Link',
-                        marks: [
+                    if (hasSelection) {
+                      editor
+                        .chain()
+                        .focus()
+                        .extendMarkRange("link")
+                        .setLink({ href: linkUrl })
+                        .run();
+                    } else {
+                      editor
+                        .chain()
+                        .focus()
+                        .insertContent([
                           {
-                            type: 'link',
-                            attrs: { href: linkUrl },
+                            type: "text",
+                            text: "Link",
+                            marks: [
+                              {
+                                type: "link",
+                                attrs: { href: linkUrl },
+                              },
+                            ],
                           },
-                        ],
-                      },
-                    ]).run();
-                  }
+                        ])
+                        .run();
+                    }
 
-                  setShowLinkModal(false);
-                  setLinkUrl("");
-                }}
-                className="bg-blue-600 text-white px-4 py-2 rounded-md"
-              >
-                OK
-              </button>
-              <button
-                onClick={() => {
-                  setShowLinkModal(false);
-                  setLinkUrl("");
-                }}
-                className="bg-gray-300 px-4 py-2 rounded-md"
-              >
-                Cancel
-              </button>
+                    setShowLinkModal(false);
+                    setLinkUrl("");
+                  }}
+                  className="bg-blue-600 text-white px-4 py-2 rounded-md"
+                >
+                  OK
+                </button>
+                <button
+                  onClick={() => {
+                    setShowLinkModal(false);
+                    setLinkUrl("");
+                  }}
+                  className="bg-gray-300 px-4 py-2 rounded-md"
+                >
+                  Cancel
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      )}
-      {showDraftNotification && (
-        <div className="fixed inset-0 backdrop-blur-sm bg-white/5 flex items-center justify-center z-50">
-            <div className="bg-white p-6 rounded-lg shadow-xl text-left" style={{ maxWidth: '400px', width: 'auto' }}>
-            <p className="text-lg font-semibold mb-2">Draft saved successfully!</p>
-            <p className="text-sm text-gray-500 mt-2">
-              Your draft will expire in 7 days. Don't forget to publish it before then!
-            </p>
-      
-            {/* OK Button to acknowledge the notification */}
-            <div className="flex justify-end mt-4">
-              <button
-                onClick={() => setShowDraftNotification(false)} // Close the notification
-                className="bg-blue-600 text-white px-4 py-2 rounded-md"
-              >
-                OK
-              </button>
+        )}
+        {showDraftNotification && (
+          <div className="fixed inset-0 backdrop-blur-sm bg-white/5 flex items-center justify-center z-50">
+            <div
+              className="bg-white p-6 rounded-lg shadow-xl text-left"
+              style={{ maxWidth: "400px", width: "auto" }}
+            >
+              <p className="text-lg font-semibold mb-2">
+                Draft saved successfully!
+              </p>
+              <p className="text-sm text-gray-500 mt-2">
+                Your draft will expire in 7 days. Don't forget to publish it
+                before then!
+              </p>
+
+              {/* OK Button to acknowledge the notification */}
+              <div className="flex justify-end mt-4">
+                <button
+                  onClick={() => setShowDraftNotification(false)} // Close the notification
+                  className="bg-blue-600 text-white px-4 py-2 rounded-md"
+                >
+                  OK
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      )}  
-
+        )}
       </main>
     </div>
   );

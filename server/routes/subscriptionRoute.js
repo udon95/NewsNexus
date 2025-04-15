@@ -24,8 +24,8 @@ router.post("/create-checkout-session", async (req, res) => {
         },
       ],
       success_url:
-        "http://localhost:5173/subscription-status/success?userId=${userId}",
-      cancel_url: "http://localhost:5173/subscription-status/cancel",
+        "https://van.dpyq2cohucoc7.amplifyapp.com/subscription-status/success?userId=${userId}",
+      cancel_url: "https://van.dpyq2cohucoc7.amplifyapp.com/subscription-status/cancel",
     });
 
     res.json({ url: session.url });
