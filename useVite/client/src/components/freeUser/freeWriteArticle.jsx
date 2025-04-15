@@ -420,7 +420,7 @@ const handleSubmitTopicApplication = async () => {
     return;
   }
 
-  // 🔍 Check if topic already exists in `topic_categories`
+  // Check if topic already exists in `topic_categories`
   const { data: existingTopics, error: topicFetchError } = await supabase
     .from("topic_categories")
     .select("name");
@@ -439,7 +439,7 @@ const handleSubmitTopicApplication = async () => {
     return;
   }
 
-  // 🔍 Check if user already applied for this topic
+  // Check if user already applied for this topic
   const { data: userApplications, error: appFetchError } = await supabase
     .from("topic_applications")
     .select("topic_name")
