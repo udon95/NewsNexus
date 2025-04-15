@@ -48,7 +48,7 @@ const SubscriptionPage = () => {
         // You might call an API to update the user's subscription status in your backend
         const response = await fetch(
           // `${import.meta.env.VITE_API_BASE_URL}/subscription/unsubscribe`, // Hosted not tested
-          "http://localhost:5000/subscription/unsubscribe",
+          "/subscription/unsubscribe",
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -71,7 +71,7 @@ const SubscriptionPage = () => {
       } else if (selectedSubscription) {
         const response = await fetch(
           // `${import.meta.env.VITE_API_BASE_URL}/subscription/create-checkout-session`, //hosted not tested
-          "http://localhost:5000/subscription/create-checkout-session",
+          "/subscription/create-checkout-session",
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },
