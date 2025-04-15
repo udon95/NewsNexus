@@ -98,8 +98,8 @@ const PublicProfile = () => {
       // If using a fake ID, directly set dummy data
 
       try {
-        const response = await axios.get(
-          `http://localhost:5000/auth/public-profile/${username}`
+        const response = await api.get(
+          `/auth/public-profile/${username}`
         );
         // Here, you might combine the user data with dummy articles/rooms if needed
         setProfileData(response.data);

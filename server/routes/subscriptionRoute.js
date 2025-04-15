@@ -24,7 +24,7 @@ router.post("/create-checkout-session", async (req, res) => {
         },
       ],
       success_url:
-        "https://van.dpyq2cohucoc7.amplifyapp.com/subscription-status/success?userId=${userId}",
+        `https://van.dpyq2cohucoc7.amplifyapp.com/subscription-status/success?userId=${userId}`,
       cancel_url: "https://van.dpyq2cohucoc7.amplifyapp.com/subscription-status/cancel",
     });
 
