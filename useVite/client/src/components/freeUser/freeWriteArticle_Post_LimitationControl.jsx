@@ -15,14 +15,6 @@ import OrderedList from '@tiptap/extension-ordered-list';
 import { Extension } from '@tiptap/core';
 import { Paragraph } from '@tiptap/extension-paragraph';
 
-function normalizeAndFormatTopic(name) {
-  const normalized = name.trim().toLowerCase();
-  const formatted = normalized
-    .split(/\s+/)
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(" ");
-  return { normalized, formatted };
-}
 
 export const FreeWriteArticle = () => {
   const [title, setTitle] = useState("");
@@ -258,39 +250,11 @@ export const FreeWriteArticle = () => {
         if (!firstImageUrl) firstImageUrl = urlData.publicUrl; // Track first image URL
         updatedHTML = updatedHTML.replaceAll(img.previewUrl, urlData.publicUrl);        
       }
-    }    
-
-    const { normalized, formatted } = normalizeAndFormatTopic(topics);
-
-    const matchedTopic = topicOptions.find(
-      (t) => t.name.trim().toLowerCase() === normalized
-    );
-
-    
-    if (matchedTopic) {
-      topicIdToUse = matchedTopic.topicid;
-    } else {
-      const { data: newTopic, error: insertError } = await supabase
-        .from("topic_categories")    
-        .insert([{ 
-          name: formatted,
-          Creator: "User",
-          created_at: new Date().toISOString()
-        }])
-            
-        .select("topicid")
-        .single();    
-      if (insertError) {
-        alert("Failed to create new topic.");
-        return;
-      }
-      topicIdToUse = newTopic.topicid;
-    }
+    }      
 
     const articleData = {
       title,
       content: updatedHTML,
-      topicid: topicIdToUse,
       created_by: session.userid, // Use session ID for the user
       created_at: new Date().toISOString(),
     };
@@ -303,7 +267,7 @@ export const FreeWriteArticle = () => {
           title: articleData.title,
           text: articleData.content,
           userid: articleData.created_by,
-          topicid: topicIdToUse, // Insert the UUID
+          topicid: topics, // Insert the UUID
           time: articleData.created_at,
           status: "Published",
           imagepath: firstImageUrl || null,
@@ -382,40 +346,12 @@ export const FreeWriteArticle = () => {
           updatedHTML = updatedHTML.replaceAll(img.previewUrl, urlData.publicUrl);
       }
     }
-
-    let topicIdToUse;
-    const { normalized, formatted } = normalizeAndFormatTopic(topics);
-
-    const matchedTopic = topicOptions.find(
-      (t) => t.name.trim().toLowerCase() === normalized
-    );
-
-    
-    if (matchedTopic) {
-      topicIdToUse = matchedTopic.topicid;
-    } else {
-      const { data: newTopic, error: insertError } = await supabase
-        .from("topic_categories")    
-        .insert([{ 
-          name: formatted,
-          Creator: "User",
-          created_at: new Date().toISOString()
-        }])
-
-        .select("topicid")
-        .single();
-      if (insertError) {
-        alert("Failed to create new topic.");
-        return;
-      }
-      topicIdToUse = newTopic.topicid;
-    }
   
     const articleData = {
       title,
       text: updatedHTML,
       userid: session.userid,
-      topicid: topicIdToUse,
+      topicid: topics,
       time: new Date().toISOString(),
       imagepath: firstImageUrl || null,
       status: "Draft",
@@ -436,14 +372,6 @@ export const FreeWriteArticle = () => {
   const handleEditorImageUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
-
-    const MAX_SIZE_MB = 50;
-    const MAX_SIZE_BYTES = MAX_SIZE_MB * 1024 * 1024;
-  
-    if (file.size > MAX_SIZE_BYTES) {
-      alert("Image exceeds 50MB limit. Please upload a smaller image.");
-      return;
-    }
   
     const storedUser = JSON.parse(localStorage.getItem("userProfile"));
     const userId = storedUser?.user?.userid;
@@ -501,8 +429,7 @@ export const FreeWriteArticle = () => {
   // Fetch both topicid and name from the topic_categories table
   const { data, error } = await supabase
     .from("topic_categories")
-    // .select("topicid, name");
-    .select("topicid,name");
+    .select("topicid, name");
 
   if (!error && data) {
     setTopicOptions(data); // Data is an array of objects like { topicid, name }
@@ -627,40 +554,49 @@ return (
           </div>
 
           <div>
-            <label className="block text-xl font-semibold mb-1">Select or Create Topic:</label>
-            <div className="relative w-full">
-              <input
-                type="text"
-                value={topics}
-                onChange={(e) => {
-                  setTopics(e.target.value);
-                  setShowTopicsDropdown(true); // Always show dropdown while typing
-                }}    
-                onBlur={() => setTimeout(() => setShowTopicsDropdown(false), 200)} // Close on blur after delay            
-                placeholder="Type topic..."
-                className="w-full p-2 border border-gray-300 rounded-md bg-white"
-                onFocus={() => setShowTopicsDropdown(true)}
-              />
-              {showTopicsDropdown && topics && (
-                <div className="absolute z-10 w-full mt-1 bg-white border rounded-md shadow-md max-h-40 overflow-y-auto">
-                  {topicOptions
-                    .filter((t) =>
-                    t.name.toLowerCase().includes(topics.trim().toLowerCase())
-                  )
-                  .map((topic, i) => (
+            <label className="block text-xl font-semibold mb-1">Topic:</label>
+
+              <div className="flex items-center gap-2 w-full">
+              <div className="relative w-full">
+                <div
+                  onClick={() => setShowTopicsDropdown(!showTopicsDropdown)}
+                  className="p-2 border rounded-md bg-white w-full cursor-pointer flex justify-between items-center"
+                >
+                  {/* {topics || "Select a topic"} */}
+                  {topics ? topicOptions.find((t) => t.topicid === topics)?.name : "Select a topic"}
+                  <button
+                    className="ml-2 text-gray-500 text-sm"
+                    onClick={(e) => {
+                      e.stopPropagation(); // prevents double toggle
+                      setShowTopicsDropdown(!showTopicsDropdown);
+                    }}
+                  >
+                  {showTopicsDropdown ? "▲" : "▼"}
+                </button>  </div>
+
+                {showTopicsDropdown && (
+                  <div className="absolute z-10 w-full mt-1 bg-white border rounded-md shadow-md max-h-40 overflow-y-auto">
+                    {topicOptions.map((topic, i) => (
                       <div
-                      key={i}
-                      onClick={() => {
-                          setTopics(topic.name);
+                        key={i}
+                        onClick={() => {
+                          setTopics(topic.topicid);
                           setShowTopicsDropdown(false);
                         }}
-                        className="p-2 hover:bg-indigo-100 cursor-pointer"
+                          className="p-2 hover:bg-indigo-100 cursor-pointer text-black font-medium"
                       >
-                        {topic.name}
+                    {topic.name}
                       </div>
                     ))}
                 </div>
-              )}
+                )}
+              </div>
+                  <button 
+                    className="bg-black text-white rounded-md p-2 flex items-center justify-center h-full"
+                      onClick={() => setShowTopicApplication(true)}
+                  >
+                    <Plus size={16} />
+                  </button>
             </div>
           </div>
 
