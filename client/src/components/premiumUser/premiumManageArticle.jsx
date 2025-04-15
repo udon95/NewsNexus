@@ -3,6 +3,7 @@ import ArticleList from "../articleList.jsx";
 import { useNavigate } from "react-router-dom";
 import SearchBar from "../search.jsx"; // Import Search.jsx
 import FilterAltIcon from '@mui/icons-material/FilterAlt';
+import supabase from "../../api/supabaseClient.js";
 
 export const PremManageArticle = () => {
   const navigate = useNavigate();

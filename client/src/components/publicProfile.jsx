@@ -58,10 +58,10 @@
 
 import React, { useEffect, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
-import axios from "axios";
 import { BadgeCheck, ArrowLeft } from "lucide-react";
 import Navbar from "./navbar.jsx";
 import api from "../api/axios.jsx";
+import axios from "axios";
 
 const PublicProfile = () => {
   const { username } = useParams();
@@ -99,9 +99,7 @@ const PublicProfile = () => {
       // If using a fake ID, directly set dummy data
 
       try {
-        const response = await api.get(
-          `/auth/public-profile/${username}`
-        );
+        const response = await api.get(`/auth/public-profile/${username}`);
         // Here, you might combine the user data with dummy articles/rooms if needed
         setProfileData(response.data);
       } catch (err) {
