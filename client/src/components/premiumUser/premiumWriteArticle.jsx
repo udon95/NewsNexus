@@ -469,7 +469,7 @@ export const PremiumWriteArticle = () => {
 
     // CASE 1: General Article (always factual)
     if (postType === "General") {
-      const response = await fetch("http://localhost:5000/api/submit-article", {
+      const response = await fetch("https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/api/submit-article", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
