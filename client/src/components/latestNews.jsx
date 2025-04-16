@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import NewsCard from "./newsCard";
 import supabase from "../api/supabaseClient";
 
-const LatestNews = ({ searchQuery = "", topic = "", displayLimit }) => {
+const LatestNews = ({ searchQuery = "", topic = "", displayLimit, timeFilter = "This Week" }) => {
   const [latestArticles, setLatestArticles] = useState([]);
 
   useEffect(() => {
@@ -21,8 +21,27 @@ const LatestNews = ({ searchQuery = "", topic = "", displayLimit }) => {
         query = query.eq("topicid", topic);
       }
 
+      // 🔍 Search filter
       if (searchQuery.trim()) {
         query = query.or(`title.ilike.%${searchQuery}%,text.ilike.%${searchQuery}%`);
+      }
+
+      // ⏱️ Time filter
+      const now = new Date();
+      let cutoff;
+
+      if (timeFilter === "Today") {
+        cutoff = new Date(now.setHours(0, 0, 0, 0));
+      } else if (timeFilter === "Week") {
+        cutoff = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+      } else if (timeFilter === "Month") {
+        cutoff = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+      } else if (timeFilter === "Year") {
+        cutoff = new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000);
+      }
+
+      if (cutoff) {
+        query = query.gte("time", cutoff.toISOString());
       }
 
       const { data, error } = await query;
@@ -36,7 +55,7 @@ const LatestNews = ({ searchQuery = "", topic = "", displayLimit }) => {
     };
 
     fetchLatestArticles();
-  }, [searchQuery, topic]);
+  }, [searchQuery, topic, timeFilter]);
 
   const articlesToDisplay = displayLimit
     ? latestArticles.slice(0, displayLimit)
