@@ -1,9 +1,3 @@
-
-// ✅ FULL MERGED VERSION of article.jsx
-// Includes:
-// - Backend TTS + Translation (from chat version)
-// - Community Notes modal + Report modal + styling (from uploaded version)
-
 import React, { useState, useEffect, useRef } from "react";
 import "../index.css";
 import "../pages/article.css";
