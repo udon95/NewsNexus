@@ -17,6 +17,9 @@ const Explore = () => {
   const [selectedTopic, setSelectedTopic] = useState(initialTopic);
   const [topics, setTopics] = useState([]);
   const [userInterests, setUserInterests] = useState([]);
+  const [timeFilter, setTimeFilter] = useState("Today");
+  const [isInterestsLoaded, setIsInterestsLoaded] = useState(false);
+
   const { user, userType } = useAuthHook();
   const isPremium = userType === "Premium";
   const isSearching = searchQuery.trim() !== "";
@@ -30,6 +33,10 @@ const Explore = () => {
     const params = { query };
     if (selectedTopic) params.topic = selectedTopic;
     setSearchParams(params);
+  };
+
+  const handleTimeFilterChange = (value) => {
+    setTimeFilter(value);
   };
 
   const handleTopicChange = (value) => {
@@ -55,21 +62,28 @@ const Explore = () => {
             .eq("userid", user.userid);
 
           if (!interestError && interestData?.length > 0) {
-            const parsedInterests = interestData[0].interesttype.split(", ");
+            const parsedInterests = interestData[0].interesttype
+              .split(",")
+              .map((s) => s.trim())
+              .filter(Boolean);
             setUserInterests(parsedInterests);
 
-            // ✅ Fallback to recommended if no topic selected in URL and interests exist
+            // ✅ Only set recommended after interests are ready
             if (!searchParams.get("topic") && parsedInterests.length > 0) {
-              setSelectedTopic("recommended");
-              setSearchParams((prev) => {
-                const params = new URLSearchParams(prev);
-                params.set("topic", "recommended");
-                return params;
-              });
+              setTimeout(() => {
+                setSelectedTopic("recommended");
+                setSearchParams((prev) => {
+                  const params = new URLSearchParams(prev);
+                  params.set("topic", "recommended");
+                  return params;
+                });
+              }, 0);
             }
           }
         }
       }
+
+      setIsInterestsLoaded(true);
     };
 
     loadAll();
@@ -84,7 +98,9 @@ const Explore = () => {
 
   const selectedTopicName = topics.find((t) => t.topicid === selectedTopic)?.name;
   const interestTopicIDs = topics
-    .filter((t) => userInterests.includes(t.name))
+    .filter((t) =>
+      userInterests.map((i) => i.toLowerCase()).includes(t.name.toLowerCase())
+    )
     .map((t) => t.topicid);
 
   let pageTitle = "Explore All Articles:";
@@ -101,12 +117,22 @@ const Explore = () => {
     resolvedTopic = selectedTopic;
   }
 
+  // ⏳ Prevent render until interests are loaded for recommended
+  if (selectedTopic === "recommended" && !isInterestsLoaded) {
+    return null;
+  }
+
   return (
     <div className="w-full min-w-screen min-h-screen flex flex-col bg-white">
       <Navbar />
       <div className="flex flex-col sm:flex-row justify-center items-center min-w-[900px] gap-4 mt-5 px-4">
         <div className="w-full max-w-[600px]">
-          <Search onSearch={handleSearch} initialQuery={searchQuery} />
+          <Search
+            onSearch={handleSearch}
+            initialQuery={searchQuery}
+            initialTimeFilter={timeFilter}
+            onTimeFilterChange={handleTimeFilterChange}
+          />
         </div>
         <select
           value={selectedTopic}
@@ -130,7 +156,7 @@ const Explore = () => {
               Search Results:
             </h1>
             <div className="flex justify-center w-full">
-              <Rank searchQuery={searchQuery} topic={resolvedTopic} />
+              <Rank searchQuery={searchQuery} topic={resolvedTopic} selectedTime={timeFilter} />
             </div>
           </div>
           <div className="w-full font-grotesk mt-5">
@@ -140,7 +166,7 @@ const Explore = () => {
           </div>
           <div className="w-full font-grotesk">
             <div className="flex justify-center mb-5 w-full">
-              <LatestNews searchQuery={searchQuery} topic={resolvedTopic} />
+              <LatestNews searchQuery={searchQuery} topic={resolvedTopic} timeFilter={timeFilter} />
             </div>
           </div>
         </>
@@ -151,7 +177,7 @@ const Explore = () => {
               {pageTitle}
             </h1>
             <div className="flex justify-center w-full">
-              <Rank searchQuery={searchQuery} topic={resolvedTopic} />
+              <Rank searchQuery={searchQuery} topic={resolvedTopic} selectedTime={timeFilter} />
             </div>
             <div className="w-full font-grotesk mt-5">
               <h1 className="text-2xl sm:text-3xl mb-5 text-left max-w-[900px] mx-auto">
@@ -167,7 +193,7 @@ const Explore = () => {
               Latest News:
             </h1>
             <div className="flex justify-center mb-5 w-full">
-              <LatestNews searchQuery={searchQuery} topic={resolvedTopic} />
+              <LatestNews searchQuery={searchQuery} topic={resolvedTopic} timeFilter={timeFilter} />
             </div>
           </div>
         </>
