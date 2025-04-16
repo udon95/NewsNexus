@@ -50,7 +50,7 @@ const Article = () => {
       const text = articleRef.current.innerText;
 
       const response = await fetch(
-        "http://localhost:5000/translate/text-to-speech",
+        "https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/translate/text-to-speech",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -90,11 +90,14 @@ const Article = () => {
     const textToTranslate = originalText;
 
     try {
-      const response = await fetch("http://localhost:5000/translate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text: textToTranslate, targetLang }),
-      });
+      const response = await fetch(
+        "https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/translate",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ text: textToTranslate, targetLang }),
+        }
+      );
       if (!response.ok) {
         throw new Error("Translation failed.");
       }
@@ -351,7 +354,10 @@ const Article = () => {
                 </ul>
               </div>
             )}
-            <Comments articleRef={articleRef} articleId={articleData.articleid} />
+            <Comments
+              articleRef={articleRef}
+              articleId={articleData.articleid}
+            />
           </>
         ) : showPaywall ? (
           <div className="paywall-modal">
@@ -428,7 +434,9 @@ const Article = () => {
         {showNote && (
           <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
             <div className="bg-white p-6 rounded-xl w-[90%] max-w-md">
-              <h2 className="text-lg font-semibold mb-4">Submit a Community Note</h2>
+              <h2 className="text-lg font-semibold mb-4">
+                Submit a Community Note
+              </h2>
               <textarea
                 className="w-full p-2 border border-gray-300 rounded-lg resize-none"
                 rows={4}

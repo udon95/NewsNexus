@@ -2,108 +2,95 @@ import { useState, useEffect } from "react";
 import supabase from "../../api/supabaseClient";
 
 const ManageRooms = () => {
-  const [publicRooms, setPublicRooms] = useState([
-    { id: 1, name: "Lee Hsien Long", privacy: "public" },
-  ]);
-  const [privateRooms, setPrivateRooms] = useState([
-    { id: 2, name: "...", privacy: "private" },
-  ]);
-  const [isCreating, setIsCreating] = useState(false);
-  const [editingRoom, setEditingRoom] = useState(null);
-  const [newRoom, setNewRoom] = useState({
-    name: "",
-    userLimit: "20",
-    description: "",
-    category: "",
-    privacy: "public",
-  });
-  const [existingRoomNames, setExistingRoomNames] = useState([
-    "Lee Hsien Long",
-  ]);
-
-  useEffect(() => {
-    fetch("http://localhost:5000/rooms")
-      .then((res) => res.json())
-      .then((data) => {
-        const publicRooms = data.filter((r) => r.privacy === "public");
-        const privateRooms = data.filter((r) => r.privacy === "private");
-        setPublicRooms(publicRooms);
-        setPrivateRooms(privateRooms);
-        setExistingRoomNames(data.map((r) => r.name));
-      });
-  }, []);
-
-  const openCreateForm = () => {
-    setIsCreating(true);
-    setEditingRoom(null);
-    setNewRoom({
-      name: "",
-      userLimit: "20",
-      description: "",
-      category: "",
-      privacy: "public",
-    });
-  };
-
-  const closeForm = () => {
-    setIsCreating(false);
-    setEditingRoom(null);
-  };
-
-  const refreshRooms = async () => {
-    const res = await fetch("http://localhost:5000/rooms");
-    const data = await res.json();
-    const publicRooms = data.filter((r) => r.privacy === "public");
-    const privateRooms = data.filter((r) => r.privacy === "private");
-    setPublicRooms(publicRooms);
-    setPrivateRooms(privateRooms);
-    setExistingRoomNames(data.map((r) => r.name));
-  };
-
-  const handleSaveRoom = async () => {
-    if (
-      newRoom.name.trim() === "" ||
-      (!editingRoom && existingRoomNames.includes(newRoom.name))
-    ) {
-      alert("The group name cannot be empty and must be unique!");
-      return;
-    }
-
-    try {
-      if (editingRoom) {
-        await fetch(`http://localhost:3001/rooms/${editingRoom.id}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(newRoom),
-        });
-      } else {
-        await fetch("http://localhost:3001/rooms/new", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(newRoom),
-        });
-      }
-      await refreshRooms();
-      closeForm();
-    } catch (error) {
-      console.error("SaveError", error);
-    }
-  };
-
-  const handleDeleteRoom = async (id) => {
-    try {
-      await fetch(`http://localhost:3001/rooms/${id}`, { method: "DELETE" });
-      await refreshRooms();
-    } catch (error) {
-      console.error("deleteError", error);
-    }
-  };
-
-  const handleEditRoom = (room, privacy) => {
-    setEditingRoom({ ...room, privacy });
-    setNewRoom({ ...room, privacy });
-    setIsCreating(true);
-  };
+  const [publicRooms, setPublicRooms] = useState([]);
+   const [privateRooms, setPrivateRooms] = useState([]);
+   const [isCreating, setIsCreating] = useState(false);
+   const [editingRoom, setEditingRoom] = useState(null);
+   const [newRoom, setNewRoom] = useState({
+     name: "",
+     userLimit: "20",
+     description: "",
+     category: "",
+     privacy: "public",
+   });
+   const [existingRoomNames, setExistingRoomNames] = useState([]);
+ 
+   useEffect(() => {
+     fetchRooms();
+   }, []);
+ 
+   const fetchRooms = async () => {
+     const { data, error } = await supabase.from("rooms").select("*");
+     if (error) {
+       console.error("Error fetching rooms:", error);
+       return;
+     }
+     const publicRooms = data.filter((r) => r.privacy === "public");
+     const privateRooms = data.filter((r) => r.privacy === "private");
+     setPublicRooms(publicRooms);
+     setPrivateRooms(privateRooms);
+     setExistingRoomNames(data.map((r) => r.name));
+   };
+ 
+   const openCreateForm = () => {
+     setIsCreating(true);
+     setEditingRoom(null);
+     setNewRoom({
+       name: "",
+       userLimit: "20",
+       description: "",
+       category: "",
+       privacy: "public",
+     });
+   };
+ 
+   const closeForm = () => {
+     setIsCreating(false);
+     setEditingRoom(null);
+   };
+ 
+   const handleSaveRoom = async () => {
+     if (
+       newRoom.name.trim() === "" ||
+       (!editingRoom && existingRoomNames.includes(newRoom.name))
+     ) {
+       alert("The group name cannot be empty and must be unique!");
+       return;
+     }
+ 
+     try {
+       if (editingRoom) {
+         const { error } = await supabase
+           .from("rooms")
+           .update(newRoom)
+           .eq("id", editingRoom.id);
+         if (error) throw error;
+       } else {
+         const { error } = await supabase.from("rooms").insert([newRoom]);
+         if (error) throw error;
+       }
+       await fetchRooms();
+       closeForm();
+     } catch (error) {
+       console.error("SaveError", error);
+     }
+   };
+ 
+   const handleDeleteRoom = async (id) => {
+     try {
+       const { error } = await supabase.from("rooms").delete().eq("id", id);
+       if (error) throw error;
+       await fetchRooms();
+     } catch (error) {
+       console.error("deleteError", error);
+     }
+   };
+ 
+   const handleEditRoom = (room, privacy) => {
+     setEditingRoom({ ...room, privacy });
+     setNewRoom({ ...room, privacy });
+     setIsCreating(true);
+   };
 
   return (
     <div className="w-screen min-h-screen flex flex-col overflow-auto">

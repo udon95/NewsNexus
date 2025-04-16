@@ -288,19 +288,23 @@ ${content}
             {
               role: "system",
               content: `You are a fact-checking assistant.
+                Review the following article and highlight any **false or misleading** statements.
+                For any inaccuracies, describe the issues. 
+                Then, provide an overall factual accuracy score as a number between 0 and 100.
+                If some parts are ambiguous but overall the article is largely accurate, note this in your score.
+                Return your response in valid JSON format in this exact structure:
+                {"accuracy": <number>, "feedback": "<Your explanation>"}`,
+                
+              // Format:
+              // - Wrap only the false or misleading **text** in "<mark>...</mark><br>".
+              // - Directly after the marked text, add the explanation in **parentheses** like this:
+              //   "(This statement is false because...)"
+              // - Do NOT include the explanation inside the "<mark>" tags.
+              // - Do NOT remove or alter the rest of the article.
+              // - If everything is correct, return the original article **unchanged** (no <mark>, no explanation).
 
-Review the following article and highlight any **false or misleading** statements.
-
-Format:
-- Wrap only the false or misleading **text** in "<mark>...</mark><br>".
-- Directly after the marked text, add the explanation in **parentheses** like this:
-  "(This statement is false because...)"
-- Do NOT include the explanation inside the "<mark>" tags.
-- Do NOT remove or alter the rest of the article.
-- If everything is correct, return the original article **unchanged** (no <mark>, no explanation).
-
-Return the **entire article** with these annotations applied.
-`,
+              //   Return the **entire article** with these annotations applied.
+              // `,
             },
             {
               role: "user",

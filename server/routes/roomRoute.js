@@ -21,101 +21,61 @@ const supabase = require("../supabaseClient"); // Import Supabase client
 // GET all rooms
 // When mounted at /rooms, this endpoint will be accessible at GET /rooms
 router.get("/", async (req, res) => {
-  const { data, error } = await supabase
-    .from("managerooms")
-    .select("*")
-    .order("id", { ascending: true });
+  const { data, error } = await supabase.from("managerooms").select("*");
 
   if (error) {
-    return res.status(500).json({ error: error.message });
+    console.error("Error fetching rooms:", error.message);
+    return res.status(500).json({ error: "Failed to fetch rooms" });
   }
-  res.json(data);
+
+  res.status(200).json(data);
 });
 
-// POST a new room
-// Accessible at POST /rooms
-router.post("/new", async (req, res) => {
-  const { name, userLimit, description, category, privacy } = req.body;
+// 🔹 CREATE new room
+router.post("/", async (req, res) => {
+  const room = req.body;
 
-  const { data, error } = await supabase
-    .from("managerooms")
-    .insert({
-      name,
-      user_limit: userLimit,
-      description,
-      category,
-      privacy,
-    })
-    .select(); // Returns the inserted rows
+  if (!room.name || !room.privacy) {
+    return res.status(400).json({ error: "Missing required fields" });
+  }
+
+  const { data, error } = await supabase.from("managerooms").insert([room]);
 
   if (error) {
-    return res.status(400).json({ error: error.message });
+    console.error("Error creating room:", error.message);
+    return res.status(500).json({ error: "Failed to create room" });
   }
-  // Assume the insert returns an array with a single room object
-  res.json(data[0]);
+
+  res.status(201).json(data[0]);
 });
 
-// PUT update a room by id
-// Accessible at PUT /rooms/:id
+// 🔹 UPDATE room by ID
 router.put("/:id", async (req, res) => {
   const { id } = req.params;
-  const { name, userLimit, description, category, privacy } = req.body;
+  const updates = req.body;
 
-  const { data, error } = await supabase
-    .from("managerooms")
-    .update({
-      name,
-      user_limit: userLimit,
-      description,
-      category,
-      privacy,
-    })
-    .eq("id", id)
-    .select();
+  const { error } = await supabase.from("managerooms").update(updates).eq("id", id);
 
   if (error) {
-    return res.status(400).json({ error: error.message });
+    console.error("Error updating room:", error.message);
+    return res.status(500).json({ error: "Failed to update room" });
   }
-  res.json(data[0]);
+
+  res.status(200).json({ message: "Room updated successfully" });
 });
 
-// DELETE a room by id
-// Accessible at DELETE /rooms/:id
+// 🔹 DELETE room by ID
 router.delete("/:id", async (req, res) => {
   const { id } = req.params;
+
   const { error } = await supabase.from("managerooms").delete().eq("id", id);
 
   if (error) {
-    return res.status(400).json({ error: error.message });
+    console.error("Error deleting room:", error.message);
+    return res.status(500).json({ error: "Failed to delete room" });
   }
-  // 204 means no content is returned on successful deletion
-  res.sendStatus(204);
+
+  res.status(200).json({ message: "Room deleted successfully" });
 });
 
-// POST feedback endpoint
-// Accessible at POST /rooms/feedback
-router.post("/feedback", async (req, res) => {
-  const { rating, share, areas } = req.body;
-
-  if (rating === undefined || share === undefined || areas === undefined) {
-    return res.status(400).json({ message: "Missing required fields" });
-  }
-
-  const { data, error } = await supabase
-    .from("feedback")
-    .insert({ rating, share, areas })
-    .select();
-
-  if (error) {
-    console.error("Database insertion failed:", error);
-    return res.status(500).json({ message: error.message });
-  }
-
-  res.status(200).json({
-    message: "Feedback submitted successfully",
-    id: data[0].id,
-  });
-});
-
-// Export the router so that it can be mounted in server.js
 module.exports = router;
