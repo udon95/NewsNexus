@@ -1,3 +1,9 @@
+
+// ✅ FULL MERGED VERSION of article.jsx
+// Includes:
+// - Backend TTS + Translation (from chat version)
+// - Community Notes modal + Report modal + styling (from uploaded version)
+
 import React, { useState, useEffect, useRef } from "react";
 import "../index.css";
 import "../pages/article.css";
@@ -9,7 +15,7 @@ import Comments from "../components/commentsSection.jsx";
 import useAuthHook from "../hooks/useAuth.jsx";
 import { useParams, useNavigate } from "react-router-dom";
 import supabase from "../api/supabaseClient";
-import { Share2, Headphones, Flag, StickyNote, Languages } from "lucide-react";
+import { Share2, Headphones, Flag, StickyNote } from "lucide-react";
 import TranslateButton from "../components/translate.jsx";
 
 const Article = () => {
@@ -26,33 +32,15 @@ const Article = () => {
   const speechRef = useRef(null);
   const [originalText, setOriginalText] = useState("");
   const [translatedText, setTranslatedText] = useState("");
-  const [selectedLanguage, setSelectedLanguage] = useState("en"); // Default to English
+  const [selectedLanguage, setSelectedLanguage] = useState("en");
 
   const [showNote, setShowNote] = useState(false);
   const [noteText, setNoteText] = useState("");
   const [reportTarget, setReportTarget] = useState(null);
   const [selectedReason, setSelectedReason] = useState("");
-
-  // const handleTTS = () => {
-  //   if (!articleRef.current) return;
-  //   if (isSpeaking) {
-  //     window.speechSynthesis.cancel();
-  //     setIsSpeaking(false);
-  //     return;
-  //   }
-  //   const text = articleRef.current.innerText;
-  //   const utterance = new SpeechSynthesisUtterance(text);
-  //   utterance.lang = "en-US";
-  //   utterance.rate = 1;
-  //   utterance.pitch = 1;
-  //   utterance.onend = () => setIsSpeaking(false);
-  //   utterance.onstart = () => setIsSpeaking(true);
-  //   speechRef.current = utterance;
-  //   window.speechSynthesis.speak(utterance);
-  // };
+  const [notes, setNotes] = useState([]);
 
   const handleTTS = async () => {
-    // If we’re already playing audio, stop or pause it here
     if (isSpeaking && speechRef.current) {
       speechRef.current.pause();
       setIsSpeaking(false);
@@ -65,11 +53,8 @@ const Article = () => {
     }
 
     try {
-      // 1. Get text from the article
       const text = articleRef.current.innerText;
 
-      // 2. Make a POST request to your TTS endpoint
-      //    Adjust the URL if your server is at a different path or port
       const response = await fetch(
         "http://localhost:5000/translate/text-to-speech",
         {
@@ -77,7 +62,7 @@ const Article = () => {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             text: text,
-            targetLang: selectedLanguage, // or any other supported language
+            targetLang: selectedLanguage,
           }),
         }
       );
@@ -86,26 +71,16 @@ const Article = () => {
         throw new Error("TTS request failed: " + response.status);
       }
 
-      // 3. Get the binary audio stream
       const arrayBuffer = await response.arrayBuffer();
-
-      // 4. Convert it into a Blob, then a URL we can play in the browser
       const blob = new Blob([arrayBuffer], { type: "audio/mpeg" });
       const audioUrl = URL.createObjectURL(blob);
 
-      // 5. Create an Audio object and play it
       const audio = new Audio(audioUrl);
       audio.volume = 0.5;
       speechRef.current = audio;
 
-      // Update your isSpeaking state
       setIsSpeaking(true);
-
-      // When audio ends, reset isSpeaking
-      audio.onended = () => {
-        setIsSpeaking(false);
-      };
-
+      audio.onended = () => setIsSpeaking(false);
       audio.play();
     } catch (error) {
       alert("TTS not supported for selected language: " + selectedLanguage);
@@ -118,12 +93,9 @@ const Article = () => {
       return;
     }
     setSelectedLanguage(targetLang);
-    // Extract the text you want to translate (here, using the article content)
     const textToTranslate = originalText;
-    // console.log(articleData.text);
-    console.log(articleRef.current.innerText);
+
     try {
-      // Call the translation endpoint you set up on the server.
       const response = await fetch("http://localhost:5000/translate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -133,13 +105,7 @@ const Article = () => {
         throw new Error("Translation failed.");
       }
       const data = await response.json();
-
-      // For example, you might simply show the translated text in an alert...
-      // alert(`Translated Text:\n\n${data.translatedText}`);
-
-      // Alternatively, if you want to update the UI, store it in state:
       setTranslatedText(data.translatedText);
-      // console.log(data.translatedText);
     } catch (error) {
       console.error("Error translating article:", error);
       alert("Error translating article: " + error.message);
@@ -169,7 +135,7 @@ const Article = () => {
         userid: user?.userid,
         username: user?.username,
         created_at: new Date().toISOString(),
-        Status: "pending",
+        Status: "Pending",
       },
     ]);
     if (!error) {
@@ -213,6 +179,14 @@ const Article = () => {
       if (!error) {
         setArticleData(data);
         setOriginalText(data.text);
+
+        const { data: noteData } = await supabase
+          .from("community_notes")
+          .select("*")
+          .eq("target_id", data.articleid)
+          .eq("Status", "Approved");
+
+        setNotes(noteData || []);
 
         if (data?.articleid) {
           const { data: currentView } = await supabase
@@ -371,10 +345,19 @@ const Article = () => {
                 username: articleData.users?.username || "Unknown Author",
               }}
             />
-            <Comments
-              articleRef={articleRef}
-              articleId={articleData.articleid}
-            />
+            {notes.length > 0 && (
+              <div className="border border-yellow-400 bg-yellow-50 rounded-lg p-4 mt-4 w-full">
+                <h3 className="text-sm font-semibold text-yellow-700 mb-1">
+                  ⚠️ Community Notes:
+                </h3>
+                <ul className="list-disc list-inside text-sm text-yellow-800">
+                  {notes.map((n, i) => (
+                    <li key={i}>{n.note}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            <Comments articleRef={articleRef} articleId={articleData.articleid} />
           </>
         ) : showPaywall ? (
           <div className="paywall-modal">
@@ -402,6 +385,79 @@ const Article = () => {
           </div>
         ) : (
           <p>Loading article...</p>
+        )}
+
+        {/* Report Modal */}
+        {reportTarget && (
+          <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+            <div className="bg-white p-6 rounded-xl w-[90%] max-w-md">
+              <h2 className="text-lg font-semibold mb-4">Report Article</h2>
+              <div className="space-y-2">
+                {[
+                  "Misinformation",
+                  "Hate Speech",
+                  "Spam or Promotional",
+                  "Plagiarism",
+                  "Other",
+                ].map((reason) => (
+                  <label key={reason} className="flex items-center gap-2">
+                    <input
+                      type="radio"
+                      name="reportReason"
+                      value={reason}
+                      checked={selectedReason === reason}
+                      onChange={(e) => setSelectedReason(e.target.value)}
+                    />
+                    {reason}
+                  </label>
+                ))}
+              </div>
+              <div className="flex justify-end mt-4">
+                <button
+                  onClick={() => setReportTarget(null)}
+                  className="mr-2 px-4 py-2 bg-gray-300 rounded-lg hover:bg-gray-400"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleSubmitReport}
+                  className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
+                >
+                  Submit Report
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Community Note Modal */}
+        {showNote && (
+          <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+            <div className="bg-white p-6 rounded-xl w-[90%] max-w-md">
+              <h2 className="text-lg font-semibold mb-4">Submit a Community Note</h2>
+              <textarea
+                className="w-full p-2 border border-gray-300 rounded-lg resize-none"
+                rows={4}
+                placeholder="Write your note here..."
+                value={noteText}
+                onChange={(e) => setNoteText(e.target.value)}
+              />
+              <div className="flex justify-end mt-4">
+                <button
+                  onClick={() => setShowNote(false)}
+                  className="mr-2 px-4 py-2 bg-gray-300 rounded-lg hover:bg-gray-400"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleSubmitNote}
+                  className="px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600"
+                >
+                  Submit Note
+                </button>
+              </div>
+            </div>
+          </div>
         )}
       </main>
     </div>
