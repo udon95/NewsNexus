@@ -32,6 +32,7 @@ export const FreeWriteArticle = () => {
   const [newTopicName, setNewTopicName] = useState("");
   const [showLinkModal, setShowLinkModal] = useState(false);
   const [linkUrl, setLinkUrl] = useState("");
+  const [showDraftNotification, setShowDraftNotification] = useState(false);  
 
 
   console.log("Auth session:", supabase.auth.getSession());
@@ -111,10 +112,21 @@ export const FreeWriteArticle = () => {
       }),
     ],
     content: '',
+
     onUpdate: ({ editor }) => {
-      setArticleContent(editor.getHTML());
+      const html = editor.getHTML();
+      setArticleContent(html);
+  
       const words = editor.getText().trim().split(/\s+/).filter(Boolean).length;
       setWordCount(words);
+  
+      // Clean up removed images from pendingImages
+      const doc = new DOMParser().parseFromString(html, "text/html");
+      const imageSrcsInEditor = Array.from(doc.querySelectorAll("img")).map((img) => img.getAttribute("src"));
+  
+      setPendingImages((prev) =>
+        prev.filter((img) => imageSrcsInEditor.includes(img.previewUrl))
+      );
     },
   });
 
@@ -131,7 +143,7 @@ export const FreeWriteArticle = () => {
     };
   
     checkSession();
-  }, []);   
+  }, []); 
 
   useEffect(() => {
     supabase.auth.onAuthStateChange((event, session) => {
@@ -155,6 +167,11 @@ export const FreeWriteArticle = () => {
 
     const parsedUser = JSON.parse(storedUser);
     const session = parsedUser?.user; // Assuming 'user' is the session data in your stored object
+
+    // Check if user has posted 4 or more articles this month
+    const now = new Date();
+    const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+    const lastDayOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59).toISOString();
 
     if (!session) {
       alert("User not authenticated. Cannot upload.");
@@ -234,7 +251,8 @@ export const FreeWriteArticle = () => {
       for (const img of pendingImages) {
         const fileExt = img.file.name.split('.').pop();
         const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
-        const filePath = `${session.id}/${fileName}`;
+        // const filePath = `${session.id}/${fileName}`;
+        const filePath = `user-${session.userid}/${fileName}`;
 
         await supabase.storage.from("articles-images").upload(filePath, img.file, {
           cacheControl: "3600",
@@ -249,7 +267,8 @@ export const FreeWriteArticle = () => {
         ]);
       }
 
-    
+    pendingImages.forEach(img => URL.revokeObjectURL(img.previewUrl)); // cleanup object URLs
+    setPendingImages([]);      
 
     alert("Article posted!");
     handleClearInputs();
@@ -304,25 +323,101 @@ export const FreeWriteArticle = () => {
       status: "Draft",
     };
   
-    const { error } = await supabase.from("articles").insert([articleData]);
-    if (error) return alert("Failed to save draft.");  
+    const { data, error } = await supabase
+      .from("articles")
+      .insert([articleData])
+      .select("articleid");
+
+    if (error) return alert("Failed to save draft.");
+
+    const articleid = data?.[0]?.articleid;
+
+    for (const img of pendingImages) {
+      const fileExt = img.file.name.split('.').pop();
+      const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+      const filePath = `user-${session.userid}/${fileName}`;
+
+      await supabase.storage.from("articles-images").upload(filePath, img.file, {
+        cacheControl: "3600",
+        upsert: false,
+      });
+
+      const { data: urlData } = supabase.storage.from("articles-images").getPublicUrl(filePath);
+      const imageUrl = urlData?.publicUrl;
+
+      await supabase.from("article_images").insert([
+        { articleid, image_url: imageUrl }
+      ]);
+    }
+
+    // Trigger the pop-up notification for successful draft save
+    setShowDraftNotification(true);
 
     alert("Draft saved!");
     handleClearInputs();
   };    
 
-  const [pendingImages, setPendingImages] = useState([]);
-
-  const handleEditorImageUpload = (e) => {
+  const [pendingImages, setPendingImages] = useState([]); 
+  
+  const handleEditorImageUpload = async (e) => {
     const file = e.target.files[0];
-    if (file) {
-      const previewUrl = URL.createObjectURL(file);
-      setPendingImages((prev) => [...prev, { file, previewUrl }]);
+    if (!file) return;
 
-        editor.chain().focus().setImage({ src: previewUrl }).run();
+    if (file.size > 50 * 1024 * 1024) {
+      alert("Image size exceeds 50MB limit. Please upload a smaller file.");
+      return;
+    }    
+  
+    const storedUser = JSON.parse(localStorage.getItem("userProfile"));
+    const userId = storedUser?.user?.userid;
+  
+    if (!userId) {
+      alert("User not authenticated.");
+      return;
     }
+  
+    // Fetch usertype from Supabase
+    const { data: userTypeData, error } = await supabase
+      .from("usertype")
+      .select("usertype")
+      .eq("userid", userId)
+      .single();
+  
+    if (error || !userTypeData) {
+      alert("Failed to verify user type.");
+      return;
+    }
+  
+    const userType = userTypeData.usertype.toLowerCase();
+  
+    if (userType === "free" && pendingImages.length >= 1) {
+      alert("Free users can only upload 1 image. Upgrade to Premium for more.");
+      return;
+    }
+
+    
+  
+    const previewUrl = URL.createObjectURL(file);
+    setPendingImages((prev) => [...prev, { file, previewUrl }]);
+  
+    editor.chain().focus().setImage({ src: previewUrl }).run();
     e.target.value = null;
-  };    
+  };  
+
+  const handleRemoveImage = (indexToRemove) => {
+    const removedUrl = pendingImages[indexToRemove].previewUrl;
+    URL.revokeObjectURL(removedUrl); // cleanup memory
+    const updatedImages = pendingImages.filter((_, i) => i !== indexToRemove);
+    setPendingImages(updatedImages);
+  
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(editor.getHTML(), "text/html");
+    const imgs = doc.querySelectorAll("img");
+    imgs.forEach((img) => {
+      if (img.src === removedUrl) img.remove();
+    });
+    editor.commands.setContent(doc.body.innerHTML);
+  };  
 
   // Fetch Topics from `topic_categories`
   useEffect(() => {
@@ -409,77 +504,77 @@ export const FreeWriteArticle = () => {
     `;
     document.head.appendChild(style);
     return () => document.head.removeChild(style); // Cleanup
-  }, []);    
-
-const handleSubmitTopicApplication = async () => {
-  const rawInput = newTopicName.trim();
-  const normalizedInput = rawInput.toLowerCase();
-
-  if (!normalizedInput) {
-    alert("Please enter a topic name.");
-    return;
-  }
-
-  // Check if topic already exists in `topic_categories`
-  const { data: existingTopics, error: topicFetchError } = await supabase
-    .from("topic_categories")
-    .select("name");
-
-  if (topicFetchError) {
-    alert("Error checking existing topics.");
-    return;
-  }
-
-  const topicExists = existingTopics.some(
-    (topic) => topic.name.trim().toLowerCase() === normalizedInput
-  );
-
-  if (topicExists) {
-    alert("This topic already exists. Please choose an existing topic.");
-    return;
-  }
-
-  // Check if user already applied for this topic
-  const { data: userApplications, error: appFetchError } = await supabase
-    .from("topic_applications")
-    .select("topic_name")
-    .eq("requested_by", userId)
-    .eq("status", "Pending");
-
-  if (appFetchError) {
-    alert("Error checking your previous applications.");
-    return;
-  }
-
-  const alreadyApplied = userApplications.some(
-    (app) => app.topic_name.trim().toLowerCase() === normalizedInput
-  );
-
-  if (alreadyApplied) {
-    alert("You’ve already applied for this topic.");
-    return;
-  }
-
-  // Insert the application
-  const { error: insertError } = await supabase
-    .from("topic_applications")
-    .insert([
-      {
-        requested_by: userId,
-        topic_name: rawInput, // keep original casing for admin view
-        status: "Pending",
-        created_at: new Date().toISOString(),
-      }
-    ]);
-
-  if (insertError) {
-    alert("Failed to apply for topic.");
-  } else {
-    alert("Topic application submitted!");
-    setShowTopicApplication(false);
-    setNewTopicName("");
-  }
-};     
+  }, []);       
+  
+  const handleSubmitTopicApplication = async () => {
+    const rawInput = newTopicName.trim();
+    const normalizedInput = rawInput.toLowerCase();
+  
+    if (!normalizedInput) {
+      alert("Please enter a topic name.");
+      return;
+    }
+  
+    // Check if topic already exists in `topic_categories`
+    const { data: existingTopics, error: topicFetchError } = await supabase
+      .from("topic_categories")
+      .select("name");
+  
+    if (topicFetchError) {
+      alert("Error checking existing topics.");
+      return;
+    }
+  
+    const topicExists = existingTopics.some(
+      (topic) => topic.name.trim().toLowerCase() === normalizedInput
+    );
+  
+    if (topicExists) {
+      alert("This topic already exists. Please choose an existing topic.");
+      return;
+    }
+  
+    // Check if user already applied for this topic
+    const { data: userApplications, error: appFetchError } = await supabase
+      .from("topic_applications")
+      .select("topic_name")
+      .eq("requested_by", userId)
+      .eq("status", "Pending");
+  
+    if (appFetchError) {
+      alert("Error checking your previous applications.");
+      return;
+    }
+  
+    const alreadyApplied = userApplications.some(
+      (app) => app.topic_name.trim().toLowerCase() === normalizedInput
+    );
+  
+    if (alreadyApplied) {
+      alert("You’ve already applied for this topic.");
+      return;
+    }
+  
+    // Insert the application
+    const { error: insertError } = await supabase
+      .from("topic_applications")
+      .insert([
+        {
+          requested_by: userId,
+          topic_name: rawInput, // keep original casing for admin view
+          status: "Pending",
+          created_at: new Date().toISOString(),
+        }
+      ]);
+  
+    if (insertError) {
+      alert("Failed to apply for topic.");
+    } else {
+      alert("Topic application submitted!");
+      setShowTopicApplication(false);
+      setNewTopicName("");
+    }
+  };  
 
 return (
     <div className="w-full min-h-screen bg-indigo-50 text-black font-grotesk flex justify-center">
@@ -562,6 +657,22 @@ return (
               >
                 Upload Image
               </button>
+
+              {pendingImages.length > 0 && (
+                <div className="flex flex-wrap gap-4 mt-4">
+                  {pendingImages.map((img, index) => (
+                    <div key={index} className="relative w-32 h-32 border rounded overflow-hidden">
+                      <img src={img.previewUrl} alt="Preview" className="object-cover w-full h-full" />
+                      <button
+                        onClick={() => handleRemoveImage(index)}
+                        className="absolute top-1 right-1 bg-red-600 text-white text-xs px-2 py-1 rounded"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
 
             <div className="flex flex-wrap items-center gap-2 bg-white p-3 mt-4 border rounded-lg shadow-md text-sm font-medium">
             <select
@@ -656,7 +767,6 @@ return (
         </div>
 
         {showConfirm && (
-          
           <div className="fixed inset-0 backdrop-blur-sm bg-white/5 flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded-lg shadow-xl text-center">
               <p className="text-lg font-semibold mb-4">Clear all fields?</p>
@@ -770,6 +880,26 @@ return (
           </div>
         </div>
       )}
+      {showDraftNotification && (
+        <div className="fixed inset-0 backdrop-blur-sm bg-white/5 flex items-center justify-center z-50">
+            <div className="bg-white p-6 rounded-lg shadow-xl text-left" style={{ maxWidth: '400px', width: 'auto' }}>
+            <p className="text-lg font-semibold mb-2">Draft saved successfully!</p>
+            <p className="text-sm text-gray-500 mt-2">
+              Your draft will expire in 7 days. Don't forget to publish it before then!
+            </p>
+      
+            {/* OK Button to acknowledge the notification */}
+            <div className="flex justify-end mt-4">
+              <button
+                onClick={() => setShowDraftNotification(false)} // Close the notification
+                className="bg-blue-600 text-white px-4 py-2 rounded-md"
+              >
+                OK
+              </button>
+            </div>
+          </div>
+        </div>
+      )}  
 
       </main>
     </div>
