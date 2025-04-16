@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import supabase from "../api/supabaseClient";
 
-const ArticlesRank = ({ searchQuery = "", topic = "" }) => {
+const ArticlesRank = ({ searchQuery = "", topic = "", selectedTime = "week" }) => {
   const [articles, setArticles] = useState([]);
   const navigate = useNavigate();
 
@@ -10,17 +10,37 @@ const ArticlesRank = ({ searchQuery = "", topic = "" }) => {
     const fetchRankedArticles = async () => {
       let query = supabase
         .from("articles")
-        .select("articleid, title, imagepath, total_votes, view_count, topicid, status, text") // Include status to filter
-        .eq("status", "Published"); // ✅ Hide drafts
+        .select("articleid, title, imagepath, total_votes, view_count, topicid, status, text, time")
+        .eq("status", "Published");
 
+      // Topic filtering
       if (Array.isArray(topic) && topic.length > 0) {
         query = query.in("topicid", topic);
       } else if (typeof topic === "string" && topic) {
         query = query.eq("topicid", topic);
       }
 
+      // Search filter
       if (searchQuery.trim()) {
         query = query.or(`title.ilike.%${searchQuery}%,text.ilike.%${searchQuery}%`);
+      }
+
+      // Time filter
+      const now = new Date();
+      let cutoff;
+
+      if (selectedTime === "Today") {
+        cutoff = new Date(now.setHours(0, 0, 0, 0));
+      } else if (selectedTime === "Week") {
+        cutoff = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+      } else if (selectedTime === "Month") {
+        cutoff = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+      } else if (selectedTime === "Year") {
+        cutoff = new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000);
+      }
+
+      if (cutoff) {
+        query = query.gte("time", cutoff.toISOString());
       }
 
       const { data, error } = await query;
@@ -34,18 +54,16 @@ const ArticlesRank = ({ searchQuery = "", topic = "" }) => {
         .map((article) => ({
           ...article,
           ranking_score:
-            article.view_count > 0
-              ? article.total_votes / article.view_count
-              : 0,
+            article.view_count > 0 ? article.total_votes / article.view_count : 0,
         }))
         .sort((a, b) => b.ranking_score - a.ranking_score)
-        .slice(0, 3); // top 3
+        .slice(0, 3);
 
       setArticles(ranked);
     };
 
     fetchRankedArticles();
-  }, [searchQuery, topic]);
+  }, [searchQuery, topic, selectedTime]);
 
   const handleCardClick = (title) => {
     navigate(`/article/${encodeURIComponent(title)}`);
