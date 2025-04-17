@@ -271,6 +271,89 @@ const Room = () => {
       }
     };
 
+  //   const fetchArticles = async () => {
+  //     const { data, error } = await supabase
+  //       .from("room_articles")
+  //       .select(`
+  //         postid,
+  //         title,
+  //         content,
+  //         created_at,
+  //         userid,
+  //         users:userid(username),
+  //         room_comments(*),
+  //         room_article_images(image_url)
+  //       `)
+  //       .eq("roomid", roomid)
+  //       .order("created_at", { ascending: false });
+    
+  //     if (error) {
+  //       console.error("Error fetching articles:", error);
+  //       return;
+  //     }
+
+  //     // Map notes by article id
+  //     const notesMap = {};
+  //       notesData?.forEach((note) => {
+  //         if (note.Status === "Approved") {
+  //           if (!notesMap[note.target_id]) {
+  //             notesMap[note.target_id] = [];
+  //           }
+  //           notesMap[note.target_id].push(note);
+  //         }
+  //       });
+
+  // if (notesError) {
+  //   console.error("Error fetching community notes:", notesError);
+  //   return;
+  // }
+
+  //     console.log("Fetched articles data:", JSON.stringify(data, null, 2)); // Debugging log
+  //     setArticles(data);
+          
+  //     const articlesWithComments = data.map((article) => {
+  //       // Step 1: Map all comments by ID
+  //       const commentMap = new Map();
+  //       article.room_comments.forEach((comment) => {
+  //         comment.replies = []; // initialize replies array
+  //         commentMap.set(comment.commentid, comment);
+  //       });
+      
+  //       // Step 2: Flatten comments – attach all replies to their topmost parent
+  //       const topLevelComments = [];
+      
+  //       article.room_comments.forEach((comment) => {
+  //         if (!comment.parent_commentid) {
+  //           topLevelComments.push(comment);
+  //         } else {
+  //           let parent = commentMap.get(comment.parent_commentid);
+      
+  //           // Traverse up until top-level parent found
+  //           while (parent?.parent_commentid && commentMap.has(parent.parent_commentid)) {
+  //             parent = commentMap.get(parent.parent_commentid);
+  //           }
+      
+  //           if (parent) {
+  //             parent.replies.push(comment); // flatten under top-level parent
+  //           } else {
+  //             topLevelComments.push(comment); // fallback: treat as top-level if orphaned
+  //           }
+  //         }
+  //       });
+      
+  //       // return { ...article, room_comments: topLevelComments };
+  //       const approvedNotes = (article.community_notes || []).filter(n => n.Status === "Approved");
+  //         return {
+  //           ...article,
+  //           room_comments: topLevelComments,
+  //           approvedNotes
+  //         };
+
+  //       });          
+    
+  //     setArticles(articlesWithComments);
+  //   };    
+
   const fetchArticles = async () => {
     const { data: articlesData, error: articlesError } = await supabase
       .from("room_articles")
@@ -285,6 +368,7 @@ const Room = () => {
         room_article_images(image_url)
       `)
       .eq("roomid", roomid)
+      .eq("status", "Published")  // Only show published
       .order("created_at", { ascending: false });
   
     if (articlesError) {
@@ -1055,7 +1139,8 @@ const CommentCard = ({
     ))}
   </div>
 )}
-              
+
+
               <div className="room-article-content mt-4 text-gray-800">
                 {(() => {
                   const parser = new DOMParser();
@@ -1315,6 +1400,7 @@ const CommentCard = ({
     </div>
   </div>
 )}
+
       </div>
     </div>
   );
