@@ -32,7 +32,9 @@ export const FreeWriteArticle = () => {
   const [newTopicName, setNewTopicName] = useState("");
   const [showLinkModal, setShowLinkModal] = useState(false);
   const [linkUrl, setLinkUrl] = useState("");
-  const [showDraftNotification, setShowDraftNotification] = useState(false);  
+  const [showDraftNotification, setShowDraftNotification] = useState(false);
+  const [monthlyPostCount, setMonthlyPostCount] = useState(0);
+  
 
 
   console.log("Auth session:", supabase.auth.getSession());
@@ -114,11 +116,20 @@ export const FreeWriteArticle = () => {
     content: '',
 
     onUpdate: ({ editor }) => {
-      const html = editor.getHTML();
-      setArticleContent(html);
-  
-      const words = editor.getText().trim().split(/\s+/).filter(Boolean).length;
+
+      const text = editor.getText();
+      const wordsArray = text.trim().split(/\s+/).filter(Boolean);
+      const words = wordsArray.length;
+
+      if (words > MAX_WORDS) {
+       // Prevent adding new words by restoring previous content
+        editor.commands.setContent(articleContent); // roll back to last valid state
+        return;
+      }
+
       setWordCount(words);
+      setArticleContent(editor.getHTML());
+
   
       // Clean up removed images from pendingImages
       const doc = new DOMParser().parseFromString(html, "text/html");
@@ -143,7 +154,33 @@ export const FreeWriteArticle = () => {
     };
   
     checkSession();
-  }, []); 
+  }, []);
+  
+  useEffect(() => {
+    const fetchMonthlyPostCount = async () => {
+      const storedUser = JSON.parse(localStorage.getItem("userProfile"));
+      const session = storedUser?.user;
+      if (!session) return;
+  
+      const now = new Date();
+      const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+      const lastDayOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59).toISOString();
+  
+      const { data, error } = await supabase
+        .from("articles")
+        .select("articleid")
+        .eq("userid", session.userid)
+        .eq("status", "Published")
+        .gte("time", firstDayOfMonth)
+        .lte("time", lastDayOfMonth);
+  
+      if (!error && data) {
+        setMonthlyPostCount(data.length);
+      }
+    };
+  
+    fetchMonthlyPostCount();
+  }, []);  
 
   useEffect(() => {
     supabase.auth.onAuthStateChange((event, session) => {
@@ -173,6 +210,25 @@ export const FreeWriteArticle = () => {
     const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
     const lastDayOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59).toISOString();
 
+    const { data: monthlyPosts, error: countError } = await supabase
+      .from("articles")
+      .select("articleid")
+      .eq("userid", session.userid)
+      .eq("status", "Published")
+      .gte("time", firstDayOfMonth)
+      .lte("time", lastDayOfMonth);
+
+    if (countError) {
+      console.error("Error checking monthly post limit:", countError);
+      alert("Unable to verify posting limit. Please try again later.");
+      return;
+    }
+
+    if (monthlyPosts.length >= 4) {
+      alert("You have reached your monthly article post limit (4 per month). Please try again next month.");
+      return;
+    }
+
     if (!session) {
       alert("User not authenticated. Cannot upload.");
       return;
@@ -190,15 +246,14 @@ export const FreeWriteArticle = () => {
     let firstImageUrl = null;
 
     const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+    
+    let uploadedImageUrls = [];
 
     for (const img of pendingImages) {
       const file = img.file;
       const fileExt = file.name.split('.').pop();
       const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
-
-      const { data: authSession } = await supabase.auth.getSession();
-      const supabaseUid = authSession?.session?.user?.id;
-      const filePath = `${supabaseUid}/${fileName}`;
+      const filePath = `user-${session.userid}/${fileName}`;
     
       const { error: uploadError } = await supabase.storage
         .from(bucket)
@@ -212,7 +267,8 @@ export const FreeWriteArticle = () => {
       const { data: urlData } = supabase.storage.from(bucket).getPublicUrl(filePath);
       if (urlData?.publicUrl) {
         if (!firstImageUrl) firstImageUrl = urlData.publicUrl; // Track first image URL
-        updatedHTML = updatedHTML.replaceAll(img.previewUrl, urlData.publicUrl);        
+        updatedHTML = updatedHTML.replaceAll(img.previewUrl, urlData.publicUrl);  
+        uploadedImageUrls.push(urlData.publicUrl);       
       }
     }      
 
@@ -248,24 +304,11 @@ export const FreeWriteArticle = () => {
 
       const articleid = data?.[0]?.articleid;
 
-      for (const img of pendingImages) {
-        const fileExt = img.file.name.split('.').pop();
-        const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
-        // const filePath = `${session.id}/${fileName}`;
-        const filePath = `user-${session.userid}/${fileName}`;
-
-        await supabase.storage.from("articles-images").upload(filePath, img.file, {
-          cacheControl: "3600",
-          upsert: false,
-        });
-
-        const { data: urlData } = supabase.storage.from("articles-images").getPublicUrl(filePath);
-        const imageUrl = urlData?.publicUrl;
-
+      for (const url of uploadedImageUrls) {
         await supabase.from("article_images").insert([
-          { articleid, image_url: imageUrl }
+          { articleid, image_url: url }
         ]);
-      }
+      }      
 
     pendingImages.forEach(img => URL.revokeObjectURL(img.previewUrl)); // cleanup object URLs
     setPendingImages([]);      
@@ -273,6 +316,8 @@ export const FreeWriteArticle = () => {
     alert("Article posted!");
     handleClearInputs();
   };
+
+  //HANDLE AUTO COUNT HERE
 
   const handleSaveDraft = async () => {
     const storedUser = localStorage.getItem("userProfile");
@@ -290,14 +335,15 @@ export const FreeWriteArticle = () => {
     let updatedHTML = articleContent;
     const bucket = "articles-images";
     let firstImageUrl = null;
+    let uploadedImageUrls = []; // <--  add this before the image loop
   
     for (const img of pendingImages) {
       const file = img.file;
       const fileExt = file.name.split('.').pop();
       const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
-      const { data: authSession } = await supabase.auth.getSession();
-      const supabaseUid = authSession?.session?.user?.id;
-      const filePath = `${supabaseUid}/${fileName}`;
+      // const { data: authSession } = await supabase.auth.getSession();
+      // const supabaseUid = authSession?.session?.user?.id;
+      const filePath = `user-${session.userid}/${fileName}`;
 
   
       const { error: uploadError } = await supabase.storage.from(bucket).upload(filePath, file);
@@ -310,6 +356,7 @@ export const FreeWriteArticle = () => {
       if (urlData?.publicUrl) {
         if (!firstImageUrl) firstImageUrl = urlData.publicUrl;
           updatedHTML = updatedHTML.replaceAll(img.previewUrl, urlData.publicUrl);
+          uploadedImageUrls.push(urlData.publicUrl); // Track for article_images insert
       }
     }
   
@@ -332,25 +379,12 @@ export const FreeWriteArticle = () => {
 
     const articleid = data?.[0]?.articleid;
 
-    for (const img of pendingImages) {
-      const fileExt = img.file.name.split('.').pop();
-      const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
-      const filePath = `user-${session.userid}/${fileName}`;
-
-      await supabase.storage.from("articles-images").upload(filePath, img.file, {
-        cacheControl: "3600",
-        upsert: false,
-      });
-
-      const { data: urlData } = supabase.storage.from("articles-images").getPublicUrl(filePath);
-      const imageUrl = urlData?.publicUrl;
-
+    for (const imageUrl of uploadedImageUrls) {
       await supabase.from("article_images").insert([
         { articleid, image_url: imageUrl }
       ]);
-    }
+    }    
 
-    // Trigger the pop-up notification for successful draft save
     setShowDraftNotification(true);
 
     alert("Draft saved!");
@@ -732,12 +766,24 @@ return (
           </div>
                 <p className="text-sm text-gray-500 mt-1">
                   Word Count: {wordCount} / {MAX_WORDS}
+                  {wordCount >= MAX_WORDS && (
+                  <p className="text-grey-600 text-sm mt-1">
+                    You’ve reached the maximum word count.
+                  </p>
+                )}
                 </p>
+
               </>
             ) : (
               <p className="text-gray-500">Loading editor...</p>
             )}
           </div>
+
+          {userId && (
+            <p className="text-right text-sm text-black mb-1">
+              You’ve posted {monthlyPostCount} out of 4 articles this month. Update your subscription for unlimited posts..!!
+            </p>
+          )}
 
           <div className="flex justify-end gap-3">
             <button
@@ -757,11 +803,15 @@ return (
             </button>
 
             <button
-              className="bg-blue-600 text-white px-4 py-2 rounded-md"
-              onClick={handlePostArticle}
+              className={`px-4 py-2 rounded-md ${
+                monthlyPostCount >= 4 ? "bg-gray-400 cursor-not-allowed" : "bg-blue-600"
+              } text-white`}
+                onClick={monthlyPostCount >= 4 ? null : handlePostArticle}
+              disabled={monthlyPostCount >= 4}
             >
               Post
             </button>
+
 
           </div>
         </div>
