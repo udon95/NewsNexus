@@ -117,11 +117,35 @@ export const PremiumWriteArticle = () => {
       }),
     ],
     content: '',
+    // onUpdate: ({ editor }) => {
+    //   const html = editor.getHTML();
+    //   setArticleContent(html);
+    //   const words = editor.getText().trim().split(/\s+/).filter(Boolean).length;
+    //   setWordCount(words);
+    
+    //   if (postType === "General") {
+    //     const doc = new DOMParser().parseFromString(html, "text/html");
+    //     const imageSrcsInEditor = Array.from(doc.querySelectorAll("img")).map((img) => img.getAttribute("src"));
+    
+    //     setPendingImages((prev) =>
+    //       prev.filter((img) => imageSrcsInEditor.includes(img.previewUrl))
+    //     );
+    //   }
+    // },
     onUpdate: ({ editor }) => {
+      const text = editor.getText();
+      const wordsArray = text.trim().split(/\s+/).filter(Boolean);
+      const words = wordsArray.length;
+    
+      if (words > MAX_WORDS) {
+        // Prevent typing beyond limit
+        editor.commands.setContent(articleContent); // rollback
+        return;
+      }
+    
+      setWordCount(words);
       const html = editor.getHTML();
       setArticleContent(html);
-      const words = editor.getText().trim().split(/\s+/).filter(Boolean).length;
-      setWordCount(words);
     
       if (postType === "General") {
         const doc = new DOMParser().parseFromString(html, "text/html");
@@ -132,6 +156,7 @@ export const PremiumWriteArticle = () => {
         );
       }
     },
+    
   });
 
   //NEW
@@ -192,6 +217,7 @@ export const PremiumWriteArticle = () => {
 
     const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
 
+    // for (const img of pendingImages) {
     for (const img of pendingImages) {
       const file = img.file;
       const fileExt = file.name.split('.').pop();
@@ -256,7 +282,7 @@ export const PremiumWriteArticle = () => {
       for (const img of pendingImages) {
         const fileExt = img.file.name.split('.').pop();
         const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
-        const filePath = `${session.id}/${fileName}`;
+        const filePath = `${session.userid}/${fileName}`;
 
         await supabase.storage.from("articles-images").upload(filePath, img.file, {
           cacheControl: "3600",
@@ -337,6 +363,7 @@ export const PremiumWriteArticle = () => {
     const bucket = postType === "Room" ? "room-article-images" : "articles-images";
     let firstImageUrl = null;
   
+    // for (const img of pendingImages) {
     for (const img of pendingImages) {
       const file = img.file;
       const fileExt = file.name.split('.').pop();
@@ -855,7 +882,13 @@ return (
           </div>
                 <p className="text-sm text-gray-500 mt-1">
                   Word Count: {wordCount} / {MAX_WORDS}
+                  {wordCount >= MAX_WORDS && (
+                  <p className="text-grey-600 text-sm mt-1">
+                    You’ve reached the maximum word count.
+                  </p>
+                )}
                 </p>
+
               </>
             ) : (
               <p className="text-gray-500">Loading editor...</p>
