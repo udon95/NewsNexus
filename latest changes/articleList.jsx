@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { EllipsisVertical } from "lucide-react";
+import { EllipsisVertical, ThumbsUp, ThumbsDown, Eye  } from "lucide-react";
 import supabase from "../api/supabaseClient";
 import { useNavigate } from "react-router-dom";
 
@@ -12,11 +12,53 @@ const ArticleList = ({
     isRoom,
     onArticleClick,
     onDeleteSuccess,
-    articleData = { viewCounts: {}, likeCounts: {} },
+    articleData = { viewCounts: {} }
   }) => {
   const [openMenuIndex, setOpenMenuIndex] = useState(null); // Tracks which article's menu is open
   const navigate = useNavigate();
-  const { viewCounts, likeCounts } = articleData;
+  const { viewCounts } = articleData;
+  const [voteCounts, setVoteCounts] = useState({});
+  const [showAll, setShowAll] = useState(false);
+  const visibleArticles = showAll ? articles : articles.slice(0, 3);
+
+  useEffect(() => {
+    const fetchVotes = async () => {
+      if (!isDraft && !isRoom && articles.length > 0 ) {
+        const articleIds = articles.map((a) => a.articleid);
+        const { data, error } = await supabase
+          .from("ratings")
+          .select("articleid, vote_type")
+          .in("articleid", articleIds);
+
+        if (error) {
+          console.error("Error fetching votes:", error);
+          return;
+        }
+
+        const voteMap = {};
+        articleIds.forEach(id => {
+          voteMap[id] = { up: 0, down: 0 };
+        });
+
+        data.forEach((vote) => {
+          if (vote.vote_type === "upvote") {
+            voteMap[vote.articleid].up += 1;
+          } else if (vote.vote_type === "downvote") {
+            voteMap[vote.articleid].down += 1;
+          }
+        });
+  
+        setVoteCounts(voteMap);
+      } 
+    };
+
+    fetchVotes();
+  }, [articles]);
+
+  const formatCount = (count) => {
+    if (count >= 1000) return `${Math.floor(count / 1000)}K+`;
+    return count.toString();
+  };
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -36,29 +78,29 @@ const ArticleList = ({
 
   const calculateExpiryDate = (article) => {
     if (!article.time) return "Unknown";
-
-    const creationDate = new Date(article.time); // Parses "2025-04-06 17:08:36.384"
+  
+    const creationDate = new Date(article.time);
     creationDate.setDate(creationDate.getDate() + 7);
-
-    return creationDate.toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
-  };
+  
+    const day = creationDate.getDate();
+    const month = creationDate.getMonth() + 1; // Months are 0-based
+    const year = creationDate.getFullYear();
+  
+    return `( ${day}/${month}/${year} )`;
+  };  
 
   const calculateExpiryDateRoom = (article) => {
     if (!article.created_at) return "Unknown";
-
-    const creationDate = new Date(article.created_at); // Parses "2025-04-06 17:08:36.384"
+  
+    const creationDate = new Date(article.created_at);
     creationDate.setDate(creationDate.getDate() + 7);
-
-    return creationDate.toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
-  };
+  
+    const day = creationDate.getDate();
+    const month = creationDate.getMonth() + 1;
+    const year = creationDate.getFullYear();
+  
+    return `( ${day}/${month}/${year} )`;
+  };  
 
   const handleDeleteArticle = async (articleid) => {
     const confirmed = window.confirm("Are you sure you want to delete this article?");
@@ -101,46 +143,76 @@ const ArticleList = ({
       <h2 className="text-2xl font-bold font-grotesk mb-2 w-3/3 md:w-2/3">
         {title}
       </h2>
-      <ul className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 max-w-4xl">
-        {articles.map((article, index) => {
+      <ul className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 max-w-[890px] w-full">
+        {visibleArticles.map((article, index) => {
           const roomimageUrl =
-            article.room_article_images?.[article.room_article_images.length - 1]?.image_url;
+            article.room_article_images?.[0]?.image_url;
 
           return (
             <li
               key={index}
-              className="relative bg-white rounded-md shadow-md border border-gray-300 text-base aspect-square flex flex-col p-4 cursor-pointer"
+              onClick={() => onArticleClick(article)} // Calls parent function when clicked
+              className="w-full h-60 border border-black rounded-2xl shadow-md cursor-pointer hover:shadow-lg transition bg-white flex flex-col"
             >
-              {/* Number and Article Name */}
-              <div className="flex-1 p-4 relative ">
-                <button
-                  className="flex items-start gap-2 font-grotesk w-full text-left focus:outline-none"
-                  onClick={() => onArticleClick(article)} // Calls parent function when clicked
-                >
-                  <span className="inline-block w-full pr-10 overflow-hidden whitespace-nowrap text-ellipsis text-lg font-semibold text-black">
-                    {index + 1}. {article.title}
-                  </span>
-                </button>
-                {!isRoom && (
-                  <div className="w-full h-32 mt-5 bg-gray-100 rounded-t-md">
+              {/* Article Information */}
+              <div className="flex-1 relative ">
+                {!isRoom && !isDraft &&  (
+                  <div className="w-full h-40 bg-gray-200 rounded-t-2xl overflow-hidden relative">
                     <img src={article.imagepath} alt={article.title} className="w-full h-full object-cover" />
                   </div>
                 )}
-                {isRoom && roomimageUrl && (
-                  <div className="w-full h-32 mt-5 bg-gray-100 rounded-t-md">
+                {!isRoom && isDraft && (
+                  <div className="w-full h-40 bg-gray-200 rounded-t-2xl overflow-hidden relative">
+                    <img src={article.imagepath} alt={article.title} className="w-full h-full object-cover" />
+                  </div>
+                )}
+                {isRoom && !isDraft && (
+                  <div className="w-full h-48 bg-gray-200 rounded-t-2xl overflow-hidden relative">
                     <img src={roomimageUrl} alt={article.title} className="w-full h-full object-cover" />
                   </div>
                 )}
-                {!isDraft && !isRoom && (
-                  <div className="absolute bottom-4 left-4 text-sm text-gray-700 space-y-1">
-                    <p>Views: {viewCounts[article.articleid] || 0}</p>
-                    <p>Likes: {likeCounts[article.articleid] || 0}</p>
+                {isRoom && isDraft && (
+                  <div className="w-full h-40 bg-gray-200 rounded-t-2xl overflow-hidden relative">
+                    <img src={roomimageUrl} alt={article.title} className="w-full h-full object-cover" />
                   </div>
                 )}
+                <p className="pr-10 px-4 py-2 text-base text-left text-black overflow-hidden whitespace-nowrap text-ellipsis font-medium">
+                  {article.title}
+                </p>
+                {!isDraft && !isRoom && (
+                  <div className="flex flex-wrap gap-10 absolute bottom-4 left-4 text-sm">
+                    <div className="flex items-center gap-2">
+                      <Eye />
+                      {viewCounts[article.articleid] || 0}
+                    </div>
+                    <div className="flex items-center gap-2 text-green-500">
+                      <ThumbsUp /> 
+                      <span className="font-semibold text-black">
+                        {formatCount(voteCounts[article.articleid]?.up || 0)}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2 text-red-500">
+                      <ThumbsDown /> 
+                      <span className="font-semibold text-black">
+                        {formatCount(voteCounts[article.articleid]?.down || 0)}
+                      </span>
+                    </div>
+                  </div>
+                )}               
+                {isDraft && !isRoom && (
+                  <div className="absolute bottom-4 left-4 text-sm">
+                    Expires: {calculateExpiryDate(article)}
+                  </div>
+                )}
+                {isDraft && isRoom && (
+                  <div className="absolute bottom-4 left-4 text-sm">
+                    Expires: {calculateExpiryDateRoom(article)}
+                  </div>
+                )}       
 
                 {/* Three-Dot Menu Button */}
                 <button
-                  className="article-menu-trigger absolute top-2 right-2 p-2 text-lg font-bold text-gray-600 hover:text-black"
+                  className="article-menu-trigger absolute bottom-2 right-2 p-2 text-lg font-bold text-black hover:text-gray-600"
                   onClick={(e) => {
                     e.stopPropagation(); // Prevents triggering article click
                     setOpenMenuIndex(openMenuIndex === index ? null : index);
@@ -148,26 +220,18 @@ const ArticleList = ({
                 >
                   <EllipsisVertical />
                 </button>
-                {isDraft && !isRoom && (
-                  <div className="absolute bottom-4 left-4 text-gray-500 text-sm">
-                    Expires: {calculateExpiryDate(article)}
-                  </div>
-                )}
-                {isDraft && isRoom && (
-                  <div className="absolute bottom-4 left-4 text-gray-500 text-sm">
-                    Expires: {calculateExpiryDateRoom(article)}
-                  </div>
-                )}
+                
                 {/* Dropdown Menu (Appears on Click) */}
                 {openMenuIndex === index && (
-                  <div className="article-menu-dropdown absolute top-10 right-2 bg-white shadow-md border border-gray-300 rounded-lg min-w-[120px] z-50">
+                  <div className="article-menu-dropdown absolute bottom-10 right-2 bg-white shadow-md border border-gray-300 rounded-lg min-w-[120px] z-50">
                     <ul className="flex flex-col">
                       {!isDraft && isFree && ( // Show "Edit" for free user posted
                         <li>
                           <button 
                             className="block px-4 py-2 w-full text-left hover:bg-gray-100"
-                            onClick={() => {
-                              navigate(`/freeDashboard/editPosted/${encodeURIComponent(article.title)}`);
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              navigate(`/freeDashboard/editPosted/${encodeURIComponent(article.articleid)}`);
                             }}
                           >
                             Edit
@@ -178,8 +242,9 @@ const ArticleList = ({
                         <li>
                           <button 
                             className="block px-4 py-2 w-full text-left hover:bg-gray-100"
-                            onClick={() => {
-                              navigate(`/premiumDashboard/editPosted/General/${encodeURIComponent(article.title)}`);
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              navigate(`/premiumDashboard/editPosted/General/${encodeURIComponent(article.articleid)}`);
                             }}
                           >
                             Edit
@@ -190,8 +255,9 @@ const ArticleList = ({
                         <li>
                           <button 
                             className="block px-4 py-2 w-full text-left hover:bg-gray-100"
-                            onClick={() => {
-                              navigate(`/premiumDashboard/editPosted/Room/${encodeURIComponent(article.title)}`);
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              navigate(`/premiumDashboard/editPosted/Room/${encodeURIComponent(article.postid)}`);
                             }}
                           >
                             Edit
@@ -202,7 +268,8 @@ const ArticleList = ({
                         <li>
                           <button
                             className="block px-4 py-2 w-full text-left hover:bg-gray-100"
-                            onClick={() => {
+                            onClick={(e) => {
+                              e.stopPropagation();
                               navigate(`/freeDashboard/writeArticle/${encodeURIComponent(article.articleid)}`);
                             }}
                           >
@@ -214,7 +281,8 @@ const ArticleList = ({
                         <li>
                           <button
                             className="block px-4 py-2 w-full text-left hover:bg-gray-100"
-                            onClick={() => {
+                            onClick={(e) => {
+                              e.stopPropagation();
                               navigate(`/premiumDashboard/writeArticle/${encodeURIComponent(article.articleid)}`);
                             }}
                           >
@@ -226,7 +294,8 @@ const ArticleList = ({
                         <li>
                           <button
                             className="block px-4 py-2 w-full text-left hover:bg-gray-100"
-                            onClick={() => {
+                            onClick={(e) => {
+                              e.stopPropagation();
                               navigate(`/premiumDashboard/writeArticle/${encodeURIComponent(article.postid)}`);
                             }}
                           >
@@ -238,7 +307,10 @@ const ArticleList = ({
                         <li>
                           <button
                             className="block px-4 py-2 w-full text-left hover:bg-gray-100"
-                            onClick={() => handleDeleteArticle(article.articleid)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDeleteArticle(article.articleid)}
+                            }
                           >
                             Delete
                           </button>
@@ -248,7 +320,10 @@ const ArticleList = ({
                         <li>
                           <button
                             className="block px-4 py-2 w-full text-left hover:bg-gray-100"
-                            onClick={() => handleDeleteRoomArticle(article.postid)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDeleteRoomArticle(article.postid)}
+                            }
                           >
                             Delete
                           </button>
@@ -262,6 +337,16 @@ const ArticleList = ({
           );
         })}
       </ul>
+      {articles.length > 3 && (
+        <div className="flex justify-end mt-4 pr-2">
+          <button
+            onClick={() => setShowAll(!showAll)}
+            className="text-black text-bold text-base hover:text-blue-800"
+          >
+            {showAll ? "Show Less" : "Show More"}
+          </button>
+        </div>
+      )}
     </div>
   );
 };
