@@ -97,6 +97,7 @@ function Home() {
           Go To Discussion Rooms &gt;
         </button>
       </div>
+      
       <VideoComponent />
 
       <div className="w-full font-grotesk mt-12">
