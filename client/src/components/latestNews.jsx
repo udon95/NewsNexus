@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import NewsCard from "./newsCard";
 import supabase from "../api/supabaseClient";
 
-const LatestNews = ({ searchQuery = "", topic = "", displayLimit, timeFilter = "This Week" }) => {
+const LatestNews = ({ searchQuery = "", topic = "", displayLimit, timeFilter = "Latest" }) => {
   const [latestArticles, setLatestArticles] = useState([]);
 
   useEffect(() => {
@@ -32,7 +32,7 @@ const LatestNews = ({ searchQuery = "", topic = "", displayLimit, timeFilter = "
 
       if (timeFilter === "Today") {
         cutoff = new Date(now.setHours(0, 0, 0, 0));
-      } else if (timeFilter === "Week") {
+      } else if (timeFilter === "Latest") {
         cutoff = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
       } else if (timeFilter === "Month") {
         cutoff = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
