@@ -7,7 +7,8 @@ const RateAndFlag = ({ articleId }) => {
   const { user } = useAuthHook();
   const [upvoted, setUpvoted] = useState(false);
   const [downvoted, setDownvoted] = useState(false);
-  const [votesCount, setVotesCount] = useState(0);
+  const [upvotes, setUpvotes] = useState(0);
+  const [downvotes, setDownvotes] = useState(0);
 
   useEffect(() => {
     if (!user || !articleId) return;
@@ -32,12 +33,14 @@ const RateAndFlag = ({ articleId }) => {
 
       if (allVotesError) console.error("Error fetching vote count:", allVotesError);
       else {
-        const upvotes = allVotes.filter((v) => v.vote_type === "upvote").length;
-        setVotesCount(upvotes);
+        const upvoteCount = allVotes.filter((v) => v.vote_type === "upvote").length;
+        const downvoteCount = allVotes.filter((v) => v.vote_type === "downvote").length;
+        setUpvotes(upvoteCount);
+        setDownvotes(downvoteCount);
 
         await supabase
           .from("articles")
-          .update({ total_votes: upvotes })
+          .update({ total_votes: upvoteCount + downvoteCount })
           .eq("articleid", articleId);
       }
     };
@@ -45,18 +48,34 @@ const RateAndFlag = ({ articleId }) => {
     fetchVotes();
   }, [articleId, user]);
 
+  const refreshVotes = async () => {
+    const { data: updatedVotes } = await supabase
+      .from("ratings")
+      .select("vote_type")
+      .eq("articleid", articleId);
+
+    const upvoteCount = updatedVotes.filter((v) => v.vote_type === "upvote").length;
+    const downvoteCount = updatedVotes.filter((v) => v.vote_type === "downvote").length;
+    setUpvotes(upvoteCount);
+    setDownvotes(downvoteCount);
+
+    await supabase
+      .from("articles")
+      .update({ total_votes: upvoteCount + downvoteCount })
+      .eq("articleid", articleId);
+  };
+
   const handleUpvote = async () => {
     if (!user || !articleId) return;
 
-    if (upvoted) {
-      await supabase
-        .from("ratings")
-        .delete()
-        .eq("articleid", articleId)
-        .eq("userid", user.userid);
-      setUpvoted(false);
-    } else {
-      await supabase.from("ratings").upsert([
+    await supabase
+      .from("ratings")
+      .delete()
+      .eq("articleid", articleId)
+      .eq("userid", user.userid);
+
+    if (!upvoted) {
+      await supabase.from("ratings").insert([
         {
           articleid: articleId,
           userid: user.userid,
@@ -65,34 +84,24 @@ const RateAndFlag = ({ articleId }) => {
       ]);
       setUpvoted(true);
       setDownvoted(false);
+    } else {
+      setUpvoted(false);
     }
 
-    const { data: updatedVotes } = await supabase
-      .from("ratings")
-      .select("vote_type")
-      .eq("articleid", articleId);
-
-    const upvotes = updatedVotes.filter((v) => v.vote_type === "upvote").length;
-    setVotesCount(upvotes);
-
-    await supabase
-      .from("articles")
-      .update({ total_votes: upvotes })
-      .eq("articleid", articleId);
+    await refreshVotes();
   };
 
   const handleDownvote = async () => {
     if (!user || !articleId) return;
 
-    if (downvoted) {
-      await supabase
-        .from("ratings")
-        .delete()
-        .eq("articleid", articleId)
-        .eq("userid", user.userid);
-      setDownvoted(false);
-    } else {
-      await supabase.from("ratings").upsert([
+    await supabase
+      .from("ratings")
+      .delete()
+      .eq("articleid", articleId)
+      .eq("userid", user.userid);
+
+    if (!downvoted) {
+      await supabase.from("ratings").insert([
         {
           articleid: articleId,
           userid: user.userid,
@@ -101,41 +110,34 @@ const RateAndFlag = ({ articleId }) => {
       ]);
       setDownvoted(true);
       setUpvoted(false);
+    } else {
+      setDownvoted(false);
     }
 
-    const { data: updatedVotes } = await supabase
-      .from("ratings")
-      .select("vote_type")
-      .eq("articleid", articleId);
-
-    const upvotes = updatedVotes.filter((v) => v.vote_type === "upvote").length;
-    setVotesCount(upvotes);
-
-    await supabase
-      .from("articles")
-      .update({ total_votes: upvotes })
-      .eq("articleid", articleId);
+    await refreshVotes();
   };
 
   return (
     <div className="w-full flex justify-start">
       <div className="flex items-center space-x-4 p-2 bg-gray-200 rounded-lg">
-        <span className="text-black text-sm font-semibold">{votesCount} liked this</span>
         <button
-          className={`transition-colors flex items-center space-x-2 ${
-            upvoted ? "text-green-500" : "text-gray-500"
-          } hover:text-green-500`}
+          className={`flex items-center space-x-1 ${
+            upvoted ? "text-green-600" : "text-gray-500"
+          } hover:text-green-600`}
           onClick={handleUpvote}
         >
-          <ThumbsUp size={24} />
+          <ThumbsUp size={20} />
+          <span className="text-sm font-medium">{upvotes}</span>
         </button>
+
         <button
-          className={`transition-colors ${
-            downvoted ? "text-red-500" : "text-gray-500"
-          } hover:text-red-500`}
+          className={`flex items-center space-x-1 ${
+            downvoted ? "text-red-600" : "text-gray-500"
+          } hover:text-red-600`}
           onClick={handleDownvote}
         >
-          <ThumbsDown size={24} />
+          <ThumbsDown size={20} />
+          <span className="text-sm font-medium">{downvotes}</span>
         </button>
       </div>
     </div>
