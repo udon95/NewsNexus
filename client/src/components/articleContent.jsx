@@ -32,7 +32,7 @@ const ArticleContent = ({ articleRef, text, postDate, author, imagepath }) => {
     <div className="flex flex-col w-full font-grotesk">
 
       {/* Post Meta */}
-      <span className="text-lg text-[#00317F] mb-4 self-start">
+      {/* <span className="text-lg text-[#00317F] mb-4 self-start">
         Posted by{" "}
         <Link
           to={`/public-profile/${usernameValue}`}
@@ -41,7 +41,7 @@ const ArticleContent = ({ articleRef, text, postDate, author, imagepath }) => {
           {usernameValue}
         </Link>{" "}
         on {postDate}
-      </span>
+      </span> */}
 
       {/* Article Body */}
       <div

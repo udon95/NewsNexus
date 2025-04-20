@@ -271,7 +271,7 @@ ${content}
       }
       const { accuracy, feedback } = factCheckResult;
       // Define a threshold (for example, 80) below which the article fails the fact-check
-      const threshold = 80;
+      const threshold = 75;
       if (accuracy < threshold) {
         return res.status(400).json({
           error: "Article failed fact-checking.",
@@ -353,6 +353,26 @@ ${content}
       console.log("💬 GPT Verdict:", verdict);
       console.log("📝 GPT Explanation:", gptMessage);
 
+      let factCheckResult;
+      try {
+        factCheckResult = JSON.parse(gptMessage);
+      } catch (error) {
+        console.error("Failed to parse GPT output as JSON:", error);
+        return res.status(500).json({ error: "Invalid response format from fact-checking." });
+      }
+
+      const accuracy = factCheckResult.accuracy;
+      const feedback = factCheckResult.feedback;
+      const threshold = 75; // Define your acceptance threshold
+
+      if (accuracy < threshold) {
+        return res.status(400).json({
+          error: "Article failed fact-checking.",
+          accuracy,
+          feedback,
+        });
+      }
+
       if (verdict === "false") {
         return res.status(400).json({
           error: "Article failed fact-checking.",
@@ -404,7 +424,8 @@ ${content}
     return res.json({
       message: "Factual article saved successfully.",
       verdict,
-      highlightedHTML: explanation.includes("<mark>") ? explanation : null,
+      accuracy: typeof accuracy !== "undefined" ? accuracy : undefined,
+      feedback: explanation && explanation.includes("<mark>") ? explanation : explanation || null,
     });
   } catch (err) {
     console.error("Article submission error:", err);

@@ -118,21 +118,24 @@ function Register() {
 
   const handleFinalSubmit = async (selectedTopics) => {
     // Check if userData & topics are valid
-    if (selectedTopics.length === 0) {
-      alert("Please select at least one topic.");
+    if (selectedTopics.length !== 6) {
+      alert("Please select at 6 topic.");
       return;
     }
 
     try {
       // Send everything (personal info + topics) to the server
-      const response = await fetch("https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/auth/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...userData,
-          topics: selectedTopics,
-        }),
-      });
+      const response = await fetch(
+        "https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/auth/register",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            ...userData,
+            topics: selectedTopics,
+          }),
+        }
+      );
 
       const data = await response.json();
       if (!response.ok) throw new Error(data.error);
@@ -203,10 +206,15 @@ function Register() {
                     Password:
                   </label>
                   <PasswordInput
-                    type="password"
+                    // type="password"
                     name="password"
                     value={userData.password}
-                    onChange={handleInputChange}
+                    onChange={(e) =>
+                      setUserData((prev) => ({
+                        ...prev,
+                        password: e.target.value,
+                      }))
+                    }
                     className="flex-grow p-3 rounded-lg bg-[#F3F3F3] focus:ring-2 focus:ring-blue-500 shadow-lg"
                     placeholder="Enter a password"
                   />
@@ -221,10 +229,15 @@ function Register() {
                     Re-enter password:
                   </label>
                   <PasswordInput
-                    type="password"
+                    // type="password"
                     name="confirmPassword"
                     value={userData.confirmPassword}
-                    onChange={handleInputChange}
+                    onChange={(e) =>
+                      setUserData((prev) => ({
+                        ...prev,
+                        confirmPassword: e.target.value,
+                      }))
+                    }
                     className="flex-grow p-3 rounded-lg bg-[#F3F3F3] focus:ring-2 focus:ring-blue-500 shadow-lg"
                     placeholder="Re-Enter password"
                   />
@@ -260,7 +273,7 @@ function Register() {
                     name="gender"
                     value={userData.gender}
                     onChange={handleInputChange}
-                    className="flex-grow p-3 rounded-lg bg-[#F3F3F3] focus:ring-2 focus:ring-blue-500 shadow-lg"
+                    className="flex-grow p-3 rounded-lg bg-[#F3F3F3] focus:ring-2  shadow-lg"
                   >
                     <option value="">Select Gender</option>
                     <option value="Male">Male</option>
@@ -308,28 +321,28 @@ function Register() {
           <div className="flex flex-col items-center">
             <h2 className="text-2xl font-bold mb-4">Select Your Interests</h2>
             <h2 className="text-xl mb-4">
-              (At least 1, max. 6. Starting from Most Interested)
+              (Choose 6. Starting from Most Interested)
             </h2>
             {/* <div className="grid grid-cols-1 gap-4"> */}
-              {Array.from({ length: 6 }).map((_, index) => (
-                <div key={index} className="flex flex-row mb-4">
-                  <label className="mt-1 mr-2 font-grotesk text-2xl">
-                    {index + 1}.{" "}
-                  </label>
-                  <select
-                    value={dropdownValues[index]}
-                    onChange={(e) => handleDropdownChange(index, e)}
-                    className="p-2 border rounded-lg"
-                  >
-                    <option value="">Select a category</option>
-                    {categories.map((cat) => (
-                      <option key={cat.id} value={cat.name}>
-                        {cat.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              ))}
+            {Array.from({ length: 6 }).map((_, index) => (
+              <div key={index} className="flex flex-row mb-4">
+                <label className="mt-1 mr-2 font-grotesk text-2xl">
+                  {index + 1}.{" "}
+                </label>
+                <select
+                  value={dropdownValues[index]}
+                  onChange={(e) => handleDropdownChange(index, e)}
+                  className="p-2 border rounded-lg"
+                >
+                  <option value="">Select a category</option>
+                  {categories.map((cat) => (
+                    <option key={cat.id} value={cat.name}>
+                      {cat.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            ))}
             {/* </div> */}
             <button
               type="button"

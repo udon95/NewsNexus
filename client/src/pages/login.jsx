@@ -57,6 +57,8 @@ function LoginPage() {
                 Password:
               </label>
               <PasswordInput
+                // type="password"
+                name="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="p-3  rounded-lg  bg-[#F3F3F3]   focus:ring-2 focus:ring-blue-500  shadow-md w-full"

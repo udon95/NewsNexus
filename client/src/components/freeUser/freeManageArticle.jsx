@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import ArticleList from "../articleList.jsx";
 import { useNavigate } from "react-router-dom";
 import supabase from "../../api/supabaseClient";
-import Manage from "../manageBar.jsx"; 
+import Manage from "../manageSearchBar.jsx"; 
 
 export const FreeManageMyArticles = () => {
   const navigate = useNavigate();

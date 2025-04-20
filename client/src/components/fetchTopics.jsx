@@ -22,7 +22,7 @@ useEffect(() => {
         // If user is logged in, fetch their selected topics from the 'topicinterests' table
         const { data, error } = await supabase
           .from("topicinterests")
-          .select("interests")
+          .select("interesttype")
           .eq("userid", user.id);
 
         if (!error && data) {

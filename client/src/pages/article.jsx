@@ -7,7 +7,7 @@ import Rate from "../components/rateAndFlag.jsx";
 import ArticleContent from "../components/articleContent.jsx";
 import Comments from "../components/commentsSection.jsx";
 import useAuthHook from "../hooks/useAuth.jsx";
-import { useParams, useNavigate } from "react-router-dom";
+import { Link, useParams, useNavigate } from "react-router-dom";
 import supabase from "../api/supabaseClient";
 import { Share2, Headphones, Flag, StickyNote } from "lucide-react";
 import TranslateButton from "../components/translate.jsx";
@@ -311,9 +311,14 @@ const Article = () => {
               {articleData.title}
             </h1>
             <div className="flex items-center text-sm text-gray-600 mb-3 w-full">
-              <span className="font-semibold text-black">
+              {/* <span className="font-semibold text-black"> */}
+              <Link
+                to={`/public-profile/${username}`}
+                className="underline hover:text-blue-600"
+              >
                 {articleData.users?.username || "Unknown Author"}
-              </span>
+              </Link>
+              {/* </span> */}
               <span className="mx-2">•</span>
               <span>
                 Published on {new Date(articleData.time).toLocaleDateString()}

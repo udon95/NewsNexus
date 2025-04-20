@@ -1,15 +1,17 @@
 import React, { useState } from "react";
 import { EyeOff, Eye } from "lucide-react";
 
-const PasswordInput = ({ value, onChange, className = "", ...props }) => {
+const PasswordInput = ({ value, onChange, className = "", name, ...props }) => {
   const [showPassword, setShowPassword] = useState(false);
 
   return (
-    <div className={`relative ${className}`} {...props}>
+    <div className={`relative ${className} focus-border-2  focus-within:border-black focus-within:ring-2  rounded-lg`} {...props}>
+      
       <input
         type={showPassword ? "text" : "password"}
         value={value}
         onChange={onChange}
+        name={name}
         className="pr-10 outline-none border-0 "
         {...props}
       />
