@@ -301,148 +301,149 @@ export const FreeWriteArticle = () => {
 
     const topicName = topicOptions.find((t) => t.topicid === topics)?.name;
 
-  //   const { data, error } = await supabase
-  //     .from("articles")
-  //     .insert([
-  //       {
-  //         title: articleData.title,
-  //         text: articleData.content,
-  //         userid: articleData.created_by,
-  //         topicid: topics, // Insert the UUID
-  //         time: articleData.created_at,
-  //         status: "Published",
-  //         imagepath: firstImageUrl || null,
-  //       },
-  //     ])
-  //     .select("articleid");
+    //   const { data, error } = await supabase
+    //     .from("articles")
+    //     .insert([
+    //       {
+    //         title: articleData.title,
+    //         text: articleData.content,
+    //         userid: articleData.created_by,
+    //         topicid: topics, // Insert the UUID
+    //         time: articleData.created_at,
+    //         status: "Published",
+    //         imagepath: firstImageUrl || null,
+    //       },
+    //     ])
+    //     .select("articleid");
 
-  //   console.log(articleData.topic, error);
+    //   console.log(articleData.topic, error);
 
-  //   if (error) {
-  //     alert("Failed to post article.");
-  //     return;
-  //   }
+    //   if (error) {
+    //     alert("Failed to post article.");
+    //     return;
+    //   }
 
-  //   const articleid = data?.[0]?.articleid;
+    //   const articleid = data?.[0]?.articleid;
 
-  //   for (const img of pendingImages) {
-  //     const fileExt = img.file.name.split(".").pop();
-  //     const fileName = `${Date.now()}-${Math.random()
-  //       .toString(36)
-  //       .substring(2)}.${fileExt}`;
-  //     const filePath = `${session.id}/${fileName}`;
+    //   for (const img of pendingImages) {
+    //     const fileExt = img.file.name.split(".").pop();
+    //     const fileName = `${Date.now()}-${Math.random()
+    //       .toString(36)
+    //       .substring(2)}.${fileExt}`;
+    //     const filePath = `${session.id}/${fileName}`;
 
-  //     await supabase.storage
-  //       .from("articles-images")
-  //       .upload(filePath, img.file, {
-  //         cacheControl: "3600",
-  //         upsert: false,
-  //       });
+    //     await supabase.storage
+    //       .from("articles-images")
+    //       .upload(filePath, img.file, {
+    //         cacheControl: "3600",
+    //         upsert: false,
+    //       });
 
-  //     const { data: urlData } = supabase.storage
-  //       .from("articles-images")
-  //       .getPublicUrl(filePath);
-  //     const imageUrl = urlData?.publicUrl;
+    //     const { data: urlData } = supabase.storage
+    //       .from("articles-images")
+    //       .getPublicUrl(filePath);
+    //     const imageUrl = urlData?.publicUrl;
 
-  //     await supabase
-  //       .from("article_images")
-  //       .insert([{ articleid, image_url: imageUrl }]);
-  //   }
+    //     await supabase
+    //       .from("article_images")
+    //       .insert([{ articleid, image_url: imageUrl }]);
+    //   }
 
-  //   alert("Article posted!");
-  //   handleClearInputs();
-  if (postType === "General") {
-        const response = await fetch("http://localhost:5000/api/submit-article", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            title,
-            content: updatedHTML,
-            type: "factual",
-            authorId: session.userid,
-            topicid: topics,
-            topicName,
-          }),
-        });
-  
-        const result = await response.json();
-  
-        if (!response.ok) {
-          console.log(result);
-          if (result.highlightedHTML) {
-            console.log("🔴 AI Feedback returned:", result.highlightedHTML);
-            setAiFeedback(result.highlightedHTML);
-            alert(
-              "❌ Article flagged by AI. Please review the highlighted sections."
-            );
-          } else {
-            alert(result.error || "Submission failed.");
-          }
-  
-          // ✅ This is important to prevent saving
-          return;
+    //   alert("Article posted!");
+    //   handleClearInputs();
+
+    if (postType === "General") {
+      const response = await fetch("http://localhost:5000/api/submit-article", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title,
+          content: updatedHTML,
+          type: "factual",
+          authorId: session.userid,
+          topicid: topics,
+          topicName,
+        }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        console.log(result);
+        if (result.highlightedHTML) {
+          console.log("🔴 AI Feedback returned:", result.highlightedHTML);
+          setAiFeedback(result.highlightedHTML);
+          alert(
+            "❌ Article flagged by AI. Please review the highlighted sections."
+          );
+        } else {
+          alert(result.error || "Submission failed.");
         }
-  
-        if (result.verdict === "true") {
-          if (result.explanation) {
-            alert(`✅ Article passed AI check:\n${result.explanation}`);
-          } else {
-            alert("✅ Article passed AI check.");
-          }
-        }
-  
-        //  Save to articles table
-        const { data, error } = await supabase
-          .from("articles")
-          .insert([
-            {
-              title: articleData.title,
-              text: articleData.content,
-              userid: articleData.created_by,
-              topicid: topics, // Insert the UUID
-              time: articleData.created_at,
-              status: "Published",
-              imagepath: firstImageUrl || null,
-            },
-          ])
-          .select("articleid");
-  
-        if (error) {
-          alert("Failed to save article.");
-          return;
-        }
-  
-        const articleid = data?.[0]?.articleid;
-  
-        // Save multiple images to article_images
-        for (const img of pendingImages) {
-          const fileExt = img.file.name.split(".").pop();
-          const fileName = `${Date.now()}-${Math.random()
-            .toString(36)
-            .substring(2)}.${fileExt}`;
-          const filePath = `${session.id}/${fileName}`;
-  
-          await supabase.storage
-            .from("articles-images")
-            .upload(filePath, img.file, {
-              cacheControl: "3600",
-              upsert: false,
-            });
-  
-          const { data: urlData } = supabase.storage
-            .from("articles-images")
-            .getPublicUrl(filePath);
-          const imageUrl = urlData?.publicUrl;
-  
-          await supabase
-            .from("article_images")
-            .insert([{ articleid, image_url: imageUrl }]);
-        }
-  
-        alert("Article posted successfully.");
-        handleClearInputs();
+
+        // ✅ This is important to prevent saving
         return;
       }
+
+      if (result.verdict === "true") {
+        if (result.explanation) {
+          alert(`✅ Article passed AI check:\n${result.explanation}`);
+        } else {
+          alert("✅ Article passed AI check.");
+        }
+      }
+
+      //  Save to articles table
+      const { data, error } = await supabase
+        .from("articles")
+        .insert([
+          {
+            title: articleData.title,
+            text: articleData.content,
+            userid: articleData.created_by,
+            topicid: topics, // Insert the UUID
+            time: articleData.created_at,
+            status: "Published",
+            imagepath: firstImageUrl || null,
+          },
+        ])
+        .select("articleid");
+
+      if (error) {
+        alert("Failed to save article.");
+        return;
+      }
+
+      const articleid = data?.[0]?.articleid;
+
+      // Save multiple images to article_images
+      for (const img of pendingImages) {
+        const fileExt = img.file.name.split(".").pop();
+        const fileName = `${Date.now()}-${Math.random()
+          .toString(36)
+          .substring(2)}.${fileExt}`;
+        const filePath = `${session.id}/${fileName}`;
+
+        await supabase.storage
+          .from("articles-images")
+          .upload(filePath, img.file, {
+            cacheControl: "3600",
+            upsert: false,
+          });
+
+        const { data: urlData } = supabase.storage
+          .from("articles-images")
+          .getPublicUrl(filePath);
+        const imageUrl = urlData?.publicUrl;
+
+        await supabase
+          .from("article_images")
+          .insert([{ articleid, image_url: imageUrl }]);
+      }
+
+      alert("Article posted successfully.");
+      handleClearInputs();
+      return;
+    }
   };
 
   const handleSaveDraft = async () => {
