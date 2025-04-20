@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import "../index.css";
 import Navbar from "../components/navbar.jsx";
-import Search from "../components/search.jsx";
+import Search from "../components/exploreSearch.jsx";
 import Rank from "../components/articlesRank.jsx";
 import Expert from "../components/expertNewsCard.jsx";
 import LatestNews from "../components/latestNews.jsx";
@@ -17,7 +17,7 @@ const Explore = () => {
   const [selectedTopic, setSelectedTopic] = useState(initialTopic);
   const [topics, setTopics] = useState([]);
   const [userInterests, setUserInterests] = useState([]);
-  const [timeFilter, setTimeFilter] = useState("Today");
+  const [timeFilter, setTimeFilter] = useState("Latest");
   const [isInterestsLoaded, setIsInterestsLoaded] = useState(false);
 
   const { user, userType } = useAuthHook();
@@ -68,7 +68,6 @@ const Explore = () => {
               .filter(Boolean);
             setUserInterests(parsedInterests);
 
-            // ✅ Only set recommended after interests are ready
             if (!searchParams.get("topic") && parsedInterests.length > 0) {
               setTimeout(() => {
                 setSelectedTopic("recommended");
@@ -117,7 +116,6 @@ const Explore = () => {
     resolvedTopic = selectedTopic;
   }
 
-  // ⏳ Prevent render until interests are loaded for recommended
   if (selectedTopic === "recommended" && !isInterestsLoaded) {
     return null;
   }
@@ -126,27 +124,17 @@ const Explore = () => {
     <div className="w-full min-w-screen min-h-screen flex flex-col bg-white">
       <Navbar />
       <div className="flex flex-col sm:flex-row justify-center items-center min-w-[900px] gap-4 mt-5 px-4">
-        <div className="w-full max-w-[600px]">
+        <div className="w-full max-w-[900px]">
           <Search
             onSearch={handleSearch}
             initialQuery={searchQuery}
             initialTimeFilter={timeFilter}
             onTimeFilterChange={handleTimeFilterChange}
+            topics={topics}
+            selectedTopic={selectedTopic}
+            onTopicChange={handleTopicChange}
           />
         </div>
-        <select
-          value={selectedTopic}
-          onChange={(e) => handleTopicChange(e.target.value)}
-          className="w-full max-w-[200px] p-2 mt-10 border border-gray-300 rounded-md"
-        >
-          <option value="">All Categories</option>
-          <option value="recommended">Recommended for you</option>
-          {topics.map((cat) => (
-            <option key={cat.topicid} value={cat.topicid}>
-              {cat.name}
-            </option>
-          ))}
-        </select>
       </div>
 
       {isSearching ? (
