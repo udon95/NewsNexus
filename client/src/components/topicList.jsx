@@ -11,11 +11,7 @@ const TopicList = ({
         {allTopics.map((topic) => (
           <button
             key={topic}
-            className={`p-2 min-w-[180px] whitespace-nowrap rounded-lg shadow-md  ${
-              selectedTopics.includes(topic)
-                ? "bg-blue-500 text-white"
-                : "bg-gray-200 text-black"
-            }`}
+            className="text-base font-semibold cursor-pointer px-5 py-3 rounded-[20px] border-none transition-all text-white bg-[#7FB0FE] hover:bg-[#00317f]"
             onClick={() => handleTopicSelection(topic)}
           >
             {topic}

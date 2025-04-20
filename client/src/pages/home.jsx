@@ -11,28 +11,6 @@ import useAuthHook from "../hooks/useAuth.jsx";
 import FetchTopics from "../components/fetchTopics.jsx";
 import VideoComponent from "../components/featureVideo.jsx";
 
-// const topics = [
-//   "Finance",
-//   "Politics",
-//   "Entertainment",
-//   "Sports",
-//   "Weather",
-//   "Lifestyle",
-//   "Beauty",
-//   "Hollywood",
-//   "China",
-//   "Horticulture",
-//   "Culinary",
-//   "LGBTQ++",
-//   "Singapore",
-//   "Environment",
-//   "Investment",
-//   "USA",
-//   "Luxury",
-//   "Korea",
-//   "Others",
-// ];
-
 function Home() {
   const navigate = useNavigate();
   const [selectedTopics, setSelectedTopics] = useState([]);
@@ -99,6 +77,18 @@ function Home() {
       </div>
       <Navbar />
       {/* <Search onSearch={handleSearchFromHome} /> */}
+      <div className="w-full font-grotesk mt-12">
+        <h1 className="text-2xl sm:text-3xl mb-5 text-left max-w-[900px] mx-auto">
+          Topics:
+        </h1>
+        <div className="flex justify-center w-full ">
+          <FetchTopics
+            selectedTopics={selectedTopics}
+            handleTopicSelection={handleTopicSelection}
+          />
+        </div>
+      </div>
+
       <div className="flex justify-center w-full mt-12">
         <button
           onClick={handleGoToDiscussionRooms}
@@ -115,17 +105,6 @@ function Home() {
         </h1>
         <div className="flex justify-center w-full ">
           <Testimonial />
-        </div>
-      </div>
-      <div className="w-full font-grotesk mt-12">
-        <h1 className="text-2xl sm:text-3xl mb-5 text-left max-w-[900px] mx-auto">
-          Topics:
-        </h1>
-        <div className="flex justify-center w-full ">
-          <FetchTopics
-            selectedTopics={selectedTopics}
-            handleTopicSelection={handleTopicSelection}
-          />
         </div>
       </div>
 

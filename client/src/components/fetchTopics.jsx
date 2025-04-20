@@ -5,24 +5,48 @@ import TopicsList from "./topicList.jsx"; // Adjust the path if needed
 
 const FetchTopics = ({ selectedTopics, handleTopicSelection }) => {
   const [topics, setTopics] = useState([]);
+  const [user, setUser] = useState(null);
 
   useEffect(() => {
-    const fetchTopics = async () => {
-      const { data, error } = await supabase
-        .from("topic_categories")
-        .select("topicid, name");
+    const fetchUser = async () => {
+      const { data: userData } = await supabase.auth.getUser();
+      setUser(userData);
+    };
 
-      if (!error && data) {
-        // If TopicsList expects an array of objects with topicid and name:
-        setTopics(data.map((topic) => topic.name));
-        // If you need just an array of names, you could map: setTopics(data.map(t => t.name));
+    fetchUser();
+  }, []);
+
+useEffect(() => {
+    const fetchTopics = async () => {
+      if (user) {
+        // If user is logged in, fetch their selected topics from the 'topicinterests' table
+        const { data, error } = await supabase
+          .from("topicinterests")
+          .select("interests")
+          .eq("userid", user.id);
+
+        if (!error && data) {
+          const userTopics = data.map((entry) => entry.interests).flat();
+          setTopics(userTopics);
+        } else {
+          console.error("Error fetching user topics:", error);
+        }
       } else {
-        console.error("Error fetching topics:", error);
+        // If no user is logged in, fetch all available categories from 'topic_categories'
+        const { data, error } = await supabase
+          .from("topic_categories")
+          .select("topicid, name");
+
+        if (!error && data) {
+          setTopics(data.map((topic) => topic.name));
+        } else {
+          console.error("Error fetching all topics:", error);
+        }
       }
     };
 
     fetchTopics();
-  }, []);
+  }, [user]);
 
   return (
     <TopicsList

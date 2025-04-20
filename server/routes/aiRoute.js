@@ -220,15 +220,14 @@ You are a fact-checking assistant.
 Please review the following article and verify its factual accuracy using up-to-date knowledge as of today.
 
 For any false, misleading, or dubious claims:
+- Wrap only the false or misleading text in <mark> tags.
+- Immediately after each <mark> section, on a new line preceded by a <br> tag, provide an explanation in parentheses that details why the text is inaccurate.
 
-- Wrap the **false/misleading text only** in <mark> tags.  
-- After the marked section, write the explanation inside parentheses **on a new line** using a <br> tag before the explanation.
+In addition, analyze the overall factual correctness of the article and assign a numerical accuracy score between 0 and 100, where 100 means the article is completely accurate and 0 means it is entirely inaccurate.
 
-Example:
-<mark>This is false</mark><br>(This is false because XYZ is incorrect...)
-
-Return the full article text with <mark> and explanation annotations applied. If all claims are correct, return the full article unchanged.
-    
+Return your output in valid JSON format exactly as follows:
+{"accuracy": <percentage between 0 and 100>, "feedback": "<Your explanation including any <mark> annotations if applicable>"}
+  
 Article:
 ${content}
 `,
@@ -245,7 +244,12 @@ ${content}
       console.log("🟣 Perplexity raw:", pxData);
       const perplexityReply = pxData.choices?.[0]?.message?.content?.trim();
       const lowerReply = perplexityReply?.toLowerCase() || "";
-
+      let factCheckResult;
+      try {
+        factCheckResult = JSON.parse(perplexityReply);
+      } catch (error) {
+        throw new Error("Perplexity returned an invalid JSON format.");
+      }
       if (
         !perplexityReply ||
         lowerReply.includes("i'm not sure") ||
@@ -265,11 +269,23 @@ ${content}
           highlightedHTML: perplexityReply,
         });
       }
+      const { accuracy, feedback } = factCheckResult;
+      // Define a threshold (for example, 80) below which the article fails the fact-check
+      const threshold = 80;
+      if (accuracy < threshold) {
+        return res.status(400).json({
+          error: "Article failed fact-checking.",
+          accuracy,
+          feedback,
+          source: "perplexity",
+        });
+      }
 
       return res.json({
         verdict: "passed",
         source: "perplexity",
-        feedback: perplexityReply,
+        accuracy,
+        feedback,
       });
     } catch (err) {
       console.warn("Perplexity failed or unsure — falling back to GPT.");
@@ -293,8 +309,8 @@ ${content}
                 Then, provide an overall factual accuracy score as a number between 0 and 100.
                 If some parts are ambiguous but overall the article is largely accurate, note this in your score.
                 Return your response in valid JSON format in this exact structure:
-                {"accuracy": <number>, "feedback": "<Your explanation>"}`,
-                
+                {"accuracy": <percentage between 0 and 100>, "feedback": "<Your explanation>"}`,
+
               // Format:
               // - Wrap only the false or misleading **text** in "<mark>...</mark><br>".
               // - Directly after the marked text, add the explanation in **parentheses** like this:
