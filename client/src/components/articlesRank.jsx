@@ -31,7 +31,7 @@ const ArticlesRank = ({ searchQuery = "", topic = "", selectedTime = "week" }) =
 
       if (selectedTime === "Today") {
         cutoff = new Date(now.setHours(0, 0, 0, 0));
-      } else if (selectedTime === "Week") {
+      } else if (selectedTime === "Latest") {
         cutoff = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
       } else if (selectedTime === "Month") {
         cutoff = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
