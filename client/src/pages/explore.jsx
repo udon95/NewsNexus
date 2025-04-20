@@ -15,6 +15,7 @@ const Explore = () => {
   const initialTopic = searchParams.get("topic") || "";
   const [searchQuery, setSearchQuery] = useState(initialQuery);
   const [selectedTopic, setSelectedTopic] = useState(initialTopic);
+  const [resolvedTopicId, setResolvedTopicId] = useState(""); // 🆕 NEW
   const [topics, setTopics] = useState([]);
   const [userInterests, setUserInterests] = useState([]);
   const [timeFilter, setTimeFilter] = useState("Latest");
@@ -55,6 +56,19 @@ const Explore = () => {
       if (!topicError && topicData) {
         setTopics(topicData);
 
+        // 🧠 Match name from URL to topicid
+        if (initialTopic && topicData.length > 0) {
+          const matched = topicData.find(
+            (t) => t.name.toLowerCase().trim() === initialTopic.toLowerCase().trim()
+          );
+          if (matched) {
+            setSelectedTopic(matched.topicid);
+            setResolvedTopicId(matched.topicid);
+          } else {
+            setSelectedTopic(""); // fallback
+          }
+        }
+
         if (user) {
           const { data: interestData, error: interestError } = await supabase
             .from("topicinterest")
@@ -68,15 +82,13 @@ const Explore = () => {
               .filter(Boolean);
             setUserInterests(parsedInterests);
 
-            if (!searchParams.get("topic") && parsedInterests.length > 0) {
-              setTimeout(() => {
-                setSelectedTopic("recommended");
-                setSearchParams((prev) => {
-                  const params = new URLSearchParams(prev);
-                  params.set("topic", "recommended");
-                  return params;
-                });
-              }, 0);
+            if (!initialTopic && parsedInterests.length > 0) {
+              setSelectedTopic("recommended");
+              setSearchParams((prev) => {
+                const params = new URLSearchParams(prev);
+                params.set("topic", "recommended");
+                return params;
+              });
             }
           }
         }
@@ -144,17 +156,29 @@ const Explore = () => {
               Search Results:
             </h1>
             <div className="flex justify-center w-full">
-              <Rank searchQuery={searchQuery} topic={resolvedTopic} selectedTime={timeFilter} />
+              <Rank
+                searchQuery={searchQuery}
+                topic={resolvedTopicId || resolvedTopic}
+                selectedTime={timeFilter}
+              />
             </div>
           </div>
           <div className="w-full font-grotesk mt-5">
             <div className="flex justify-center mb-5 w-full">
-              <Expert searchQuery={searchQuery} disableNavigation={!isPremium} topic={resolvedTopic} />
+              <Expert
+                searchQuery={searchQuery}
+                disableNavigation={!isPremium}
+                topic={resolvedTopicId || resolvedTopic}
+              />
             </div>
           </div>
           <div className="w-full font-grotesk">
             <div className="flex justify-center mb-5 w-full">
-              <LatestNews searchQuery={searchQuery} topic={resolvedTopic} timeFilter={timeFilter} />
+              <LatestNews
+                searchQuery={searchQuery}
+                topic={resolvedTopicId || resolvedTopic}
+                timeFilter={timeFilter}
+              />
             </div>
           </div>
         </>
@@ -165,14 +189,21 @@ const Explore = () => {
               {pageTitle}
             </h1>
             <div className="flex justify-center w-full">
-              <Rank searchQuery={searchQuery} topic={resolvedTopic} selectedTime={timeFilter} />
+              <Rank
+                searchQuery={searchQuery}
+                topic={resolvedTopicId || resolvedTopic}
+                selectedTime={timeFilter}
+              />
             </div>
             <div className="w-full font-grotesk mt-5">
               <h1 className="text-2xl sm:text-3xl mb-5 text-left max-w-[900px] mx-auto">
                 Expert:
               </h1>
               <div className="flex justify-center mb-5 w-full">
-                <Expert disableNavigation={!isPremium} topic={resolvedTopic} />
+                <Expert
+                  disableNavigation={!isPremium}
+                  topic={resolvedTopicId || resolvedTopic}
+                />
               </div>
             </div>
           </div>
@@ -181,7 +212,11 @@ const Explore = () => {
               Latest News:
             </h1>
             <div className="flex justify-center mb-5 w-full">
-              <LatestNews searchQuery={searchQuery} topic={resolvedTopic} timeFilter={timeFilter} />
+              <LatestNews
+                searchQuery={searchQuery}
+                topic={resolvedTopicId || resolvedTopic}
+                timeFilter={timeFilter}
+              />
             </div>
           </div>
         </>
