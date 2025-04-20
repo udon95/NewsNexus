@@ -289,6 +289,7 @@ const Room = () => {
         `
         )
         .eq("roomid", roomid)
+        .eq("status", "Published")
         .order("created_at", { ascending: false });
 
       if (articlesError) {

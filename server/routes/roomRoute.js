@@ -20,33 +20,31 @@ const supabase = require("../supabaseClient"); // Import Supabase client
 
 // GET all rooms
 // When mounted at /rooms, this endpoint will be accessible at GET /rooms
-router.get("/", async (req, res) => {
-  const { data, error } = await supabase.from("managerooms").select("*");
+router.get("/:userid", async (req, res) => {
+  const { userid } = req.params;
+  const { data, error } = await supabase
+    .from("rooms")
+    .select("*")
+    .eq("created_by", userid);
 
-  if (error) {
-    console.error("Error fetching rooms:", error.message);
-    return res.status(500).json({ error: "Failed to fetch rooms" });
-  }
-
+  if (error) return res.status(500).json({ error: error.message });
   res.status(200).json(data);
 });
 
 // 🔹 CREATE new room
 router.post("/", async (req, res) => {
-  const room = req.body;
+  const { name, description, privacy, created_by } = req.body;
 
-  if (!room.name || !room.privacy) {
+  if (!name || !description || !privacy || !created_by) {
     return res.status(400).json({ error: "Missing required fields" });
   }
 
-  const { data, error } = await supabase.from("managerooms").insert([room]);
+  const { data, error } = await supabase.from("rooms").insert([
+    { name, description, privacy, created_by }
+  ]);
 
-  if (error) {
-    console.error("Error creating room:", error.message);
-    return res.status(500).json({ error: "Failed to create room" });
-  }
-
-  res.status(201).json(data[0]);
+  if (error) return res.status(500).json({ error: error.message });
+  res.status(201).json({ message: "Room created", data });
 });
 
 // 🔹 UPDATE room by ID
@@ -65,17 +63,63 @@ router.put("/:id", async (req, res) => {
 });
 
 // 🔹 DELETE room by ID
-router.delete("/:id", async (req, res) => {
-  const { id } = req.params;
+router.delete("/:roomid", async (req, res) => {
+  const roomid = req.params.roomid;
+  const { error } = await supabase.from("rooms").delete().eq("roomid", roomid);
 
-  const { error } = await supabase.from("managerooms").delete().eq("id", id);
+  if (error) return res.status(500).json({ error: error.message });
+  res.status(200).json({ message: "Room deleted" });
+});
 
-  if (error) {
-    console.error("Error deleting room:", error.message);
-    return res.status(500).json({ error: "Failed to delete room" });
-  }
+router.post("/invite", async (req, res) => {
+  const { inviter_id, invitee_username, roomid } = req.body;
 
-  res.status(200).json({ message: "Room deleted successfully" });
+  const { data: user, error: userError } = await supabase
+    .from("users")
+    .select("userid")
+    .eq("username", invitee_username)
+    .single();
+
+  if (userError || !user) return res.status(404).json({ error: "User not found" });
+
+  const { error } = await supabase.from("room_members").insert([
+    {
+      userid: user.userid,
+      roomid,
+      invited_by: inviter_id,
+      joined_at: null,
+      exited_at: null
+    }
+  ]);
+
+  if (error) return res.status(500).json({ error: error.message });
+  res.status(200).json({ message: "Invitation sent" });
+});
+
+router.post("/accept", async (req, res) => {
+  const { userid, roomid } = req.body;
+
+  const { error } = await supabase
+    .from("room_members")
+    .update({ joined_at: new Date().toISOString() })
+    .eq("userid", userid)
+    .eq("roomid", roomid);
+
+  if (error) return res.status(500).json({ error: error.message });
+  res.status(200).json({ message: "Joined room" });
+});
+
+router.post("/exit", async (req, res) => {
+  const { userid, roomid } = req.body;
+
+  const { error } = await supabase
+    .from("room_members")
+    .update({ exited_at: new Date().toISOString() })
+    .eq("userid", userid)
+    .eq("roomid", roomid);
+
+  if (error) return res.status(500).json({ error: error.message });
+  res.status(200).json({ message: "Exited room" });
 });
 
 module.exports = router;

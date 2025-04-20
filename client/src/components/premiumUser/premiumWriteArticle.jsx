@@ -131,11 +131,31 @@ export const PremiumWriteArticle = () => {
         linkOnPaste: true,
       }),
     ],
-    content: articleContent,
+    content: "",
     onUpdate: ({ editor }) => {
-      setArticleContent(editor.getHTML());
-      const words = editor.getText().trim().split(/\s+/).filter(Boolean).length;
+      const text = editor.getText();
+      const wordsArray = text.trim().split(/\s+/).filter(Boolean);
+      const words = wordsArray.length;
+
+      if (words > MAX_WORDS) {
+        // Prevent typing beyond limit
+        editor.commands.setContent(articleContent); // rollback
+        return;
+      }
+
       setWordCount(words);
+      const html = editor.getHTML();
+      setArticleContent(html);
+      if (postType === "General") {
+        const doc = new DOMParser().parseFromString(html, "text/html");
+        const imageSrcsInEditor = Array.from(doc.querySelectorAll("img")).map(
+          (img) => img.getAttribute("src")
+        );
+
+        setPendingImages((prev) =>
+          prev.filter((img) => imageSrcsInEditor.includes(img.previewUrl))
+        );
+      }
     },
   });
 
@@ -469,18 +489,21 @@ export const PremiumWriteArticle = () => {
 
     // CASE 1: General Article (always factual)
     if (postType === "General") {
-      const response = await fetch("https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/api/submit-article", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          title,
-          content: updatedHTML,
-          type: "factual",
-          authorId: session.userid,
-          topicid: topics,
-          topicName,
-        }),
-      });
+      const response = await fetch(
+        "https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/api/submit-article",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            title,
+            content: updatedHTML,
+            type: "factual",
+            authorId: session.userid,
+            topicid: topics,
+            topicName,
+          }),
+        }
+      );
 
       const result = await response.json();
 
@@ -537,7 +560,7 @@ export const PremiumWriteArticle = () => {
         const fileName = `${Date.now()}-${Math.random()
           .toString(36)
           .substring(2)}.${fileExt}`;
-        const filePath = `${session.id}/${fileName}`;
+        const filePath = `${session.userid}/${fileName}`;
 
         await supabase.storage
           .from("articles-images")
@@ -1260,6 +1283,11 @@ export const PremiumWriteArticle = () => {
                 </div>
                 <p className="text-sm text-gray-500 mt-1">
                   Word Count: {wordCount} / {MAX_WORDS}
+                  {wordCount >= MAX_WORDS && (
+                   <p className="text-grey-600 text-sm mt-1">
+                     You’ve reached the maximum word count.
+                   </p>
+                 )}
                 </p>
               </>
             ) : (
