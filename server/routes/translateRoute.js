@@ -4,7 +4,7 @@ const AWS = require("aws-sdk");
 
 // Configure AWS (ensure your AWS credentials are set up properly)
 AWS.config.update({
-  region: "us-east-1",
+  region: "ap-southeast-1",
 });
 
 // Initialize AWS services
@@ -15,7 +15,7 @@ const polly = new AWS.Polly({ signatureVersion: "v4" });
 router.post("/", async (req, res) => {
   try {
     const { text, targetLang } = req.body;
-    // Example: assuming text is in English; targetLang should be one of "en", "zh", "zh-TW", "ms", or "ta"
+    // Example: assuming text is in English; targetLang should be one of "en", "zh", "ms", or "ta"
     const params = {
       Text: text,
       SourceLanguageCode: "en",
@@ -27,7 +27,7 @@ router.post("/", async (req, res) => {
     console.error("Translation error:", error);
     return res
       .status(500)
-      .json({ error: "An error occurred during translation." });
+      .json({ error: "An error occurred during translation.", stack: error.stack });
   }
 });
 

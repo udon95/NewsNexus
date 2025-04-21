@@ -32,14 +32,15 @@ const Article = () => {
   const [showDictionary, setShowDictionary] = useState(false);
   const [buttonPosition, setButtonPosition] = useState({ x: 0, y: 0 });
   const buttonRef = useRef(null);
-  
+
   const [showNote, setShowNote] = useState(false);
   const [noteText, setNoteText] = useState("");
   const [reportTarget, setReportTarget] = useState(null);
   const [selectedReason, setSelectedReason] = useState("");
   const [notes, setNotes] = useState([]);
 
-  const authorName = articleData.user?.username;
+  console.log(articleData);
+  const authorName = articleData.users?.username;
 
   const handleTextSelection = () => {
     const selection = window.getSelection();
