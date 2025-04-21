@@ -9,7 +9,7 @@ import Comments from "../components/commentsSection.jsx";
 import useAuthHook from "../hooks/useAuth.jsx";
 import { Link, useParams, useNavigate } from "react-router-dom";
 import supabase from "../api/supabaseClient";
-import { Share2, Headphones, Flag, StickyNote } from "lucide-react";
+import { Share2, Headphones, Flag, StickyNote, BookOpenIcon } from "lucide-react";
 import TranslateButton from "../components/translate.jsx";
 
 const Article = () => {
@@ -134,11 +134,7 @@ const Article = () => {
       alert("Article content not available.");
       return;
     }
-    if (speechRef.current && isSpeaking) {
-      speechRef.current.pause();
-      setIsSpeaking(false);
-    }
-
+    
     setSelectedLanguage(targetLang);
     const textToTranslate = originalText;
 
@@ -156,14 +152,27 @@ const Article = () => {
       }
       const data = await response.json();
       setTranslatedText(data.translatedText);
-      setTimeout(() => {
-        handleTTS();
-      }, 0);
     } catch (error) {
       console.error("Error translating article:", error);
       alert("Error translating article: " + error.message);
     }
   };
+
+  useEffect(() => {
+    if (translatedText && isSpeaking) {
+      speechRef.current.pause();
+      setIsSpeaking(false);
+      handleTTS();
+    }
+  }, [translatedText]);
+
+  useEffect(() => {
+    return () => {
+      if (speechRef.current) {
+        speechRef.current.pause();
+      }
+    };
+  }, []);
 
   const handleShareClick = () => {
     const shareLink = window.location.href;
