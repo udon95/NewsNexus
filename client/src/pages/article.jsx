@@ -30,7 +30,9 @@ const Article = () => {
   const [selectedText, setSelectedText] = useState("");
   const [definition, setDefinition] = useState(null);
   const [showDictionary, setShowDictionary] = useState(false);
-
+  const [buttonPosition, setButtonPosition] = useState({ x: 0, y: 0 });
+  const buttonRef = useRef(null);
+  
   const [showNote, setShowNote] = useState(false);
   const [noteText, setNoteText] = useState("");
   const [reportTarget, setReportTarget] = useState(null);
