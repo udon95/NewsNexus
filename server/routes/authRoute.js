@@ -28,7 +28,7 @@ router.post("/login", async (req, res) => {
         `
         userid, email, username, password, status, auth_id,
         profile:profile(uuserid, gender, dob),
-        usertype:usertype(usertype)
+        usertype:usertype(usertype, color)
       `
       )
       .eq("auth_id", userId) // Match Supabase auth_id
@@ -97,6 +97,7 @@ router.post("/login", async (req, res) => {
         },
         profile: userProfile.profile || {}, // Ensure no null values
         role: userProfile.usertype?.usertype || "Unknown",
+        color: userProfile.usertype?.color,
         interests,
         session: authData.session, // Supabase session data
       });

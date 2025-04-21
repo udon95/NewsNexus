@@ -52,11 +52,6 @@ router.put("/:roomid", async (req, res) => {
   const { roomid } = req.params;
   const { name, description, room_type } = req.body;
 
-  console.log("Updating room with roomid:", roomid);
-  console.log("Updating with name:", name);
-  console.log("Updating with description:", description);
-  console.log("Updating with room_type:", room_type);
-
   if (!name && !description && !room_type) {
     return res.status(400).json({ error: "No fields to update" });
   }

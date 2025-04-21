@@ -6,6 +6,7 @@ import api from "../../api/axios";
 import PasswordInput from "../showPW";
 import { HexColorPicker } from "react-colorful";
 import FetchTopics from "../fetchTopics";
+import supabase from "../../api/supabaseClient";
 
 const PremManageProfile = () => {
   const [selectedTopics, setSelectedTopics] = useState([]);
@@ -35,6 +36,10 @@ const PremManageProfile = () => {
           const data = JSON.parse(storedUser);
 
           setUserDetails(data.user);
+          if (data.user && data.user.userid) {
+            const color = await fetchProfileColor(data.user.userid);
+            setProfileColor(color); // Set the profile color after fetching
+          }
 
           //  Ensure interests are always an array before setting state
           const formattedInterests = Array.isArray(data.interests)
@@ -109,7 +114,7 @@ const PremManageProfile = () => {
         email: editEmail,
         dob: editDate,
         gender: editGender,
-        color: editColor,
+        color: profileColor,
       };
 
       const response = await api.post("/auth/update-profile", payload, {
@@ -126,7 +131,7 @@ const PremManageProfile = () => {
             ...storedUser.profile,
             dob: editDate,
             gender: editGender,
-            color: editColor,
+            color: profileColor,
           };
           localStorage.setItem("userProfile", JSON.stringify(storedUser));
         }
@@ -313,20 +318,33 @@ const PremManageProfile = () => {
     }
   };
 
-  // const updateProfileColor = async (userId, newColor) => {
-  //   try {
-  //     const { data, error } = await supabase
-  //       .from("usertype") // Assuming the table name is "userprofile"
-  //       .update({ color: newColor }) // Update the color column
-  //       .eq("userid", userId); // Update the record where userid matches
-
-  //     if (error) throw error;
-
-  //     console.log("Profile color updated successfully.");
-  //   } catch (error) {
-  //     console.error("Error updating profile color:", error.message);
-  //   }
-  // };
+  const updateProfileColor = async (newColor) => {
+    if (!userDetails || !userDetails.userid) {
+      alert("User details are not available");
+      return;
+    }
+  
+    try {
+      const payload = {
+        userId: userDetails.userid, // Make sure you're using the correct user ID
+        color: newColor, // New color you want to update
+      };
+  
+      // Make a request to update the color on the server
+      const response = await api.post("/auth/update-color", payload, {
+        headers: { "Content-Type": "application/json" },
+      });
+  
+      if (response.status === 200) {
+        console.log("Profile color updated successfully!");
+        // Update state to reflect new color
+        setProfileColor(newColor);
+      }
+    } catch (error) {
+      console.error("Error updating profile color:", error);
+      alert("Failed to update profile color.");
+    }
+  };
 
   return (
     <div className="w-screen min-h-screen flex flex-col overflow-hidden">
