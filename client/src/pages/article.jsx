@@ -15,6 +15,7 @@ import {
   Flag,
   StickyNote,
   BookOpenIcon,
+  XMarkIcon
 } from "lucide-react";
 import TranslateButton from "../components/translate.jsx";
 
