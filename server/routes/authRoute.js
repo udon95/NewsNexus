@@ -355,7 +355,7 @@ router.get("/user-full/:userid", async (req, res) => {
   }
 });
 
-router.post("/update-profile", async (req, res) => {
+router.put("/update-profile", async (req, res) => {
   const { userId, username, email, dob, gender } = req.body;
 
   if (!userId || !username || !email) {
