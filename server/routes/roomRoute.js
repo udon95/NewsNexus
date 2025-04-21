@@ -50,10 +50,19 @@ router.post("/", async (req, res) => {
 // 🔹 UPDATE room by ID
 router.put("/:roomid", async (req, res) => {
   const { roomid } = req.params.roomid;
-  const updates = req.body;
+  const {name, description, room_type} = req.body;
 
   console.log("Updating room with roomid:", roomid);
-  console.log("Updates object:", updates);
+  // console.log("Updates object:", updates);
+  if (!name && !description && !room_type) {
+    return res.status(400).json({ error: "No fields to update" });
+  }
+  const updates = {};
+
+  if (name) updates.name = name;
+  if (description) updates.description = description;
+  if (room_type) updates.room_type = room_type;
+
 
   const { data, error } = await supabase
     .from("rooms")

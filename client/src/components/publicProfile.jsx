@@ -34,15 +34,15 @@ const PublicProfile = () => {
           <h2 className="text-2xl font-semibold">
             {profileData.user.username}
 
-            {profileData.user.usertype.usertype === "Expert" && (
+            {profileData.user.usertype === "Expert" && (
               <BadgeCheck className="inline-block ml-2 text-blue-500" />
             )}
-            {profileData.user.usertype.usertype === "Premium" && (
+            {profileData.userusertype === "Premium" && (
               <span className="ml-2 px-2 py-1 text-sm bg-yellow-400 text-black rounded-full">
                 Premium
               </span>
             )}
-            {profileData.user.usertype.usertype === "Free" && (
+            {profileData.user.usertype === "Free" && (
               <span className="ml-2 px-2 py-1 text-sm bg-yellow-400 text-black rounded-full">
                 Free
               </span>
