@@ -304,7 +304,7 @@ const Article = () => {
   }, [user, userType, articleData, readArticlesCount]);
 
   return (
-    <div className="min-h-screen w-screen flex flex-col bg-white">
+    <div className="min-h-screen w-screen flex flex-col bg-white" onMouseUp={handleTextSelection}>
       <Navbar />
       <main className="flex flex-col items-center w-full px-4 sm:px-8 py-6 mx-auto max-w-[750px]">
         {articleData && !showPaywall ? (
