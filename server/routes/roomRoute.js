@@ -48,11 +48,14 @@ router.post("/", async (req, res) => {
 });
 
 // 🔹 UPDATE room by ID
-router.put("/:id", async (req, res) => {
-  const { roomid } = req.params;
+router.put("/:roomid", async (req, res) => {
+  const { roomid } = req.params.roomid;
   const updates = req.body;
 
-  const { error } = await supabase
+  console.log("Updating room with roomid:", roomid);
+  console.log("Updates object:", updates);
+
+  const { data, error } = await supabase
     .from("rooms")
     .update(updates)
     .eq("roomid", roomid);
@@ -62,7 +65,7 @@ router.put("/:id", async (req, res) => {
     return res.status(500).json({ error: "Failed to update room" });
   }
 
-  res.status(200).json({ message: "Room updated successfully" });
+  res.status(200).json({ message: "Room updated successfully", data });
 });
 
 // 🔹 DELETE room by ID
