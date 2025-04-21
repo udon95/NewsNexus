@@ -37,7 +37,7 @@ const Article = () => {
   const [selectedReason, setSelectedReason] = useState("");
   const [notes, setNotes] = useState([]);
 
-  const authorName = user?.username;
+  const authorName = articleData.user?.username;
 
   const handleTextSelection = () => {
     const selection = window.getSelection();
@@ -216,7 +216,8 @@ const Article = () => {
       const { data, error } = await supabase
         .from("articles")
         .select(
-          `articleid, title, text, imagepath, time, view_count, rating, status, userid, users (userid, username)`
+          `articleid, title, text, imagepath, time, view_count, 
+          rating, status, userid, users (userid, username)`
         )
         .eq("title", articleName)
         .single();
@@ -318,7 +319,7 @@ const Article = () => {
             <div className="flex items-center text-sm text-gray-600 mb-3 w-full">
               {/* <span className="font-semibold text-black"> */}
               <Link
-                to={`/public-profile/${authorName}`}
+                to={`/public-profile/${encodeURIComponent(authorName)}`}
                 className="underline hover:text-blue-600"
               >
                 {authorName || "Unknown Author"}
