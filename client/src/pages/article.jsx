@@ -15,7 +15,7 @@ import {
   Flag,
   StickyNote,
   BookOpenIcon,
-  XMarkIcon
+  X
 } from "lucide-react";
 import TranslateButton from "../components/translate.jsx";
 
@@ -467,7 +467,7 @@ const Article = () => {
                       Dictionary
                     </h2>
                     <button onClick={() => setShowDictionary(false)}>
-                      <XMarkIcon className="h-6 w-6 text-gray-600 hover:text-black" />
+                      <X className="h-6 w-6 text-gray-600 hover:text-black" />
                     </button>
                   </div>
                   <p className="text-lg mt-2">
