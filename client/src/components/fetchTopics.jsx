@@ -23,7 +23,7 @@ useEffect(() => {
         const { data, error } = await supabase
           .from("topicinterest")
           .select("interesttype")
-          .eq("userid", user.id);
+          .eq("userid", userid);
 
         if (!error && data) {
           const userTopics = data.map((entry) => entry.interests).flat();

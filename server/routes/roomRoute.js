@@ -33,15 +33,15 @@ router.get("/:userid", async (req, res) => {
 
 // 🔹 CREATE new room
 router.post("/", async (req, res) => {
-  const { name, description, privacy, created_by } = req.body;
+  const { name, description, room_type, created_by } = req.body;
 
-  if (!name || !description || !privacy || !created_by) {
+  if (!name || !description || !room_type || !created_by) {
     return res.status(400).json({ error: "Missing required fields" });
   }
 
-  const { data, error } = await supabase.from("rooms").insert([
-    { name, description, privacy, created_by }
-  ]);
+  const { data, error } = await supabase
+    .from("rooms")
+    .insert([{ name, description, room_type, created_by }]);
 
   if (error) return res.status(500).json({ error: error.message });
   res.status(201).json({ message: "Room created", data });
@@ -49,10 +49,13 @@ router.post("/", async (req, res) => {
 
 // 🔹 UPDATE room by ID
 router.put("/:id", async (req, res) => {
-  const { id } = req.params;
+  const { roomid } = req.params;
   const updates = req.body;
 
-  const { error } = await supabase.from("managerooms").update(updates).eq("id", id);
+  const { error } = await supabase
+    .from("rooms")
+    .update(updates)
+    .eq("id", roomid);
 
   if (error) {
     console.error("Error updating room:", error.message);
@@ -80,7 +83,8 @@ router.post("/invite", async (req, res) => {
     .eq("username", invitee_username)
     .single();
 
-  if (userError || !user) return res.status(404).json({ error: "User not found" });
+  if (userError || !user)
+    return res.status(404).json({ error: "User not found" });
 
   const { error } = await supabase.from("room_members").insert([
     {
@@ -88,8 +92,8 @@ router.post("/invite", async (req, res) => {
       roomid,
       invited_by: inviter_id,
       joined_at: null,
-      exited_at: null
-    }
+      exited_at: null,
+    },
   ]);
 
   if (error) return res.status(500).json({ error: error.message });
