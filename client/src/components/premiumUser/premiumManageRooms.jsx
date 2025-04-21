@@ -19,10 +19,12 @@ const ManageRooms = () => {
   const userId = userProfile?.user?.userid;
 
   const fetchRooms = async () => {
-    const res = await fetch(`https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/rooms/${userId}`);
+    const res = await fetch(
+      `https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/rooms/${userId}`
+    );
     const data = await res.json();
-    setPublicRooms(data.filter((room) => room.privacy === "Public"));
-    setPrivateRooms(data.filter((room) => room.privacy === "Private"));
+    setPublicRooms(data.filter((room) => room.room_type === "Public"));
+    setPrivateRooms(data.filter((room) => room.room_type === "Private"));
   };
 
   const fetchInvites = async () => {
@@ -44,18 +46,21 @@ const ManageRooms = () => {
   useEffect(() => {
     fetchRooms();
     fetchInvites();
-  }, []);
+  }, [userId]);
 
   const handleAddPublicRoom = async () => {
-    const res = await fetch("https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/rooms", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        ...newPublicRoom,
-        privacy: "Public",
-        created_by: userId,
-      }),
-    });
+    const res = await fetch(
+      "https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/rooms",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...newPublicRoom,
+          privacy: "Public",
+          created_by: userId,
+        }),
+      }
+    );
 
     if (res.ok) {
       alert("Public room created");
@@ -65,15 +70,18 @@ const ManageRooms = () => {
   };
 
   const handleAddPrivateRoom = async () => {
-    const res = await fetch("https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/rooms", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        ...newPrivateRoom,
-        privacy: "Private",
-        created_by: userId,
-      }),
-    });
+    const res = await fetch(
+      "https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/rooms",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...newPrivateRoom,
+          privacy: "Private",
+          created_by: userId,
+        }),
+      }
+    );
 
     if (res.ok) {
       alert("Private room created");
@@ -87,15 +95,18 @@ const ManageRooms = () => {
         .slice(0, 10);
 
       for (let username of usernames) {
-        await fetch("https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/rooms/invite", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            inviter_id: userId,
-            invitee_username: username,
-            roomid,
-          }),
-        });
+        await fetch(
+          "https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/rooms/invite",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              inviter_id: userId,
+              invitee_username: username,
+              roomid,
+            }),
+          }
+        );
       }
 
       setNewPrivateRoom({ name: "", description: "", invite: "" });
@@ -104,28 +115,37 @@ const ManageRooms = () => {
   };
 
   const handleDeleteRoom = async (roomid) => {
-    await fetch(`https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/rooms/${roomid}`, {
-      method: "DELETE",
-    });
+    await fetch(
+      `https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/rooms/${roomid}`,
+      {
+        method: "DELETE",
+      }
+    );
     fetchRooms();
   };
 
   const handleAcceptInvite = async (roomid) => {
-    await fetch("https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/rooms/accept", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ userid: userId, roomid }),
-    });
+    await fetch(
+      "https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/rooms/accept",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userid: userId, roomid }),
+      }
+    );
     alert("Joined room");
     fetchInvites();
   };
 
   const handleExitRoom = async (roomid) => {
-    await fetch("https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/rooms/exit", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ userid: userId, roomid }),
-    });
+    await fetch(
+      "https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/rooms/exit",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userid: userId, roomid }),
+      }
+    );
     alert("Exited room");
     fetchRooms();
   };
@@ -136,71 +156,137 @@ const ManageRooms = () => {
 
   return (
     <div className="flex min-h-screen text-base">
-       <div className="flex-1 p-10 bg-[#eef2fc] space-y-8">
-         {/* Public Rooms */}
-         <section>
-           <h2 className="font-bold text-xl mb-2">My Public Discussion Rooms :</h2>
-           <div className="flex gap-2 items-center mb-2">
-             <input placeholder="Name" value={newPublicRoom.name}
-               onChange={e => setNewPublicRoom({ ...newPublicRoom, name: e.target.value })}
-               className="w-1/4 px-3 py-2 border rounded-md text-base" />
-             <input placeholder="Description" value={newPublicRoom.description}
-               onChange={e => setNewPublicRoom({ ...newPublicRoom, description: e.target.value })}
-               className="w-2/3 px-3 py-2 border rounded-md text-base" />
-             <button onClick={handleAddPublicRoom} className="bg-black text-white px-4 py-2 rounded text-base">+</button>
-           </div>
-           <div className="bg-white p-4 rounded-xl shadow space-y-2">
-             {publicRooms.map((room, index) => (
-               <div key={room.roomid} className={rowStyle}>
-                 <span>{index + 1}. {room.name}</span>
-                 <button onClick={() => handleDeleteRoom(room.roomid)} className={buttonClass}>Delete</button>
-               </div>
-             ))}
-           </div>
-         </section>
- 
-         {/* Private Rooms */}
-         <section>
-           <h2 className="font-bold text-xl mb-2">My Private Discussion Rooms :</h2>
-           <div className="flex gap-2 items-center mb-2">
-             <input placeholder="Name" value={newPrivateRoom.name}
-               onChange={e => setNewPrivateRoom({ ...newPrivateRoom, name: e.target.value })}
-               className="w-1/4 px-3 py-2 border rounded-md text-base" />
-             <input placeholder="Description" value={newPrivateRoom.description}
-               onChange={e => setNewPrivateRoom({ ...newPrivateRoom, description: e.target.value })}
-               className="w-2/3 px-3 py-2 border rounded-md text-base" />
-           </div>
-           <div className="flex items-center gap-2 mb-2">
-             <input placeholder="@username1, @username2" value={newPrivateRoom.invite}
-               onChange={e => setNewPrivateRoom({ ...newPrivateRoom, invite: e.target.value })}
-               className="w-full px-3 py-2 border rounded-md text-base" />
-             <button onClick={handleAddPrivateRoom} className="bg-black text-white px-4 py-2 rounded text-base">+</button>
-           </div>
-           <div className="bg-white p-4 rounded-xl shadow space-y-2">
-             {privateRooms.map((room, index) => (
-               <div key={room.roomid} className={rowStyle}>
-                 <span>{index + 1}. {room.name}</span>
-                 <button onClick={() => handleDeleteRoom(room.roomid)} className={buttonClass}>Delete</button>
-               </div>
-             ))}
-           </div>
-         </section>
- 
-         {/* Invites */}
-         <section>
-           <h2 className="font-bold text-xl mb-2">My Invites:</h2>
-           <div className="bg-white p-4 rounded-xl shadow space-y-2">
-             {invites.map((invite, index) => (
-               <div key={invite.id} className={rowStyle}>
-                 <span>{index + 1}. {invite.name}</span>
-                 <button onClick={() => handleAcceptInvite(invite.id)} className={buttonClass}>Accept</button>
-               </div>
-             ))}
-           </div>
-         </section>
-       </div>
-     </div>
-   );
- };
+      <div className="flex-1 p-10 bg-[#eef2fc] space-y-8">
+        {/* Public Rooms */}
+        <section>
+          <h2 className="font-bold text-xl mb-2">
+            My Public Discussion Rooms :
+          </h2>
+          <div className="flex gap-2 items-center mb-2">
+            <input
+              placeholder="Name"
+              value={newPublicRoom.name}
+              onChange={(e) =>
+                setNewPublicRoom({ ...newPublicRoom, name: e.target.value })
+              }
+              className="w-1/4 px-3 py-2 border rounded-md text-base"
+            />
+            <input
+              placeholder="Description"
+              value={newPublicRoom.description}
+              onChange={(e) =>
+                setNewPublicRoom({
+                  ...newPublicRoom,
+                  description: e.target.value,
+                })
+              }
+              className="w-2/3 px-3 py-2 border rounded-md text-base"
+            />
+            <button
+              onClick={handleAddPublicRoom}
+              className="bg-black text-white px-4 py-2 rounded text-base"
+            >
+              +
+            </button>
+          </div>
+          <div className="bg-white p-4 rounded-xl shadow space-y-2">
+            {publicRooms.map((room, index) => (
+              <div key={room.roomid} className={rowStyle}>
+                <span>
+                  {index + 1}. {room.name}
+                </span>
+                <button
+                  onClick={() => handleDeleteRoom(room.roomid)}
+                  className={buttonClass}
+                >
+                  Delete
+                </button>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* Private Rooms */}
+        <section>
+          <h2 className="font-bold text-xl mb-2">
+            My Private Discussion Rooms :
+          </h2>
+          <div className="flex gap-2 items-center mb-2">
+            <input
+              placeholder="Name"
+              value={newPrivateRoom.name}
+              onChange={(e) =>
+                setNewPrivateRoom({ ...newPrivateRoom, name: e.target.value })
+              }
+              className="w-1/4 px-3 py-2 border rounded-md text-base"
+            />
+            <input
+              placeholder="Description"
+              value={newPrivateRoom.description}
+              onChange={(e) =>
+                setNewPrivateRoom({
+                  ...newPrivateRoom,
+                  description: e.target.value,
+                })
+              }
+              className="w-2/3 px-3 py-2 border rounded-md text-base"
+            />
+          </div>
+          <div className="flex items-center gap-2 mb-2">
+            <input
+              placeholder="@username1, @username2"
+              value={newPrivateRoom.invite}
+              onChange={(e) =>
+                setNewPrivateRoom({ ...newPrivateRoom, invite: e.target.value })
+              }
+              className="w-full px-3 py-2 border rounded-md text-base"
+            />
+            <button
+              onClick={handleAddPrivateRoom}
+              className="bg-black text-white px-4 py-2 rounded text-base"
+            >
+              +
+            </button>
+          </div>
+          <div className="bg-white p-4 rounded-xl shadow space-y-2">
+            {privateRooms.map((room, index) => (
+              <div key={room.roomid} className={rowStyle}>
+                <span>
+                  {index + 1}. {room.name}
+                </span>
+                <button
+                  onClick={() => handleDeleteRoom(room.roomid)}
+                  className={buttonClass}
+                >
+                  Delete
+                </button>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* Invites */}
+        <section>
+          <h2 className="font-bold text-xl mb-2">My Invites:</h2>
+          <div className="bg-white p-4 rounded-xl shadow space-y-2">
+            {invites.map((invite, index) => (
+              <div key={invite.id} className={rowStyle}>
+                <span>
+                  {index + 1}. {invite.name}
+                </span>
+                <button
+                  onClick={() => handleAcceptInvite(invite.id)}
+                  className={buttonClass}
+                >
+                  Accept
+                </button>
+              </div>
+            ))}
+          </div>
+        </section>
+      </div>
+    </div>
+  );
+};
 
 export default ManageRooms;
