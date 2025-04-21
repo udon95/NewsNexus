@@ -30,9 +30,9 @@ function Home() {
     navigate("/rooms");
   };
 
-  if (loading) {
-    return <p>Loading...</p>; // Prevents flickering before user is set
-  }
+  // if (loading) {
+  //   return <p>Loading...</p>; // Prevents flickering before user is set
+  // }
 
   return (
     <div className="w-full min-w-screen min-h-screen flex flex-col bg-white">

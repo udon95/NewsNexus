@@ -236,7 +236,7 @@ router.get("/user-role/:userid", async (req, res) => {
 
   const { data, error } = await supabase
     .from("usertype")
-    .select("usertype")
+    .select("*")
     .eq("userid", userid)
     .single();
 

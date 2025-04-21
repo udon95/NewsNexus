@@ -25,6 +25,7 @@ const FetchTopics = ({ selectedTopics, handleTopicSelection }) => {
 
   useEffect(() => {
     const fetchTopics = async () => {
+      const { userid } = req.params;
       if (user) {
         // If user is logged in, fetch their selected topics from the 'topicinterests' table
         const { data, error } = await supabase
