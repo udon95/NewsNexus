@@ -501,13 +501,25 @@ router.get("/public-profile/:username", async (req, res) => {
     // 1. Fetch basic user details (e.g. username)
     const { data: userData, error: userError } = await supabase
       .from("users")
-      .select(`userid, username, status, usertype:usertype ( usertype )`)
+      .select(`userid, username, status`)
       .eq("username", username)
       .single();
 
     if (userError || !userData) {
       return res.status(404).json({ error: "User not found" });
     }
+
+    const { data: typeRow, error: typeError } = await supabase
+     .from("usertype")
+     .select("usertype")
+     .eq("userid", userData.userid)
+     .single();
+
+   if (typeError) {
+     // you can either default it or treat it as not‑found
+     return res.status(500).json({ error: "Could not load usertype" });
+   }
+
 
     const userId = userData.userid;
 
@@ -562,7 +574,7 @@ router.get("/public-profile/:username", async (req, res) => {
       user: {
         userid: userData.userid,
         username: userData.username,
-        usertype: userData.usertype, // front-end can check if usertype === "Expert" to show icon
+        usertype: typeRow.usertype, // front-end can check if usertype === "Expert" to show icon
         status: userData.status,
       },
       articles: articlesData || [],
