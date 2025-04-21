@@ -501,7 +501,7 @@ router.get("/public-profile/:username", async (req, res) => {
     // 1. Fetch basic user details (e.g. username)
     const { data: userData, error: userError } = await supabase
       .from("users")
-      .select(`userid, username, status,  usertype `)
+      .select(`userid, username, status, usertype:usertype ( usertype )`)
       .eq("username", username)
       .single();
 
