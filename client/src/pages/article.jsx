@@ -39,9 +39,6 @@ const Article = () => {
   const [selectedReason, setSelectedReason] = useState("");
   const [notes, setNotes] = useState([]);
 
-  console.log(articleData);
-  const authorName = articleData.users?.username;
-
   const handleTextSelection = () => {
     const selection = window.getSelection();
     const text = selection.toString().trim();
@@ -306,6 +303,8 @@ const Article = () => {
       setShowPaywall(true);
     }
   }, [user, userType, articleData, readArticlesCount]);
+
+  const authorName = articleData?.users?.username;
 
   return (
     <div
