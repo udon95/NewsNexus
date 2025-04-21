@@ -9,7 +9,13 @@ import Comments from "../components/commentsSection.jsx";
 import useAuthHook from "../hooks/useAuth.jsx";
 import { Link, useParams, useNavigate } from "react-router-dom";
 import supabase from "../api/supabaseClient";
-import { Share2, Headphones, Flag, StickyNote, BookOpenIcon } from "lucide-react";
+import {
+  Share2,
+  Headphones,
+  Flag,
+  StickyNote,
+  BookOpenIcon,
+} from "lucide-react";
 import TranslateButton from "../components/translate.jsx";
 
 const Article = () => {
@@ -32,6 +38,7 @@ const Article = () => {
   const [showDictionary, setShowDictionary] = useState(false);
   const [buttonPosition, setButtonPosition] = useState({ x: 0, y: 0 });
   const buttonRef = useRef(null);
+  const [loading, setLoading] = useState(false);
 
   const [showNote, setShowNote] = useState(false);
   const [noteText, setNoteText] = useState("");
@@ -43,18 +50,17 @@ const Article = () => {
     const selection = window.getSelection();
     const text = selection.toString().trim();
 
-    if (text) {
-      setSelectedText(text);
-
-      // Get the bounding rectangle of the selected text
-      const range = selection.getRangeAt(0).getBoundingClientRect();
-      setButtonPosition({
-        x: range.left + window.scrollX,
-        y: range.top + window.scrollY - 40, // Position above text
-      });
-    } else {
+    if (!text) {
       setSelectedText("");
+      return;
     }
+    setSelectedText(text);
+
+    const rect = selection.getRangeAt(0).getBoundingClientRect();
+    setButtonPosition({
+      x: rect.left + window.scrollX,
+      y: rect.top + window.scrollY - 40,
+    });
   };
 
   // Function to fetch word definition
@@ -134,7 +140,7 @@ const Article = () => {
       alert("Article content not available.");
       return;
     }
-    
+
     setSelectedLanguage(targetLang);
     const textToTranslate = originalText;
 
@@ -321,7 +327,7 @@ const Article = () => {
     }
   }, [user, userType, articleData, readArticlesCount]);
 
-  const authorName = articleData?.users?.username;
+  const authorName = articleData?.users?.username ?? "Unknown Author";
 
   return (
     <div
@@ -341,7 +347,7 @@ const Article = () => {
                 to={`/public-profile/${encodeURIComponent(authorName)}`}
                 className="underline hover:text-blue-600"
               >
-                {authorName || "Unknown Author"}
+                {authorName}
               </Link>
               {/* </span> */}
               <span className="mx-2">•</span>
@@ -447,7 +453,7 @@ const Article = () => {
                 }}
               >
                 <BookOpenIcon className="h-5 w-5" />
-                <span>Define "{selectedText}"</span>
+                <span>{loading ? "Loading…" : `Define "{selectedText}"`}</span>
               </button>
             )}
 
