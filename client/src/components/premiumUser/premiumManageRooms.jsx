@@ -56,7 +56,7 @@ const ManageRooms = () => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...newPublicRoom,
-          privacy: "Public",
+          room_type: "Public",
           created_by: userId,
         }),
       }
@@ -77,7 +77,7 @@ const ManageRooms = () => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...newPrivateRoom,
-          privacy: "Private",
+          room_type: "Private",
           created_by: userId,
         }),
       }
@@ -112,6 +112,23 @@ const ManageRooms = () => {
       setNewPrivateRoom({ name: "", description: "", invite: "" });
       fetchRooms();
     }
+  };
+
+  const handleUpdateRoom = async (roomid, currentName, currentDescription) => {
+    const newName = prompt("Enter new name", currentName);
+    const newDesc = prompt("Enter new description", currentDescription);
+    if (!newName || !newDesc) return;
+
+    await fetch(
+      `https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/rooms/${roomid}`,
+      {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: newName, description: newDesc }),
+      }
+    );
+
+    fetchRooms();
   };
 
   const handleDeleteRoom = async (roomid) => {
@@ -159,48 +176,25 @@ const ManageRooms = () => {
       <div className="flex-1 p-10 bg-[#eef2fc] space-y-8">
         {/* Public Rooms */}
         <section>
-          <h2 className="font-bold text-xl mb-2">
-            My Public Discussion Rooms :
-          </h2>
+          <h2 className="font-bold text-xl mb-2">My Public Discussion Rooms :</h2>
           <div className="flex gap-2 items-center mb-2">
-            <input
-              placeholder="Name"
-              value={newPublicRoom.name}
-              onChange={(e) =>
-                setNewPublicRoom({ ...newPublicRoom, name: e.target.value })
-              }
-              className="w-1/4 px-3 py-2 border rounded-md text-base"
-            />
-            <input
-              placeholder="Description"
-              value={newPublicRoom.description}
-              onChange={(e) =>
-                setNewPublicRoom({
-                  ...newPublicRoom,
-                  description: e.target.value,
-                })
-              }
-              className="w-2/3 px-3 py-2 border rounded-md text-base"
-            />
-            <button
-              onClick={handleAddPublicRoom}
-              className="bg-black text-white px-4 py-2 rounded text-base"
-            >
-              +
-            </button>
+            <input placeholder="Name" value={newPublicRoom.name}
+              onChange={e => setNewPublicRoom({ ...newPublicRoom, name: e.target.value })}
+              className="w-1/4 px-3 py-2 border rounded-md text-base" />
+            <input placeholder="Description" value={newPublicRoom.description}
+              onChange={e => setNewPublicRoom({ ...newPublicRoom, description: e.target.value })}
+              className="w-2/3 px-3 py-2 border rounded-md text-base" />
+            <button onClick={handleAddPublicRoom} className="bg-black text-white px-4 py-2 rounded text-base">+</button>
           </div>
           <div className="bg-white p-4 rounded-xl shadow space-y-2">
             {publicRooms.map((room, index) => (
               <div key={room.roomid} className={rowStyle}>
-                <span>
-                  {index + 1}. {room.name}
-                </span>
-                <button
-                  onClick={() => handleDeleteRoom(room.roomid)}
-                  className={buttonClass}
-                >
-                  Delete
-                </button>
+                <span>{index + 1}. {room.name}</span>
+                <div className="flex gap-2">
+                  <button onClick={() => handleUpdateRoom(room.roomid, room.name, room.description)} className={buttonClass}>Update</button>
+                  <button onClick={() => handleDeleteRoom(room.roomid)} className={buttonClass}>Delete</button>
+                  <button onClick={() => handleExitRoom(room.roomid)} className={buttonClass}>Exit</button>
+                </div>
               </div>
             ))}
           </div>
@@ -208,58 +202,30 @@ const ManageRooms = () => {
 
         {/* Private Rooms */}
         <section>
-          <h2 className="font-bold text-xl mb-2">
-            My Private Discussion Rooms :
-          </h2>
+          <h2 className="font-bold text-xl mb-2">My Private Discussion Rooms :</h2>
           <div className="flex gap-2 items-center mb-2">
-            <input
-              placeholder="Name"
-              value={newPrivateRoom.name}
-              onChange={(e) =>
-                setNewPrivateRoom({ ...newPrivateRoom, name: e.target.value })
-              }
-              className="w-1/4 px-3 py-2 border rounded-md text-base"
-            />
-            <input
-              placeholder="Description"
-              value={newPrivateRoom.description}
-              onChange={(e) =>
-                setNewPrivateRoom({
-                  ...newPrivateRoom,
-                  description: e.target.value,
-                })
-              }
-              className="w-2/3 px-3 py-2 border rounded-md text-base"
-            />
+            <input placeholder="Name" value={newPrivateRoom.name}
+              onChange={e => setNewPrivateRoom({ ...newPrivateRoom, name: e.target.value })}
+              className="w-1/4 px-3 py-2 border rounded-md text-base" />
+            <input placeholder="Description" value={newPrivateRoom.description}
+              onChange={e => setNewPrivateRoom({ ...newPrivateRoom, description: e.target.value })}
+              className="w-2/3 px-3 py-2 border rounded-md text-base" />
           </div>
           <div className="flex items-center gap-2 mb-2">
-            <input
-              placeholder="@username1, @username2"
-              value={newPrivateRoom.invite}
-              onChange={(e) =>
-                setNewPrivateRoom({ ...newPrivateRoom, invite: e.target.value })
-              }
-              className="w-full px-3 py-2 border rounded-md text-base"
-            />
-            <button
-              onClick={handleAddPrivateRoom}
-              className="bg-black text-white px-4 py-2 rounded text-base"
-            >
-              +
-            </button>
+            <input placeholder="@username1, @username2" value={newPrivateRoom.invite}
+              onChange={e => setNewPrivateRoom({ ...newPrivateRoom, invite: e.target.value })}
+              className="w-full px-3 py-2 border rounded-md text-base" />
+            <button onClick={handleAddPrivateRoom} className="bg-black text-white px-4 py-2 rounded text-base">+</button>
           </div>
           <div className="bg-white p-4 rounded-xl shadow space-y-2">
             {privateRooms.map((room, index) => (
               <div key={room.roomid} className={rowStyle}>
-                <span>
-                  {index + 1}. {room.name}
-                </span>
-                <button
-                  onClick={() => handleDeleteRoom(room.roomid)}
-                  className={buttonClass}
-                >
-                  Delete
-                </button>
+                <span>{index + 1}. {room.name}</span>
+                <div className="flex gap-2">
+                  <button onClick={() => handleUpdateRoom(room.roomid, room.name, room.description)} className={buttonClass}>Update</button>
+                  <button onClick={() => handleDeleteRoom(room.roomid)} className={buttonClass}>Delete</button>
+                  <button onClick={() => handleExitRoom(room.roomid)} className={buttonClass}>Exit</button>
+                </div>
               </div>
             ))}
           </div>
@@ -267,19 +233,13 @@ const ManageRooms = () => {
 
         {/* Invites */}
         <section>
-          <h2 className="font-bold text-xl mb-2">My Invites:</h2>
+          <h2 className="font-bold text-xl mb-2">My Private Discussion Room Invites :</h2>
           <div className="bg-white p-4 rounded-xl shadow space-y-2">
             {invites.map((invite, index) => (
               <div key={invite.id} className={rowStyle}>
-                <span>
-                  {index + 1}. {invite.name}
-                </span>
-                <button
-                  onClick={() => handleAcceptInvite(invite.id)}
-                  className={buttonClass}
-                >
-                  Accept
-                </button>
+                <span>{index + 1}. {invite.name}</span>
+                <button onClick={() => handleAcceptInvite(invite.id)} className={buttonClass}>Accept</button>
+                <button className={buttonClass}>Decline</button>
               </div>
             ))}
           </div>

@@ -8,15 +8,22 @@ const FetchTopics = ({ selectedTopics, handleTopicSelection }) => {
   const [user, setUser] = useState(null);
 
   useEffect(() => {
-    const fetchUser = async () => {
-      const { data: userData } = await supabase.auth.getUser();
-      setUser(userData);
-    };
+    const raw = localStorage.getItem("userProfile");
+    if (!raw) return;
 
-    fetchUser();
+    try {
+      // 2) parse it
+      const { user } = JSON.parse(raw);
+
+      // 3) stash your app‑level user record
+      setUser(user); // user.userid, user.username, user.usertype
+    } catch (err) {
+      console.error("Failed to load userProfile from localStorage:", err);
+      setError(err.message);
+    }
   }, []);
 
-useEffect(() => {
+  useEffect(() => {
     const fetchTopics = async () => {
       if (user) {
         // If user is logged in, fetch their selected topics from the 'topicinterests' table
@@ -26,7 +33,7 @@ useEffect(() => {
           .eq("userid", userid);
 
         if (!error && data) {
-          const userTopics = data.map((entry) => entry.interests).flat();
+          const userTopics = data.map((entry) => entry.interesttype).flat();
           setTopics(userTopics);
         } else {
           console.error("Error fetching user topics:", error);

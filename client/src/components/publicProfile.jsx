@@ -1,67 +1,8 @@
-// import React, { useEffect, useState } from "react";
-// import { useParams } from "react-router-dom";
-// import axios from "axios";
-
-// function PublicProfile() {
-//   const { userid } = useParams();
-//   const [profileData, setProfileData] = useState(null);
-//   const [error, setError] = useState("");
-
-//   useEffect(() => {
-//     const fetchProfile = async () => {
-//       try {
-//         const response = await axios.get(`/public-profile/${userId}`);
-//         setProfileData(response.data);
-//       } catch (err) {
-//         setError(err.response?.data?.error || "Error fetching profile.");
-//       }
-//     };
-//     fetchProfile();
-//   }, [userId]);
-
-//   if (error) return <div>{error}</div>;
-//   if (!profileData) return <div>Loading...</div>;
-
-//   return (
-//     <div>
-//       <h2>{profileData.user.username}</h2>
-//       {profileData.biography && (
-//         <div>
-//           <h3>Biography:</h3>
-//           <p>{profileData.biography}</p>
-//         </div>
-//       )}
-//       <div>
-//         <h3>Articles:</h3>
-//         <ul>
-//           {profileData.articles.map((article) => (
-//             <li key={article.articleid}>
-//               <h4>{article.title}</h4>
-//               <p>{article.summary}</p>
-//             </li>
-//           ))}
-//         </ul>
-//       </div>
-//       <div>
-//         <h3>Public Rooms Joined:</h3>
-//         <ul>
-//           {profileData.publicRooms.map((room) => (
-//             <li key={room.roomid}>{room.room_name}</li>
-//           ))}
-//         </ul>
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default PublicProfile;
-
 import React, { useEffect, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { BadgeCheck, ArrowLeft } from "lucide-react";
 import Navbar from "./navbar.jsx";
 import api from "../api/axios.jsx";
-import axios from "axios";
 
 const PublicProfile = () => {
   const { username } = useParams();
@@ -69,38 +10,10 @@ const PublicProfile = () => {
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
-  // Dummy data to use for a fake user
-  // const dummyData = {
-  //   userid: "fake123",
-  //   username: "John",
-  //   usertype: "Expert",
-  //   articles: [
-  //     {
-  //       articleid: 1,
-  //       title: "Dummy Article One",
-  //       summary: "Summary for article one.",
-  //     },
-  //     {
-  //       articleid: 2,
-  //       title: "Dummy Article Two",
-  //       summary: "Summary for article two.",
-  //     },
-  //   ],
-  //   publicRooms: [
-  //     { roomid: 1, room_name: "Public Room A" },
-  //     { roomid: 2, room_name: "Public Room B" },
-  //   ],
-  //   biography:
-  //     "I have a PHD in Computer Science, and have been working in the industry for 20 years.",
-  // };
-
   useEffect(() => {
     const fetchUserData = async () => {
-      // If using a fake ID, directly set dummy data
-
       try {
         const response = await api.get(`/auth/public-profile/${username}`);
-        // Here, you might combine the user data with dummy articles/rooms if needed
         setProfileData(response.data);
       } catch (err) {
         setError(err.response?.data?.error || "Error fetching user data");

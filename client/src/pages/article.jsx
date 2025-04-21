@@ -37,6 +37,8 @@ const Article = () => {
   const [selectedReason, setSelectedReason] = useState("");
   const [notes, setNotes] = useState([]);
 
+  const authorName = articleData.users?.username;
+
   const handleTextSelection = () => {
     const selection = window.getSelection();
     const text = selection.toString().trim();
@@ -313,10 +315,10 @@ const Article = () => {
             <div className="flex items-center text-sm text-gray-600 mb-3 w-full">
               {/* <span className="font-semibold text-black"> */}
               <Link
-                to={`/public-profile/${username}`}
+                to={`/public-profile/${authorName}`}
                 className="underline hover:text-blue-600"
               >
-                {articleData.users?.username || "Unknown Author"}
+                {authorName || "Unknown Author"}
               </Link>
               {/* </span> */}
               <span className="mx-2">•</span>
