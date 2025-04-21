@@ -55,7 +55,7 @@ router.put("/:id", async (req, res) => {
   const { error } = await supabase
     .from("rooms")
     .update(updates)
-    .eq("id", roomid);
+    .eq("roomid", roomid);
 
   if (error) {
     console.error("Error updating room:", error.message);
