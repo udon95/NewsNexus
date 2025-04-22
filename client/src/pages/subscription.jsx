@@ -220,7 +220,7 @@ const SubscriptionPage = () => {
               className="bg-[#3F414C] text-white p-3 rounded-lg cursor-pointer text-sm"
               onClick={handleUpgrade}
             >
-              Upgrade
+              {role === "Premium" ? "Unsubscribe" : "Upgrade"}
             </button>
           </div>
         </div>

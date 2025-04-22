@@ -11,7 +11,7 @@ router.post("/create-checkout-session", async (req, res) => {
     const { data: sub, error: subErr } = await supabase
       .from("subscriptions")
       .select(
-        "default_price, promotion_price, promotion_active, promotion_end_date, effective_price"
+        "tier, default_price, promotion_price, promotion_active, promotion_end_date, effective_price"
       )
       .eq("id", subscriptionId)
       .single();
@@ -41,6 +41,7 @@ router.post("/create-checkout-session", async (req, res) => {
               name: "Premium Subscription", // You can customize this to your needs
             },
             unit_amount: priceToUse * 100, // Stripe expects the price in cents, so multiply by 100
+            recurring: {interval: "month"},
           },
           quantity: 1,
         },
