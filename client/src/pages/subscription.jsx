@@ -47,7 +47,7 @@ const SubscriptionPage = () => {
         // Handle Unsubscribe logic for Premium users
         // You might call an API to update the user's subscription status in your backend
         const response = await fetch(
-          `${import.meta.env.VITE_API_BASE_URL}/subscription/unsubscribe`, // Hosted not tested
+          "https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/subscription/unsubscribe", // Hosted not tested
           // "http://localhost:5000/subscription/unsubscribe",
           {
             method: "POST",
@@ -70,14 +70,14 @@ const SubscriptionPage = () => {
         }
       } else if (selectedSubscription) {
         const response = await fetch(
-          `${import.meta.env.VITE_API_BASE_URL}/subscription/create-checkout-session`, //hosted not tested
+          "https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/subscription/create-checkout-session", //hosted not tested
           // "http://localhost:5000/subscription/create-checkout-session",
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
               userId,
-              promotion_price: selectedSubscription.promotion_price,
+              subscriptionId: selectedSubscription.id,
             }),
           }
         );
