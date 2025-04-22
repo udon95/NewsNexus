@@ -147,6 +147,18 @@ function Register() {
     }
   };
 
+  const resendConfirmationEmail = async () => {
+    const { error } = await supabase.auth.resend({
+      type: "signup",
+      email: userData.email,
+      options: {
+        emailRedirectTo: window.location.origin + "/login",
+      },
+    });
+    if (error) return alert("Error resending email: " + error.message);
+    alert("A new confirmation link has been sent to your inbox.");
+  };
+
   return (
     <div className="w-full min-h-screen min-w-screen flex flex-col bg-white">
       <Navbar />
@@ -353,6 +365,14 @@ function Register() {
             </button>
           </div>
         )}
+
+        <button
+          type="button"
+          onClick={resendConfirmationEmail}
+          className="mt-4 text-sm underline"
+        >
+          Resend confirmation email
+        </button>
       </main>
     </div>
   );

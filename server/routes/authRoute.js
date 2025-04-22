@@ -141,14 +141,12 @@ router.post("/register", async (req, res) => {
   try {
     const salt = await bcrypt.genSalt(10);
     const hashPw = await bcrypt.hash(password, salt);
-    // 1) Create user in Supabase Auth
-    const { data: authData, error: authError } = await supabase.auth.signUp({
-      email,
-      password,
-      options: { data: { username, dob, gender } },
-    });
 
-    if (authError) return res.status(400).json({ error: authError.message });
+    if (!username || !email || !password || !dob || !gender) {
+      return res
+        .status(400)
+        .json({ error: "Missing required registration fields." });
+    }
 
     // Calculate age from dob
     const birthDate = new Date(dob);
@@ -168,6 +166,14 @@ router.post("/register", async (req, res) => {
         .status(400)
         .json({ error: "You must be at least 16 years old to register." });
     }
+
+    const { data: authData, error: authError } = await supabase.auth.signUp({
+      email,
+      password,
+      options: { data: { username, dob, gender } },
+    });
+
+    if (authError) return res.status(400).json({ error: authError.message });
 
     const userId = authData.user.id;
 
@@ -511,16 +517,15 @@ router.get("/public-profile/:username", async (req, res) => {
     }
 
     const { data: typeRow, error: typeError } = await supabase
-     .from("usertype")
-     .select("usertype")
-     .eq("userid", userData.userid)
-     .single();
+      .from("usertype")
+      .select("usertype")
+      .eq("userid", userData.userid)
+      .single();
 
-   if (typeError) {
-     // you can either default it or treat it as not‑found
-     return res.status(500).json({ error: "Could not load usertype" });
-   }
-
+    if (typeError) {
+      // you can either default it or treat it as not‑found
+      return res.status(500).json({ error: "Could not load usertype" });
+    }
 
     const userId = userData.userid;
 
