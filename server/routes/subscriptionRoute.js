@@ -5,9 +5,31 @@ const supabase = require("../supabaseClient"); // Import Supabase client
 
 router.post("/create-checkout-session", async (req, res) => {
   try {
-    const { userId, promotion_price } = req.body; // Receive promotion_price from frontend
-    const priceToUse = promotion_price ? promotion_price : process.env.DEFAULT_PRICE;
+    const { userId, subscriptionId } = req.body;
 
+    // 1) fetch the subscription row
+    const { data: sub, error: subErr } = await supabase
+      .from("subscriptions")
+      .select(
+        "default_price, promotion_price, promotion_active, promotion_end_date, effective_price"
+      )
+      .eq("id", subscriptionId)
+      .single();
+  
+    if (subErr) throw subErr;
+  
+    // 2) decide which price to charge
+    const now = new Date();
+    const promoStillValid =
+      sub.promotion_active &&
+      sub.promotion_price != null &&
+      new Date(sub.promotion_end_date) >= now;
+  
+    
+    const priceToUse =
+      sub.effective_price ??
+      (promoStillValid ? sub.promotion_price : sub.default_price);
+  
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
       mode: "subscription",
