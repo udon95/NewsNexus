@@ -31,6 +31,7 @@ const PaymentStatus = () => {
             console.log(" Subscription updated:", data);
             storedUser.role = "Premium"; //  Update role in local storage
             localStorage.setItem("userProfile", JSON.stringify(storedUser));
+            sessionStorage.setItem("userProfile", JSON.stringify(storedUser))
           })
           .catch((error) =>
             console.error(" Error updating subscription:", error)
