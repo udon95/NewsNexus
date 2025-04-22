@@ -16,7 +16,6 @@ const FetchTopics = ({ selectedTopics, handleTopicSelection }) => {
       if (raw) {
         try {
           const profile = JSON.parse(raw);
-          // adjust these paths to match however you're storing in localStorage
           userId = profile.user?.userid;
           cachedInterests = profile.interests;
         } catch (e) {
@@ -61,7 +60,7 @@ const FetchTopics = ({ selectedTopics, handleTopicSelection }) => {
       }
     };
 
-    // loadTopics();
+    loadTopics();
   }, []); 
 
   return (
