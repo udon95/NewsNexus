@@ -15,21 +15,20 @@ router.post("/create-checkout-session", async (req, res) => {
       )
       .eq("id", subscriptionId)
       .single();
-  
+
     if (subErr) throw subErr;
-  
-    // 2) decide which price to charge
-    const now = new Date();
-    const promoStillValid =
-      sub.promotion_active &&
-      sub.promotion_price != null &&
-      new Date(sub.promotion_end_date) >= now;
-  
-    
-    const priceToUse =
-      sub.effective_price ??
-      (promoStillValid ? sub.promotion_price : sub.default_price);
-  
+
+    // // 2) decide which price to charge
+    // const now = new Date();
+    // const promoStillValid =
+    //   sub.promotion_active &&
+    //   sub.promotion_price != null &&
+    //   new Date(sub.promotion_end_date) >= now;
+
+    const priceToUse = sub.promotion_active
+      ? sub.promotion_price
+      : sub.default_price;
+
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
       mode: "subscription",
@@ -41,14 +40,14 @@ router.post("/create-checkout-session", async (req, res) => {
               name: "Premium Subscription", // You can customize this to your needs
             },
             unit_amount: priceToUse * 100, // Stripe expects the price in cents, so multiply by 100
-            recurring: {interval: "month"},
+            recurring: { interval: "month" },
           },
           quantity: 1,
         },
       ],
-      success_url:
-        `https://van.dpyq2cohucoc7.amplifyapp.com/subscription-status/success?userId=${userId}`,
-      cancel_url: "https://van.dpyq2cohucoc7.amplifyapp.com/subscription-status/cancel",
+      success_url: `https://van.dpyq2cohucoc7.amplifyapp.com/subscription-status/success?userId=${userId}`,
+      cancel_url:
+        "https://van.dpyq2cohucoc7.amplifyapp.com/subscription-status/cancel",
     });
 
     res.json({ url: session.url });
@@ -86,7 +85,7 @@ router.post("/update-subscription", async (req, res) => {
 router.post("/unsubscribe", async (req, res) => {
   try {
     const { userId } = req.body;
-    
+
     if (!userId) {
       return res.status(400).json({ error: "Missing userId" });
     }
@@ -106,6 +105,5 @@ router.post("/unsubscribe", async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
-
 
 module.exports = router;
