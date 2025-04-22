@@ -9,7 +9,6 @@ const PaymentStatus = () => {
   const [showPopup, setShowPopup] = useState(false);
   const { refreshUserProfile } = useAuth(); //  Fetch updated user role
 
-
   useEffect(() => {
     const storedUser = JSON.parse(localStorage.getItem("userProfile"));
     const userId = storedUser?.user?.userid;
@@ -19,11 +18,14 @@ const PaymentStatus = () => {
       setShowPopup(true);
       if (userId) {
         // fetch(`${import.meta.env.VITE_API_BASE_URL}/subscription/update-subscription`, { //hosted not tested
-        fetch("https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/subscription/update-subscription", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ userId }),
-        })
+        fetch(
+          "https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/subscription/update-subscription",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ userId }),
+          }
+        )
           .then((res) => res.json())
           .then((data) => {
             console.log(" Subscription updated:", data);
@@ -31,10 +33,9 @@ const PaymentStatus = () => {
             localStorage.setItem("userProfile", JSON.stringify(storedUser));
           })
           .catch((error) =>
-            console.error("❌ Error updating subscription:", error)
+            console.error(" Error updating subscription:", error)
           );
-          refreshUserProfile(); //  Ensure frontend gets the updated role
-
+        refreshUserProfile(); //  Ensure frontend gets the updated role
       }
     } else if (location.pathname.includes("cancel")) {
       setIsSuccess(false);
@@ -57,9 +58,7 @@ const PaymentStatus = () => {
             isSuccess ? "text-green-600" : "text-red-600"
           }`}
         >
-          {isSuccess
-            ? "🎉 Subscription Successful!"
-            : "😔 Subscription Canceled"}
+          {isSuccess ? " Subscription Successful!" : " Subscription Canceled"}
         </h1>
         <p className="mt-4 text-lg">
           {isSuccess

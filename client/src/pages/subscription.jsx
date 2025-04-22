@@ -31,21 +31,16 @@ const SubscriptionPage = () => {
   const handleUpgrade = async () => {
     try {
       const storedUser = JSON.parse(localStorage.getItem("userProfile"));
-      if (!storedUser || !storedUser.user || !storedUser.user.userid) {
-        // console.error("User not found");
+      if (!storedUser?.user?.userid) {
         alert("Please Sign In");
-        navigate("/login");
-        return;
+        return navigate("/login");
       }
-
       const userId = storedUser.user.userid;
-      const selectedSubscription = subscriptions.find(
-        (sub) => sub.tier !== "Free"
-      );
+      const userRole = storedUser.role;
 
-      if (selectedSubscription && selectedSubscription.tier === "Premium") {
-        // Handle Unsubscribe logic for Premium users
-        // You might call an API to update the user's subscription status in your backend
+      // Handle Unsubscribe logic for Premium users
+      // You might call an API to update the user's subscription status in your backend
+      if (userRole === "Premium") {
         const response = await fetch(
           "https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/subscription/unsubscribe", // Hosted not tested
           // "http://localhost:5000/subscription/unsubscribe",
@@ -66,9 +61,10 @@ const SubscriptionPage = () => {
             JSON.stringify(updatedUserProfile)
           );
         } else {
-          console.error("Error unsubscribing");
+          console.error("Error unsubscribing", data);
         }
-      } else if (selectedSubscription) {
+      } else {
+        const premiumPlan = subscriptions.find((sub) => sub.tier === "Premium");
         const response = await fetch(
           "https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/subscription/create-checkout-session", //hosted not tested
           // "http://localhost:5000/subscription/create-checkout-session",
@@ -77,14 +73,16 @@ const SubscriptionPage = () => {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
               userId,
-              subscriptionId: selectedSubscription.id,
+              subscriptionId: premiumPlan.id,
             }),
           }
         );
 
-        const data = await response.json();
-        if (data.url) {
-          window.location.href = data.url; // Redirect to Stripe Checkout
+        const { url, error } = await response.json();
+        if (error) {
+          console.error("Error processing payment:", error);
+        } else if (url) {
+          window.location.href = url; // Redirect to Stripe Checkout
         }
       }
     } catch (error) {
