@@ -53,13 +53,15 @@ const SubscriptionPage = () => {
 
         const data = await response.json();
         if (data.success) {
-          alert("You have successfully unsubscribed.");
           setRole("Free"); // Update user type to Free
+
           const updatedUserProfile = { ...storedUser, role: "Free" };
           localStorage.setItem(
             "userProfile",
             JSON.stringify(updatedUserProfile)
           );
+          sessionStorage.setItem("userProfile", JSON.stringify(updatedUserProfile))
+          alert("You have successfully unsubscribed.");
         } else {
           console.error("Error unsubscribing", data);
         }
