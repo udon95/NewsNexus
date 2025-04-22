@@ -1,60 +1,68 @@
-// src/components/FetchTopics.jsx
 import React, { useState, useEffect } from "react";
 import supabase from "../api/supabaseClient.js";
 import TopicsList from "./topicList.jsx"; // Adjust the path if needed
 
 const FetchTopics = ({ selectedTopics, handleTopicSelection }) => {
   const [topics, setTopics] = useState([]);
-  const [user, setUser] = useState(null);
+  // const [user, setUser] = useState(null);
 
   useEffect(() => {
-    const raw = localStorage.getItem("userProfile");
-    if (!raw) return;
+    const loadTopics = async () => {
+      // 1. Pull your stored profile out of localStorage
+      const raw = localStorage.getItem("userProfile");
+      let userId = null;
+      let cachedInterests = null;
 
-    try {
-      // 2) parse it
-      const { user } = JSON.parse(raw);
+      if (raw) {
+        try {
+          const profile = JSON.parse(raw);
+          // adjust these paths to match however you're storing in localStorage
+          userId = profile.user?.userid;
+          cachedInterests = profile.interests;
+        } catch (e) {
+          console.error("Could not parse userProfile:", e);
+        }
+      }
+      if (Array.isArray(cachedInterests) && cachedInterests.length) {
+        setTopics(cachedInterests);
+        return;
+      }
 
-      // 3) stash your app‑level user record
-      setUser(user); // user.userid, user.username, user.usertype
-    } catch (err) {
-      console.error("Failed to load userProfile from localStorage:", err);
-      setError(err.message);
-    }
-  }, []);
-
-  useEffect(() => {
-    const fetchTopics = async (req) => {
-      const { userid } = req.params;
-      if (user) {
-        // If user is logged in, fetch their selected topics from the 'topicinterests' table
+      if (userId) {
         const { data, error } = await supabase
           .from("topicinterest")
           .select("interesttype")
-          .eq("userid", userid);
+          .eq("userid", userId)
+          .single();
 
-        if (!error && data) {
-          const userTopics = data.map((entry) => entry.interesttype).flat();
-          setTopics(userTopics);
+        if (error) {
+          console.error("Error fetching user interests:", error);
+          setTopics([]);
         } else {
-          console.error("Error fetching user topics:", error);
+          const list = (data.interesttype || "")
+            .split(",")
+            .map((t) => t.trim())
+            .filter((t) => t.length);
+          setTopics(list);
         }
+        return;
+      }
+
+      // Fetch all categories
+      const { data, error } = await supabase
+        .from("topic_categories")
+        .select("name");
+
+      if (error) {
+        console.error("Error fetching topic categories:", error);
+        setTopics([]);
       } else {
-        // If no user is logged in, fetch all available categories from 'topic_categories'
-        const { data, error } = await supabase
-          .from("topic_categories")
-          .select("topicid, name");
-
-        if (!error && data) {
-          setTopics(data.map((topic) => topic.name));
-        } else {
-          console.error("Error fetching all topics:", error);
-        }
+        setTopics(data.map((row) => row.name));
       }
     };
 
-    fetchTopics();
-  }, [user]);
+    // loadTopics();
+  }, []); 
 
   return (
     <TopicsList
