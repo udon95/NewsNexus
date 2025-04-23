@@ -27,14 +27,14 @@ const VideoComponent = () => {
     fetchVideo(); // Call the fetch function when the component mounts
   }, []);
 
-  if (loading) {
-    return <div>Loading video...</div>; // Loading state
-  }
+  // if (loading) {
+  //   return <div>Loading video...</div>; // Loading state
+  // }
 
   // If no video is found or displayed, don't render the video element
-  if (!videoData) {
-    return <div>No video available to display.</div>;
-  }
+  // if (!videoData) {
+  //   return <div>No video available to display.</div>;
+  // }
 
   const getLuminance = (hexColor) => {
     const r = parseInt(hexColor.slice(1, 3), 16) / 255;

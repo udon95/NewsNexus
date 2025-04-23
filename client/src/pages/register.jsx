@@ -366,13 +366,13 @@ function Register() {
           </div>
         )}
 
-        <button
+        {/* <button
           type="button"
           onClick={resendConfirmationEmail}
           className="mt-4 text-sm underline"
         >
           Resend confirmation email
-        </button>
+        </button> */}
       </main>
     </div>
   );

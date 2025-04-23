@@ -92,6 +92,13 @@ function LoginPage() {
             {error && <p className="text-red-500">{error}</p>}
           </form>
         </div>
+        <button
+          type="button"
+          onClick={resendConfirmationEmail}
+          className="mt-4 text-sm underline"
+        >
+          Resend confirmation email
+        </button>
       </main>
     </div>
   );
