@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import useAuthHook from "../../hooks/useAuth";
 import TopicList from "../../components/topicList";
-import axios from "axios";
 import PasswordInput from "../showPW";
+import api from "../../api/axios";
 
 const FreeManageProfile = () => {
   const [selectedTopics, setSelectedTopics] = useState([]);
@@ -105,13 +105,9 @@ const FreeManageProfile = () => {
         gender: editGender,
       };
 
-      const response = await axios.post(
-        "http://localhost:5000/auth/update-profile",
-        payload,
-        {
-          headers: { "Content-Type": "application/json" },
-        }
-      );
+      const response = await api.post("/auth/update-profile", payload, {
+        headers: { "Content-Type": "application/json" },
+      });
 
       if (response.data.message) {
         alert("Profile updated successfully!");
@@ -162,13 +158,9 @@ const FreeManageProfile = () => {
         newPasswordConfirm: editNewPasswordConfirm,
       };
 
-      const response = await axios.post(
-        "http://localhost:5000/auth/update-password",
-        payload,
-        {
-          headers: { "Content-Type": "application/json" },
-        }
-      );
+      const response = await api.post("/auth/update-password", payload, {
+        headers: { "Content-Type": "application/json" },
+      });
 
       if (response.data.message) {
         alert("Password updated successfully!");
@@ -193,8 +185,8 @@ const FreeManageProfile = () => {
 
   const updateInterests = async () => {
     try {
-      const response = await axios.post(
-        "http://localhost:5000/auth/update-interests",
+      const response = await api.post(
+        "/auth/update-interests",
         {
           userId: userDetails.userid,
           interests: selectedTopics.join(", "),
@@ -236,8 +228,8 @@ const FreeManageProfile = () => {
 
     // Set a timer to debounce the API call (e.g., 500ms)
     const timer = setTimeout(() => {
-      axios
-        .post("http://localhost:5000/auth/verify-old-password", {
+      api
+        .post("/auth/verify-old-password", {
           userId: userDetails.userid,
           oldPassword: editOldPassword,
         })

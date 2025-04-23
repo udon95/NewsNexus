@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import useAuthHook from "../../hooks/useAuth";
 import TopicList from "../../components/topicList";
-// import axios from "axios";
 import api from "../../api/axios";
 import PasswordInput from "../showPW";
 import { HexColorPicker } from "react-colorful";
