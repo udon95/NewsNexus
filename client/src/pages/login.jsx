@@ -19,7 +19,7 @@ function LoginPage() {
   const resendConfirmationEmail = async () => {
     const { error } = await supabase.auth.resend({
       type: "signup",
-      email: userData.email,
+      email: email,
       options: {
         emailRedirectTo: window.location.origin + "/login",
       },
