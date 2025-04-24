@@ -14,6 +14,19 @@ function LoginPage() {
   useEffect(() => {
     window.scrollTo(0, 0); // Scroll to top when page loads
   }, []);
+
+  const resendConfirmationEmail = async () => {
+    const { error } = await supabase.auth.resend({
+      type: "signup",
+      email: userData.email,
+      options: {
+        emailRedirectTo: window.location.origin + "/login",
+      },
+    });
+    if (error) return alert("Error resending email: " + error.message);
+    alert("A new confirmation link has been sent to your inbox.");
+  };
+
   return (
     <div className="min-h-screen w-screen flex flex-col bg-white">
       <Navbar />
