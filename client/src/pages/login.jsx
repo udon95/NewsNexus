@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import Navbar from "../components/navbar.jsx";
 import useAuthHook from "../hooks/useAuth.jsx";
 import PasswordInput from "../components/showPW.jsx";
+import supabase from "../api/supabaseClient.js";
 
 function LoginPage() {
   const navigate = useNavigate();

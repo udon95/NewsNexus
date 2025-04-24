@@ -4,7 +4,6 @@ import Navbar from "../components/navbar.jsx";
 import Topic from "./topic.jsx";
 import supabase from "../api/supabaseClient.js";
 import PasswordInput from "../components/showPW.jsx";
-
 import "../index.css";
 
 function Register() {
