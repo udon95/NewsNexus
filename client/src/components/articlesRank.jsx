@@ -10,22 +10,19 @@ const ArticlesRank = ({ searchQuery = "", topic = "", selectedTime = "week" }) =
     const fetchRankedArticles = async () => {
       let query = supabase
         .from("articles")
-        .select("articleid, title, imagepath, total_votes, view_count, topicid, status, text, time")
+        .select("articleid, title, imagepath, total_votes, view_count, topicid, userid, status, text, time")
         .eq("status", "Published");
 
-      // Topic filtering
       if (Array.isArray(topic) && topic.length > 0) {
         query = query.in("topicid", topic);
       } else if (typeof topic === "string" && topic) {
         query = query.eq("topicid", topic);
       }
 
-      // Search filter
       if (searchQuery.trim()) {
         query = query.or(`title.ilike.%${searchQuery}%,text.ilike.%${searchQuery}%`);
       }
 
-      // Time filter
       const now = new Date();
       let cutoff;
 
@@ -50,7 +47,22 @@ const ArticlesRank = ({ searchQuery = "", topic = "", selectedTime = "week" }) =
         return;
       }
 
-      const ranked = data
+      // ✅ Expert filter
+      const { data: expertApps, error: expertError } = await supabase
+        .from("expert_application")
+        .select("userid, topicid")
+        .eq("status", "Approved");
+
+      if (expertError) {
+        console.error("Error fetching expert applications:", expertError);
+        return;
+      }
+
+      const nonExpertArticles = data.filter(
+        (a) => !expertApps.some((e) => e.userid === a.userid && e.topicid === a.topicid)
+      );
+
+      const ranked = nonExpertArticles
         .map((article) => ({
           ...article,
           ranking_score:
