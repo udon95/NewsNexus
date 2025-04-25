@@ -71,6 +71,18 @@ const PublicProfile = () => {
               </ul>
             </div>
           </div>
+          <div className="w-full max-w-[900px] mx-auto">
+                <div className="space-y-6">
+                  {profileData.articles.map((article) => (
+                    <NewsCard
+                      key={article.articleid}
+                      articleid={article.articleid}
+                      title={article.title}
+                      imageUrl={article.imagepath}
+                    />
+                  ))}
+                </div>
+              </div>
 
           <div className="w-full max-w-5xl p-6 font-grotesk">
             <h1 className="text-4xl mb-8 font-grotesk text-left">
