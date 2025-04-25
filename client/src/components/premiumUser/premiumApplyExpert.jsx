@@ -12,7 +12,7 @@ const PremiumApplyExpert = () => {
   const { user } = useAuthHook();
 
   const staticRequirements = `Applicants must have:
-- At least 10 posted articles in the selected category
+- At least 10 published articles in the selected category
 - An average accuracy score of 75% or above`;
 
   useEffect(() => {
@@ -33,12 +33,25 @@ const PremiumApplyExpert = () => {
       return;
     }
 
+    // Step 1: Get user's internal userid from users table
+    const { data: userRow, error: userError } = await supabase
+      .from("users")
+      .select("userid")
+      .eq("username", user.username)
+      .single();
+
+    if (userError || !userRow) {
+      setErrorMessage("User not found in users table.");
+      return;
+    }
+
+    // Step 2: Fetch all published articles from this user in selected topic
     const { data: articles, error: articleError } = await supabase
       .from("articles")
       .select("accuracy_score")
-      .eq("userid", user.userid)
+      .eq("userid", userRow.userid)
       .eq("topicid", selectedTopicId)
-      .eq("status", "Posted");
+      .eq("status", "Published");
 
     if (articleError) {
       setErrorMessage("Error checking your article history.");
@@ -54,14 +67,15 @@ const PremiumApplyExpert = () => {
 
     if (totalArticles < 10 || avgAccuracy < 75) {
       setErrorMessage(
-        `You need at least 10 posted articles in this category with ≥75% accuracy. You have ${totalArticles}, avg ${avgAccuracy.toFixed(2)}%.`
+        `You need at least 10 published articles in this category with ≥75% accuracy. You have ${totalArticles}, avg ${avgAccuracy.toFixed(2)}%.`
       );
       return;
     }
 
+    // Step 3: Insert application into expert_application
     const { error } = await supabase.from("expert_application").insert({
       username: user.username,
-      userid: user.userid,
+      userid: userRow.userid,
       topicid: selectedTopicId,
       description: position,
       requirements: staticRequirements,
