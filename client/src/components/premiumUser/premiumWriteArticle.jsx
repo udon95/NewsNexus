@@ -457,7 +457,7 @@ export const PremiumWriteArticle = () => {
     if (postType === "General") {
       articleData.topic = topics;
       const response = await fetch(
-        "https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/api/submit-article",
+        "https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/test/submit-article",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
