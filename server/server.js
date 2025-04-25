@@ -37,7 +37,7 @@ app.get('/', (req, res) => {
 
 app.use("/auth", authRoute);
 app.use("/subscription", subscriptionRoutes);
-app.use('/api', aiRoute);
+app.use("/api", aiRoute);
 app.use("/translate", translateRoute);
 app.use("/rooms", roomRoute);
 
