@@ -47,6 +47,9 @@ const Article = () => {
   const [selectedReason, setSelectedReason] = useState("");
   const [notes, setNotes] = useState([]);
 
+  const [isExpertArticle, setIsExpertArticle] = useState(false);
+
+
   const handleTextSelection = () => {
     const selection = window.getSelection();
     const text = selection.toString().trim();
@@ -249,6 +252,19 @@ const Article = () => {
       if (!error) {
         setArticleData(data);
         setOriginalText(data.text);
+        
+        if (data?.userid && data?.topicid) {
+          const { data: match } = await supabase
+            .from("expert_application")
+            .select("username")
+            .eq("userid", data.userid)
+            .eq("topicid", data.topicid)
+            .eq("status", "Approved")
+            .single();
+          setIsExpertArticle(!!match);
+        }
+        
+
 
         const { data: noteData } = await supabase
           .from("community_notes")
@@ -342,20 +358,24 @@ const Article = () => {
             <h1 className="text-3xl sm:text-4xl font-bold text-black mb-2 text-left w-full">
               {articleData.title}
             </h1>
-            <div className="flex items-center text-sm text-gray-600 mb-3 w-full">
-              {/* <span className="font-semibold text-black"> */}
+            <div className="flex items-center text-sm text-gray-600 mb-3 w-full gap-2">
               <Link
                 to={`/public-profile/${encodeURIComponent(authorName)}`}
                 className="underline hover:text-blue-600"
               >
                 {authorName}
               </Link>
-              {/* </span> */}
+              {isExpertArticle && (
+                <span className="bg-blue-200 text-blue-800 text-xs font-semibold px-3 py-1 rounded-xl">
+                  Expert
+                </span>
+              )}
               <span className="mx-2">•</span>
               <span>
                 Published on {new Date(articleData.time).toLocaleDateString()}
               </span>
             </div>
+
 
             <div className="flex justify-between items-center w-full mb-4">
               <Rate articleId={articleData.articleid} />
