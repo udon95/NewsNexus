@@ -499,20 +499,20 @@ export const PremiumWriteArticle = () => {
       }
 
       //  Save to articles table
-      const { data, error } = await supabase
-        .from("articles")
-        .insert([
-          {
-            title: articleData.title,
-            text: articleData.content,
-            userid: articleData.created_by,
-            topicid: topics, // Insert the UUID
-            time: articleData.created_at,
-            status: "Published",
-            imagepath: firstImageUrl || null,
-          },
-        ])
-        .select("articleid");
+      // const { data, error } = await supabase
+      //   .from("articles")
+      //   .insert([
+      //     {
+      //       title: articleData.title,
+      //       text: articleData.content,
+      //       userid: articleData.created_by,
+      //       topicid: topics, // Insert the UUID
+      //       time: articleData.created_at,
+      //       status: "Published",
+      //       imagepath: firstImageUrl || null,
+      //     },
+      //   ])
+      //   .select("articleid");
 
       if (error) {
         alert("Failed to save article.");
