@@ -148,9 +148,25 @@ const ViewRoomsPage = () => {
     }
  };
 
+  // const filteredRooms = rooms.filter((room) =>
+  //   room.name.toLowerCase().includes(searchQuery.toLowerCase())
+  // );
+
   const filteredRooms = rooms.filter((room) =>
     room.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
+  
+  const privateJoinedRooms = filteredRooms.filter(
+    (room) => room.room_type === "Private" && userRooms.has(room.roomid)
+  );
+  
+  const publicJoinedRooms = filteredRooms.filter(
+    (room) => room.room_type === "Public" && userRooms.has(room.roomid)
+  );
+  
+  const publicNotJoinedRooms = filteredRooms.filter(
+    (room) => room.room_type === "Public" && !userRooms.has(room.roomid)
+  );  
 
   const getRoomImage = async (roomid) => {
     try {
@@ -237,7 +253,8 @@ const ViewRoomsPage = () => {
 
           {/* ROOM LIST SECTION - UNTOUCHED */}
           <div className="w-full max-w-5xl space-y-4">
-            {filteredRooms.map((room) => (
+            {/* {filteredRooms.map((room) => ( */}
+            {[...privateJoinedRooms, ...publicJoinedRooms, ...publicNotJoinedRooms].map((room) => (
               <div
                 key={room.roomid}
                 onClick={() => navigate(`/room/${room.roomid}`)}
@@ -256,7 +273,13 @@ const ViewRoomsPage = () => {
                   onClick={(e) => handleJoinAndRedirect(room.roomid, e)}
                   disabled={userRooms.has(room.roomid)}
                 >
-                  {userRooms.has(room.roomid) ? "Joined" : "Join"}
+                  {/* {userRooms.has(room.roomid) ? "Joined" : "Join"} */}
+                  {userRooms.has(room.roomid)
+  ? room.room_type === "Private"
+    ? "Private"
+    : "Joined"
+  : "Join"
+}
                 </button>
               </div>
             ))}
