@@ -244,7 +244,7 @@ const Article = () => {
         .from("articles")
         .select(
           `articleid, title, text, imagepath, time, view_count, 
-          rating, status, userid, users (userid, username)`
+          rating, status, userid, topicid, users (userid, username)`
         )
         .eq("title", articleName)
         .single();
