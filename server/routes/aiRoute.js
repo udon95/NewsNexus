@@ -235,6 +235,7 @@ Please review the following article and verify its factual accuracy using up-to-
 }
 
 router.post("/submit-article", async (req, res) => {
+  console.log("body", req.body);
   const { title, content, authorId, topicid, topicName } = req.body;
 
   if (!title || !content || !authorId || !topicid || !topicName) {
