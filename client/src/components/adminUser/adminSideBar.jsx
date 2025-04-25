@@ -62,7 +62,12 @@ export const AdminSidebar = () => {
           <a href="/adminDashboard/AdminArticleReports" className="tracking-wide" >
             Article Reports &gt;
           </a>
-
+          <a href="/adminDashboard/AdminRoomArticleReports" className="tracking-wide" >
+            Room Article Reports &gt;
+          </a>
+          <a href="/adminDashboard/AdminRoomCommentReports" className="tracking-wide" >
+            Room Comment Reports &gt;
+          </a>
         </div>
       </nav>
     </>

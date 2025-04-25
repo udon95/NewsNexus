@@ -14,6 +14,8 @@ import AdminArticleReports from "./AdminArticleReports.jsx";
 import AdminUsers from "./AdminUsers.jsx";
 import AdminHome from "./AdminHome.jsx";
 import AdminCommunityNotes from "./AdminCommunityNotes.jsx";
+import AdminRoomArticleReports from "./AdminRoomArticleReports.jsx";
+import AdminRoomCommentReports from "./AdminRoomCommentReports.jsx";
 
 function AdminDashboard() {
   return (
@@ -38,6 +40,8 @@ function AdminDashboard() {
             <Route path="AdminArticleReports/*" element={<AdminArticleReports />} />
             <Route path="AdminUsers/*" element={<AdminUsers />} />
             <Route path="AdminCommunityNotes/*" element={<AdminCommunityNotes />} />
+            <Route path="AdminRoomArticleReports/*" element={<AdminRoomArticleReports />} />
+            <Route path="AdminRoomCommentReports/*" element={<AdminRoomCommentReports />} />
 
           </Routes>
         </div>
