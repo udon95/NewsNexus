@@ -1,35 +1,34 @@
 import React, { useEffect, useState } from "react";
-import NewsCard from "./newsCard";
 import supabase from "../api/supabaseClient";
+import NewsCard from "./newsCard";
 
-const LatestNews = ({ searchQuery = "", topic = "", displayLimit, timeFilter = "Latest" }) => {
+const LatestNews = ({ searchQuery = "", topic = "", timeFilter = "" }) => {
   const [latestArticles, setLatestArticles] = useState([]);
 
   useEffect(() => {
     const fetchLatestArticles = async () => {
       let query = supabase
         .from("articles")
-        .select("articleid, title, imagepath, topicid, time")
+        .select("articleid, title, imagepath, topicid, userid, time")
         .eq("status", "Published")
         .order("time", { ascending: false })
         .limit(20);
 
-      // 🔧 handle array or string topic
+      // Topic filter
       if (Array.isArray(topic) && topic.length > 0) {
         query = query.in("topicid", topic);
       } else if (typeof topic === "string" && topic) {
         query = query.eq("topicid", topic);
       }
 
-      // 🔍 Search filter
+      // Search filter
       if (searchQuery.trim()) {
         query = query.or(`title.ilike.%${searchQuery}%,text.ilike.%${searchQuery}%`);
       }
 
-      // ⏱️ Time filter
+      // Time filter
       const now = new Date();
       let cutoff;
-
       if (timeFilter === "Today") {
         cutoff = new Date(now.setHours(0, 0, 0, 0));
       } else if (timeFilter === "Latest") {
@@ -44,35 +43,45 @@ const LatestNews = ({ searchQuery = "", topic = "", displayLimit, timeFilter = "
         query = query.gte("time", cutoff.toISOString());
       }
 
-      const { data, error } = await query;
-
+      const { data: articles, error } = await query;
       if (error) {
         console.error("Error fetching latest articles:", error);
         return;
       }
 
-      setLatestArticles(data);
+      // Fetch expert applications
+      const { data: expertApps, error: expertError } = await supabase
+        .from("expert_application")
+        .select("userid, topicid")
+        .eq("status", "Approved");
+
+      if (expertError) {
+        console.error("Error fetching expert applications:", expertError);
+        return;
+      }
+
+      // Filter out expert-authored articles
+      const filtered = articles.filter(
+        (a) => !expertApps.some((e) => e.userid === a.userid && e.topicid === a.topicid)
+      );
+
+      setLatestArticles(filtered);
     };
 
     fetchLatestArticles();
   }, [searchQuery, topic, timeFilter]);
 
-  const articlesToDisplay = displayLimit
-    ? latestArticles.slice(0, displayLimit)
-    : latestArticles;
-
   return (
-    <div className="w-full max-w-[900px] mx-auto">
-      <div className="space-y-6">
-        {articlesToDisplay.map((article) => (
+    <div className="w-full max-w-[900px] mx-auto space-y-6 font-grotesk">
+      {latestArticles.map((article) => (
+        <div key={article.articleid}>
           <NewsCard
-            key={article.articleid}
-            articleid={article.articleid}
             title={article.title}
             imageUrl={article.imagepath}
+            articleid={article.articleid}
           />
-        ))}
-      </div>
+        </div>
+      ))}
     </div>
   );
 };
