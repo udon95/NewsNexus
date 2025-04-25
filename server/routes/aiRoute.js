@@ -358,7 +358,9 @@ ${content}
         factCheckResult = JSON.parse(gptMessage);
       } catch (error) {
         console.error("Failed to parse GPT output as JSON:", error);
-        return res.status(500).json({ error: "Invalid response format from fact-checking." });
+        return res
+          .status(500)
+          .json({ error: "Invalid response format from fact-checking." });
       }
 
       const accuracy = factCheckResult.accuracy;
@@ -425,7 +427,10 @@ ${content}
       message: "Factual article saved successfully.",
       verdict,
       accuracy: typeof accuracy !== "undefined" ? accuracy : undefined,
-      feedback: explanation && explanation.includes("<mark>") ? explanation : explanation || null,
+      feedback:
+        explanation && explanation.includes("<mark>")
+          ? explanation
+          : explanation || null,
     });
   } catch (err) {
     console.error("Article submission error:", err);

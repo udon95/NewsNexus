@@ -1284,10 +1284,10 @@ export const PremiumWriteArticle = () => {
                 <p className="text-sm text-gray-500 mt-1">
                   Word Count: {wordCount} / {MAX_WORDS}
                   {wordCount >= MAX_WORDS && (
-                   <p className="text-grey-600 text-sm mt-1">
-                     You’ve reached the maximum word count.
-                   </p>
-                 )}
+                    <p className="text-grey-600 text-sm mt-1">
+                      You’ve reached the maximum word count.
+                    </p>
+                  )}
                 </p>
               </>
             ) : (

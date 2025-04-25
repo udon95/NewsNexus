@@ -36,7 +36,7 @@ const PremManageProfile = () => {
 
           setUserDetails(data.user);
           if (data.user && data.user.userid) {
-            const color = await fetchProfileColor(data.user.userid);
+            const color = await fetchProfileColor(storedUser.userid);
             setProfileColor(color); // Set the profile color after fetching
           }
 
