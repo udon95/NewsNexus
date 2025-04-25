@@ -151,9 +151,9 @@ router.post("/submit-article", async (req, res) => {
     }
   }
 
-  const { title, type, authorId, topicid, topicName } = req.body;
+  const { title, type, authorId, topicid } = req.body;
 
-  if (!title || !content || !type || !authorId || !topicid || !topicName) {
+  if (!title || !content || !type || !authorId || !topicid ) {
     return res.status(400).json({ error: "Missing required fields." });
   }
 
