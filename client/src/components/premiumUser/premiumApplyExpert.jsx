@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import supabase from "../../api/supabaseClient";
-import useAuthHook from "../hooks/useAuth";
+import useAuthHook from "../../hooks/useAuth";
 
 const PremiumApplyExpert = () => {
   const [fullName, setFullName] = useState("");
