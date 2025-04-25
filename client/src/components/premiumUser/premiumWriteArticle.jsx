@@ -111,10 +111,7 @@ export const PremiumWriteArticle = () => {
 
   const editor = useEditor({
     extensions: [
-      StarterKit.configure({
-        paragraph: false,
-      }),
-      CustomParagraph,
+      StarterKit,
       BulletList,
       OrderedList,
       UnderlineExtension,
