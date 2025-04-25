@@ -7,6 +7,7 @@ const PremiumApplyExpert = () => {
   const [position, setPosition] = useState("");
   const [topics, setTopics] = useState([]);
   const [selectedTopicId, setSelectedTopicId] = useState("");
+  const [cv, setCv] = useState(""); // ✅ NEW
   const [errorMessage, setErrorMessage] = useState("");
 
   const { user } = useAuthHook();
@@ -33,7 +34,6 @@ const PremiumApplyExpert = () => {
       return;
     }
 
-    // Step 1: Get user's internal userid from users table
     const { data: userRow, error: userError } = await supabase
       .from("users")
       .select("userid")
@@ -45,7 +45,18 @@ const PremiumApplyExpert = () => {
       return;
     }
 
-    // Step 2: Fetch all published articles from this user in selected topic
+    const { data: existing } = await supabase
+      .from("expert_application")
+      .select("username")
+      .eq("username", user.username)
+      .eq("topicid", selectedTopicId)
+      .single();
+
+    if (existing) {
+      setErrorMessage("You’ve already submitted an application for this topic.");
+      return;
+    }
+
     const { data: articles, error: articleError } = await supabase
       .from("articles")
       .select("accuracy_score")
@@ -72,12 +83,12 @@ const PremiumApplyExpert = () => {
       return;
     }
 
-    // Step 3: Insert application into expert_application
     const { error } = await supabase.from("expert_application").insert({
       username: user.username,
       userid: userRow.userid,
       topicid: selectedTopicId,
       description: position,
+      cv: cv, // ✅ NEW
       requirements: staticRequirements,
       status: "Pending",
       created_at: new Date().toISOString(),
@@ -126,6 +137,15 @@ const PremiumApplyExpert = () => {
             </option>
           ))}
         </select>
+
+        {/* ✅ NEW CV FIELD */}
+        <label className="block mt-4 text-lg font-semibold">CV / Experience Summary:</label>
+        <textarea
+          placeholder="Briefly describe your qualifications or experience"
+          value={cv}
+          onChange={(e) => setCv(e.target.value)}
+          className="w-full h-40 p-4 mt-2 text-lg text-gray-700 bg-gray-200 rounded-xl outline-none focus:bg-white resize-none"
+        />
 
         <label className="block mt-6 text-lg font-semibold">Requirements:</label>
         <div className="w-full mt-2 text-gray-800 text-base p-4 bg-gray-100 rounded-xl border whitespace-pre-wrap">
