@@ -1,0 +1,284 @@
+const express = require("express");
+const fetch = require("node-fetch");
+const router = express.Router();
+const { createClient } = require("@supabase/supabase-js");
+
+const supabase = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_ANON_KEY
+);
+const OPENAI_KEY = process.env.OPENAI_API_KEY;
+const PERPLEXITY_KEY = process.env.PERPLEXITY_API_KEY;
+const HUGGINGFACE_KEY = process.env.HUGGINGFACE_KEY;
+
+const generateCategoryPrompt = (content, category) => `
+ You are a category validation assistant.
+ 
+ Determine if the following article content is relevant to the category "${category}".
+ 
+ Relevance includes people, places, events, policies, or topics that originate from or strongly affect the category.
+ 
+ Respond with one word only: "Yes" or "No".
+ 
+ Article:
+ ${content}
+ `;
+async function moderateText(content) {
+  const res = await fetch("https://api.openai.com/v1/moderations", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${OPENAI_KEY}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ input: content }),
+  });
+  const data = await res.json();
+  return data.results?.[0];
+}
+
+// 🖼️ Image Moderation (Hugging Face - NudeNet)
+async function moderateImage(base64Image) {
+  const res = await fetch(
+    "https://api-inference.huggingface.co/models/NotAI-tech/NudeNet_NSFW",
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${HUGGINGFACE_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ inputs: base64Image }),
+    }
+  );
+  const result = await res.json();
+  return result; // typically returns labels like "nsfw", "porn"
+}
+
+router.post("/submit-article", async (req, res) => {
+  const { content, imageBase64 } = req.body;
+
+  const modResult = await moderateText(content);
+  if (modResult?.flagged) {
+    return res.status(400).json({
+      error: "Content flagged as inappropriate by text moderation.",
+      categories: modResult.categories,
+    });
+  }
+
+  if (imageBase64) {
+    const imageMod = await moderateImage(imageBase64);
+    if (
+      imageMod?.[0]?.label?.toLowerCase().includes("nsfw") &&
+      imageMod?.[0]?.score > 0.8
+    ) {
+      return res.status(400).json({ error: "Image flagged as NSFW." });
+    }
+  }
+
+  const { title, type, authorId, topicid, topicName } = req.body;
+
+  if (!title || !content || !type || !authorId || !topicid || !topicName) {
+    return res.status(400).json({ error: "Missing required fields." });
+  }
+
+  if (type === "opinion") {
+    await supabase
+      .from("rooms_articles")
+      .insert([{ title, content, type, authorid: authorId, topicName }]);
+    return res.json({ message: "Opinion article saved successfully." });
+  }
+
+  try {
+    // Step 1: Check category match via GPT
+    const catRes = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${OPENAI_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "gpt-3.5-turbo",
+        messages: [
+          {
+            role: "system",
+            content: "You are a category validation assistant.",
+          },
+          { role: "user", content: generateCategoryPrompt(content, topicName) },
+        ],
+        temperature: 0.2,
+      }),
+    });
+
+    const catData = await catRes.json();
+    const categoryMatch = catData.choices?.[0]?.message?.content
+      .trim()
+      .toLowerCase();
+
+    if (!categoryMatch.includes("yes")) {
+      return res.status(400).json({
+        error: `Article content does not match the category "${topicName}".`,
+      });
+    }
+
+    // Step 2: Real-time context via Perplexity
+    let verdict = "";
+    let explanation = "";
+    let usedGPT = false;
+    let gptMessage = "";
+
+    try {
+      const pxRes = await fetch("https://api.perplexity.ai/chat/completions", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${PERPLEXITY_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: "sonar",
+          messages: [
+            {
+              role: "system",
+              content: `
+  You are a fact-checking assistant. 
+  
+  Please review the following article and verify its factual accuracy using up-to-date knowledge as of today.
+  
+  For any false, misleading, or dubious claims:
+  
+  - Wrap the **false/misleading text only** in <mark> tags.  
+  - After the marked section, write the explanation inside parentheses **on a new line** using a <br> tag before the explanation.
+  
+  Example:
+  <mark>This is false</mark><br>(This is false because XYZ is incorrect...)
+  
+  Return the full article text with <mark> and explanation annotations applied. If all claims are correct, return the full article unchanged.
+      
+  Article:
+  ${content}
+  `,
+            },
+            {
+              role: "user",
+              content: content,
+            },
+          ],
+        }),
+      });
+
+      const pxData = await pxRes.json();
+      console.log("🟣 Perplexity raw:", pxData);
+      const perplexityReply = pxData.choices?.[0]?.message?.content?.trim();
+      const lowerReply = perplexityReply?.toLowerCase() || "";
+
+      if (
+        !perplexityReply ||
+        lowerReply.includes("i'm not sure") ||
+        lowerReply.includes("unknown") ||
+        lowerReply.includes("cannot verify")
+      ) {
+        throw new Error("Perplexity returned unsure result.");
+      }
+
+      // If <mark> present, treat as failed check
+      const failed = perplexityReply.includes("<mark>");
+
+      if (failed) {
+        return res.status(400).json({
+          verdict: "failed",
+          source: "perplexity",
+          highlightedHTML: perplexityReply,
+        });
+      }
+
+      return res.json({
+        verdict: "passed",
+        source: "perplexity",
+        feedback: perplexityReply,
+      });
+    } catch (err) {
+      console.warn("Perplexity failed or unsure — falling back to GPT.");
+
+      usedGPT = true;
+
+      const gptRes = await fetch("https://api.openai.com/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${OPENAI_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: "gpt-3.5-turbo",
+          messages: [
+            {
+              role: "system",
+              content: `You are a fact-checking assistant. 
+                Review the following article and highlight any **false or misleading** statements.
+                 For any inaccuracies, describe the issues. 
+                 Then, provide an overall factual accuracy score as a number between 0 and 100.
+                 If some parts are ambiguous but overall the article is largely accurate, note this in your score.
+                 Return your response in valid JSON format in this exact structure:
+                 {"accuracy": <number>, "feedback": "<Your explanation>"}`,
+            },
+            {
+              role: "user",
+              content: content,
+            },
+          ],
+          temperature: 0.2,
+        }),
+      });
+
+      const gptData = await gptRes.json();
+      const gptMessage = gptData.choices?.[0]?.message?.content || "";
+      console.log(gptMessage);
+      const explanation = gptMessage;
+      const lowerMsg = gptMessage.toLowerCase();
+      const containsFalseKeywords = [
+        "false",
+        "obviously-fake",
+        "this is false",
+        "not true",
+        "misleading",
+        "dubious",
+        "<mark>",
+      ];
+
+      verdict = containsFalseKeywords.some((k) => lowerMsg.includes(k))
+        ? "false"
+        : "true";
+
+      console.log("💬 GPT Verdict:", verdict);
+      console.log("📝 GPT Explanation:", gptMessage);
+
+      if (verdict === "false") {
+        return res.status(400).json({
+          error: "Article failed fact-checking.",
+          verdict,
+          highlightedHTML: gptMessage,
+        });
+      }
+    }
+    if (verdict.includes("false") || verdict.includes("dubious")) {
+      return res.status(400).json({
+        error: "Article failed fact-checking.",
+        verdict,
+        highlightedHTML: gptMessage,
+      });
+    }
+
+    // Save to Supabase
+    await supabase
+      .from("articles")
+      .insert([{ title, text: content, type, userid: authorId, topicid }]);
+
+    return res.json({
+      message: "Factual article saved successfully.",
+      verdict,
+      highlightedHTML: explanation.includes("<mark>") ? explanation : null,
+    });
+  } catch (err) {
+    console.error("Article submission error:", err);
+    res.status(500).json({ error: "Failed to submit article." });
+  }
+});
+
+module.exports = router;

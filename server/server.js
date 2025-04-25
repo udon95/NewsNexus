@@ -41,6 +41,8 @@ app.use("/api", aiRoute);
 app.use("/translate", translateRoute);
 app.use("/rooms", roomRoute);
 
+app.use("/test", require("./routes/testaai"));
+
 // Start Server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () =>
