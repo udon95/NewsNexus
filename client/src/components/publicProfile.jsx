@@ -37,7 +37,7 @@ const PublicProfile = () => {
             {profileData.user.usertype === "Expert" && (
               <BadgeCheck className="inline-block ml-2 text-blue-500" />
             )}
-            {profileData.userusertype === "Premium" && (
+            {profileData.user.usertype === "Premium" && (
               <span className="ml-2 px-2 py-1 text-sm bg-yellow-400 text-black rounded-full">
                 Premium
               </span>
@@ -50,26 +50,32 @@ const PublicProfile = () => {
           </h2>
         </div>
 
-        <div className="bg-gray-200 p-6 rounded-lg shadow">
-          <section className="mb-6 ">
-            <h2 className="text-2xl font-semibold">Articles</h2>
-            <ul>
-              {profileData.articles.map((article) => (
-                <li key={article.articleid} className="mb-2">
-                  <Link
-                    to={`/article/${encodeURIComponent(article.title)}`}
-                    className="text-blue-600 hover:underline font-medium"
-                  >
-                    {article.title}
-                  </Link>
-                  {/* <p>{article.summary}</p> */}
-                </li>
-              ))}
-            </ul>
-          </section>
+        <div className="flex flex-col flex-grow items-center w-full px-4">
+          <div className="w-full max-w-5xl p-6 font-grotesk">
+            <h1 className="text-4xl mb-8 font-grotesk text-left">Articles:</h1>
 
-          <section className="mb-6 ">
-            <h2 className="text-2xl font-semibold">Public Rooms Joined</h2>
+            {/* RANKING CARD SECTION - UNTOUCHED */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6 w-full">
+              <ul>
+                {profileData.articles.map((article) => (
+                  <li key={article.articleid} className="mb-2">
+                    <Link
+                      to={`/article/${encodeURIComponent(article.title)}`}
+                      className="text-blue-600 hover:underline font-medium"
+                    >
+                      {article.title}
+                    </Link>
+                    {/* <p>{article.summary}</p> */}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+
+          <div className="w-full max-w-5xl p-6 font-grotesk">
+            <h1 className="text-4xl mb-8 font-grotesk text-left">
+              Public Rooms Joined:
+            </h1>{" "}
             <ul>
               {profileData.rooms.map((room) => (
                 <li key={room.roomid} className="mb-1">
@@ -82,7 +88,7 @@ const PublicProfile = () => {
                 </li>
               ))}
             </ul>
-          </section>
+          </div>
         </div>
       </div>
     </div>
