@@ -262,15 +262,15 @@ router.post("/submit-article", async (req, res) => {
   //   }
   // }
 
-  try {
-    // await factCheck(content, topicName);
-  } catch (fcErr) {
-    console.error("Fact-check error:", fcErr);
-    return res.status(fcErr.status || 400).json({
-      error: fcErr.error,
-      ...(fcErr.feedback && { feedback: fcErr.feedback }),
-    });
-  }
+  // try {
+  //   await factCheck(content, topicName);
+  // } catch (fcErr) {
+  //   console.error("Fact-check error:", fcErr);
+  //   return res.status(fcErr.status || 400).json({
+  //     error: fcErr.error,
+  //     ...(fcErr.feedback && { feedback: fcErr.feedback }),
+  //   });
+  // }
 
   // Insert into `articles`
   const { data, error } = await supabase.from("articles").insert([
