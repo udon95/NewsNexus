@@ -260,7 +260,7 @@ router.post("/submit-article", async (req, res) => {
   // }
 
   try {
-    await factCheckArticle(content, topicName);
+    await factCheck(content, topicName);
   } catch (fcErr) {
     console.error("Fact-check error:", fcErr);
     return res.status(fcErr.status || 400).json({
@@ -614,7 +614,7 @@ router.post(
       return res.status(400).json({ error: "Missing required field: topicName for factual room post." });
     }
     try {
-      await factCheckArticle(content, topicName);
+      await factCheck(content, topicName);
     } catch (fcErr) {
       console.error("Room fact-check error:", fcErr);
       return res.status(fcErr.status || 400).json({ error: fcErr.error });

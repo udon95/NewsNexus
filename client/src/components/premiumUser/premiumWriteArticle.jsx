@@ -143,6 +143,7 @@ export const PremiumWriteArticle = () => {
       setWordCount(words);
       const html = editor.getHTML();
       setArticleContent(html);
+
       if (postType === "General") {
         const doc = new DOMParser().parseFromString(html, "text/html");
         const imageSrcsInEditor = Array.from(doc.querySelectorAll("img")).map(
@@ -441,40 +442,6 @@ export const PremiumWriteArticle = () => {
     const { data: sessionData, error: sessionError } =
       await supabase.auth.getSession();
 
-    for (const img of pendingImages) {
-      const file = img.file;
-      const fileExt = file.name.split(".").pop();
-      const fileName = `${Date.now()}-${Math.random()
-        .toString(36)
-        .substring(2)}.${fileExt}`;
-
-      const { data: authSession } = await supabase.auth.getSession();
-      const supabaseUid = authSession?.session?.user?.id;
-      const filePath = `${supabaseUid}/${fileName}`;
-
-      const { error: uploadError } = await supabase.storage
-        .from(bucket)
-        .upload(filePath, file);
-
-      if (uploadError) {
-        alert("Image upload failed.");
-        return;
-      }
-
-      const { data: urlData } = supabase.storage
-        .from(bucket)
-        .getPublicUrl(filePath);
-      if (urlData?.publicUrl) {
-        if (!firstImageUrl) firstImageUrl = urlData.publicUrl; // Track first image URL
-        if (postType === "General") {
-          updatedHTML = updatedHTML.replaceAll(
-            img.previewUrl,
-            urlData.publicUrl
-          );
-        }
-      }
-    }
-
     const articleData = {
       title,
       content: updatedHTML,
@@ -482,10 +449,13 @@ export const PremiumWriteArticle = () => {
       created_at: new Date().toISOString(),
     };
 
+    let uploadedImageUrls = [];
+
     const topicName = topicOptions.find((t) => t.topicid === topics)?.name;
 
     // CASE 1: General Article (always factual)
     if (postType === "General") {
+      articleData.topic = topics;
       const response = await fetch(
         "https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/api/submit-article",
         {
@@ -552,84 +522,77 @@ export const PremiumWriteArticle = () => {
       const articleid = data?.[0]?.articleid;
 
       // Save multiple images to article_images
-      for (const img of pendingImages) {
-        const fileExt = img.file.name.split(".").pop();
-        const fileName = `${Date.now()}-${Math.random()
-          .toString(36)
-          .substring(2)}.${fileExt}`;
-        const filePath = `${session.userid}/${fileName}`;
-
-        await supabase.storage
-          .from("articles-images")
-          .upload(filePath, img.file, {
-            cacheControl: "3600",
-            upsert: false,
-          });
-
-        const { data: urlData } = supabase.storage
-          .from("articles-images")
-          .getPublicUrl(filePath);
-        const imageUrl = urlData?.publicUrl;
-
+      for (const url of uploadedImageUrls) {
         await supabase
           .from("article_images")
-          .insert([{ articleid, image_url: imageUrl }]);
+          .insert([{ articleid, image_url: url }]);
       }
 
       alert("Article posted successfully.");
       handleClearInputs();
       return;
-    }
-
-    // 🏠 CASE 2: Room Opinion Article (skip validation)
-    if (postType === "Room") {
+    } else {
       articleData.roomid = selectedRoom;
-      const { data, error } = await supabase
-        .from("room_articles")
-        .insert([
-          {
-            title: articleData.title,
-            content: articleData.content,
-            roomid: selectedRoom,
-            userid: session.userid,
-            created_at: articleData.created_at,
-            status: "Published",
-          },
-        ])
-        .select("postid");
 
-      if (error) {
-        alert("Failed to post room article.");
-        return;
-      }
+      // 🏠 CASE 2: Room Opinion Article (skip validation)
+      if (postType === "Room") {
+        articleData.roomid = selectedRoom;
+        const { data, error } = await supabase
+          .from("room_articles")
+          .insert([
+            {
+              title: articleData.title,
+              content: articleData.content,
+              roomid: selectedRoom,
+              userid: session.userid,
+              created_at: articleData.created_at,
+              status: "Published",
+            },
+          ])
+          .select("postid");
 
-      const postid = data?.[0]?.postid;
+        if (error) {
+          alert("Failed to post room article.");
+          return;
+        }
 
-      for (const img of pendingImages) {
-        const fileExt = img.file.name.split(".").pop();
-        const fileName = `${Date.now()}-${Math.random()
-          .toString(36)
-          .substring(2)}.${fileExt}`;
-        const { data: authSession } = await supabase.auth.getSession();
-        const supabaseUid = authSession?.session?.user?.id;
-        const filePath = `${supabaseUid}/${fileName}`;
+        const postid = data?.[0]?.postid;
+        if (postType === "Room" && postid) {
+          for (const img of pendingImages) {
+            const file = img.file;
+            if (!file?.name) continue;
 
-        await supabase.storage
-          .from("room-article-images")
-          .upload(filePath, img.file);
+            const fileExt = file.name.split(".").pop();
+            const fileName = `${Date.now()}-${Math.random()
+              .toString(36)
+              .substring(2)}.${fileExt}`;
+            const filePath = `user-${session.userid}/${fileName}`;
 
-        const { data: urlData } = supabase.storage
-          .from("room-article-images")
-          .getPublicUrl(filePath);
+            const { error: uploadError } = await supabase.storage
+              .from("room-article-images")
+              .upload(filePath, file);
 
-        const imageUrl = urlData?.publicUrl;
+            if (uploadError) {
+              console.error("Room image upload failed:", uploadError);
+              continue;
+            }
 
-        await supabase
-          .from("room_article_images")
-          .insert([{ postid, image_url: imageUrl }]);
+            const { data: urlData } = supabase.storage
+              .from("room-article-images")
+              .getPublicUrl(filePath);
+
+            const publicUrl = urlData?.publicUrl;
+            if (publicUrl) {
+              await supabase
+                .from("room_article_images")
+                .insert([{ postid, image_url: publicUrl }]);
+            }
+          }
+        }
       }
     }
-
+    pendingImages.forEach((img) => URL.revokeObjectURL(img.previewUrl));
+    setPendingImages([]);
     alert("Opinion room article posted successfully.");
     handleClearInputs();
     return;
@@ -658,38 +621,6 @@ export const PremiumWriteArticle = () => {
       postType === "Room" ? "room-article-images" : "articles-images";
     let firstImageUrl = null;
 
-    for (const img of pendingImages) {
-      const file = img.file;
-      const fileExt = file.name.split(".").pop();
-      const fileName = `${Date.now()}-${Math.random()
-        .toString(36)
-        .substring(2)}.${fileExt}`;
-      const { data: authSession } = await supabase.auth.getSession();
-      const supabaseUid = authSession?.session?.user?.id;
-      const filePath = `${supabaseUid}/${fileName}`;
-
-      const { error: uploadError } = await supabase.storage
-        .from(bucket)
-        .upload(filePath, file);
-      if (uploadError) {
-        alert("Image upload failed.");
-        return;
-      }
-
-      const { data: urlData } = supabase.storage
-        .from(bucket)
-        .getPublicUrl(filePath);
-      if (urlData?.publicUrl) {
-        if (!firstImageUrl) firstImageUrl = urlData.publicUrl;
-        if (postType === "General") {
-          updatedHTML = updatedHTML.replaceAll(
-            img.previewUrl,
-            urlData.publicUrl
-          );
-        }
-      }
-    }
-
     const articleData = {
       title,
       text: updatedHTML,
@@ -699,6 +630,8 @@ export const PremiumWriteArticle = () => {
       imagepath: firstImageUrl || null,
       status: "Draft",
     };
+
+    let uploadedImageUrls = [];
 
     if (postType === "General") {
       articleData.topicid = topics;
@@ -726,33 +659,41 @@ export const PremiumWriteArticle = () => {
       }
 
       const postid = data?.[0]?.postid;
+      if (postType === "Room" && postid) {
+        for (const img of pendingImages) {
+          const file = img.file;
+          if (!file?.name) continue;
 
-      for (const img of pendingImages) {
-        const fileExt = img.file.name.split(".").pop();
-        const fileName = `${Date.now()}-${Math.random()
-          .toString(36)
-          .substring(2)}.${fileExt}`;
-        const { data: authSession } = await supabase.auth.getSession();
-        const supabaseUid = authSession?.session?.user?.id;
-        const filePath = `${supabaseUid}/${fileName}`;
+          const fileExt = file.name.split(".").pop();
+          const fileName = `${Date.now()}-${Math.random()
+            .toString(36)
+            .substring(2)}.${fileExt}`;
+          const filePath = `user-${session.userid}/${fileName}`;
 
-        await supabase.storage
-          .from("room-article-images")
-          .upload(filePath, img.file);
+          const { error: uploadError } = await supabase.storage
+            .from("room-article-images")
+            .upload(filePath, file);
 
-        const { data: urlData } = supabase.storage
-          .from("room-article-images")
-          .getPublicUrl(filePath);
+          if (uploadError) {
+            console.error("Room draft image upload failed:", uploadError);
+            continue;
+          }
 
-        const imageUrl = urlData?.publicUrl;
+          const { data: urlData } = supabase.storage
+            .from("room-article-images")
+            .getPublicUrl(filePath);
 
-        if (imageUrl) {
-          await supabase
-            .from("room_article_images")
-            .insert([{ postid, image_url: imageUrl }]);
+          const publicUrl = urlData?.publicUrl;
+          if (publicUrl) {
+            await supabase
+              .from("room_article_images")
+              .insert([{ postid, image_url: publicUrl }]);
+          }
         }
       }
     }
+    pendingImages.forEach((img) => URL.revokeObjectURL(img.previewUrl));
+    setPendingImages([]);
     setShowDraftNotification(true);
 
     alert("Draft saved!");
@@ -1128,7 +1069,7 @@ export const PremiumWriteArticle = () => {
                 </button>
 
                 {/* Preview attached images for Room posts */}
-                {postType === "Room" && pendingImages.length > 0 && (
+                {pendingImages.length > 0 && (
                   <div className="mt-3 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
                     {pendingImages.map((img, index) => (
                       <div
@@ -1142,9 +1083,26 @@ export const PremiumWriteArticle = () => {
                         />
                         <button
                           onClick={() => {
+                            URL.revokeObjectURL(img.previewUrl);
+                            const targetUrl = img.previewUrl;
+                            editor.commands.focus();
+                            editor.commands.setContent(
+                              editor
+                                .getHTML()
+                                .replaceAll(
+                                  `<img src="${targetUrl}"`,
+                                  '<img src="__toRemove__"'
+                                ) // mark
+                            );
                             setPendingImages((prev) =>
                               prev.filter((_, i) => i !== index)
                             );
+                            setTimeout(() => {
+                              const updatedHtml = editor
+                                .getHTML()
+                                .replaceAll('<img src="__toRemove__"', "");
+                              editor.commands.setContent(updatedHtml);
+                            }, 0);
                           }}
                           className="absolute top-1 right-1 bg-white text-red-600 rounded-full w-6 h-6 flex items-center justify-center shadow-md hover:bg-red-100"
                         >
@@ -1272,7 +1230,7 @@ export const PremiumWriteArticle = () => {
                     className="min-h-[200px] w-full outline-none p-2 text-base leading-relaxed"
                     style={{ lineHeight: "1.75" }}
                     onKeyDown={(e) => {
-                      if (e.key === "Tab") {
+                      if (e.key === "Tab" || (e.key === "Tab" && e.shiftKey)) {
                         e.preventDefault();
                       }
                     }}
