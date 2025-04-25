@@ -264,11 +264,24 @@ router.post("/submit-article", async (req, res) => {
         highlightedHTML: gptMessage,
       });
     }
+    console.log({title, text:content, userid:authorId,topicid});
 
     // Save to Supabase
     await supabase
       .from("articles")
-      .insert([{ title, text: content, type, userid: authorId, topicid }]);
+      .insert([
+        {
+          title,
+          text: content,
+          userid: authorId,
+          topicid,
+          rating: 0,
+          view_count: 0,
+          total_votes: 0,
+          Suspended: false,
+          time: new Date().toISOString(),
+        },
+      ]);
 
     return res.json({
       message: "Factual article saved successfully.",
