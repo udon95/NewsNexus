@@ -490,13 +490,13 @@ export const PremiumWriteArticle = () => {
         return;
       }
 
-      if (result.verdict === "true") {
-        if (result.explanation) {
-          alert(`✅ Article passed AI check:\n${result.explanation}`);
-        } else {
-          alert("✅ Article passed AI check.");
-        }
-      }
+      // if (result.verdict === "true") {
+      //   if (result.explanation) {
+      //     alert(` Article passed AI check:\n${result.explanation}`);
+      //   } else {
+      //     alert(" Article passed AI check.");
+      //   }
+      // }
 
       //  Save to articles table
       // const { data, error } = await supabase
@@ -514,10 +514,10 @@ export const PremiumWriteArticle = () => {
       //   ])
       //   .select("articleid");
 
-      if (error) {
-        alert("Failed to save article.");
-        return;
-      }
+      // if (error) {
+      //   alert("Failed to save article.");
+      //   return;
+      // }
 
       const articleid = data?.[0]?.articleid;
 
@@ -531,6 +531,7 @@ export const PremiumWriteArticle = () => {
       alert("Article posted successfully.");
       handleClearInputs();
       return;
+      
     } else {
       articleData.roomid = selectedRoom;
 
