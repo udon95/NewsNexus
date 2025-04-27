@@ -1,8 +1,12 @@
+import { useNavigate } from "react-router-dom";
 import React, { useState } from "react";
 import { EllipsisVertical } from "lucide-react";
 
-const ArticleList = ({ title, articles, isDraft, onArticleClick }) => {
-  const [openMenuIndex, setOpenMenuIndex] = useState(null); // Tracks which article's menu is open
+
+
+const ArticleList = ({ title, articles, isDraft, onArticleClick, isRoom, isPremium }) => {
+  const [openMenuIndex, setOpenMenuIndex] = useState(null);
+  const navigate = useNavigate();
 
   return (
     <div className="mt-6 first:mt-0 font-grotesk w-full flex flex-col items-start">
@@ -21,7 +25,8 @@ const ArticleList = ({ title, articles, isDraft, onArticleClick }) => {
               <span className="text-lg font-semibold text-black">
                 {index + 1}.
               </span>
-              <span className="text-lg text-black flex-1">{article}</span>
+              {/* <span className="text-lg text-black flex-1">{article}</span> */}
+              <span className="text-lg text-black flex-1">{article.title || article}</span>
             </button>
 
             {/* Three-Dot Menu Button */}
@@ -35,15 +40,27 @@ const ArticleList = ({ title, articles, isDraft, onArticleClick }) => {
               <EllipsisVertical />
             </button>
 
+
             {/* Dropdown Menu (Appears on Click) */}
             {openMenuIndex === index && (
               <div className="absolute top-full right-0 bg-white shadow-md border border-gray-300 rounded-lg min-w-[120px] z-50">
                 <ul className="flex flex-col">
-                  <li>
-                    <button className="block px-4 py-2 w-full text-left hover:bg-gray-100">
-                      Edit
-                    </button>
-                  </li>
+                <li>
+                <button
+                  className="block px-4 py-2 w-full text-left hover:bg-gray-100"
+                  onClick={() => {
+                    setOpenMenuIndex(null);
+                    const id = isRoom ? article.postid : article.articleid;
+                    const route = isPremium ? `/edit/premium/${id}` : `/edit/free/${id}`;
+                    console.log("Navigating to:", route); // 👈 Add this
+                    navigate(route);
+                  }}
+                >
+                  Edit
+                </button>
+              </li>
+
+
                   <li>
                     <button className="block px-4 py-2 w-full text-left hover:bg-gray-100">
                       Delete
