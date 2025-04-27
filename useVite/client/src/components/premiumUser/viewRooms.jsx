@@ -275,11 +275,11 @@ const ViewRoomsPage = () => {
                 >
                   {/* {userRooms.has(room.roomid) ? "Joined" : "Join"} */}
                   {userRooms.has(room.roomid)
-  ? room.room_type === "Private"
-    ? "Private"
-    : "Joined"
-  : "Join"
-}
+                    ? room.room_type === "Private"
+                    ? "Private"
+                    : "Joined"
+                    : "Join"
+                  }
                 </button>
               </div>
             ))}
