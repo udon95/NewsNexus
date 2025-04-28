@@ -283,7 +283,7 @@ Use this exact shape:
 }
 
 router.post("/submit-article", async (req, res) => {
-  console.log("body", req.body);
+  // console.log("body", req.body);
   const { title, content, authorId, topicid, topicName } = req.body;
 
   if (!title || !content || !authorId || !topicid || !topicName) {
@@ -307,11 +307,12 @@ router.post("/submit-article", async (req, res) => {
   //     return res.status(400).json({ error: "Image flagged as NSFW." });
   //   }
   // }
-
+  let factResult;
   try {
-    await factCheck(content, topicName);
+    factResult = await factCheck(content, topicName);
   } catch (err) {
     console.error("Fact-check error:", err);
+
     return res.status(err.status || 400).json({
       error: err.error,
       ...(err.feedback && { feedback: err.feedback }),
@@ -319,14 +320,18 @@ router.post("/submit-article", async (req, res) => {
   }
 
   // Insert into `articles`
-  const { data, error } = await supabase.from("articles").insert([
-    {
-      title,
-      text: content,
-      userid: authorId,
-      topicid,
-    },
-  ]);
+  const { data, error } = await supabase
+    .from("articles")
+    .insert([
+      {
+        title,
+        text: content,
+        userid: authorId,
+        topicid,
+        accuracy_score: factResult.accuracy,
+      },
+    ])
+    .select();
 
   if (error) {
     console.error("General insert error:", error);
@@ -335,6 +340,8 @@ router.post("/submit-article", async (req, res) => {
   return res.json({
     message: "Factual article saved successfully.",
     article: data[0],
+    accuracy: factResult.accuracy,
+    feedback: factResult.feedback,
   });
 
   //   if (type === "opinion") {
