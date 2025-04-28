@@ -51,8 +51,8 @@ export const PremiumWriteArticle = () => {
   const [showLinkModal, setShowLinkModal] = useState(false);
   const [linkUrl, setLinkUrl] = useState("");
   const [roomArticleType, setRoomArticleType] = useState("factual"); // only for Room
-  const [aiFeedback, setAiFeedback] = useState < string > "";
-  const [accuracy, setAccuracy] = (useState < number) | (null > null);
+  const [aiFeedback, setAiFeedback] = useState("");
+  const [accuracy, setAccuracy] = useState(null);
   const [showDraftNotification, setShowDraftNotification] = useState(false);
 
   // console.log("Auth session:", supabase.auth.getSession());
