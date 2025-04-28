@@ -189,7 +189,7 @@ async function factCheck(content, topicName) {
           {
             role: "system",
             content: `
- You are a fact-checking assistant. 
+You are a fact-checking assistant. 
 
 Please review the following article and verify its factual accuracy using up-to-date knowledge as of today.
 
@@ -199,8 +199,9 @@ Please review the following article and verify its factual accuracy using up-to-
 
  In addition, analyze the overall factual correctness of the article and assign a numerical accuracy score between 0 and 100, where 100 means the article is completely accurate and 0 means it is entirely inaccurate.
 
- Return your output only in a JSON object exactly as follows. {"accuracy <number>, "feedback":"<string>"}:
- {"accuracy": <percentage between 0 and 100>, "feedback": "<Your explanation including any <mark> annotations if applicable>"}
+You must return _only_ a single JSON object, no arrays, no markdown, no code fences, no extra text.
+Use this exact shape:
+  {"accuracy":<0–100>,"feedback":"…"}
   
  Article:
  ${content}
@@ -222,6 +223,7 @@ Please review the following article and verify its factual accuracy using up-to-
       .replace(/\s*```$/, "")
       .trim();
     console.log("reply:", reply);
+
     const m = reply.match(/\{[\s\S]*\}/);
     if (!m) {
       throw new Error("No JSON object found in model response:\n" + reply);
@@ -229,8 +231,16 @@ Please review the following article and verify its factual accuracy using up-to-
 
     const jsonString = m[0];
     console.log("jsonstring:", jsonString);
+
     const result = JSON.parse(jsonString);
     console.log("parsed:", result);
+    if (
+      Array.isArray(parsed) &&
+      parsed.length === 2 &&
+      (typeof parsed[0] === "number") === false
+    ) {
+    }
+
     if (result.accuracy < 75) {
       throw { status: 400, error: "Article failed fact-checking.", ...result };
     }
