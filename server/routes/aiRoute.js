@@ -133,6 +133,7 @@ ${content}
 `;
 
 async function factCheck(content, topicName) {
+  console.log("openai key", process.env.OPENAI_API_KEY);
   const catRes = await fetch("https://api.openai.com/v1/chat/completions", {
     method: "POST",
     headers: {
