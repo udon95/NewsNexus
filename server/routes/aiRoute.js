@@ -127,9 +127,21 @@ Determine if the following article content is relevant to the category "${catego
 Relevance includes people, places, events, policies, or topics that originate from or strongly affect the category.
 
 Respond with one word only: "yes" or "no".
+EXAMPLE 1
+Category: Technology  
+Article: “Modern GPU architectures push 4 nm transistors, AI inference on-chip…”  
+Answer: Yes
 
+EXAMPLE 2
+Category: Technology  
+Article: “Baking sourdough with wild yeast, tips on kneading dough…”  
+Answer: No
+
+NOW EVALUATE
+Category: ${category} 
 Article:
 ${content}
+Answer:
 `;
 
 async function factCheck(content, topicName) {
