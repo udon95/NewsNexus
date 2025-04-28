@@ -211,9 +211,26 @@ Please review the following article and verify its factual accuracy using up-to-
       }),
     });
     const pxData = await pxRes.json();
-    console.log("🟢 Perplexity fact check raw response:", JSON.stringify(pxData, null, 2));
+    console.log(
+      "🟢 Perplexity fact check raw response:",
+      JSON.stringify(pxData, null, 2)
+    );
     const reply = pxData.choices?.[0]?.message?.content.trim();
-    const result = JSON.parse(reply);
+    console.log("response before trim:", reply);
+    reply = reply
+      .replace(/^```(?:json)?\s*/, "")
+      .replace(/\s*```$/, "")
+      .trim();
+    console.log("reply:", reply);
+    const m = reply.match(/\{[\s\S]*\}/);
+    if (!m) {
+      throw new Error("No JSON object found in model response:\n" + reply);
+    }
+
+    const jsonString = m[0];
+    console.log("jsonstring:", jsonString);
+    const result = JSON.parse(jsonString);
+    console.log("parsed:", result);
     if (result.accuracy < 75) {
       throw { status: 400, error: "Article failed fact-checking.", ...result };
     }
