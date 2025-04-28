@@ -212,12 +212,8 @@ Use this exact shape:
       }),
     });
     const pxData = await pxRes.json();
-    console.log(
-      "🟢 Perplexity fact check raw response:",
-      JSON.stringify(pxData, null, 2)
-    );
+
     const reply = pxData.choices?.[0]?.message?.content.trim();
-    console.log("response before trim:", reply);
     reply = reply
       .replace(/^```(?:json)?\s*/, "")
       .replace(/\s*```$/, "")
