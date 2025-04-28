@@ -214,9 +214,9 @@ Use this exact shape:
     const pxData = await pxRes.json();
 
     const raw = pxData.choices?.[0]?.message?.content;
-    console.log("raw model output:\n", JSON.stringify(raw));
-    let reply = raw.trim();
-    console.log("after trim:\n", JSON.stringify(reply));
+    // console.log("raw model output:\n", JSON.stringify(raw));
+    // let reply = raw.trim();
+    // console.log("after trim:\n", JSON.stringify(reply));
 
     let start = raw.indexOf("{");
     let end = raw.lastIndexOf("}");
@@ -227,7 +227,7 @@ Use this exact shape:
     }
 
     let jsonString = raw.substring(start, end + 1);
-    console.log("jsonString to parse:", jsonString);
+    // console.log("jsonString to parse:", jsonString);
 
     let result;
     try {
