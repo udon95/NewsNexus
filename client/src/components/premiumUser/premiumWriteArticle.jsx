@@ -51,8 +51,8 @@ export const PremiumWriteArticle = () => {
   const [showLinkModal, setShowLinkModal] = useState(false);
   const [linkUrl, setLinkUrl] = useState("");
   const [roomArticleType, setRoomArticleType] = useState("factual"); // only for Room
-  const [aiFeedback, setAiFeedback] = useState("");
-  const [collabId, setCollabId] = useState("collab-id");
+  const [aiFeedback, setAiFeedback] = useState < string > "";
+  const [accuracy, setAccuracy] = (useState < number) | (null > null);
   const [showDraftNotification, setShowDraftNotification] = useState(false);
 
   // console.log("Auth session:", supabase.auth.getSession());
@@ -783,6 +783,8 @@ export const PremiumWriteArticle = () => {
     setSelectedRoom("");
     setShowConfirm(false);
     setPendingImages([]);
+    setAccuracy(null);
+    setAiFeedback("");
 
     // Reset Tiptap editor content (this is the key)
     if (editor) {
