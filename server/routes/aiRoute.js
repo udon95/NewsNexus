@@ -162,10 +162,10 @@ async function factCheck(content, topicName) {
   });
 
   const catData = await catRes.json();
-  console.log("🟢 Category check raw response:", JSON.stringify(catData, null, 2));
+  // console.log("🟢 Category check raw response:", JSON.stringify(catData, null, 2));
   const rawCategory = catData.choices?.[0]?.message?.content;
   const categoryMatch = rawCategory ? rawCategory.trim().toLowerCase() : "";
-  console.log("🟢 Category assistant says:", categoryMatch);
+  // console.log("🟢 Category assistant says:", categoryMatch);
 
   if (categoryMatch.startsWith("y")) {
   } else {
@@ -211,6 +211,7 @@ Please review the following article and verify its factual accuracy using up-to-
       }),
     });
     const pxData = await pxRes.json();
+    console.log("🟢 Perplexity fact check raw response:", JSON.stringify(pxData, null, 2));
     const reply = pxData.choices?.[0]?.message?.content.trim();
     const result = JSON.parse(reply);
     if (result.accuracy < 75) {
