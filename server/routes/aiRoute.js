@@ -199,7 +199,7 @@ Please review the following article and verify its factual accuracy using up-to-
 
  In addition, analyze the overall factual correctness of the article and assign a numerical accuracy score between 0 and 100, where 100 means the article is completely accurate and 0 means it is entirely inaccurate.
 
- Return your output only in valid JSON format exactly as follows. Return raw JSON object directly:
+ Return your output only in a JSON object exactly as follows. {"accuracy <number>, "feedback":"<string>"}:
  {"accuracy": <percentage between 0 and 100>, "feedback": "<Your explanation including any <mark> annotations if applicable>"}
   
  Article:
@@ -236,7 +236,7 @@ Please review the following article and verify its factual accuracy using up-to-
                  For any inaccuracies, describe the issues. 
                  Then, provide an overall factual accuracy score as a number between 0 and 100.
                  If some parts are ambiguous but overall the article is largely accurate, note this in your score.
-                 Return your response in valid JSON format in this exact structure:
+                 Return your response only in a valid JSON object in this exact structure:
                 {"accuracy": <percentage between 0 and 100>, "feedback": "<Your explanation>"}`,
           },
           { role: "user", content },
