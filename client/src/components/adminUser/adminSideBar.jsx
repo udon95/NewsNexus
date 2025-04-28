@@ -32,6 +32,9 @@ export const AdminSidebar = () => {
           <a href="/adminDashboard/AdminGuidelines" className="tracking-wide">
             Guidelines &gt;
           </a>
+          <a href="/adminDashboard/AdminPrivacy" className="tracking-wide">
+            Privacy Policy &gt;
+          </a>
           <a href="/adminDashboard/AdminCategories" className="tracking-wide">
             Categories &gt;
           </a>
@@ -53,6 +56,9 @@ export const AdminSidebar = () => {
           <a href="/adminDashboard/AdminExperts" className="tracking-wide">
             Expert Applications &gt;
           </a>
+          <a href="/adminDashboard/AdminCommunityNotes" className="tracking-wide" >
+            Community Notes &gt;
+          </a>
           <a
             href="/adminDashboard/AdminCommentReports"
             className="tracking-wide"
@@ -64,6 +70,12 @@ export const AdminSidebar = () => {
             className="tracking-wide"
           >
             Article Reports &gt;
+          </a>
+          <a href="/adminDashboard/AdminRoomArticleReports" className="tracking-wide" >
+            Room Article Reports &gt;
+          </a>
+          <a href="/adminDashboard/AdminRoomCommentReports" className="tracking-wide" >
+            Room Comment Reports &gt;
           </a>
         </div>
       </nav>

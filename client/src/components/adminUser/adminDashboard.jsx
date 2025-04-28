@@ -7,12 +7,16 @@ import AdminTestimonials from "./AdminTestimonials.jsx";
 import AdminCategories from "./AdminCategories.jsx";
 import AdminUserDetails from "./AdminUserDetails.jsx";
 import AdminGuidelines from "./AdminGuidelines.jsx";
+import AdminPrivacy from "./AdminPrivacy.jsx";
 import AdminSubscription from "./AdminSubscription.jsx";
 import AdminFeatures from "./AdminFeatures.jsx";
 import AdminCommentReports from "./AdminCommentReports.jsx";
 import AdminArticleReports from "./AdminArticleReports.jsx";
 import AdminUsers from "./AdminUsers.jsx";
 import AdminHome from "./AdminHome.jsx";
+import AdminCommunityNotes from "./AdminCommunityNotes.jsx";
+import AdminRoomArticleReports from "./AdminRoomArticleReports.jsx";
+import AdminRoomCommentReports from "./AdminRoomCommentReports.jsx";
 
 function AdminDashboard() {
   return (
@@ -31,6 +35,7 @@ function AdminDashboard() {
             <Route path="AdminCategories/*" element={<AdminCategories />} />
             <Route path="AdminUserDetails/*" element={<AdminUserDetails />} />
             <Route path="AdminGuidelines/*" element={<AdminGuidelines />} />
+            <Route path="AdminPrivacy/*" element={<AdminPrivacy />} />
             <Route path="AdminSubscription/*" element={<AdminSubscription />} />
             <Route path="AdminFeatures/*" element={<AdminFeatures />} />
             <Route
@@ -42,6 +47,18 @@ function AdminDashboard() {
               element={<AdminArticleReports />}
             />
             <Route path="AdminUsers/*" element={<AdminUsers />} />
+            <Route
+              path="AdminCommunityNotes/*"
+              element={<AdminCommunityNotes />}
+            />
+            <Route
+              path="AdminRoomArticleReports/*"
+              element={<AdminRoomArticleReports />}
+            />
+            <Route
+              path="AdminRoomCommentReports/*"
+              element={<AdminRoomCommentReports />}
+            />
           </Routes>
         </div>
       </main>
