@@ -157,7 +157,7 @@ async function factCheck(content, topicName) {
         { role: "system", content: "You are a category validation assistant." },
         { role: "user", content: generateCategoryPrompt(content, topicName) },
       ],
-      temperature: 0.2,
+      temperature: 0.0,
     }),
   });
 

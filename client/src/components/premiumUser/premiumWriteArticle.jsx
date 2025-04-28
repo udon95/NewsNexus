@@ -531,7 +531,7 @@ export const PremiumWriteArticle = () => {
       }
       setAccuracy(result.accuracy);
       setAiFeedback(result.feedback);
-      alert(`Article posted successfully. Accuracy score: ${result.accuracy}%`);
+      alert(`Article posted successfully. Accuracy Score: ${result.accuracy}%`);
       handleClearInputs();
       return;
     } else {
