@@ -148,9 +148,13 @@ async function factCheck(content, topicName) {
       temperature: 0.2,
     }),
   });
+  
   const catData = await catRes.json();
+  console.log("🧐 Category assistant replied:", catData.choices[0].message.content);
   const rawCategory = catData.choices?.[0]?.message?.content;
+  console.log(rawCategory);
   const categoryMatch = rawCategory ? rawCategory.trim().toLowerCase() : "";
+  console.log(categoryMatch);
 
   if (!categoryMatch.includes("yes")) {
     throw {
