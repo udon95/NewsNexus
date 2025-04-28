@@ -476,9 +476,11 @@ export const PremiumWriteArticle = () => {
 
       if (!response.ok) {
         console.log(result);
-        if (result.highlightedHTML) {
-          console.log("🔴 AI Feedback returned:", result.highlightedHTML);
-          setAiFeedback(result.highlightedHTML);
+        if (result.feedback) {
+          console.log("🔴 AI Feedback returned:", result.feedback);
+          setAiFeedback(result.feedback);
+          setAccuracy(result.accuracy || null);
+
           alert(
             "❌ Article flagged by AI. Please review the highlighted sections."
           );
@@ -519,7 +521,7 @@ export const PremiumWriteArticle = () => {
       //   return;
       // }
 
-      const articleid = data?.[0]?.articleid;
+      const articleid = result.article?.articleid;
 
       // Save multiple images to article_images
       for (const url of uploadedImageUrls) {
@@ -527,11 +529,11 @@ export const PremiumWriteArticle = () => {
           .from("article_images")
           .insert([{ articleid, image_url: url }]);
       }
-
-      alert("Article posted successfully.");
+      setAccuracy(result.accuracy);
+      setAiFeedback(result.feedback);
+      alert(`Article posted successfully. Accuracy score: ${result.accuracy}%`);
       handleClearInputs();
       return;
-      
     } else {
       articleData.roomid = selectedRoom;
 
@@ -1212,13 +1214,20 @@ export const PremiumWriteArticle = () => {
                   </button>
                 </div>
 
-                {aiFeedback && (
+                {accuracy !== null && (
                   <div className="mt-4 p-4 border border-red-300 bg-red-50 rounded text-sm text-red-800">
-                    <strong>AI Feedback:</strong>
+                    <strong>Fact Check Results:</strong>
+                    <p>
+                      <strong>Accuracy:</strong> {accuracy}%
+                    </p>
+                    <p>
+                      <strong>Feedback:</strong>
+                    </p>
                     <div
-                      className="p-4 bg-red-50 text-red-800 border border-red-200 mt-4 rounded"
+                      className="mt-1"
                       dangerouslySetInnerHTML={{ __html: aiFeedback }}
                     />
+                    +
                   </div>
                 )}
 

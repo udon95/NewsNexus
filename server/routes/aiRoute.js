@@ -320,7 +320,7 @@ router.post("/submit-article", async (req, res) => {
   }
 
   // Insert into `articles`
-  const { data, error } = await supabase
+  const { data: inserted, error } = await supabase
     .from("articles")
     .insert([
       {
@@ -331,15 +331,16 @@ router.post("/submit-article", async (req, res) => {
         accuracy_score: factResult.accuracy,
       },
     ])
-    .select();
+    .select()
+    .single();
 
   if (error) {
     console.error("General insert error:", error);
     return res.status(500).json({ error: error.message });
   }
   return res.json({
-    message: "Factual article saved successfully.",
-    article: data[0],
+    message: "Article saved successfully.",
+    article: inserted,
     accuracy: factResult.accuracy,
     feedback: factResult.feedback,
   });
