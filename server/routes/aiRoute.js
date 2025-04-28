@@ -212,7 +212,7 @@ Please review the following article and verify its factual accuracy using up-to-
     });
     const pxData = await pxRes.json();
     console.log("🟢 Perplexity fact check raw response:", JSON.stringify(pxData, null, 2));
-    const reply = pxData.choices?.[0]?.message?.content.trim();
+    const reply = pxData.choices[0].message.content;
     const result = JSON.parse(reply);
     if (result.accuracy < 75) {
       throw { status: 400, error: "Article failed fact-checking.", ...result };
