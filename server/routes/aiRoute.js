@@ -126,7 +126,7 @@ Determine if the following article content is relevant to the category "${catego
 
 Relevance includes people, places, events, policies, or topics that originate from or strongly affect the category.
 
-Respond with one word only: "Yes" or "No".
+Respond with one word only: "yes" or "no".
 
 Article:
 ${content}
@@ -154,7 +154,7 @@ async function factCheck(content, topicName) {
   const rawCategory = catData.choices?.[0]?.message?.content;
   const categoryMatch = rawCategory ? rawCategory.trim().toLowerCase() : "";
   
-  if (categoryMatch.startsWith("y")) {
+  if (!categoryMatch.includes("yes")) {
     throw {
       status: 400,
       error: `Article content does not match category: ${topicName}`,
