@@ -235,9 +235,9 @@ Use this exact shape:
     const result = JSON.parse(jsonString);
     console.log("parsed:", result);
     if (
-      Array.isArray(parsed) &&
-      parsed.length === 2 &&
-      (typeof parsed[0] === "number") === false
+      Array.isArray(result) &&
+      result.length === 2 &&
+      (typeof result[0] === "number") === false
     ) {
     }
 
