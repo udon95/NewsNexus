@@ -213,29 +213,35 @@ Use this exact shape:
     });
     const pxData = await pxRes.json();
 
-    const reply = pxData.choices?.[0]?.message?.content.trim();
-    reply = reply
-      .replace(/^```(?:json)?\s*/, "")
-      .replace(/\s*```$/, "")
-      .trim();
-    console.log("reply:", reply);
+    const raw = pxData.choices?.[0]?.message?.content;
+    console.log("raw model output:\n", JSON.stringify(raw));
+    let reply = raw.trim();
+    console.log("after trim:\n", JSON.stringify(reply));
 
-    const m = reply.match(/\{[\s\S]*\}/);
-    if (!m) {
-      throw new Error("No JSON object found in model response:\n" + reply);
+    let start = raw.indexOf("{");
+    let end = raw.lastIndexOf("}");
+    if (start === -1 || end === -1) {
+      throw new Error(
+        "—couldn't find JSON braces in the model output!—\n" + raw
+      );
     }
 
-    const jsonString = m[0];
-    console.log("jsonstring:", jsonString);
+    let jsonString = raw.substring(start, end + 1);
+    console.log("jsonString to parse:", jsonString);
 
-    const result = JSON.parse(jsonString);
-    console.log("parsed:", result);
-    if (
-      Array.isArray(result) &&
-      result.length === 2 &&
-      (typeof result[0] === "number") === false
-    ) {
+    let result;
+    try {
+      result = JSON.parse(jsonString);
+    } catch (e) {
+      console.error(
+        "Failed to JSON.parse the extracted string:",
+        e,
+        jsonString
+      );
+      throw e;
     }
+
+    console.log("parsed result:", result);
 
     if (result.accuracy < 75) {
       throw { status: 400, error: "Article failed fact-checking.", ...result };
