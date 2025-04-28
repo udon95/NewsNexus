@@ -149,9 +149,9 @@ async function factCheck(content, topicName) {
     }),
   });
   const catData = await catRes.json();
-  const categoryMatch = catData.choices?.[0]?.message?.content
-    .trim()
-    .toLowerCase();
+  const rawCategory = catData.choices?.[0]?.message?.content;
+  const categoryMatch = rawCategory ? rawCategory.trim().toLowerCase() : "";
+
   if (!categoryMatch.includes("yes")) {
     throw {
       status: 400,
@@ -574,73 +574,83 @@ router.post("/submit-article", async (req, res) => {
   // }
 });
 
-router.post(
-  "/rooms/:roomid/articles",
-  async (req, res) => {
-    const { roomid } = req.params;
-    const { title, content, authorId, type, topicName, imageBase64 } = req.body;
+router.post("/rooms/:roomid/articles", async (req, res) => {
+  const { roomid } = req.params;
+  const { title, content, authorId, type, topicName, imageBase64 } = req.body;
 
-    // Validate required
-    if (!roomid || !title || !content || !authorId || !type) {
-      return res.status(400).json({ error: "Missing required fields." });
-    }
-    // Moderate text/image
-    const textMod = await moderateText(content);
-    if (textMod.flagged) return res.status(400).json({ error: "Content flagged." });
-    if (imageBase64) {
-      const imgMod = await moderateImage(imageBase64);
-      if (imgMod[0]?.label?.toLowerCase().includes("nsfw") && imgMod[0].score > 0.8)
-        return res.status(400).json({ error: "Image flagged as NSFW." });
-    }
+  // Validate required
+  if (!roomid || !title || !content || !authorId || !type) {
+    return res.status(400).json({ error: "Missing required fields." });
+  }
+  // Moderate text/image
+  const textMod = await moderateText(content);
+  if (textMod.flagged)
+    return res.status(400).json({ error: "Content flagged." });
+  if (imageBase64) {
+    const imgMod = await moderateImage(imageBase64);
+    if (
+      imgMod[0]?.label?.toLowerCase().includes("nsfw") &&
+      imgMod[0].score > 0.8
+    )
+      return res.status(400).json({ error: "Image flagged as NSFW." });
+  }
 
-    // Opinion flow: direct save
-    if (type === "opinion") {
-      const { data, error } = await supabase
-        .from("room_articles")
-        .insert([{
-          roomid,
-          userid: authorId,
-          title,
-          content,
-          status: 'Published',
-          is_general: false
-        }]);
-      if (error) {
-        console.error("Room opinion insert error:", error);
-        return res.status(500).json({ error: error.message });
-      }
-      return res.json({ message: "Opinion article saved in room.", article: data[0] });
-    }
-
-    // Factual in room: need topicName for category check
-    if (!topicName) {
-      return res.status(400).json({ error: "Missing required field: topicName for factual room post." });
-    }
-    try {
-      await factCheck(content, topicName);
-    } catch (fcErr) {
-      console.error("Room fact-check error:", fcErr);
-      return res.status(fcErr.status || 400).json({ error: fcErr.error });
-    }
-
-    // Insert factual room article
-    const { data, error } = await supabase
-      .from("room_articles")
-      .insert([{
+  // Opinion flow: direct save
+  if (type === "opinion") {
+    const { data, error } = await supabase.from("room_articles").insert([
+      {
         roomid,
         userid: authorId,
         title,
         content,
-        status: 'Published',
-        is_general: true
-      }]);
+        status: "Published",
+        is_general: false,
+      },
+    ]);
     if (error) {
-      console.error("Room factual insert error:", error);
+      console.error("Room opinion insert error:", error);
       return res.status(500).json({ error: error.message });
     }
-    return res.json({ message: "Factual article saved in room.", article: data[0] });
+    return res.json({
+      message: "Opinion article saved in room.",
+      article: data[0],
+    });
   }
-);
 
+  // Factual in room: need topicName for category check
+  if (!topicName) {
+    return res
+      .status(400)
+      .json({
+        error: "Missing required field: topicName for factual room post.",
+      });
+  }
+  try {
+    await factCheck(content, topicName);
+  } catch (fcErr) {
+    console.error("Room fact-check error:", fcErr);
+    return res.status(fcErr.status || 400).json({ error: fcErr.error });
+  }
+
+  // Insert factual room article
+  const { data, error } = await supabase.from("room_articles").insert([
+    {
+      roomid,
+      userid: authorId,
+      title,
+      content,
+      status: "Published",
+      is_general: true,
+    },
+  ]);
+  if (error) {
+    console.error("Room factual insert error:", error);
+    return res.status(500).json({ error: error.message });
+  }
+  return res.json({
+    message: "Factual article saved in room.",
+    article: data[0],
+  });
+});
 
 module.exports = router;
