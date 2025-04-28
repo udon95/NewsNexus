@@ -162,8 +162,10 @@ async function factCheck(content, topicName) {
   });
 
   const catData = await catRes.json();
+  console.log("🟢 Category check raw response:", JSON.stringify(catData, null, 2));
   const rawCategory = catData.choices?.[0]?.message?.content;
   const categoryMatch = rawCategory ? rawCategory.trim().toLowerCase() : "";
+  console.log("🟢 Category assistant says:", categoryMatch);
 
   if (categoryMatch.startsWith("y")) {
   } else {
