@@ -133,7 +133,6 @@ ${content}
 `;
 
 async function factCheck(content, topicName) {
-  console.log("openai key", process.env.OPENAI_API_KEY);
   const catRes = await fetch("https://api.openai.com/v1/chat/completions", {
     method: "POST",
     headers: {
@@ -149,12 +148,13 @@ async function factCheck(content, topicName) {
       temperature: 0.2,
     }),
   });
-  
+
   const catData = await catRes.json();
   const rawCategory = catData.choices?.[0]?.message?.content;
   const categoryMatch = rawCategory ? rawCategory.trim().toLowerCase() : "";
-  
-  if (!categoryMatch.includes("yes")) {
+
+  if (categoryMatch.startsWith("y")) {
+  } else {
     throw {
       status: 400,
       error: `Article content does not match category: ${topicName}`,
@@ -621,11 +621,9 @@ router.post("/rooms/:roomid/articles", async (req, res) => {
 
   // Factual in room: need topicName for category check
   if (!topicName) {
-    return res
-      .status(400)
-      .json({
-        error: "Missing required field: topicName for factual room post.",
-      });
+    return res.status(400).json({
+      error: "Missing required field: topicName for factual room post.",
+    });
   }
   try {
     await factCheck(content, topicName);
