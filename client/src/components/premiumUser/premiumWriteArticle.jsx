@@ -846,8 +846,8 @@ export const PremiumWriteArticle = () => {
         cursor: pointer;
       }
       .ProseMirror mark {
-        background-color: #fde68a;
-        color: #b91c1c;
+        background-color: #ffff00;
+        color: #ff0000;
         padding: 0 2px;
         border-radius: 3px;
       }
