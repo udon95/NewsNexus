@@ -6,22 +6,26 @@ import useAuthHook from "../hooks/useAuth.jsx";
 const Header = () => {
   const { user, userType, handleLogout } = useAuthHook();
   const navigate = useNavigate();
-  const [profileColor, setProfileColor] = useState("#ffffff")
+  const [profileColor, setProfileColor] = useState("#ffffff");
   const [textColor, setTextColor] = useState("black");
 
   useEffect(() => {
-    const storedColor = localStorage.getItem("color");
-    if (storedColor) {
-      setProfileColor(storedColor);
-      setTextColor(getTextColor(storedColor));
-    } else {}
+    const storedUser = localStorage.getItem("userProfile");
+    if (storedUser) {
+      const parsed = JSON.parse(storedUser);
+      const storedColor = parsed.color;
+      if (storedColor) {
+        setProfileColor(storedColor);
+        setTextColor(getTextColor(storedColor));
+      }
+    }
   }, []);
 
-  const getLuminance = (hexColor) =>{
+  const getLuminance = (hexColor) => {
     const r = parseInt(hexColor.slice(1, 3), 16) / 255;
     const g = parseInt(hexColor.slice(3, 5), 16) / 255;
     const b = parseInt(hexColor.slice(5, 7), 16) / 255;
-  
+
     // Convert RGB to relative luminance using the formula
     const a = [r, g, b].map((x) =>
       x <= 0.03928 ? x / 12.92 : Math.pow((x + 0.055) / 1.055, 2.4)
@@ -35,7 +39,7 @@ const Header = () => {
   };
 
   const handleProfileClick = () => {
-    // console.log("Navigating to:", userType); 
+    // console.log("Navigating to:", userType);
     if (!userType) {
       // console.warn("UserType is null! Fetching from sessionStorage...");
       const cachedProfile = sessionStorage.getItem("userProfile");
@@ -51,7 +55,7 @@ const Header = () => {
     } else if (userType === "Admin") {
       navigate("/adminDashboard");
     } else {
-      navigate("/login"); 
+      navigate("/login");
     }
   };
 
@@ -84,8 +88,7 @@ const Header = () => {
               className="w-12 h-12 sm:w-14 sm:h-14 bg-blue-200 rounded-lg text-blue-900 font-bold border-2 border-blue-900 flex items-center justify-center shadow-md hover:bg-blue-300 transition"
               onClick={handleProfileClick}
               title="Profile"
-              style={{backgroundColor: profileColor, color:textColor}}
-
+              style={{ backgroundColor: profileColor, color: textColor }}
             >
               {user.email.charAt(0).toUpperCase()}
             </button>
