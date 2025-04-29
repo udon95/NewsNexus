@@ -190,24 +190,21 @@ async function factCheck(content, topicName) {
         messages: [
           {
             role: "system",
-            content: `
-You are a fact-checking assistant. 
+            content: `You are a fact-checking assistant. 
+  Please review the following article and verify its factual accuracy using up-to-date knowledge as of today.
 
-Please review the following article and verify its factual accuracy using up-to-date knowledge as of today.
+  For any false, misleading, or dubious claims:
+  - Wrap only the false or misleading text in <mark> tags.
+  - Immediately after each <mark> section, on a new line preceded by a <br> tag, provide an explanation in parentheses that details why the text is inaccurate.
 
- For any false, misleading, or dubious claims:
- - Wrap only the false or misleading text in <mark> tags.
- - Immediately after each <mark> section, on a new line preceded by a <br> tag, provide an explanation in parentheses that details why the text is inaccurate.
+  In addition, analyze the overall factual correctness of the article and assign a numerical accuracy score between 0 and 100, where 100 means the article is completely accurate and 0 means it is entirely inaccurate.
 
- In addition, analyze the overall factual correctness of the article and assign a numerical accuracy score between 0 and 100, where 100 means the article is completely accurate and 0 means it is entirely inaccurate.
-
-You must return _only_ a single JSON object, no arrays, no markdown, no code fences, no extra text.
-Use this exact shape:
-  {"accuracy":<0–100>,"feedback":"…"}
+  You must return _only_ a single JSON object, no arrays, no markdown, no code fences, no extra text.
+  Use this exact shape:
+  {"accuracy":<0 – 100>,"feedback":"The article contains false claims. Article: <original article HTML with <mark> around the inaccuracies>"}
   
- Article:
- ${content}
- `,
+  Article:
+  ${content}`,
           },
           { role: "user", content },
         ],
@@ -233,50 +230,52 @@ Use this exact shape:
     const parsed = raw.substring(start, end + 1);
     // console.log("jsonString to parse:", jsonString);
 
-      result = JSON.parse(parsed);
-    } catch (perpErr) {
-      console.warn(
-        "Perplexity fail to determine, falling back to ChatGPT:", perpErr.message);
-       
-        const gptRes = await fetch("https://api.openai.com/v1/chat/completions", {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${OPENAI_KEY}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            model: "gpt-3.5-turbo",
-            messages: [
-              {
-                role: "system",
-                content: `You are a fact-checking assistant.
+    result = JSON.parse(parsed);
+  } catch (perpErr) {
+    console.warn(
+      "Perplexity fail to determine, falling back to ChatGPT:",
+      perpErr.message
+    );
+
+    const gptRes = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${OPENAI_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "gpt-3.5-turbo",
+        messages: [
+          {
+            role: "system",
+            content: `You are a fact-checking assistant.
                      Review the following article and highlight any **false or misleading** statements.
                      For any inaccuracies, describe the issues. 
                      Then, provide an overall factual accuracy score as a number between 0 and 100.
                      If some parts are ambiguous but overall the article is largely accurate, note this in your score.
                      Return your response only in a valid JSON object in this exact structure:
-                    {"accuracy": <percentage between 0 and 100>, "feedback": "<Your explanation>"}`,
-              },
-              { role: "user", content },
-            ],
-            temperature: 0.2,
-          }),
-        });
-        const gptData = await gptRes.json();
-        const parsed = JSON.parse(gptData.choices[0].message.content);
-        result = parsed;
-    }
+                    {"accuracy": <0 - 100>, "feedback": "The article contains false claims. Article: <original article HTML with <mark> around the inaccuracies>"}`,
+          },
+          { role: "user", content },
+        ],
+        temperature: 0.2,
+      }),
+    });
+    const gptData = await gptRes.json();
+    const parsed = JSON.parse(gptData.choices[0].message.content);
+    result = parsed;
+  }
 
-    console.log("parsed result:", result);
-    if (typeof result.accuracy !== "number" || result.accuracy < threshold) {
-      // include both accuracy and feedback in the thrown object
-      throw {
-        status: 400,
-        error: "Article failed fact-checking.",
-        ...result
-      };
-    }
-    return result;
+  console.log("parsed result:", result);
+  if (typeof result.accuracy !== "number" || result.accuracy < threshold) {
+    // include both accuracy and feedback in the thrown object
+    throw {
+      status: 400,
+      error: "Article failed fact-checking.",
+      ...result,
+    };
+  }
+  return result;
 
   //   if (result.accuracy < 75) {
   //     throw { status: 400, error: "Article failed fact-checking.", ...result };
@@ -284,7 +283,7 @@ Use this exact shape:
   //   return result;
   // } catch (err) {
   //   // Fallback to GPT
-    
+
   //   if (parsed.accuracy < 75) {
   //     throw { status: 400, error: "Article failed fact-checking.", ...parsed };
   //   }

@@ -1221,7 +1221,8 @@ export const PremiumWriteArticle = () => {
                     <strong>Fact Check Results:</strong>
                     {accuracy !== null && (
                       <p>
-                        <strong>Accuracy:</strong> {accuracy}%
+                        <strong>Accuracy:</strong>
+                        {accuracy}%
                       </p>
                     )}
                     <p>
