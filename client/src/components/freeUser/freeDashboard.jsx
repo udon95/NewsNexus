@@ -1,11 +1,11 @@
 import React from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
-import FreeSidebar from "./freeSideBar";
+import FreeSidebar from "./freeSideBar.jsx";
 import FreeManageArticle from "./freeManageArticle";
 import FreeManageProfile from "./freeManageProfile";
 import FreeWriteArticle from "./freeWriteArticlePostControl";
 import FreeSubmitTest from "./freeSubmitTest";
-import FreeEditPosted from "./freeEditPosted";
+import FreeEditArticle from "./freeEditArticle";
 
 function FreeDashboard() {
   return (
@@ -25,8 +25,8 @@ function FreeDashboard() {
               element={<FreeWriteArticle />}
             />
             <Route
-              path="editPosted/:articletitle"
-              element={<FreeEditPosted />}
+              path="edit/:id"
+              element={<FreeEditArticle />}
             />
             <Route path="manageProfile" element={<FreeManageProfile />} />
             <Route path="submitTest" element={<FreeSubmitTest />} />

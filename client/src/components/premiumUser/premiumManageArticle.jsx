@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import ArticleList from "../articleList.jsx";
 import { useNavigate } from "react-router-dom";
 import supabase from "../../api/supabaseClient";
-import Manage from "../manageSearchBar.jsx"; 
+import Manage from "../manageSearchBar.jsx";
 
 export const PremManageArticle = () => {
   const navigate = useNavigate();
@@ -11,6 +11,7 @@ export const PremManageArticle = () => {
   const [draftArticles, setDraftArticles] = useState([]);
   const [roomdraftArticles, setroomDraftArticles] = useState([]);
   const [viewCounts, setViewCounts] = useState({});
+  const [likeCounts, setLikeCounts] = useState({});
   const storedUser = JSON.parse(localStorage.getItem("userProfile"));
   const userId = storedUser?.user?.userid;
 
@@ -30,37 +31,43 @@ export const PremManageArticle = () => {
         return;
       }
 
-      console.log("User from localStorage:", session);
+      // console.log("User from localStorage:", session);
 
       const { data, error } = await supabase
         .from("articles")
-        .select(`
+        .select(
+          `
           articleid,
           title,
           time,
           view_count,
+          total_votes,
           imagepath
-        `)
+        `
+        )
         .eq("userid", userId)
-        .eq('status', 'Published')
+        .eq("status", "Published")
         .order("time", { ascending: false });
-    
+
       if (error) {
         console.error("Error fetching articles:", error);
         return;
       }
 
       const viewCountMap = {};
+      const likeCountMap = {};
 
       // Populate view_count for each article
-      data.forEach(article => {
+      data.forEach((article) => {
         viewCountMap[article.articleid] = article.view_count;
+        likeCountMap[article.articleid] = article.total_votes;
       });
 
       console.log("Fetched articles data:", JSON.stringify(data, null, 2)); // Debugging log
       setPostedArticles(data);
       setViewCounts(viewCountMap);
-    }
+      setLikeCounts(likeCountMap);
+    };
     fetchpostedArticles();
   }, [userId]);
 
@@ -80,21 +87,23 @@ export const PremManageArticle = () => {
         return;
       }
 
-      console.log("User from localStorage:", session);
+      // console.log("User from localStorage:", session);
 
       const { data, error } = await supabase
         .from("room_articles")
-        .select(`
+        .select(
+          `
           postid,
-          roomid,
+          
           title,
           created_at,
           room_article_images(image_url)
-        `)
+        `
+        )
         .eq("userid", userId)
-        .eq('status', 'Published')
+        .eq("status", "Published")
         .order("created_at", { ascending: false });
-    
+
       if (error) {
         console.error("Error fetching articles:", error);
         return;
@@ -102,8 +111,7 @@ export const PremManageArticle = () => {
 
       console.log("Fetched articles data:", JSON.stringify(data, null, 2)); // Debugging log
       setroomPostedArticles(data);
-
-    }
+    };
     fetchroompostedArticles();
   }, [userId]);
 
@@ -111,16 +119,19 @@ export const PremManageArticle = () => {
     const fetchdraftArticles = async () => {
       const { data, error } = await supabase
         .from("articles")
-        .select(`
+        .select(
+          `
           articleid,
           title,
           time,
+          topicid,
           imagepath
-        `)
+        `
+        )
         .eq("userid", userId)
-        .eq('status', 'Draft')
+        .eq("status", "Draft")
         .order("time", { ascending: false });
-    
+
       if (error) {
         console.error("Error fetching articles:", error);
         return;
@@ -128,7 +139,7 @@ export const PremManageArticle = () => {
 
       console.log("Fetched articles data:", JSON.stringify(data, null, 2)); // Debugging log
       setDraftArticles(data);
-    }
+    };
     fetchdraftArticles();
   }, [userId]);
 
@@ -136,16 +147,18 @@ export const PremManageArticle = () => {
     const fetchroomDraftArticles = async () => {
       const { data, error } = await supabase
         .from("room_articles")
-        .select(`
+        .select(
+          `
           postid,
           title,
           created_at,
           room_article_images(image_url)
-        `)
+        `
+        )
         .eq("userid", userId)
-        .eq('status', 'Draft')
+        .eq("status", "Draft")
         .order("created_at", { ascending: false });
-    
+
       if (error) {
         console.error("Error fetching articles:", error);
         return;
@@ -153,7 +166,7 @@ export const PremManageArticle = () => {
 
       console.log("Fetched articles data:", JSON.stringify(data, null, 2)); // Debugging log
       setroomDraftArticles(data);
-    }
+    };
     fetchroomDraftArticles();
   }, [userId]);
 
@@ -169,7 +182,7 @@ export const PremManageArticle = () => {
   // Function to filter articles
   const filterArticles = (articles) => {
     let filtered = articles;
-  
+
     if (searchQuery.trim() !== "") {
       filtered = filtered.filter((article) =>
         article.title.toLowerCase().includes(searchQuery.toLowerCase())
@@ -196,18 +209,19 @@ export const PremManageArticle = () => {
         return new Date(time) >= cutoff;
       });
     }
-  
+
     return filtered;
-  };  
-  
-  // Handle article click event
-  const handleArticleClick = (article) => {
-    navigate(`/article/${encodeURIComponent(article.title)}`);
   };
 
-  const handleRoomArticleClick = (article) => {
-    navigate(`/room/${article.roomid}`);
+  // Handle article click event
+  const handleArticleClick = (article) => {
+    const id = article.articleid || article.postid;
+     navigate(`/edit/premium/${id}`);
   };
+
+  // const handleRoomArticleClick = (article) => {
+  //   navigate(`/room/${article.roomid}`);
+  // };
 
   const handleDeleteArticle = (articleid) => {
     setPostedArticles((prev) => prev.filter((a) => a.articleid !== articleid));
@@ -219,7 +233,7 @@ export const PremManageArticle = () => {
 
   const handleDeleteDraft = (articleid) => {
     setDraftArticles((prev) => prev.filter((a) => a.articleid !== articleid));
-  };  
+  };
 
   const handleDeleteRoomDraft = (postid) => {
     setroomDraftArticles((prev) => prev.filter((a) => a.postid !== postid));
@@ -227,8 +241,8 @@ export const PremManageArticle = () => {
 
   return (
     <div className="w-full min-h-screen bg-indigo-50 text-black font-grotesk flex justify-center">
-      <main className="w-full text-xl flex flex-col max-md:flex-col max-w-4xl">                          
-        <Manage 
+      <main className="w-full text-xl flex flex-col max-md:flex-col max-w-4xl">
+        <Manage
           onSearch={setSearchQuery}
           initialTimeFilter={timeFilter}
           onTimeFilterChange={handleTimeFilterChange}
@@ -247,17 +261,17 @@ export const PremManageArticle = () => {
             isRoom={false}
             onArticleClick={handleArticleClick}
             onDeleteSuccess={handleDeleteArticle}
-            articleData={{ viewCounts }}
+            articleData={{ viewCounts, likeCounts }}
           />
         )}
-        {(articleType === "all" || articleType === "room article") && (
+        {(articleType === "all" || articleType === "posted") && (
           <ArticleList
-            title="My Room Posted Articles:"
+            title="My Posted Room Articles:"
             articles={filterArticles(roompostedArticles)}
             isDraft={false}
             isPremium={true}
             isRoom={true}
-            onArticleClick={handleRoomArticleClick}
+            onArticleClick={handleArticleClick}
             onDeleteSuccess={handleDeleteRoomArticle}
           />
         )}
@@ -269,6 +283,7 @@ export const PremManageArticle = () => {
             isPremium={true}
             isRoom={false}
             onDeleteSuccess={handleDeleteDraft}
+            onArticleClick={handleArticleClick}
           />
         )}
         {(articleType === "all" || articleType === "draft") && (
@@ -279,8 +294,9 @@ export const PremManageArticle = () => {
             isPremium={true}
             isRoom={true}
             onDeleteSuccess={handleDeleteRoomDraft}
+            onArticleClick={handleArticleClick}
           />
-        )}                    
+        )}
       </main>
     </div>
   );
