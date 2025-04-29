@@ -191,20 +191,22 @@ async function factCheck(content, topicName) {
           {
             role: "system",
             content: `You are a fact-checking assistant. 
-  Please review the following article and verify its factual accuracy using up-to-date knowledge as of today.
+                      Please review the following article and verify its factual accuracy using up-to-date knowledge as of today.
 
-  For any false, misleading, or dubious claims:
-  - Wrap only the false or misleading text in <mark> tags.
-  - Immediately after each <mark> section, on a new line preceded by a <br> tag, provide an explanation in parentheses that details why the text is inaccurate.
+                      For any false, misleading, or dubious claims:
+                      - Wrap only the false or misleading text in <mark> tags.
+                      - Immediately after each <mark> section, on a new line preceded by a <br> tag, provide an explanation in parentheses that details why the text is inaccurate.
 
-  In addition, analyze the overall factual correctness of the article and assign a numerical accuracy score between 0 and 100, where 100 means the article is completely accurate and 0 means it is entirely inaccurate.
+                      In addition, analyze the overall factual correctness of the article and assign a numerical accuracy score between 0 and 100, where 100 means the article is completely accurate and 0 means it is entirely inaccurate.
 
-  You must return _only_ a single JSON object, no arrays, no markdown, no code fences, no extra text.
-  Use this exact shape:
-  {"accuracy":<0 – 100>,"feedback":"The article contains false claims. Article: <original article HTML with <mark> around the inaccuracies>"}
-  
-  Article:
-  ${content}`,
+                      You must return _only_ a single JSON object, no arrays, no markdown, no code fences, no extra text.
+                      Use this exact shape:
+                      {"accuracy":<0 – 100>,"feedback":"The article contains false claims. 
+                      Article: <original article HTML with <mark> around the inaccuracies>" 
+                      \n Explanation: <explanation/correction of the inaccuracies highlighted>"}
+                      
+                      Article:
+                      ${content}`,
           },
           { role: "user", content },
         ],
@@ -254,7 +256,12 @@ async function factCheck(content, topicName) {
                      Then, provide an overall factual accuracy score as a number between 0 and 100.
                      If some parts are ambiguous but overall the article is largely accurate, note this in your score.
                      Return your response only in a valid JSON object in this exact structure:
-                    {"accuracy": <0 - 100>, "feedback": "The article contains false claims. Article: <original article HTML with <mark> around the inaccuracies>"}`,
+                    {"accuracy": <0 - 100>, "feedback": "The article contains false claims. 
+                    Article: <original article HTML with <mark> around the inaccuracies>" 
+                    \n Explanation: <explanation/correction of the inaccuracies highlighted>}
+                    
+                    Article: 
+                    ${content}`,
           },
           { role: "user", content },
         ],
