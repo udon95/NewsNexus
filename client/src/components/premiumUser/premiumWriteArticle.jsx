@@ -846,7 +846,8 @@ export const PremiumWriteArticle = () => {
         cursor: pointer;
       }
       .ProseMirror mark {
-        background-color: #bfd8ff;
+        background-color: #fde68a;
+        color: #b91c1c;
         padding: 0 2px;
         border-radius: 3px;
       }
@@ -855,75 +856,75 @@ export const PremiumWriteArticle = () => {
     return () => document.head.removeChild(style); // Cleanup
   }, []);
 
-  const handleSubmitTopicApplication = async () => {
-    const rawInput = newTopicName.trim();
-    const normalizedInput = rawInput.toLowerCase();
+  // const handleSubmitTopicApplication = async () => {
+  //   const rawInput = newTopicName.trim();
+  //   const normalizedInput = rawInput.toLowerCase();
 
-    if (!normalizedInput) {
-      alert("Please enter a topic name.");
-      return;
-    }
+  //   if (!normalizedInput) {
+  //     alert("Please enter a topic name.");
+  //     return;
+  //   }
 
-    // 🔍 Check if topic already exists in `topic_categories`
-    const { data: existingTopics, error: topicFetchError } = await supabase
-      .from("topic_categories")
-      .select("name");
+  //   // 🔍 Check if topic already exists in `topic_categories`
+  //   const { data: existingTopics, error: topicFetchError } = await supabase
+  //     .from("topic_categories")
+  //     .select("name");
 
-    if (topicFetchError) {
-      alert("Error checking existing topics.");
-      return;
-    }
+  //   if (topicFetchError) {
+  //     alert("Error checking existing topics.");
+  //     return;
+  //   }
 
-    const topicExists = existingTopics.some(
-      (topic) => topic.name.trim().toLowerCase() === normalizedInput
-    );
+  //   const topicExists = existingTopics.some(
+  //     (topic) => topic.name.trim().toLowerCase() === normalizedInput
+  //   );
 
-    if (topicExists) {
-      alert("This topic already exists. Please choose an existing topic.");
-      return;
-    }
+  //   if (topicExists) {
+  //     alert("This topic already exists. Please choose an existing topic.");
+  //     return;
+  //   }
 
-    // 🔍 Check if user already applied for this topic
-    const { data: userApplications, error: appFetchError } = await supabase
-      .from("topic_applications")
-      .select("topic_name")
-      .eq("requested_by", userId)
-      .eq("status", "Pending");
+  //   // 🔍 Check if user already applied for this topic
+  //   const { data: userApplications, error: appFetchError } = await supabase
+  //     .from("topic_applications")
+  //     .select("topic_name")
+  //     .eq("requested_by", userId)
+  //     .eq("status", "Pending");
 
-    if (appFetchError) {
-      alert("Error checking your previous applications.");
-      return;
-    }
+  //   if (appFetchError) {
+  //     alert("Error checking your previous applications.");
+  //     return;
+  //   }
 
-    const alreadyApplied = userApplications.some(
-      (app) => app.topic_name.trim().toLowerCase() === normalizedInput
-    );
+  //   const alreadyApplied = userApplications.some(
+  //     (app) => app.topic_name.trim().toLowerCase() === normalizedInput
+  //   );
 
-    if (alreadyApplied) {
-      alert("You’ve already applied for this topic.");
-      return;
-    }
+  //   if (alreadyApplied) {
+  //     alert("You’ve already applied for this topic.");
+  //     return;
+  //   }
 
-    // Insert the application
-    const { error: insertError } = await supabase
-      .from("topic_applications")
-      .insert([
-        {
-          requested_by: userId,
-          topic_name: rawInput, // keep original casing for admin view
-          status: "Pending",
-          created_at: new Date().toISOString(),
-        },
-      ]);
+  //   // Insert the application
+  //   const { error: insertError } = await supabase
+  //     .from("topic_applications")
+  //     .insert([
+  //       {
+  //         requested_by: userId,
+  //         topic_name: rawInput, // keep original casing for admin view
+  //         status: "Pending",
+  //         created_at: new Date().toISOString(),
+  //       },
+  //     ]);
 
-    if (insertError) {
-      alert("Failed to apply for topic.");
-    } else {
-      alert("Topic application submitted!");
-      setShowTopicApplication(false);
-      setNewTopicName("");
-    }
-  };
+  //   if (insertError) {
+  //     alert("Failed to apply for topic.");
+  //   } else {
+  //     alert("Topic application submitted!");
+  //     setShowTopicApplication(false);
+  //     setNewTopicName("");
+  //   }
+  // };
 
   return (
     <div className="w-full min-h-screen bg-indigo-50 text-black font-grotesk flex justify-center">
@@ -1222,7 +1223,7 @@ export const PremiumWriteArticle = () => {
                 </div>
 
                 {(accuracy !== null || aiFeedback) && (
-                  <div className="mt-4 p-4 border border-red-300 bg-red-50 rounded text-sm text-red-800">
+                  <div className="mt-4 p-4 border border-red-300 bg-red-50 rounded text-sm text-black">
                     <strong>Fact Check Results:</strong>
                     {accuracy !== null && (
                       <p>
