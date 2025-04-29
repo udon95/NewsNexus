@@ -174,6 +174,8 @@ async function factCheck(content, topicName) {
       error: `Article content does not match category: ${topicName}`,
     };
   }
+  const threshold = 75;
+  let result;
 
   // 2️⃣ Perplexity factual check
   try {
@@ -217,7 +219,9 @@ Use this exact shape:
     // console.log("raw model output:\n", JSON.stringify(raw));
     // let reply = raw.trim();
     // console.log("after trim:\n", JSON.stringify(reply));
-
+    if (/i['’]?m not sure|unknown|cannot verify/i.test(raw)) {
+      throw new Error("Perplexity unsure");
+    }
     let start = raw.indexOf("{");
     let end = raw.lastIndexOf("}");
     if (start === -1 || end === -1) {
@@ -226,60 +230,66 @@ Use this exact shape:
       );
     }
 
-    let jsonString = raw.substring(start, end + 1);
+    const parsed = raw.substring(start, end + 1);
     // console.log("jsonString to parse:", jsonString);
 
-    let result;
-    try {
-      result = JSON.parse(jsonString);
-    } catch (e) {
-      console.error(
-        "Failed to JSON.parse the extracted string:",
-        e,
-        jsonString
-      );
-      throw e;
+      result = JSON.parse(parsed);
+    } catch (perpErr) {
+      console.warn(
+        "Perplexity fail to determine, falling back to ChatGPT:", perpErr.message);
+       
+        const gptRes = await fetch("https://api.openai.com/v1/chat/completions", {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${OPENAI_KEY}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            model: "gpt-3.5-turbo",
+            messages: [
+              {
+                role: "system",
+                content: `You are a fact-checking assistant.
+                     Review the following article and highlight any **false or misleading** statements.
+                     For any inaccuracies, describe the issues. 
+                     Then, provide an overall factual accuracy score as a number between 0 and 100.
+                     If some parts are ambiguous but overall the article is largely accurate, note this in your score.
+                     Return your response only in a valid JSON object in this exact structure:
+                    {"accuracy": <percentage between 0 and 100>, "feedback": "<Your explanation>"}`,
+              },
+              { role: "user", content },
+            ],
+            temperature: 0.2,
+          }),
+        });
+        const gptData = await gptRes.json();
+        const parsed = JSON.parse(gptData.choices[0].message.content);
+        result = parsed;
     }
 
     console.log("parsed result:", result);
-
-    if (result.accuracy < 75) {
-      throw { status: 400, error: "Article failed fact-checking.", ...result };
+    if (typeof result.accuracy !== "number" || result.accuracy < threshold) {
+      // include both accuracy and feedback in the thrown object
+      throw {
+        status: 400,
+        error: "Article failed fact-checking.",
+        ...result
+      };
     }
     return result;
-  } catch (err) {
-    // Fallback to GPT
-    const gptRes = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${OPENAI_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "gpt-3.5-turbo",
-        messages: [
-          {
-            role: "system",
-            content: `You are a fact-checking assistant.
-                 Review the following article and highlight any **false or misleading** statements.
-                 For any inaccuracies, describe the issues. 
-                 Then, provide an overall factual accuracy score as a number between 0 and 100.
-                 If some parts are ambiguous but overall the article is largely accurate, note this in your score.
-                 Return your response only in a valid JSON object in this exact structure:
-                {"accuracy": <percentage between 0 and 100>, "feedback": "<Your explanation>"}`,
-          },
-          { role: "user", content },
-        ],
-        temperature: 0.2,
-      }),
-    });
-    const gptData = await gptRes.json();
-    const parsed = JSON.parse(gptData.choices[0].message.content);
-    if (parsed.accuracy < 75) {
-      throw { status: 400, error: "Article failed fact-checking.", ...parsed };
-    }
-    return parsed;
-  }
+
+  //   if (result.accuracy < 75) {
+  //     throw { status: 400, error: "Article failed fact-checking.", ...result };
+  //   }
+  //   return result;
+  // } catch (err) {
+  //   // Fallback to GPT
+    
+  //   if (parsed.accuracy < 75) {
+  //     throw { status: 400, error: "Article failed fact-checking.", ...parsed };
+  //   }
+  //   return parsed;
+  // }
 }
 
 router.post("/submit-article", async (req, res) => {
