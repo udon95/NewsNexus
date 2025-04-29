@@ -210,7 +210,7 @@ router.post("/register", async (req, res) => {
 
     await supabase
       .from("usertype")
-      .insert([{ userid: userId, usertype: "Free" }]);
+      .insert([{ userid: userId, usertype: "Free", color: "#ffffff" }]);
 
     return res.json({ user: authData.user });
   } catch (error) {
@@ -317,7 +317,7 @@ router.get("/user-full/:userid", async (req, res) => {
         `
         userid, email, username, password, status, auth_id,
         profile:profile(uuserid, gender, dob),
-        usertype:usertype(usertype)
+        usertype:usertype(usertype, color)
       `
       )
       .eq("userid", userid)
@@ -354,6 +354,7 @@ router.get("/user-full/:userid", async (req, res) => {
       },
       profile: data.profile || {},
       role: data.usertype?.usertype || "Unknown",
+      color: data.usertype?.color || "Unknown",
       interests, // Corrected interest retrieval
     });
   } catch (error) {

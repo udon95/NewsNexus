@@ -9,6 +9,7 @@ const AuthContext = createContext(undefined);
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [userType, setUserType] = useState(null);
+  const [color, setColor] = useState(null);
   const [interests, setInterests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState(null);
@@ -24,6 +25,7 @@ export const AuthProvider = ({ children }) => {
           const parsedUser = JSON.parse(storedUser);
           setUser(parsedUser.user);
           setUserType(parsedUser.role);
+          setColor(parsedUser.color);
           setInterests(parsedUser.interests || []); //  Load interests correctly
           setProfile(parsedUser.profile || null);
           // console.log(" Loaded user from localStorage:", parsedUser);
@@ -82,7 +84,7 @@ export const AuthProvider = ({ children }) => {
           formattedInterests
         );
       } else {
-        console.warn("⚠️ No interests found in API response.");
+        console.warn(" No interests found in API response.");
       }
     } catch (error) {
       console.error("Failed to fetch user interests:", error);
@@ -95,10 +97,11 @@ export const AuthProvider = ({ children }) => {
         email,
         password,
       });
-      const { user, role, interests, profile } = response.data;
+      const { user, role, interests, profile, color } = response.data;
       setUser(user);
       setUserType(role);
       setProfile(profile);
+      setColor(color);
       setInterests(
         interests ? interests.split(", ").map((topic) => topic.trim()) : []
       );
@@ -115,7 +118,7 @@ export const AuthProvider = ({ children }) => {
         })
       );
 
-      return { user, userType: role, interests, profile };
+      return { user, userType: role, userType: color, interests, profile };
     } catch (error) {
       throw new Error(error.response?.data?.error || "Login failed");
     }
@@ -127,7 +130,7 @@ export const AuthProvider = ({ children }) => {
 
     const { data, error } = await supabase
       .from("usertype")
-      .select("usertype")
+      .select("usertype, color")
       .eq("userid", storedUser.user.userid)
       .single();
 
@@ -151,6 +154,7 @@ export const AuthProvider = ({ children }) => {
     setUserType(null);
     setInterests([]);
     setProfile(null);
+    setColor(null);
 
     localStorage.removeItem("userProfile");
     window.location.reload();
@@ -161,6 +165,7 @@ export const AuthProvider = ({ children }) => {
       value={{
         user,
         userType,
+        color,
         profile,
         signInWithPass,
         signOut,

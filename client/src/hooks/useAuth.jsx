@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
 const useAuthHook = () => {
-  const { user, userType, signInWithPass, signOut, profile } = useAuth();
+  const { user, userType, signInWithPass, signOut, profile, color } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [interests, setInterests] = useState("");
@@ -20,6 +20,7 @@ const useAuthHook = () => {
       const {
         user,
         userType,
+        color,
         interests = [],
         profile = {},
       } = await signInWithPass(email, password);
@@ -34,6 +35,7 @@ const useAuthHook = () => {
       const fullUserData = {
         user,
         role: userType,
+        color: color,
         interests: formattedInterests,
         profile: profile || {},
       };
