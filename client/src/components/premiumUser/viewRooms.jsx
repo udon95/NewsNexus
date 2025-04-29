@@ -274,7 +274,11 @@ const ViewRoomsPage = () => {
                   onClick={(e) => handleJoinAndRedirect(room.roomid, e)}
                   disabled={userRooms.has(room.roomid)}
                 >
-                  {userRooms.has(room.roomid) ? "Joined" : "Join"}
+                  {userRooms.has(room.roomid)
+                    ? room.room_type === "Private"
+                      ? "Private"
+                      : "Joined"
+                    : "Join"}
                 </button>
               </div>
             ))}

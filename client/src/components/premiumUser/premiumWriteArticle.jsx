@@ -29,8 +29,6 @@ import OrderedList from "@tiptap/extension-ordered-list";
 import TextStyle from "@tiptap/extension-text-style";
 import { Extension } from "@tiptap/core";
 import { Paragraph } from "@tiptap/extension-paragraph";
-import Collaboration from "@tiptap/extension-collaboration";
-import { HocuspocusProvider } from "@hocuspocus/provider";
 
 export const PremiumWriteArticle = () => {
   const [title, setTitle] = useState("");

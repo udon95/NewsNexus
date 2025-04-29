@@ -45,8 +45,11 @@ export const FreeWriteArticle = () => {
   const [linkUrl, setLinkUrl] = useState("");
   const [showDraftNotification, setShowDraftNotification] = useState(false);
   const [monthlyPostCount, setMonthlyPostCount] = useState(0);
+  const [aiFeedback, setAiFeedback] = useState("");
+  const [accuracy, setAccuracy] = useState(null);
+  const [postType, setPostType] = useState("General");
 
-  console.log("Auth session:", supabase.auth.getSession());
+  // console.log("Auth session:", supabase.auth.getSession());
 
   // useEffect(() => {
   //   const checkSession = async () => {
@@ -353,7 +356,7 @@ export const FreeWriteArticle = () => {
     //   handleClearInputs();
 
     if (postType === "General") {
-      const response = await fetch("http://localhost:5000/api/submit-article", {
+      const response = await fetch("https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/api/submit-article", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -370,9 +373,10 @@ export const FreeWriteArticle = () => {
 
       if (!response.ok) {
         console.log(result);
-        if (result.highlightedHTML) {
-          console.log("🔴 AI Feedback returned:", result.highlightedHTML);
-          setAiFeedback(result.highlightedHTML);
+        if (result.feedback) {
+          // console.log("🔴 AI Feedback returned:", result.feedback);
+          setAiFeedback(result.feedback);
+          setAccuracy(result.accuracy || null);
           alert(
             "❌ Article flagged by AI. Please review the highlighted sections."
           );
@@ -384,34 +388,34 @@ export const FreeWriteArticle = () => {
         return;
       }
 
-      if (result.verdict === "true") {
-        if (result.explanation) {
-          alert(`✅ Article passed AI check:\n${result.explanation}`);
-        } else {
-          alert("✅ Article passed AI check.");
-        }
-      }
+      // if (result.verdict === "true") {
+      //   if (result.explanation) {
+      //     alert(`✅ Article passed AI check:\n${result.explanation}`);
+      //   } else {
+      //     alert("✅ Article passed AI check.");
+      //   }
+      // }
 
-      //  Save to articles table
-      const { data, error } = await supabase
-        .from("articles")
-        .insert([
-          {
-            title: articleData.title,
-            text: articleData.content,
-            userid: articleData.created_by,
-            topicid: topics, // Insert the UUID
-            time: articleData.created_at,
-            status: "Published",
-            imagepath: firstImageUrl || null,
-          },
-        ])
-        .select("articleid");
+      // //  Save to articles table
+      // const { data, error } = await supabase
+      //   .from("articles")
+      //   .insert([
+      //     {
+      //       title: articleData.title,
+      //       text: articleData.content,
+      //       userid: articleData.created_by,
+      //       topicid: topics, // Insert the UUID
+      //       time: articleData.created_at,
+      //       status: "Published",
+      //       imagepath: firstImageUrl || null,
+      //     },
+      //   ])
+      //   .select("articleid");
 
-      if (error) {
-        alert("Failed to save article.");
-        return;
-      }
+      // if (error) {
+      //   alert("Failed to save article.");
+      //   return;
+      // }
 
       const articleid = data?.[0]?.articleid;
 
