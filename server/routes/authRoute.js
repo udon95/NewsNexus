@@ -97,7 +97,7 @@ router.post("/login", async (req, res) => {
         },
         profile: userProfile.profile || {}, // Ensure no null values
         role: userProfile.usertype?.usertype || "Unknown",
-        color: userProfile.usertype?.color,
+        color: userProfile.usertype?.color || "Unknown",
         interests,
         session: authData.session, // Supabase session data
       });
