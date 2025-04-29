@@ -10,7 +10,7 @@ const Header = () => {
   const [textColor, setTextColor] = useState("black");
 
   useEffect(() => {
-    const storedColor = localStorage.getItem("profileColor");
+    const storedColor = localStorage.getItem("color");
     if (storedColor) {
       setProfileColor(storedColor);
       setTextColor(getTextColor(storedColor));
