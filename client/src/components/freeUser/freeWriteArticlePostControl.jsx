@@ -356,18 +356,21 @@ export const FreeWriteArticle = () => {
     //   handleClearInputs();
 
     if (postType === "General") {
-      const response = await fetch("https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/api/submit-article", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          title,
-          content: updatedHTML,
-          type: "factual",
-          authorId: session.userid,
-          topicid: topics,
-          topicName,
-        }),
-      });
+      const response = await fetch(
+        "https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/api/submit-article",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            title,
+            content: updatedHTML,
+            type: "factual",
+            authorId: session.userid,
+            topicid: topics,
+            topicName,
+          }),
+        }
+      );
 
       const result = await response.json();
 
@@ -938,6 +941,25 @@ export const FreeWriteArticle = () => {
                     <LinkIcon size={16} />
                   </button>
                 </div>
+
+                {(accuracy !== null || aiFeedback) && (
+                  <div className="mt-4 p-4 border border-red-300 bg-red-50 rounded text-sm text-black">
+                    <strong>Fact Check Results:</strong>
+                    {accuracy !== null && (
+                      <p>
+                        <strong>Accuracy: </strong>
+                        {accuracy}%
+                      </p>
+                    )}
+                    <p>
+                      <strong>Feedback: </strong>
+                    </p>
+                    <div
+                      className="mt-1"
+                      dangerouslySetInnerHTML={{ __html: aiFeedback }}
+                    />
+                  </div>
+                )}
 
                 <div
                   className="min-h-[400px] max-h-[600px] overflow-y-auto border rounded-md bg-white p-4 mt-3 focus-within:outline-none"
