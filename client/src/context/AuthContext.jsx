@@ -118,7 +118,7 @@ export const AuthProvider = ({ children }) => {
         })
       );
 
-      return { user, userType: role, userType: color, interests, profile };
+      return { user, userType: role, color, interests, profile };
     } catch (error) {
       throw new Error(error.response?.data?.error || "Login failed");
     }
