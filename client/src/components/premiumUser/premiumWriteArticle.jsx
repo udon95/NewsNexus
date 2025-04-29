@@ -477,7 +477,7 @@ export const PremiumWriteArticle = () => {
       // console.log("🏷️ AI feedback:", result.feedback);
 
       if (!response.ok) {
-        console.log(result);
+        // console.log(result);
         if (result.feedback) {
           // console.log("🔴 AI Feedback returned:", result.feedback);
           setAiFeedback(result.feedback);

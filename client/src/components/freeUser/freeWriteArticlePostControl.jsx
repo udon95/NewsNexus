@@ -375,7 +375,7 @@ export const FreeWriteArticle = () => {
       const result = await response.json();
 
       if (!response.ok) {
-        console.log(result);
+        // console.log(result);
         if (result.feedback) {
           // console.log("🔴 AI Feedback returned:", result.feedback);
           setAiFeedback(result.feedback);
@@ -447,7 +447,9 @@ export const FreeWriteArticle = () => {
           .insert([{ articleid, image_url: imageUrl }]);
       }
 
-      alert("Article posted successfully.");
+      setAccuracy(result.accuracy);
+      setAiFeedback(result.feedback);
+      alert(`Article posted successfully. Accuracy Score: ${result.accuracy}%`);
       handleClearInputs();
       return;
     }
@@ -595,6 +597,8 @@ export const FreeWriteArticle = () => {
     setImages([]);
     setShowConfirm(false);
     setPendingImages([]);
+    setAccuracy(null);
+    setAiFeedback("");
 
     // Reset Tiptap editor content (this is the key)
     if (editor) {
@@ -651,7 +655,8 @@ export const FreeWriteArticle = () => {
         cursor: pointer;
       }
       .ProseMirror mark {
-        background-color: #bfd8ff;
+        background-color: #ffff00;
+        color: #ff0000;
         padding: 0 2px;
         border-radius: 3px;
       }
@@ -660,75 +665,75 @@ export const FreeWriteArticle = () => {
     return () => document.head.removeChild(style); // Cleanup
   }, []);
 
-  const handleSubmitTopicApplication = async () => {
-    const rawInput = newTopicName.trim();
-    const normalizedInput = rawInput.toLowerCase();
+  // const handleSubmitTopicApplication = async () => {
+  //   const rawInput = newTopicName.trim();
+  //   const normalizedInput = rawInput.toLowerCase();
 
-    if (!normalizedInput) {
-      alert("Please enter a topic name.");
-      return;
-    }
+  //   if (!normalizedInput) {
+  //     alert("Please enter a topic name.");
+  //     return;
+  //   }
 
-    // Check if topic already exists in `topic_categories`
-    const { data: existingTopics, error: topicFetchError } = await supabase
-      .from("topic_categories")
-      .select("name");
+  //   // Check if topic already exists in `topic_categories`
+  //   const { data: existingTopics, error: topicFetchError } = await supabase
+  //     .from("topic_categories")
+  //     .select("name");
 
-    if (topicFetchError) {
-      alert("Error checking existing topics.");
-      return;
-    }
+  //   if (topicFetchError) {
+  //     alert("Error checking existing topics.");
+  //     return;
+  //   }
 
-    const topicExists = existingTopics.some(
-      (topic) => topic.name.trim().toLowerCase() === normalizedInput
-    );
+  //   const topicExists = existingTopics.some(
+  //     (topic) => topic.name.trim().toLowerCase() === normalizedInput
+  //   );
 
-    if (topicExists) {
-      alert("This topic already exists. Please choose an existing topic.");
-      return;
-    }
+  //   if (topicExists) {
+  //     alert("This topic already exists. Please choose an existing topic.");
+  //     return;
+  //   }
 
-    // Check if user already applied for this topic
-    const { data: userApplications, error: appFetchError } = await supabase
-      .from("topic_applications")
-      .select("topic_name")
-      .eq("requested_by", userId)
-      .eq("status", "Pending");
+  //   // Check if user already applied for this topic
+  //   const { data: userApplications, error: appFetchError } = await supabase
+  //     .from("topic_applications")
+  //     .select("topic_name")
+  //     .eq("requested_by", userId)
+  //     .eq("status", "Pending");
 
-    if (appFetchError) {
-      alert("Error checking your previous applications.");
-      return;
-    }
+  //   if (appFetchError) {
+  //     alert("Error checking your previous applications.");
+  //     return;
+  //   }
 
-    const alreadyApplied = userApplications.some(
-      (app) => app.topic_name.trim().toLowerCase() === normalizedInput
-    );
+  //   const alreadyApplied = userApplications.some(
+  //     (app) => app.topic_name.trim().toLowerCase() === normalizedInput
+  //   );
 
-    if (alreadyApplied) {
-      alert("You’ve already applied for this topic.");
-      return;
-    }
+  //   if (alreadyApplied) {
+  //     alert("You’ve already applied for this topic.");
+  //     return;
+  //   }
 
-    // Insert the application
-    const { error: insertError } = await supabase
-      .from("topic_applications")
-      .insert([
-        {
-          requested_by: userId,
-          topic_name: rawInput, // keep original casing for admin view
-          status: "Pending",
-          created_at: new Date().toISOString(),
-        },
-      ]);
+  //   // Insert the application
+  //   const { error: insertError } = await supabase
+  //     .from("topic_applications")
+  //     .insert([
+  //       {
+  //         requested_by: userId,
+  //         topic_name: rawInput, // keep original casing for admin view
+  //         status: "Pending",
+  //         created_at: new Date().toISOString(),
+  //       },
+  //     ]);
 
-    if (insertError) {
-      alert("Failed to apply for topic.");
-    } else {
-      alert("Topic application submitted!");
-      setShowTopicApplication(false);
-      setNewTopicName("");
-    }
-  };
+  //   if (insertError) {
+  //     alert("Failed to apply for topic.");
+  //   } else {
+  //     alert("Topic application submitted!");
+  //     setShowTopicApplication(false);
+  //     setNewTopicName("");
+  //   }
+  // };
 
   return (
     <div className="w-full min-h-screen bg-indigo-50 text-black font-grotesk flex justify-center">
@@ -1060,14 +1065,14 @@ export const FreeWriteArticle = () => {
                   <li>Please post under an existing topic in the meantime.</li>
                 </ul>
               </div>
-              <input
+              {/* <input
                 type="text"
                 value={newTopicName}
                 onChange={(e) => setNewTopicName(e.target.value)}
                 placeholder="Enter your proposed topic name..."
                 className="w-full p-2 mb-4 border border-gray-300 rounded-md"
-              />
-              <div className="flex justify-end gap-3">
+              /> */}
+              {/* <div className="flex justify-end gap-3">
                 <button
                   className="bg-blue-600 text-white px-4 py-2 rounded-md"
                   onClick={handleSubmitTopicApplication}
@@ -1083,7 +1088,7 @@ export const FreeWriteArticle = () => {
                 >
                   Cancel
                 </button>
-              </div>
+              </div> */}
             </div>
           </div>
         )}
