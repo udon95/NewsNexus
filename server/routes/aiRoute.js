@@ -315,6 +315,7 @@ router.post("/submit-article", async (req, res) => {
 
     return res.status(err.status || 400).json({
       error: err.error,
+      ...(typeof err.accuracy === "number" && { accuracy: err.accuracy }),
       ...(err.feedback && { feedback: err.feedback }),
     });
   }

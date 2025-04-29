@@ -1216,12 +1216,14 @@ export const PremiumWriteArticle = () => {
                   </button>
                 </div>
 
-                {accuracy !== null && (
+                {(accuracy !== null || aiFeedback) && (
                   <div className="mt-4 p-4 border border-red-300 bg-red-50 rounded text-sm text-red-800">
                     <strong>Fact Check Results:</strong>
-                    <p>
-                      <strong>Accuracy:</strong> {accuracy}%
-                    </p>
+                    {accuracy !== null && (
+                      <p>
+                        <strong>Accuracy:</strong> {accuracy}%
+                      </p>
+                    )}
                     <p>
                       <strong>Feedback:</strong>
                     </p>
@@ -1229,7 +1231,6 @@ export const PremiumWriteArticle = () => {
                       className="mt-1"
                       dangerouslySetInnerHTML={{ __html: aiFeedback }}
                     />
-                    +
                   </div>
                 )}
 
