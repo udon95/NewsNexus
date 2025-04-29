@@ -474,14 +474,14 @@ export const PremiumWriteArticle = () => {
 
       const result = await response.json();
 
-      console.log("🏷️ AI result payload:", result);
-      console.log("🏷️ AI accuracy:", result.accuracy);
-      console.log("🏷️ AI feedback:", result.feedback);
+      // console.log("🏷️ AI result payload:", result);
+      // console.log("🏷️ AI accuracy:", result.accuracy);
+      // console.log("🏷️ AI feedback:", result.feedback);
 
       if (!response.ok) {
         console.log(result);
         if (result.feedback) {
-          console.log("🔴 AI Feedback returned:", result.feedback);
+          // console.log("🔴 AI Feedback returned:", result.feedback);
           setAiFeedback(result.feedback);
           setAccuracy(result.accuracy || null);
           console.log("accuracy: ", result.accuracy);
@@ -1226,12 +1226,12 @@ export const PremiumWriteArticle = () => {
                     <strong>Fact Check Results:</strong>
                     {accuracy !== null && (
                       <p>
-                        <strong>Accuracy:</strong>
+                        <strong>Accuracy: </strong>
                         {accuracy}%
                       </p>
                     )}
                     <p>
-                      <strong>Feedback:</strong>
+                      <strong>Feedback: </strong>
                     </p>
                     <div
                       className="mt-1"

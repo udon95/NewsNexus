@@ -203,7 +203,7 @@ async function factCheck(content, topicName) {
                       Use this exact shape:
                       {"accuracy":<0 – 100>,"feedback":"The article contains false claims. 
                       Article: <original article HTML with <mark> around the inaccuracies>" 
-                      \n Explanation: <explanation/correction of the inaccuracies highlighted>"}
+                      }
                       
                       Article:
                       ${content}`,
@@ -258,7 +258,7 @@ async function factCheck(content, topicName) {
                      Return your response only in a valid JSON object in this exact structure:
                     {"accuracy": <0 - 100>, "feedback": "The article contains false claims. 
                     Article: <original article HTML with <mark> around the inaccuracies>" 
-                    \n Explanation: <explanation/correction of the inaccuracies highlighted>}
+                    }
                     
                     Article: 
                     ${content}`,
