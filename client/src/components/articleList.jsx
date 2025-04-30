@@ -150,215 +150,274 @@ const ArticleList = ({
 
   return (
     <div className="mt-6 font-grotesk w-full pb-4">
-    <h2 className="text-2xl font-bold font-grotesk mb-2 w-3/3 md:w-2/3">
-      {title}
-    </h2>
-    <ul className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 max-w-[890px] w-full">
-      {visibleArticles.map((article, index) => {
-        const roomimageUrl =
-          article.room_article_images?.[0]?.image_url;
+      <h2 className="text-2xl font-bold font-grotesk mb-2 w-3/3 md:w-2/3">
+        {title}
+      </h2>
+      {articles.length === 0 ? (
+        <p className="px-4 py-6 text-center text-gray-500">
+          {isDraft ? "No drafts available." : "No articles available."}
+        </p>
+      ) : (
+        <>
+          <ul className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 max-w-[890px] w-full">
+            {visibleArticles.map((article, index) => {
+              const roomimageUrl = article.room_article_images?.[0]?.image_url;
 
-        return (
-          <li
-            key={index}
-            onClick={() => onArticleClick(article)} // Calls parent function when clicked
-            className="w-full h-60 border border-black rounded-2xl shadow-md cursor-pointer hover:shadow-lg transition bg-white flex flex-col"
-          >
-            {/* Article Information */}
-            <div className="flex-1 relative ">
-              {!isRoom && !isDraft &&  (
-                <div className="w-full h-40 bg-gray-200 rounded-t-2xl overflow-hidden relative">
-                  <img src={article.imagepath} alt={article.title} className="w-full h-full object-cover" />
-                </div>
-              )}
-              {!isRoom && isDraft && (
-                <div className="w-full h-40 bg-gray-200 rounded-t-2xl overflow-hidden relative">
-                  <img src={article.imagepath} alt={article.title} className="w-full h-full object-cover" />
-                </div>
-              )}
-              {isRoom && !isDraft && (
-                <div className="w-full h-48 bg-gray-200 rounded-t-2xl overflow-hidden relative">
-                  <img src={roomimageUrl} alt={article.title} className="w-full h-full object-cover" />
-                </div>
-              )}
-              {isRoom && isDraft && (
-                <div className="w-full h-40 bg-gray-200 rounded-t-2xl overflow-hidden relative">
-                  <img src={roomimageUrl} alt={article.title} className="w-full h-full object-cover" />
-                </div>
-              )}
-              <p className="pr-10 px-4 py-2 text-base text-left text-black overflow-hidden whitespace-nowrap text-ellipsis font-medium">
-                {article.title}
-              </p>
-              {!isDraft && !isRoom && (
-                <div className="flex flex-wrap gap-10 absolute bottom-4 left-4 text-sm">
-                  <div className="flex items-center gap-2">
-                    <Eye />
-                    {viewCounts[article.articleid] || 0}
-                  </div>
-                  <div className="flex items-center gap-2 text-green-500">
-                    <ThumbsUp /> 
-                    <span className="font-semibold text-black">
-                      {formatCount(voteCounts[article.articleid]?.up || 0)}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2 text-red-500">
-                    <ThumbsDown /> 
-                    <span className="font-semibold text-black">
-                      {formatCount(voteCounts[article.articleid]?.down || 0)}
-                    </span>
-                  </div>
-                </div>
-              )}               
-              {isDraft && !isRoom && (
-                <div className="absolute bottom-4 left-4 text-sm">
-                  Expires: {calculateExpiryDate(article)}
-                </div>
-              )}
-              {isDraft && isRoom && (
-                <div className="absolute bottom-4 left-4 text-sm">
-                  Expires: {calculateExpiryDateRoom(article)}
-                </div>
-              )}       
+              return (
+                <li
+                  key={index}
+                  onClick={() => onArticleClick(article)} // Calls parent function when clicked
+                  className="w-full h-60 border border-black rounded-2xl shadow-md cursor-pointer hover:shadow-lg transition bg-white flex flex-col"
+                >
+                  {/* Article Information */}
+                  <div className="flex-1 relative ">
+                    {!isRoom && !isDraft && (
+                      <div className="w-full h-40 bg-gray-200 rounded-t-2xl overflow-hidden relative">
+                        <img
+                          src={article.imagepath}
+                          alt={article.title}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                    )}
+                    {!isRoom && isDraft && (
+                      <div className="w-full h-40 bg-gray-200 rounded-t-2xl overflow-hidden relative">
+                        <img
+                          src={article.imagepath}
+                          alt={article.title}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                    )}
+                    {isRoom && !isDraft && (
+                      <div className="w-full h-48 bg-gray-200 rounded-t-2xl overflow-hidden relative">
+                        <img
+                          src={roomimageUrl}
+                          alt={article.title}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                    )}
+                    {isRoom && isDraft && (
+                      <div className="w-full h-40 bg-gray-200 rounded-t-2xl overflow-hidden relative">
+                        <img
+                          src={roomimageUrl}
+                          alt={article.title}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                    )}
+                    <p className="pr-10 px-4 py-2 text-base text-left text-black overflow-hidden whitespace-nowrap text-ellipsis font-medium">
+                      {article.title}
+                    </p>
+                    {!isDraft && !isRoom && (
+                      <div className="flex flex-wrap gap-10 absolute bottom-4 left-4 text-sm">
+                        <div className="flex items-center gap-2">
+                          <Eye />
+                          {viewCounts[article.articleid] || 0}
+                        </div>
+                        <div className="flex items-center gap-2 text-green-500">
+                          <ThumbsUp />
+                          <span className="font-semibold text-black">
+                            {formatCount(
+                              voteCounts[article.articleid]?.up || 0
+                            )}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2 text-red-500">
+                          <ThumbsDown />
+                          <span className="font-semibold text-black">
+                            {formatCount(
+                              voteCounts[article.articleid]?.down || 0
+                            )}
+                          </span>
+                        </div>
+                      </div>
+                    )}
+                    {isDraft && !isRoom && (
+                      <div className="absolute bottom-4 left-4 text-sm">
+                        Expires: {calculateExpiryDate(article)}
+                      </div>
+                    )}
+                    {isDraft && isRoom && (
+                      <div className="absolute bottom-4 left-4 text-sm">
+                        Expires: {calculateExpiryDateRoom(article)}
+                      </div>
+                    )}
 
-              {/* Three-Dot Menu Button */}
+                    {/* Three-Dot Menu Button */}
+                    <button
+                      className="article-menu-trigger absolute bottom-2 right-2 p-2 text-lg font-bold text-black hover:text-gray-600"
+                      onClick={(e) => {
+                        e.stopPropagation(); // Prevents triggering article click
+                        setOpenMenuIndex(
+                          openMenuIndex === index ? null : index
+                        );
+                      }}
+                    >
+                      <EllipsisVertical />
+                    </button>
+
+                    {/* Dropdown Menu (Appears on Click) */}
+                    {openMenuIndex === index && (
+                      <div className="article-menu-dropdown absolute bottom-10 right-2 bg-white shadow-md border border-gray-300 rounded-lg min-w-[120px] z-50">
+                        <ul className="flex flex-col">
+                          {!isDraft &&
+                            isFree && ( // Show "Edit" for free user posted
+                              <li>
+                                <button
+                                  className="block px-4 py-2 w-full text-left hover:bg-gray-100"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    navigate(
+                                      `/freeDashboard/editPosted/${encodeURIComponent(
+                                        article.articleid
+                                      )}`
+                                    );
+                                  }}
+                                >
+                                  Edit
+                                </button>
+                              </li>
+                            )}
+                          {!isDraft &&
+                            isPremium &&
+                            !isRoom && ( // Show "Edit" for premium user general posted
+                              <li>
+                                <button
+                                  className="block px-4 py-2 w-full text-left hover:bg-gray-100"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    navigate(
+                                      `/premiumDashboard/edit/${article.articleid}`
+                                    );
+                                  }}
+                                >
+                                  Edit
+                                </button>
+                              </li>
+                            )}
+                          {!isDraft &&
+                            isPremium &&
+                            isRoom && ( // Show "Edit" for premium user room posted
+                              <li>
+                                <button
+                                  className="block px-4 py-2 w-full text-left hover:bg-gray-100"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    navigate(
+                                      `/premiumDashboard/edit/${article.postid}`
+                                    );
+                                  }}
+                                >
+                                  Edit
+                                </button>
+                              </li>
+                            )}
+                          {isDraft &&
+                            isFree && ( // Show "Edit" for free user draft
+                              <li>
+                                <button
+                                  className="block px-4 py-2 w-full text-left hover:bg-gray-100"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    navigate(
+                                      `/freeDashboard/writeArticle/${encodeURIComponent(
+                                        article.articleid
+                                      )}`
+                                    );
+                                  }}
+                                >
+                                  Edit
+                                </button>
+                              </li>
+                            )}
+                          {isDraft &&
+                            isPremium &&
+                            !isRoom && ( // Show "Edit" for premium user draft
+                              <li>
+                                <button
+                                  className="block px-4 py-2 w-full text-left hover:bg-gray-100"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    navigate(
+                                      `/premiumDashboard/writeArticle/${encodeURIComponent(
+                                        article.articleid
+                                      )}`
+                                    );
+                                  }}
+                                >
+                                  Edit
+                                </button>
+                              </li>
+                            )}
+                          {isDraft &&
+                            isPremium &&
+                            isRoom && ( // Show "Edit" for premium user room draft
+                              <li>
+                                <button
+                                  className="block px-4 py-2 w-full text-left hover:bg-gray-100"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    navigate(
+                                      `/premiumDashboard/writeArticle/${encodeURIComponent(
+                                        article.postid
+                                      )}`
+                                    );
+                                  }}
+                                >
+                                  Edit
+                                </button>
+                              </li>
+                            )}
+                          {!isRoom && ( // Show "Delete" for article
+                            <li>
+                              <button
+                                className="block px-4 py-2 w-full text-left hover:bg-gray-100"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleDeleteArticle(article.articleid);
+                                }}
+                              >
+                                Delete
+                              </button>
+                            </li>
+                          )}
+                          {isRoom && ( // Show "Delete" for room article
+                            <li>
+                              <button
+                                className="block px-4 py-2 w-full text-left hover:bg-gray-100"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleDeleteRoomArticle(article.postid);
+                                }}
+                              >
+                                Delete
+                              </button>
+                            </li>
+                          )}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+          {articles.length > 3 && (
+            <div className="flex justify-end mt-4 pr-2">
               <button
-                className="article-menu-trigger absolute bottom-2 right-2 p-2 text-lg font-bold text-black hover:text-gray-600"
-                onClick={(e) => {
-                  e.stopPropagation(); // Prevents triggering article click
-                  setOpenMenuIndex(openMenuIndex === index ? null : index);
-                }}
+                onClick={() => setShowAll(!showAll)}
+                className="text-black text-bold text-base hover:text-blue-800"
               >
-                <EllipsisVertical />
+                {showAll ? "Show Less" : "Show More"}
               </button>
-              
-              {/* Dropdown Menu (Appears on Click) */}
-              {openMenuIndex === index && (
-                <div className="article-menu-dropdown absolute bottom-10 right-2 bg-white shadow-md border border-gray-300 rounded-lg min-w-[120px] z-50">
-                  <ul className="flex flex-col">
-                    {!isDraft && isFree && ( // Show "Edit" for free user posted
-                      <li>
-                        <button 
-                          className="block px-4 py-2 w-full text-left hover:bg-gray-100"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            navigate(`/freeDashboard/editPosted/${encodeURIComponent(article.articleid)}`);
-                          }}
-                        >
-                          Edit
-                        </button>
-                      </li>
-                    )}
-                    {!isDraft && isPremium && !isRoom &&( // Show "Edit" for premium user general posted
-                      <li>
-                        <button 
-                          className="block px-4 py-2 w-full text-left hover:bg-gray-100"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            navigate(`/premiumDashboard/editPosted/General/${encodeURIComponent(article.articleid)}`);
-                          }}
-                        >
-                          Edit
-                        </button>
-                      </li>
-                    )}
-                    {!isDraft && isPremium && isRoom && ( // Show "Edit" for premium user room posted
-                      <li>
-                        <button 
-                          className="block px-4 py-2 w-full text-left hover:bg-gray-100"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            navigate(`/premiumDashboard/editPosted/Room/${encodeURIComponent(article.postid)}`);
-                          }}
-                        >
-                          Edit
-                        </button>
-                      </li>
-                    )}
-                    {isDraft && isFree && ( // Show "Edit" for free user draft
-                      <li>
-                        <button
-                          className="block px-4 py-2 w-full text-left hover:bg-gray-100"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            navigate(`/freeDashboard/writeArticle/${encodeURIComponent(article.articleid)}`);
-                          }}
-                        >
-                          Edit
-                        </button>
-                      </li>
-                    )}
-                    {isDraft && isPremium && !isRoom && ( // Show "Edit" for premium user draft
-                      <li>
-                        <button
-                          className="block px-4 py-2 w-full text-left hover:bg-gray-100"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            navigate(`/premiumDashboard/writeArticle/${encodeURIComponent(article.articleid)}`);
-                          }}
-                        >
-                          Edit
-                        </button>
-                      </li>
-                    )}
-                    {isDraft && isPremium && isRoom && ( // Show "Edit" for premium user room draft
-                      <li>
-                        <button
-                          className="block px-4 py-2 w-full text-left hover:bg-gray-100"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            navigate(`/premiumDashboard/writeArticle/${encodeURIComponent(article.postid)}`);
-                          }}
-                        >
-                          Edit
-                        </button>
-                      </li>
-                    )}
-                    {!isRoom && ( // Show "Delete" for article
-                      <li>
-                        <button
-                          className="block px-4 py-2 w-full text-left hover:bg-gray-100"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleDeleteArticle(article.articleid)}
-                          }
-                        >
-                          Delete
-                        </button>
-                      </li>
-                    )}
-                    {isRoom && ( // Show "Delete" for room article
-                      <li>
-                        <button
-                          className="block px-4 py-2 w-full text-left hover:bg-gray-100"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleDeleteRoomArticle(article.postid)}
-                          }
-                        >
-                          Delete
-                        </button>
-                      </li>
-                    )}
-                  </ul>
-                </div>
-              )}
             </div>
-          </li>
-        );
-      })}
-    </ul>
-    {articles.length > 3 && (
-      <div className="flex justify-end mt-4 pr-2">
-        <button
-          onClick={() => setShowAll(!showAll)}
-          className="text-black text-bold text-base hover:text-blue-800"
-        >
-          {showAll ? "Show Less" : "Show More"}
-        </button>
-      </div>
-    )}
-  </div>
-);
+          )}
+        </>
+      )}
+    </div>
+  );
 };
 
 export default ArticleList;
