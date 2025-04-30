@@ -62,6 +62,8 @@ const EditFreeArticle = () => {
     },
   });
 
+  // Fetch article details for editing (draft or posted)
+  // Initializes title, topic, content, image previews, and status
   useEffect(() => {
     const fetchArticle = async () => {
       if (!articleId) return;
@@ -117,6 +119,7 @@ const EditFreeArticle = () => {
     },
   });
 
+  // Setup TipTap Editor with rich text extensions and image/paragraph formatting
   const editor = useEditor({
     editable: false, // default to false
     extensions: [
@@ -142,32 +145,56 @@ const EditFreeArticle = () => {
     ],
     content: '',
 
-    onUpdate: ({ editor }) => {
+    // onUpdate: ({ editor }) => {
 
+    //   const text = editor.getText();
+    //   const wordsArray = text.trim().split(/\s+/).filter(Boolean);
+    //   const words = wordsArray.length;
+
+    //   if (words > MAX_WORDS) {
+    //    // Prevent adding new words by restoring previous content
+    //     editor.commands.setContent(articleContent); // roll back to last valid state
+    //     return;
+    //   }
+
+    //   setWordCount(words);
+    //   setArticleContent(editor.getHTML());
+
+  
+    //   const html = editor.getHTML();
+
+    //   // Clean up removed images from pendingImages
+    //   const doc = new DOMParser().parseFromString(html, "text/html");
+    //   const imageSrcsInEditor = Array.from(doc.querySelectorAll("img")).map((img) => img.getAttribute("src"));
+  
+    //   setPendingImages((prev) =>
+    //     prev.filter((img) => imageSrcsInEditor.includes(img.previewUrl))
+    //   );
+    // },
+    onUpdate: ({ editor }) => {
+      const html = editor.getHTML();
       const text = editor.getText();
       const wordsArray = text.trim().split(/\s+/).filter(Boolean);
       const words = wordsArray.length;
-
-      if (words > MAX_WORDS) {
-       // Prevent adding new words by restoring previous content
-        editor.commands.setContent(articleContent); // roll back to last valid state
+    
+      if (articleStatus === "Draft" && words > MAX_WORDS) {
+        alert(`Draft word count limit reached (${MAX_WORDS} words).`);
+        editor.commands.setContent(articleContent); // revert
         return;
       }
-
+    
       setWordCount(words);
-      setArticleContent(editor.getHTML());
-
-  
-      const html = editor.getHTML();
-
-      // Clean up removed images from pendingImages
+      setArticleContent(html);
+    
+      // Clean up removed images
       const doc = new DOMParser().parseFromString(html, "text/html");
       const imageSrcsInEditor = Array.from(doc.querySelectorAll("img")).map((img) => img.getAttribute("src"));
-  
+    
       setPendingImages((prev) =>
         prev.filter((img) => imageSrcsInEditor.includes(img.previewUrl))
       );
-    },
+    }
+    
   });
 
   useEffect(() => {
@@ -228,7 +255,9 @@ const EditFreeArticle = () => {
   }, []);    
 
   const MAX_WORDS = 1000;
-  
+
+  // Post article (Draft → Published)
+  // - If published already, submit a 200-word amendment only
   const handlePostArticle = async () => {
     if (!articleId) return;
   
@@ -276,6 +305,11 @@ const EditFreeArticle = () => {
     }
   };  
 
+
+  // Save current article state as 'Draft'
+  // - Upload new images
+  // - Replace preview URLs with Supabase URLs
+  // - Delete previous images and update article_images table
   const handleSaveDraft = async () => {
 
     if (!articleId) return;
@@ -323,7 +357,7 @@ const EditFreeArticle = () => {
           }          
     }
 
-    // Delete old image records (optional but recommended)
+    // Delete old image records 
     await supabase
         .from("article_images")
         .delete()
@@ -377,6 +411,13 @@ const EditFreeArticle = () => {
   
     setShowDraftNotification(true);
     alert("Draft updated!");
+
+    const words = articleContent.trim().split(/\s+/).filter(Boolean).length;
+    if (words > MAX_WORDS) {
+      alert(`Draft exceeds ${MAX_WORDS} word limit. Please reduce content.`);
+    return;
+    }
+
   };
     
 
@@ -437,6 +478,9 @@ const EditFreeArticle = () => {
     e.target.value = null;
   };  
 
+  // Remove selected image from state and editor
+  // - Revoke object URL to free memory
+  // - Remove matching <img> from editor content
   const handleRemoveImage = (indexToRemove) => {
     const removedUrl = pendingImages[indexToRemove].previewUrl;
     URL.revokeObjectURL(removedUrl); // cleanup memory
