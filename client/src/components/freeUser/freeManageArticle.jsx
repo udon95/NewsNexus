@@ -145,7 +145,7 @@ export const FreeManageMyArticles = () => {
 
   // Handle article click event
   const handleArticleClick = (article) => {
-    navigate(`/edit/${article.articleid}`);
+    navigate(`freeDashboard/edit/${article.articleid}`);
   };
 
   const handleDeletePosted = (articleid) => {

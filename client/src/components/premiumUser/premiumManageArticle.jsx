@@ -216,7 +216,7 @@ export const PremManageArticle = () => {
   // Handle article click event
   const handleArticleClick = (article) => {
     const id = article.articleid || article.postid;
-     navigate(`/edit/${id}`);
+     navigate(`premiumDashboard/edit/${id}`);
   };
 
   // const handleRoomArticleClick = (article) => {
