@@ -13,7 +13,6 @@ import {
   Link as LinkIcon,
   Highlighter,
 } from "lucide-react";
-import { Link } from "react-router-dom";
 import supabase from "../../api/supabaseClient";
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
@@ -26,7 +25,6 @@ import Placeholder from "@tiptap/extension-placeholder";
 import Heading from "@tiptap/extension-heading";
 import BulletList from "@tiptap/extension-bullet-list";
 import OrderedList from "@tiptap/extension-ordered-list";
-import TextStyle from "@tiptap/extension-text-style";
 import { Extension } from "@tiptap/core";
 import { Paragraph } from "@tiptap/extension-paragraph";
 
@@ -52,24 +50,6 @@ export const PremiumWriteArticle = () => {
   const [aiFeedback, setAiFeedback] = useState("");
   const [accuracy, setAccuracy] = useState(null);
   const [showDraftNotification, setShowDraftNotification] = useState(false);
-
-  // console.log("Auth session:", supabase.auth.getSession());
-
-  // useEffect(() => {
-  //   const checkSession = async () => {
-  //     const { data, error } = await supabase.auth.getSession();
-  //     console.log("Session check:", data?.session);
-
-  //     if (!data?.session) {
-  //       alert("You're not logged in");
-  //       return;
-  //     }
-
-  //     console.log("Logged in user:", data.session.user);
-  //   };
-
-  //   checkSession();
-  // }, []);
 
   const CustomParagraph = Paragraph.extend({
     addAttributes() {
@@ -110,6 +90,7 @@ export const PremiumWriteArticle = () => {
   const editor = useEditor({
     extensions: [
       StarterKit,
+      CustomParagraph,
       BulletList,
       OrderedList,
       UnderlineExtension,
@@ -128,6 +109,7 @@ export const PremiumWriteArticle = () => {
     ],
     content: "",
     onUpdate: ({ editor }) => {
+      const html = editor.getHTML();
       const text = editor.getText();
       const wordsArray = text.trim().split(/\s+/).filter(Boolean);
       const words = wordsArray.length;
@@ -139,7 +121,7 @@ export const PremiumWriteArticle = () => {
       }
 
       setWordCount(words);
-      const html = editor.getHTML();
+
       setArticleContent(html);
 
       if (postType === "General") {
@@ -156,33 +138,56 @@ export const PremiumWriteArticle = () => {
   });
 
   //NEW
+  // useEffect(() => {
+  //   const checkSession = async () => {
+  //     const {
+  //       data: { session },
+  //     } = await supabase.auth.getSession();
+  //     console.log("Session:", session);
+
+  //     if (!session?.user) {
+  //       console.warn("No active Supabase session!");
+  //     } else {
+  //       console.log("Supabase user is authenticated");
+  //     }
+  //   };
+
+  //   checkSession();
+  // }, []);
+
+  // //NEW
+  // useEffect(() => {
+  //   supabase.auth.onAuthStateChange((event, session) => {
+  //     if (event === "SIGNED_IN") {
+  //       console.log(" Logged in");
+  //     } else if (event === "SIGNED_OUT") {
+  //       console.log(" Logged out");
+  //     }
+  //   });
+  // }, []);
+
   useEffect(() => {
-    const checkSession = async () => {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-      console.log("Session:", session);
+    if (!editor) return;
 
-      if (!session?.user) {
-        console.warn("No active Supabase session!");
-      } else {
-        console.log("Supabase user is authenticated");
-      }
-    };
-
-    checkSession();
-  }, []);
-
-  //NEW
-  useEffect(() => {
-    supabase.auth.onAuthStateChange((event, session) => {
-      if (event === "SIGNED_IN") {
-        console.log(" Logged in");
-      } else if (event === "SIGNED_OUT") {
-        console.log(" Logged out");
-      }
-    });
-  }, []);
+    if (postType === "General") {
+      // Insert all pending images into editor
+      let insertImages = "";
+      pendingImages.forEach((img) => {
+        insertImages += `<img src="${img.previewUrl}" /><p></p>`;
+      });
+      editor.chain().focus().insertContent(insertImages).run();
+    } else if (postType === "Room") {
+      // Remove all pending images from editor
+      let editorHtml = editor.getHTML();
+      pendingImages.forEach((img) => {
+        editorHtml = editorHtml.replace(
+          new RegExp(`<img src="${img.previewUrl}"[^>]*>`, "g"),
+          ""
+        );
+      });
+      editor.commands.setContent(editorHtml);
+    }
+  }, [postType]);
 
   const MAX_WORDS = postType === "Room" ? 400 : 1000;
 
@@ -597,9 +602,10 @@ export const PremiumWriteArticle = () => {
         }
       }
     }
-    pendingImages.forEach((img) => URL.revokeObjectURL(img.previewUrl));
+
+    pendingImages.forEach(img => URL.revokeObjectURL(img.previewUrl));
     setPendingImages([]);
-    alert("Opinion room article posted successfully.");
+    alert("Article posted successfully.");
     handleClearInputs();
     return;
   };
@@ -701,8 +707,8 @@ export const PremiumWriteArticle = () => {
     pendingImages.forEach((img) => URL.revokeObjectURL(img.previewUrl));
     setPendingImages([]);
     setShowDraftNotification(true);
-
     alert("Draft saved!");
+    handleClearInputs();
     handleClearInputs();
   };
 

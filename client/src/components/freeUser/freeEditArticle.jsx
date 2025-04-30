@@ -153,27 +153,22 @@ const EditFreeArticle = () => {
     content: "",
 
     onUpdate: ({ editor }) => {
+      const html = editor.getHTML();
       const text = editor.getText();
       const wordsArray = text.trim().split(/\s+/).filter(Boolean);
       const words = wordsArray.length;
 
-      if (words > MAX_WORDS) {
-        // Prevent adding new words by restoring previous content
-        editor.commands.setContent(articleContent); // roll back to last valid state
+      if (articleStatus === "Draft" && words > MAX_WORDS) {
+        alert(`Draft word count limit reached (${MAX_WORDS} words).`);
+        editor.commands.setContent(articleContent); // revert
         return;
       }
-
       setWordCount(words);
-      setArticleContent(editor.getHTML());
-
-      const html = editor.getHTML();
-
-      // Clean up removed images from pendingImages
+      setArticleContent(html);
       const doc = new DOMParser().parseFromString(html, "text/html");
       const imageSrcsInEditor = Array.from(doc.querySelectorAll("img")).map(
         (img) => img.getAttribute("src")
       );
-
       setPendingImages((prev) =>
         prev.filter((img) => imageSrcsInEditor.includes(img.previewUrl))
       );
@@ -354,7 +349,7 @@ const EditFreeArticle = () => {
       }
     }
 
-    // Delete old image records (optional but recommended)
+    // Delete old image records
     await supabase.from("article_images").delete().eq("articleid", articleId);
 
     for (const img of pendingImages) {
@@ -411,6 +406,12 @@ const EditFreeArticle = () => {
 
     setShowDraftNotification(true);
     alert("Draft updated!");
+    const words = articleContent.trim().split(/\s+/).filter(Boolean).length;
+    
+    if (words > MAX_WORDS) {
+      alert(`Draft exceeds ${MAX_WORDS} word limit. Please reduce content.`);
+      return;
+    }
   };
 
   const [pendingImages, setPendingImages] = useState([]);
@@ -654,7 +655,6 @@ const EditFreeArticle = () => {
     //   <main className="w-full max-w-4xl p-10 flex flex-col gap-6">
     <div className="w-full min-w-screen min-h-screen flex flex-col overflow-hidden bg-indigo-50 justify-center">
       <main className="flex-grow w-full flex min-h-full overflow-hidden">
-        
         <main className="w-full max-w-4xl p-10 flex flex-col gap-6 mx-auto">
           <h1 className="text-3xl font-bold mb-1">
             {articleStatus === "Draft"

@@ -49,24 +49,6 @@ export const FreeWriteArticle = () => {
   const [accuracy, setAccuracy] = useState(null);
   const [postType, setPostType] = useState("General");
 
-  // console.log("Auth session:", supabase.auth.getSession());
-
-  // useEffect(() => {
-  //   const checkSession = async () => {
-  //     const { data, error } = await supabase.auth.getSession();
-  //     console.log("Session check:", data?.session);
-
-  //     if (!data?.session) {
-  //       alert("You're not logged in");
-  //       return;
-  //     }
-
-  //     console.log("Logged in user:", data.session.user);
-  //   };
-
-  //   checkSession();
-  // }, []);
-
   const CustomParagraph = Paragraph.extend({
     addAttributes() {
       return {
@@ -127,9 +109,28 @@ export const FreeWriteArticle = () => {
     ],
     content: "",
     onUpdate: ({ editor }) => {
+      const text = editor.getText();
+      const wordsArray = text.trim().split(/\s+/).filter(Boolean);
+      const words = wordsArray.length;
+      if (words > MAX_WORDS) {
+        // Prevent adding new words by restoring previous content
+        editor.commands.setContent(articleContent); // roll back to last valid state
+        return;
+      }
+
       setArticleContent(editor.getHTML());
-      const words = editor.getText().trim().split(/\s+/).filter(Boolean).length;
       setWordCount(words);
+
+      const doc = new DOMParser().parseFromString(
+        editor.getHTML(),
+        "text/html"
+      );
+      const imageSrcsInEditor = Array.from(doc.querySelectorAll("img")).map(
+        (img) => img.getAttribute("src")
+      );
+      setPendingImages((prev) =>
+        prev.filter((img) => imageSrcsInEditor.includes(img.previewUrl))
+      );
     },
   });
 
@@ -302,6 +303,7 @@ export const FreeWriteArticle = () => {
       created_at: new Date().toISOString(),
     };
 
+    articleData.topic = topics;
     const topicName = topicOptions.find((t) => t.topicid === topics)?.name;
 
     //   const { data, error } = await supabase
@@ -423,29 +425,14 @@ export const FreeWriteArticle = () => {
       const articleid = data?.[0]?.articleid;
 
       // Save multiple images to article_images
-      for (const img of pendingImages) {
-        const fileExt = img.file.name.split(".").pop();
-        const fileName = `${Date.now()}-${Math.random()
-          .toString(36)
-          .substring(2)}.${fileExt}`;
-        const filePath = `${session.id}/${fileName}`;
-
-        await supabase.storage
-          .from("articles-images")
-          .upload(filePath, img.file, {
-            cacheControl: "3600",
-            upsert: false,
-          });
-
-        const { data: urlData } = supabase.storage
-          .from("articles-images")
-          .getPublicUrl(filePath);
-        const imageUrl = urlData?.publicUrl;
-
+      for (const url of uploadedImageUrls) {
         await supabase
           .from("article_images")
-          .insert([{ articleid, image_url: imageUrl }]);
+          .insert([{ articleid, image_url: url }]);
       }
+
+      pendingImages.forEach((img) => URL.revokeObjectURL(img.previewUrl)); // cleanup object URLs
+      setPendingImages([]);
 
       setAccuracy(result.accuracy);
       setAiFeedback(result.feedback);
@@ -471,15 +458,13 @@ export const FreeWriteArticle = () => {
     let updatedHTML = articleContent;
     const bucket = "articles-images";
     let firstImageUrl = null;
-
+    let uploadedImageUrls = [];
     for (const img of pendingImages) {
       const file = img.file;
       const fileExt = file.name.split(".").pop();
       const fileName = `${Date.now()}-${Math.random()
         .toString(36)
         .substring(2)}.${fileExt}`;
-      const { data: authSession } = await supabase.auth.getSession();
-      const supabaseUid = authSession?.session?.user?.id;
       const filePath = `${supabaseUid}/${fileName}`;
 
       const { error: uploadError } = await supabase.storage
@@ -496,6 +481,7 @@ export const FreeWriteArticle = () => {
       if (urlData?.publicUrl) {
         if (!firstImageUrl) firstImageUrl = urlData.publicUrl;
         updatedHTML = updatedHTML.replaceAll(img.previewUrl, urlData.publicUrl);
+        uploadedImageUrls.push(urlData.publicUrl); // Track for article_images insert
       }
     }
 
@@ -509,8 +495,17 @@ export const FreeWriteArticle = () => {
       status: "Draft",
     };
 
-    const { error } = await supabase.from("articles").insert([articleData]);
+    const { data, error } = await supabase
+      .from("articles")
+      .insert([articleData])
+      .select("articleid");
     if (error) return alert("Failed to save draft.");
+    const articleid = data?.[0]?.articleid;
+    for (const imageUrl of uploadedImageUrls) {
+      await supabase
+        .from("article_images")
+        .insert([{ articleid, image_url: imageUrl }]);
+    }
 
     // Trigger the pop-up notification for successful draft save
     setShowDraftNotification(true);
@@ -559,20 +554,21 @@ export const FreeWriteArticle = () => {
     e.target.value = null;
   };
 
-  const handleRemoveImage = (indexToRemove) => {
-    const updatedImages = [...pendingImages];
-    updatedImages.splice(indexToRemove, 1);
+  const handleRemoveImage = async (indexToRemove) => {
+    const removed = pendingImages[indexToRemove];
+    const removedUrl = removed.previewUrl;
+    URL.revokeObjectURL(removedUrl); // cleanup memory
+    const updatedImages = pendingImages.filter((_, i) => i !== indexToRemove);
     setPendingImages(updatedImages);
 
     // Remove the image from the editor content as well
-    const domParser = new DOMParser();
-    const doc = domParser.parseFromString(editor.getHTML(), "text/html");
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(editor.getHTML(), "text/html");
     const imgs = doc.querySelectorAll("img");
-
-    if (imgs[indexToRemove]) {
-      imgs[indexToRemove].remove();
-      editor.commands.setContent(doc.body.innerHTML);
-    }
+    imgs.forEach((img) => {
+      if (img.src === removedUrl) img.remove();
+    });
+    editor.commands.setContent(doc.body.innerHTML);
   };
 
   // Fetch Topics from `topic_categories`
@@ -665,80 +661,12 @@ export const FreeWriteArticle = () => {
     return () => document.head.removeChild(style); // Cleanup
   }, []);
 
-  // const handleSubmitTopicApplication = async () => {
-  //   const rawInput = newTopicName.trim();
-  //   const normalizedInput = rawInput.toLowerCase();
-
-  //   if (!normalizedInput) {
-  //     alert("Please enter a topic name.");
-  //     return;
-  //   }
-
-  //   // Check if topic already exists in `topic_categories`
-  //   const { data: existingTopics, error: topicFetchError } = await supabase
-  //     .from("topic_categories")
-  //     .select("name");
-
-  //   if (topicFetchError) {
-  //     alert("Error checking existing topics.");
-  //     return;
-  //   }
-
-  //   const topicExists = existingTopics.some(
-  //     (topic) => topic.name.trim().toLowerCase() === normalizedInput
-  //   );
-
-  //   if (topicExists) {
-  //     alert("This topic already exists. Please choose an existing topic.");
-  //     return;
-  //   }
-
-  //   // Check if user already applied for this topic
-  //   const { data: userApplications, error: appFetchError } = await supabase
-  //     .from("topic_applications")
-  //     .select("topic_name")
-  //     .eq("requested_by", userId)
-  //     .eq("status", "Pending");
-
-  //   if (appFetchError) {
-  //     alert("Error checking your previous applications.");
-  //     return;
-  //   }
-
-  //   const alreadyApplied = userApplications.some(
-  //     (app) => app.topic_name.trim().toLowerCase() === normalizedInput
-  //   );
-
-  //   if (alreadyApplied) {
-  //     alert("You’ve already applied for this topic.");
-  //     return;
-  //   }
-
-  //   // Insert the application
-  //   const { error: insertError } = await supabase
-  //     .from("topic_applications")
-  //     .insert([
-  //       {
-  //         requested_by: userId,
-  //         topic_name: rawInput, // keep original casing for admin view
-  //         status: "Pending",
-  //         created_at: new Date().toISOString(),
-  //       },
-  //     ]);
-
-  //   if (insertError) {
-  //     alert("Failed to apply for topic.");
-  //   } else {
-  //     alert("Topic application submitted!");
-  //     setShowTopicApplication(false);
-  //     setNewTopicName("");
-  //   }
-  // };
+ 
 
   return (
     <div className="w-full min-h-screen bg-indigo-50 text-black font-grotesk flex justify-center">
       <main className="w-full max-w-4xl p-10 flex flex-col gap-6">
-        <h1 className="text-3xl font-bold mb-1">Publish Your Articles :</h1>
+        <h1 className="text-3xl font-bold mb-1">Publish Your Articles: </h1>
 
         <div className="flex flex-col gap-5 w-full">
           <div>
