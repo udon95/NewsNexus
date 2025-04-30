@@ -13,7 +13,6 @@
   import Heading from '@tiptap/extension-heading'
   import BulletList from '@tiptap/extension-bullet-list';
   import OrderedList from '@tiptap/extension-ordered-list';
-  import TextStyle from '@tiptap/extension-text-style';
   import { Extension } from '@tiptap/core';
   import { Paragraph } from '@tiptap/extension-paragraph';
 
@@ -41,22 +40,6 @@
     
 
     console.log("Auth session:", supabase.auth.getSession());
-
-    // useEffect(() => {
-    //   const checkSession = async () => {
-    //     const { data, error } = await supabase.auth.getSession();
-    //     console.log("Session check:", data?.session);
-    
-    //     if (!data?.session) {
-    //       alert("You're not logged in");
-    //       return;
-    //     }
-    
-    //     console.log("Logged in user:", data.session.user);
-    //   };
-    
-    //   checkSession();
-    // }, []);  
 
     const CustomParagraph = Paragraph.extend({
       addAttributes() {
@@ -140,32 +123,6 @@
       },
       
     });
-
-    //NEW
-    useEffect(() => {
-      const checkSession = async () => {
-        const { data: { session } } = await supabase.auth.getSession();
-        console.log("Session:", session);
-    
-        if (!session?.user) {
-          console.warn("No active Supabase session!");
-        } else {
-          console.log("Supabase user is authenticated");
-        }
-      };
-    
-      checkSession();
-    }, []);   
-    //NEW
-    useEffect(() => {
-      supabase.auth.onAuthStateChange((event, session) => {
-        if (event === "SIGNED_IN") {
-          console.log(" Logged in");
-        } else if (event === "SIGNED_OUT") {
-          console.log(" Logged out");
-        }
-      });
-    }, []);    
 
     useEffect(() => {
       if (!editor) return;
@@ -492,14 +449,12 @@
       }
     }
   }
-
-  // Clean up pending images
-  pendingImages.forEach(img => URL.revokeObjectURL(img.previewUrl));
-  setPendingImages([]);
-  setShowDraftNotification(true);
-  alert("Draft saved!");
-  handleClearInputs();
-
+      // Clean up pending images
+      pendingImages.forEach(img => URL.revokeObjectURL(img.previewUrl));
+      setPendingImages([]);
+      setShowDraftNotification(true);
+      alert("Draft saved!");
+      handleClearInputs();
 
     }   
 
