@@ -172,41 +172,31 @@ export const FreeManageMyArticles = () => {
         />
 
         {/* Filtered Article Lists */}
-        {(articleType === "all" || articleType === "article") &&
-          (posted.length > 0 ? (
-            <ArticleList
-              title="My Posted Articles:"
-              articles={posted}
-              isDraft={false}
-              isFree={true}
-              isRoom={false}
-              isPremium={false}
-              onArticleClick={handleArticleClick}
-              onDeleteSuccess={handleDeletePosted}
-              articleData={{ viewCounts, likeCounts }}
-            />
-          ) : (
-            <p className="py-6 text-center text-gray-500">
-              No Articles Available.
-            </p>
-          ))}
-        {(articleType === "all" || articleType === "draft") &&
-          (drafts.length > 0 ? (
-            <ArticleList
-              title="My Drafts:"
-              articles={drafts}
-              isDraft={true}
-              isFree={true}
-              isRoom={false}
-              isPremium={false}
-              onArticleClick={handleArticleClick}
-              onDeleteSuccess={handleDeleteDraft}
-            />
-          ) : (
-            <p className="py-6 text-center text-gray-500">
-              No Drafts Available.
-            </p>
-          ))}
+        {(articleType === "all" || articleType === "article") && (
+          <ArticleList
+            title="My Posted Articles:"
+            articles={posted}
+            isDraft={false}
+            isFree={true}
+            isRoom={false}
+            isPremium={false}
+            onArticleClick={handleArticleClick}
+            onDeleteSuccess={handleDeletePosted}
+            articleData={{ viewCounts, likeCounts }}
+          />
+        )}
+        {(articleType === "all" || articleType === "draft") && (
+          <ArticleList
+            title="My Drafts:"
+            articles={drafts}
+            isDraft={true}
+            isFree={true}
+            isRoom={false}
+            isPremium={false}
+            onArticleClick={handleArticleClick}
+            onDeleteSuccess={handleDeleteDraft}
+          />
+        )}
       </main>
     </div>
   );

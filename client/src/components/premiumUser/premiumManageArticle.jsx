@@ -257,71 +257,51 @@ export const PremManageArticle = () => {
         />
 
         {/* Filtered Article Lists */}
-        {(articleType === "all" || articleType === "article") &&
-          (posted.length > 0 ? (
-            <ArticleList
-              title="My Posted Articles:"
-              articles={posted}
-              isDraft={false}
-              isPremium={true}
-              isRoom={false}
-              onArticleClick={handleArticleClick}
-              onDeleteSuccess={handleDeleteArticle}
-              articleData={{ viewCounts, likeCounts }}
-            />
-          ) : (
-            <p className="py-6 text-center text-gray-500">
-              No Articles Available.
-            </p>
-          ))}
-        {(articleType === "all" || articleType === "posted") &&
-          (roomPosted.length > 0 ? (
-            <ArticleList
-              title="My Posted Room Articles:"
-              articles={roomPosted}
-              isDraft={false}
-              isPremium={true}
-              isRoom={true}
-              onArticleClick={handleArticleClick}
-              onDeleteSuccess={handleDeleteRoomArticle}
-            />
-          ) : (
-            <p className="py-6 text-center text-gray-500">
-              No Articles Available.
-            </p>
-          ))}
-        {(articleType === "all" || articleType === "draft") &&
-          (drafts.length > 0 ? (
-            <ArticleList
-              title="My Drafts:"
-              articles={drafts}
-              isDraft={true}
-              isPremium={true}
-              isRoom={false}
-              onDeleteSuccess={handleDeleteDraft}
-              onArticleClick={handleArticleClick}
-            />
-          ) : (
-            <p className="py-6 text-center text-gray-500">
-              No drafts available.
-            </p>
-          ))}
-        {(articleType === "all" || articleType === "draft") &&
-          (roomDrafts.length > 0 ? (
-            <ArticleList
-              title="My Room Drafts:"
-              articles={roomDrafts}
-              isDraft={true}
-              isPremium={true}
-              isRoom={true}
-              onDeleteSuccess={handleDeleteRoomDraft}
-              onArticleClick={handleArticleClick}
-            />
-          ) : (
-            <p className="py-6 text-center text-gray-500">
-              No drafts available.
-            </p>
-          ))}
+        {(articleType === "all" || articleType === "article") && (
+          <ArticleList
+            title="My Posted Articles:"
+            articles={posted}
+            isDraft={false}
+            isPremium={true}
+            isRoom={false}
+            onArticleClick={handleArticleClick}
+            onDeleteSuccess={handleDeleteArticle}
+            articleData={{ viewCounts, likeCounts }}
+          />
+        )}
+        {(articleType === "all" || articleType === "posted") && (
+          <ArticleList
+            title="My Posted Room Articles:"
+            articles={roomPosted}
+            isDraft={false}
+            isPremium={true}
+            isRoom={true}
+            onArticleClick={handleArticleClick}
+            onDeleteSuccess={handleDeleteRoomArticle}
+          />
+        )}
+        {(articleType === "all" || articleType === "draft") && (
+          <ArticleList
+            title="My Drafts:"
+            articles={drafts}
+            isDraft={true}
+            isPremium={true}
+            isRoom={false}
+            onDeleteSuccess={handleDeleteDraft}
+            onArticleClick={handleArticleClick}
+          />
+        )}
+        {(articleType === "all" || articleType === "draft") && (
+          <ArticleList
+            title="My Room Drafts:"
+            articles={roomDrafts}
+            isDraft={true}
+            isPremium={true}
+            isRoom={true}
+            onDeleteSuccess={handleDeleteRoomDraft}
+            onArticleClick={handleArticleClick}
+          />
+        )}
       </main>
     </div>
   );
