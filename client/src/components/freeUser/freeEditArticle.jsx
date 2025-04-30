@@ -654,9 +654,7 @@ const EditFreeArticle = () => {
     //   <main className="w-full max-w-4xl p-10 flex flex-col gap-6">
     <div className="w-full min-w-screen min-h-screen flex flex-col overflow-hidden bg-indigo-50 justify-center">
       <main className="flex-grow w-full flex min-h-full overflow-hidden">
-        <aside className="md:w-[250px] md:flex-none">
-          <FreeSidebar />
-        </aside>
+        
         <main className="w-full max-w-4xl p-10 flex flex-col gap-6 mx-auto">
           <h1 className="text-3xl font-bold mb-1">
             {articleStatus === "Draft"
