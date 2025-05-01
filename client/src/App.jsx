@@ -19,8 +19,6 @@ import ViewRooms from "./components/premiumUser/viewRooms.jsx";
 import RoomPage from "./components/premiumUser/roomPage.jsx";
 import SubscriptionStatus from "./components/payment.jsx";
 import PublicProfile from "./components/publicProfile.jsx";
-import EditFreeArticle from "./components/freeUser/freeEditArticle.jsx";
-import PremiumEditArticle from "./components/premiumUser/premiumEditArticle.jsx";
 
 import supabase from "./api/supabaseClient.js";
 import "./index.css";
@@ -68,9 +66,6 @@ function App() {
         <Route path="/freeDashboard/*" element={<FreeDashboard />} />
         <Route path="/premiumDashboard/*" element={<PremiumDashboard />} />
         <Route path="/adminDashboard/*" element={<AdminDashboard />} />
-
-        <Route path="/edit/free/:id" element={<EditFreeArticle />} />
-        <Route path="/edit/premium/:id" element={<PremiumEditArticle />} />
 
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
