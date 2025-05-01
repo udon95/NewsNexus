@@ -11,83 +11,6 @@ const supabase = createClient(
 );
 const OPENAI_KEY = process.env.OPENAI_API_KEY;
 const PERPLEXITY_KEY = process.env.PERPLEXITY_API_KEY;
-const HUGGINGFACE_KEY = process.env.HUGGINGFACE_KEY;
-
-// const generateFactCheckPrompt = (content, context = "", model = "gpt") => {
-//   const today = new Date().toLocaleDateString("en-SG", {
-//     year: "numeric",
-//     month: "long",
-//     day: "numeric",
-//   });
-//   return `
-// You are a fact-checking assistant. Today's date is **${today}**.
-
-// Review the following article and highlight any false or misleading statements.
-
-// Format:
-// - Wrap only the false or misleading text in <mark>...</mark>.
-// - Immediately after that, add the explanation in parentheses like this:
-//   (This statement is false because...)
-
-// - Do NOT include the explanation inside the <mark> tags.
-// - Do NOT remove or alter the rest of the article.
-// - If everything is correct, return the original article unchanged (no <mark>, no explanation).
-
-// Here is the article to check:
-// ${content}
-// ${context ? `\n\nContext:\n${context}` : ""}
-// `;
-// };
-
-// const generatePerplexityPrompt = (content) => `
-// Analyze the content below **only if it makes an objective, verifiable claim** (e.g. statistics, dates, legal facts).
-// If the content is clearly a **personal opinion**, reflection, or anecdote (like an interview), do not flag it.
-
-// - If it's unverifiable or personal: respond with "no-issue"
-// - If it's potentially misleading: respond with "dubious" or "obviously-fake"
-// - Provide a brief explanation only for "dubious" or "obviously-fake"
-
-// Content:
-// "${content}"
-
-// `;
-
-// router.post("/factcheck", async (req, res) => {
-//   const { userText } = req.body;
-//   console.log("Received text:", userText);
-
-//   try {
-//     const response = await fetch("https://api.openai.com/v1/chat/completions", {
-//       method: "POST",
-//       headers: {
-//         Authorization: `Bearer ${OPENAI_KEY}`,
-//         "Content-Type": "application/json",
-//       },
-//       body: JSON.stringify({
-//         model: "gpt-3.5-turbo",
-//         messages: [
-//           {
-//             role: "system",
-//             content:
-//               "You're a fact-checking assistant. Review the user's text for factual accuracy.",
-//           },
-//           { role: "user", content: userText },
-//         ],
-//         temperature: 0.3,
-//       }),
-//     });
-
-//     const data = await response.json();
-//     console.log("OpenAI response:", data);
-
-//     const result =
-//       data.choices?.[0]?.message?.content || "No content returned.";
-//     res.json({ result });
-//   } catch (err) {
-//     console.error("Fact-checking error:", err);
-//     res.status(500).json({ error: "Failed to fact-check content" });
-//   }
-// });
 
 async function moderateText(content) {
   const res = await fetch("https://api.openai.com/v1/moderations", {
@@ -101,23 +24,6 @@ async function moderateText(content) {
   const data = await res.json();
   return data.results?.[0];
 }
-
-//  Image Moderation (Hugging Face - NudeNet)
-// async function moderateImage(base64Image) {
-//   const res = await fetch(
-//     "https://api-inference.huggingface.co/models/NotAI-tech/NudeNet_NSFW",
-//     {
-//       method: "POST",
-//       headers: {
-//         Authorization: `Bearer ${HUGGINGFACE_KEY}`,
-//         "Content-Type": "application/json",
-//       },
-//       body: JSON.stringify({ inputs: base64Image }),
-//     }
-//   );
-//   const result = await res.json();
-//   return result; // typically returns labels like "nsfw", "porn"
-// }
 
 const generateCategoryPrompt = (content, category) => `
 You are a category validation assistant.
@@ -162,10 +68,8 @@ async function factCheck(content, topicName) {
   });
 
   const catData = await catRes.json();
-  // console.log("🟢 Category check raw response:", JSON.stringify(catData, null, 2));
   const rawCategory = catData.choices?.[0]?.message?.content;
   const categoryMatch = rawCategory ? rawCategory.trim().toLowerCase() : "";
-  // console.log("🟢 Category assistant says:", categoryMatch);
 
   if (categoryMatch.startsWith("y")) {
   } else {
@@ -177,7 +81,7 @@ async function factCheck(content, topicName) {
   const threshold = 75;
   let result;
 
-  // 2️⃣ Perplexity factual check
+  //  Perplexity factual check
   try {
     const pxRes = await fetch("https://api.perplexity.ai/chat/completions", {
       method: "POST",
@@ -215,9 +119,7 @@ async function factCheck(content, topicName) {
     const pxData = await pxRes.json();
 
     const raw = pxData.choices?.[0]?.message?.content;
-    // console.log("raw model output:\n", JSON.stringify(raw));
-    // let reply = raw.trim();
-    // console.log("after trim:\n", JSON.stringify(reply));
+
     if (/i['’]?m not sure|unknown|cannot verify/i.test(raw)) {
       throw new Error("Perplexity unsure");
     }
@@ -230,7 +132,6 @@ async function factCheck(content, topicName) {
     }
 
     const parsed = raw.substring(start, end + 1);
-    // console.log("jsonString to parse:", jsonString);
 
     result = JSON.parse(parsed);
   } catch (perpErr) {
@@ -275,7 +176,6 @@ async function factCheck(content, topicName) {
 
   console.log("parsed result:", result);
   if (typeof result.accuracy !== "number" || result.accuracy < threshold) {
-    // include both accuracy and feedback in the thrown object
     throw {
       status: 400,
       error: "Article failed fact-checking.",
@@ -283,23 +183,9 @@ async function factCheck(content, topicName) {
     };
   }
   return result;
-
-  //   if (result.accuracy < 75) {
-  //     throw { status: 400, error: "Article failed fact-checking.", ...result };
-  //   }
-  //   return result;
-  // } catch (err) {
-  //   // Fallback to GPT
-
-  //   if (parsed.accuracy < 75) {
-  //     throw { status: 400, error: "Article failed fact-checking.", ...parsed };
-  //   }
-  //   return parsed;
-  // }
 }
 
 router.post("/submit-article", async (req, res) => {
-  // console.log("body", req.body);
   const { title, content, authorId, topicid, topicName } = req.body;
 
   if (!title || !content || !authorId || !topicid || !topicName) {
@@ -314,15 +200,6 @@ router.post("/submit-article", async (req, res) => {
     });
   }
 
-  // if (imageBase64) {
-  //   const imageMod = await moderateImage(imageBase64);
-  //   if (
-  //     imageMod?.[0]?.label?.toLowerCase().includes("nsfw") &&
-  //     imageMod?.[0]?.score > 0.8
-  //   ) {
-  //     return res.status(400).json({ error: "Image flagged as NSFW." });
-  //   }
-  // }
   let factResult;
   try {
     factResult = await factCheck(content, topicName);
@@ -647,7 +524,7 @@ router.post("/submit-article", async (req, res) => {
 
 router.post("/rooms/:roomid/articles", async (req, res) => {
   const { roomid } = req.params;
-  const { title, content, authorId, type, topicName, imageBase64 } = req.body;
+  const { title, content, authorId, type, topicName } = req.body;
 
   // Validate required
   if (!roomid || !title || !content || !authorId || !type) {
@@ -657,14 +534,6 @@ router.post("/rooms/:roomid/articles", async (req, res) => {
   const textMod = await moderateText(content);
   if (textMod.flagged)
     return res.status(400).json({ error: "Content flagged." });
-  if (imageBase64) {
-    const imgMod = await moderateImage(imageBase64);
-    if (
-      imgMod[0]?.label?.toLowerCase().includes("nsfw") &&
-      imgMod[0].score > 0.8
-    )
-      return res.status(400).json({ error: "Image flagged as NSFW." });
-  }
 
   // Opinion flow: direct save
   if (type === "opinion") {

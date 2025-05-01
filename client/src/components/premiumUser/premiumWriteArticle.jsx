@@ -1031,7 +1031,7 @@ export const PremiumWriteArticle = () => {
                       </option>
                     ))}
                   </select>
-                  <div className="mt-4 flex gap-4 items-center">
+                  {/* <div className="mt-4 flex gap-4 items-center">
                     <label className="text-sm font-medium">
                       Room Article Type:
                     </label>
@@ -1050,7 +1050,7 @@ export const PremiumWriteArticle = () => {
                         {type.charAt(0).toUpperCase() + type.slice(1)}
                       </label>
                     ))}
-                  </div>
+                  </div> */}
 
                   {/* Custom ▼ triangle */}
                   <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none text-gray-500 text-sm">
