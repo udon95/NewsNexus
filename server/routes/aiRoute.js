@@ -196,7 +196,6 @@ router.post("/submit-article", async (req, res) => {
   if (modResult?.flagged) {
     return res.status(400).json({
       error: "Content flagged as inappropriate by text moderation.",
-      categories: modResult.categories,
     });
   }
 
@@ -578,7 +577,6 @@ router.post("/rooms/:roomid/articles", async (req, res) => {
       title,
       content,
       status: "Published",
-      is_general: true,
     },
   ]);
   if (error) {
