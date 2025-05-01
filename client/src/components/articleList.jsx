@@ -318,7 +318,7 @@ const ArticleList = ({
                               onClick={(e) => {
                                 e.stopPropagation();
                                 const id = isRoom ? article.postid : article.articleid;
-                                const route = isPremium ? `/edit/premium/${id}` : `/edit/free/${id}`;
+                                const route = isPremium ? `/premiumDashboard/edit/${id}` : `/freeDashboard/edit/${id}`;
                                 navigate(
                                   route
                                 );
