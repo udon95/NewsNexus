@@ -20,8 +20,8 @@ const app = express();
 app.use(express.json());
 app.use(
   cors({
-    origin: "https://van.dpyq2cohucoc7.amplifyapp.com", //For Hosted 
-    // origin: "http://localhost:5173", // localhost frontend 
+    origin: "https://van.dpyq2cohucoc7.amplifyapp.com", //For Hosted
+    // origin: "http://localhost:5173", // localhost frontend
     credentials: true, // Allow cookies & authentication headers
   })
 );
@@ -31,8 +31,8 @@ const supabase = createClient(
   process.env.SUPABASE_ANON_KEY
 );
 
-app.get('/', (req, res) => {
-  res.send('Hello, World!');
+app.get("/", (req, res) => {
+  res.send("Hello, World!");
 });
 
 app.use("/auth", authRoute);
@@ -41,10 +41,6 @@ app.use("/api", aiRoute);
 app.use("/translate", translateRoute);
 app.use("/rooms", roomRoute);
 
-app.use("/test", require("./routes/testaai"));
-
 // Start Server
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () =>
-  console.log(`Server running on ${PORT}`)
-);
+app.listen(PORT, () => console.log(`Server running on ${PORT}`));
