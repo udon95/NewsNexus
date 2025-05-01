@@ -557,36 +557,44 @@ router.post("/rooms/:roomid/articles", async (req, res) => {
   }
 
   // Factual in room: need topicName for category check
-  if (!topicName) {
-    return res.status(400).json({
-      error: "Missing required field: topicName for factual room post.",
-    });
-  }
-  try {
-    await factCheck(content, topicName);
-  } catch (fcErr) {
-    console.error("Room fact-check error:", fcErr);
-    return res.status(fcErr.status || 400).json({ error: fcErr.error });
-  }
+  // if (!topicName) {
+  //   return res.status(400).json({
+  //     error: "Missing required field: topicName for factual room post.",
+  //   });
+  // }
+  // try {
+  //   await factCheck(content, topicName);
+  // } catch (fcErr) {
+  //   console.error("Room fact-check error:", fcErr);
+  //   return res.status(fcErr.status || 400).json({ error: fcErr.error });
+  // }
 
-  // Insert factual room article
-  const { data, error } = await supabase.from("room_articles").insert([
-    {
-      roomid,
-      userid: authorId,
-      title,
-      content,
-      status: "Published",
-    },
-  ]);
-  if (error) {
-    console.error("Room factual insert error:", error);
-    return res.status(500).json({ error: error.message });
-  }
-  return res.json({
-    message: "Factual article saved in room.",
-    article: data[0],
-  });
+  // // Insert factual room article
+  // const { data, error } = await supabase.from("room_articles").insert([
+  //   {
+  //     roomid,
+  //     userid: authorId,
+  //     title,
+  //     content,
+  //     status: "Published",
+  //   },
+  // ]);
+  // if (error) {
+  //   console.error("Room factual insert error:", error);
+  //   return res.status(500).json({ error: error.message });
+  // }
+  // return res.json({
+  //   message: "Factual article saved in room.",
+  //   article: data[0],
+  // });
+});
+
+router.post("/moderate", async (req, res) => {
+  const { content } = req.body;
+  if (!content) return res.status(400).json({ error: "No content provided." });
+
+  const mod = await moderateText(content); // or use simpleModeration()
+  return res.json(mod);
 });
 
 module.exports = router;

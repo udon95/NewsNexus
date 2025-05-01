@@ -547,6 +547,27 @@ export const PremiumWriteArticle = () => {
 
       // 🏠 CASE 2: Room Opinion Article (skip validation)
       if (postType === "Room") {
+        try {
+          const response = await fetch(
+            "https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/api/moderate",
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ content: articleContent }),
+            }
+          );
+          const result = await response.json();
+          if (result.flagged) {
+            alert(`🚫 Article flagged: ${result.reason}`);
+            return;
+          }
+        } catch (err) {
+          alert("Failed to moderate content.");
+          console.error(err);
+          return;
+        }
         articleData.roomid = selectedRoom;
         const { data, error } = await supabase
           .from("room_articles")
@@ -603,7 +624,7 @@ export const PremiumWriteArticle = () => {
       }
     }
 
-    pendingImages.forEach(img => URL.revokeObjectURL(img.previewUrl));
+    pendingImages.forEach((img) => URL.revokeObjectURL(img.previewUrl));
     setPendingImages([]);
     alert("Article posted successfully.");
     handleClearInputs();
