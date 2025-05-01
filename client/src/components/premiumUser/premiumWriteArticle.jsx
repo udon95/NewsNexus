@@ -545,7 +545,7 @@ export const PremiumWriteArticle = () => {
     } else {
       articleData.roomid = selectedRoom;
 
-      // 🏠 CASE 2: Room Opinion Article (skip validation)
+      //  CASE 2: Room Opinion Article (skip validation)
       if (postType === "Room") {
         try {
           const response = await fetch(
@@ -560,7 +560,7 @@ export const PremiumWriteArticle = () => {
           );
           const result = await response.json();
           if (result.flagged) {
-            alert(`🚫 Article flagged: ${result.reason}`);
+            alert(` Article flagged: ${result.reason} || "Content violates policies."}`);
             return;
           }
         } catch (err) {

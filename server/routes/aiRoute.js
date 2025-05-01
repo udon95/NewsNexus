@@ -521,80 +521,16 @@ router.post("/submit-article", async (req, res) => {
   // }
 });
 
-router.post("/rooms/:roomid/articles", async (req, res) => {
-  const { roomid } = req.params;
-  const { title, content, authorId, type, topicName } = req.body;
-
-  // Validate required
-  if (!roomid || !title || !content || !authorId || !type) {
-    return res.status(400).json({ error: "Missing required fields." });
-  }
-  // Moderate text/image
-  const textMod = await moderateText(content);
-  if (textMod.flagged)
-    return res.status(400).json({ error: "Content flagged." });
-
-  // Opinion flow: direct save
-  if (type === "opinion") {
-    const { data, error } = await supabase.from("room_articles").insert([
-      {
-        roomid,
-        userid: authorId,
-        title,
-        content,
-        status: "Published",
-        is_general: false,
-      },
-    ]);
-    if (error) {
-      console.error("Room opinion insert error:", error);
-      return res.status(500).json({ error: error.message });
-    }
-    return res.json({
-      message: "Opinion article saved in room.",
-      article: data[0],
-    });
-  }
-
-  // Factual in room: need topicName for category check
-  // if (!topicName) {
-  //   return res.status(400).json({
-  //     error: "Missing required field: topicName for factual room post.",
-  //   });
-  // }
-  // try {
-  //   await factCheck(content, topicName);
-  // } catch (fcErr) {
-  //   console.error("Room fact-check error:", fcErr);
-  //   return res.status(fcErr.status || 400).json({ error: fcErr.error });
-  // }
-
-  // // Insert factual room article
-  // const { data, error } = await supabase.from("room_articles").insert([
-  //   {
-  //     roomid,
-  //     userid: authorId,
-  //     title,
-  //     content,
-  //     status: "Published",
-  //   },
-  // ]);
-  // if (error) {
-  //   console.error("Room factual insert error:", error);
-  //   return res.status(500).json({ error: error.message });
-  // }
-  // return res.json({
-  //   message: "Factual article saved in room.",
-  //   article: data[0],
-  // });
-});
-
 router.post("/moderate", async (req, res) => {
   const { content } = req.body;
   if (!content) return res.status(400).json({ error: "No content provided." });
 
-  const mod = await moderateText(content); // or use simpleModeration()
-  return res.json(mod);
+  const result = await moderateText(content); // or use simpleModeration()
+  if (result?.flagged) {
+    return res.status(400).json({
+      error: "Content flagged as inappropriate by text moderation.",
+    });
+  }
 });
 
 module.exports = router;
