@@ -544,6 +544,8 @@ export const PremiumWriteArticle = () => {
       return;
     } else {
       articleData.roomid = selectedRoom;
+      console.log("content", articleContent);
+
 
       //  CASE 2: Room Opinion Article (skip validation)
       if (postType === "Room") {
@@ -559,6 +561,10 @@ export const PremiumWriteArticle = () => {
             }
           );
           const result = await response.json();
+
+          console.log("check", result);
+          console.log("check", result.reason);
+
           if (result.flagged) {
             alert(` Article flagged: ${result.reason} || "Content violates policies."}`);
             return;
