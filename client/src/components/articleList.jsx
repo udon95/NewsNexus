@@ -288,14 +288,9 @@ const ArticleList = ({
                         </div>
                       </div>
                     )}
-                    {isDraft && !isRoom && (
+                    {isDraft && (
                       <div className="absolute bottom-4 left-4 text-sm">
-                        Expires: {calculateExpiryDate(article)}
-                      </div>
-                    )}
-                    {isDraft && isRoom && (
-                      <div className="absolute bottom-4 left-4 text-sm">
-                        Expires: {calculateExpiryDateRoom(article)}
+                        Expires: {isRoom ? calculateExpiryDateRoom(article) : calculateExpiryDate(article)}
                       </div>
                     )}
 
@@ -316,140 +311,35 @@ const ArticleList = ({
                     {openMenuIndex === index && (
                       <div className="article-menu-dropdown absolute bottom-10 right-2 bg-white shadow-md border border-gray-300 rounded-lg min-w-[120px] z-50">
                         <ul className="flex flex-col">
-                          {!isDraft &&
-                            isFree && ( // Show "Edit" for free user posted
-                              <li>
-                                <button
-                                  className="block px-4 py-2 w-full text-left hover:bg-gray-100"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    navigate(
-                                      `/freeDashboard/editPosted/${encodeURIComponent(
-                                        article.articleid
-                                      )}`
-                                    );
-                                  }}
-                                >
-                                  Edit
-                                </button>
-                              </li>
-                            )}
-                          {!isDraft &&
-                            isPremium &&
-                            !isRoom && ( // Show "Edit" for premium user general posted
-                              <li>
-                                <button
-                                  className="block px-4 py-2 w-full text-left hover:bg-gray-100"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    navigate(
-                                      `/premiumDashboard/edit/${article.articleid}`
-                                    );
-                                  }}
-                                >
-                                  Edit
-                                </button>
-                              </li>
-                            )}
-                          {!isDraft &&
-                            isPremium &&
-                            isRoom && ( // Show "Edit" for premium user room posted
-                              <li>
-                                <button
-                                  className="block px-4 py-2 w-full text-left hover:bg-gray-100"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    navigate(
-                                      `/premiumDashboard/edit/${article.postid}`
-                                    );
-                                  }}
-                                >
-                                  Edit
-                                </button>
-                              </li>
-                            )}
-                          {isDraft &&
-                            isFree && ( // Show "Edit" for free user draft
-                              <li>
-                                <button
-                                  className="block px-4 py-2 w-full text-left hover:bg-gray-100"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    navigate(
-                                      `/freeDashboard/writeArticle/${encodeURIComponent(
-                                        article.articleid
-                                      )}`
-                                    );
-                                  }}
-                                >
-                                  Edit
-                                </button>
-                              </li>
-                            )}
-                          {isDraft &&
-                            isPremium &&
-                            !isRoom && ( // Show "Edit" for premium user draft
-                              <li>
-                                <button
-                                  className="block px-4 py-2 w-full text-left hover:bg-gray-100"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    navigate(
-                                      `/premiumDashboard/writeArticle/${encodeURIComponent(
-                                        article.articleid
-                                      )}`
-                                    );
-                                  }}
-                                >
-                                  Edit
-                                </button>
-                              </li>
-                            )}
-                          {isDraft &&
-                            isPremium &&
-                            isRoom && ( // Show "Edit" for premium user room draft
-                              <li>
-                                <button
-                                  className="block px-4 py-2 w-full text-left hover:bg-gray-100"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    navigate(
-                                      `/premiumDashboard/writeArticle/${encodeURIComponent(
-                                        article.postid
-                                      )}`
-                                    );
-                                  }}
-                                >
-                                  Edit
-                                </button>
-                              </li>
-                            )}
-                          {!isRoom && ( // Show "Delete" for article
-                            <li>
-                              <button
-                                className="block px-4 py-2 w-full text-left hover:bg-gray-100"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleDeleteArticle(article.articleid);
-                                }}
-                              >
-                                Delete
-                              </button>
-                            </li>
-                          )}
-                          {isRoom && ( // Show "Delete" for room article
-                            <li>
-                              <button
-                                className="block px-4 py-2 w-full text-left hover:bg-gray-100"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleDeleteRoomArticle(article.postid);
-                                }}
-                              >
-                                Delete
-                              </button>
-                            </li>
-                          )}
+                          {/* Edit Button */}
+                          <li>
+                            <button
+                              className="block px-4 py-2 w-full text-left hover:bg-gray-100"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                const id = isRoom ? article.postid : article.articleid;
+                                const route = isPremium ? `/edit/premium/${id}` : `/edit/free/${id}`;
+                                navigate(
+                                  route
+                                );
+                              }}
+                            >
+                              Edit
+                            </button>
+                          </li>
+                          {/* Delete Button */}
+                          <li>
+                            <button
+                              className="block px-4 py-2 w-full text-left hover:bg-gray-100"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                const id = isRoom ? article.postid : article.articleid;
+                                isRoom ? handleDeleteRoomArticle(id) : handleDeleteArticle(id);
+                              }}
+                            >
+                              Delete
+                            </button>
+                          </li>
                         </ul>
                       </div>
                     )}
