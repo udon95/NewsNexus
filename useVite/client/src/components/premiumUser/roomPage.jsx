@@ -241,7 +241,7 @@ const Room = () => {
       setLoading(true);
       const { data, error } = await supabase
         .from("rooms")
-        .select("name, description, member_count")
+        .select("name, description, member_count, room_type")
         .eq("roomid", roomid)
         .single();
 
@@ -903,7 +903,11 @@ const CommentCard = ({
       <Navbar />
       <div className="w-full max-w-4xl mx-auto p-6">
         <div className="flex justify-between items-center mb-1">
-          <h1 className="text-4xl font-bold">Room: {room ? room.name : "Not Found"}</h1>
+          <h1 className="text-4xl font-bold">
+            {room
+              ? `${room.room_type === "Private" ? "Private Room: " : "Room: "}${room.name}`
+              : "Not Found"}
+          </h1>
           <div className="flex gap-3">
             <button
               className={`px-6 py-2 rounded-full text-lg font-semibold transition-all ${
