@@ -26,7 +26,7 @@ import "./index.css";
 
 function RequireAuth({ children, requirePremium = false }) {
   const [loading, setLoading] = useState(true);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAuthorized, setIsAuthorized] = useState(false);
 
   useEffect(() => {
     const localProfile = localStorage.getItem("userProfile");
@@ -67,7 +67,7 @@ function RequireAuth({ children, requirePremium = false }) {
 
   if (loading) return null; // or loading spinner
   alert("Not Authenticated.");
-  return isAuthenticated ? children : <Navigate to="/" replace />;
+  return isAuthorized  ? children : <Navigate to="/" replace />;
 }
 
 function App() {
