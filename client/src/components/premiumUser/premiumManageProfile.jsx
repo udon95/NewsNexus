@@ -1,10 +1,8 @@
 import { useEffect, useState } from "react";
 import useAuthHook from "../../hooks/useAuth";
-import TopicList from "../../components/topicList";
 import api from "../../api/axios";
 import PasswordInput from "../showPW";
 import { HexColorPicker } from "react-colorful";
-import FetchTopics from "../fetchTopics";
 import supabase from "../../api/supabaseClient";
 
 const PremManageProfile = () => {
@@ -516,7 +514,7 @@ const PremManageProfile = () => {
               <h3 className="text-2xl font-bold font-grotesk mb-1 mt-6">
                 Interest Selection (Max 6):
               </h3>
-              <div className="p-4 bg-white shadow-md rounded-lg w-3/3 md:w-2/3 mb-1">
+              <div className="p-4 bg-white shadow-md rounded-lg w-3/3 md:w-2/3 mb-1 font-grotesk">
                 {/* <FetchTopics
                   selectedTopics={selectedTopics} //  Pass selected topics
                   setSelectedTopics={setSelectedTopics} //  Allow updates

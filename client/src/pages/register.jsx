@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../components/navbar.jsx";
-import Topic from "./topic.jsx";
 import supabase from "../api/supabaseClient.js";
 import PasswordInput from "../components/showPW.jsx";
 import "../index.css";
