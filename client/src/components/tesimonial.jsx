@@ -74,6 +74,8 @@ const TestimonialSlider = () => {
         if (error) throw error;
         setTestimonials(data);
         setLoading(false);
+        console.log("Raw testimonials:", data);
+
       } catch (error) {
         console.error("Error fetching testimonials");
         setLoading(false);
@@ -88,6 +90,8 @@ const TestimonialSlider = () => {
 
   const filteredTestimonials = testimonials.filter((t) => {
     const avg = calculateAverageRating(t);
+    console.log("Filtered:", filteredTestimonials);
+
     return avg === null || avg >= 7;
   });
 
@@ -123,7 +127,7 @@ const TestimonialSlider = () => {
               <div className="ml-4 ">
                 <p className="font-bold">{testimonial.users.username}</p>
                 {getRatingText(testimonial.rating)}
-                </div>
+              </div>
             </div>
 
             <p className="text-gray-700 text-lg font-semiitalic mt-4">
