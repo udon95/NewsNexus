@@ -2,24 +2,21 @@ import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import logo from "../assets/Logo.svg";
 import useAuthHook from "../hooks/useAuth.jsx";
+import { useAuth } from "../context/AuthContext.jsx";
 
 const Header = () => {
   const { user, userType, handleLogout } = useAuthHook();
   const navigate = useNavigate();
   const [profileColor, setProfileColor] = useState("#ffffff");
   const [textColor, setTextColor] = useState("black");
+  const { color: contextColor } = useAuth();
 
   useEffect(() => {
-    const storedUser = localStorage.getItem("userProfile");
-    if (storedUser) {
-      const parsed = JSON.parse(storedUser);
-      const storedColor = parsed.color;
-      if (storedColor) {
-        setProfileColor(storedColor);
-        setTextColor(getTextColor(storedColor));
-      }
+    if (contextColor) {
+      setProfileColor(contextColor);
+      setTextColor(getTextColor(contextColor));
     }
-  }, []);
+  }, [contextColor]);
 
   const getLuminance = (hexColor) => {
     const r = parseInt(hexColor.slice(1, 3), 16) / 255;
