@@ -558,16 +558,14 @@ export const PremiumWriteArticle = () => {
               body: JSON.stringify({ content: articleData.content }),
             }
           );
-          console.log("article content", articleData.content || null);
           
           const result = await response.json();
 
-          console.log("check", result);
-          console.log("check", result.reason);
+          console.log("check", result.error);
 
-          if (result.flagged) {
+          if (result.error) {
             alert(
-              ` Article flagged: ${result.reason} || "Content violates policies."}`
+              ` Article flagged: ${result.error} || "Content violates policies."}`
             );
             return;
           }
