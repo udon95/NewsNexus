@@ -46,36 +46,43 @@ function App() {
   }, []);
 
   return (
-    <Routes>
-      <FloatingWriteButton />
-      <Route path="/" element={<Layout />}>
-        <Route path="/" element={<Home />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="register" element={<Register />} />
-        <Route path="/subscription" element={<Subscription />} />
-        <Route
-          path="/subscription-status/:status"
-          element={<SubscriptionStatus />}
-        />
+    <router>
+      <div className="relative min-h-screen">
+        <Routes>
+          <Route path="/" element={<Layout />}>
+            <Route path="/" element={<Home />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="register" element={<Register />} />
+            <Route path="/subscription" element={<Subscription />} />
+            <Route
+              path="/subscription-status/:status"
+              element={<SubscriptionStatus />}
+            />
 
-        <Route path="/explore" element={<Explore />} />
-        <Route path="/guidelines" element={<Guidelines />} />
-        <Route path="/privacy" element={<Privacy />} />
-        <Route path="/latest" element={<Latest />} />
-        <Route path="/article/:articleName" element={<Article />} />
-        <Route path="/public-profile/:username" element={<PublicProfile />} />
+            <Route path="/explore" element={<Explore />} />
+            <Route path="/guidelines" element={<Guidelines />} />
+            <Route path="/privacy" element={<Privacy />} />
+            <Route path="/latest" element={<Latest />} />
+            <Route path="/article/:articleName" element={<Article />} />
+            <Route
+              path="/public-profile/:username"
+              element={<PublicProfile />}
+            />
 
-        <Route path="/freeDashboard/*" element={<FreeDashboard />} />
-        <Route path="/premiumDashboard/*" element={<PremiumDashboard />} />
-        <Route path="/adminDashboard/*" element={<AdminDashboard />} />
+            <Route path="/freeDashboard/*" element={<FreeDashboard />} />
+            <Route path="/premiumDashboard/*" element={<PremiumDashboard />} />
+            <Route path="/adminDashboard/*" element={<AdminDashboard />} />
 
-        <Route path="/forgot-password" element={<ForgotPassword />} />
-        <Route path="/reset-password" element={<ResetPassword />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
 
-        <Route path="/rooms" element={<ViewRooms />} />
-        <Route path="/room/:id" element={<RoomPage />} />
-      </Route>
-    </Routes>
+            <Route path="/rooms" element={<ViewRooms />} />
+            <Route path="/room/:id" element={<RoomPage />} />
+          </Route>
+        </Routes>
+        <FloatingWriteButton/>
+      </div>
+    </router>
   );
 }
 
