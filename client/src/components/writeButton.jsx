@@ -13,12 +13,15 @@ const FloatingWriteButton = () => {
     if (stored) {
       const parsed = JSON.parse(stored);
       user = parsed?.user;
+      console.log("type", parsed.usertype);
+      console.log("role", parsed.role);
+
+      console.log("utype", user.usertype);
+      console.log("urole", user.role);
     }
   } catch (err) {
     console.error("Error reading user from localStorage:", err);
   }
-  console.log("type", parsed.usertype);
-  console.log("role", parsed.role);
 
   if (!user) return null;
 
