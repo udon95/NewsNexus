@@ -1,4 +1,4 @@
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, useParams } from "react-router-dom";
 import { Plus } from "lucide-react";
 import useAuthHook from "../hooks/useAuth"; // adjust path if needed
 import React from "react";
@@ -12,18 +12,24 @@ const FloatingWriteButton = () => {
 
   // Don't show on write pages
   const currentPath = location.pathname;
-  if (
-    currentPath === "/freeDashboard/writeArticle" ||
-    currentPath === "/premiumDashboard/writeArticle"
-  ) {
-    return null;
-  }
+
+  const hiddenPaths = [
+    "/freeDashboard/writeArticle",
+    "/premiumDashboard/writeArticle",
+  ];
+  if (hiddenPaths.includes(currentPath)) return null;
 
   const handleClick = () => {
-    if (user.usertype === "Premium") {
-      navigate("/premiumDashboard/writeArticle");
+    if (currentPath.startsWith("/rooms/")) {
+      const roomid = currentPath.split("/")[2]; // get room ID from URL
+      navigate(`/premiumDashboard/writeArticle?type=room&roomid=${roomid}`);
     } else {
-      navigate("/freeDashboard/writeArticle");
+      // Normal behavior
+      if (user.usertype === "Premium") {
+        navigate("/premiumDashboard/writeArticle");
+      } else {
+        navigate("/freeDashboard/writeArticle");
+      }
     }
   };
 
