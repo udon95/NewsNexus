@@ -36,8 +36,9 @@ const PremManageProfile = () => {
           const data = JSON.parse(storedUser);
 
           setUserDetails(data.user);
+
           if (data.user && data.user.userid) {
-            const color = await fetchProfileColor(storedUser.userid);
+            const color = await fetchProfileColor(data.user.userid);
             setProfileColor(color); // Set the profile color after fetching
           }
 
@@ -343,18 +344,33 @@ const PremManageProfile = () => {
   };
 
   const fetchProfileColor = async (userId) => {
+    const localColor = localStorage.getItem("profileColor");
+    if (localColor) {
+      return localColor;
+    }
+
+    if (!userId) {
+      console.error("❌ fetchProfileColor called without userId.");
+      return "#ffffff";
+    }
+
     try {
       const { data, error } = await supabase
-        .from("usertype") // Assuming the table name is "userprofile"
+        .from("usertype")
         .select("color")
-        .eq("userid", userId); // Fetching color based on the user ID
+        .eq("userid", userId);
 
       if (error) throw error;
 
-      return data[0]?.color || "#ffffff"; // Return the color or default to white
-    } catch (error) {
-      console.error("Error fetching profile color:", error.message);
-      return "#ffffff"; // Return default color in case of error
+      const color = data?.[0]?.color || "#ffffff";
+
+      // Step 3: Cache it
+      localStorage.setItem("profileColor", color);
+
+      return color;
+    } catch (err) {
+      console.error("Error fetching profile color:", err.message);
+      return "#ffffff";
     }
   };
 
@@ -379,6 +395,8 @@ const PremManageProfile = () => {
         console.log("Profile color updated successfully!");
         // Update state to reflect new color
         setProfileColor(newColor);
+        localStorage.setItem("profileColor", newColor); // ✅ override cache
+
       }
     } catch (error) {
       console.error("Error updating profile color:", error);
@@ -530,7 +548,9 @@ const PremManageProfile = () => {
                       onChange={(e) => handleDropdownChange(index, e)}
                       className="p-1 border rounded-lg font-grotesk"
                     >
-                      <option value="" classname="font-grotesk">Select a category</option>
+                      <option value="" classname="font-grotesk">
+                        Select a category
+                      </option>
                       {categories
                         .filter(
                           (cat) =>
