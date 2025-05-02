@@ -50,13 +50,19 @@ const calculateAverageRating = (testimonial) => {
 // Calculates average of non-null ratings and maps to sentiment
 const getOverallSentiment = (testimonial) => {
   const avg = calculateAverageRating(testimonial);
-  if (avg === null) return "Not Rated";
-  if (avg <= 2) return "Very Poor";
-  if (avg <= 4) return "Poor";
-  if (avg <= 6) return "Average";
-  if (avg <= 8) return "Good";
-  if (avg === 9) return "Very Good";
-  return "Excellent";
+  if (avg === null) return "I haven’t provided a rating for this experience.";
+
+  if (avg <= 2)
+    return "I had a very poor experience and faced major issues using the platform.";
+  if (avg <= 4)
+    return "My experience wasn’t great — there are several areas that need improvement.";
+  if (avg <= 6)
+    return "It was okay overall, but there are definitely things that could be improved.";
+  if (avg <= 8)
+    return "I had a good experience overall, though there’s still some room for improvement.";
+  if (avg === 9)
+    return "I’m very satisfied with the platform and had a great experience.";
+  return "I had an excellent experience and would highly recommend the platform.";
 };
 
 const TestimonialSlider = () => {
