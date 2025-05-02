@@ -176,7 +176,10 @@ const PremManageProfile = () => {
             gender: editGender,
             color: profileColor,
           };
+          storedUser.profile.color = profileColor;
+
           localStorage.setItem("userProfile", JSON.stringify(storedUser));
+          localStorage.setItem("profileColor", profileColor);
         }
         window.location.reload();
       }
@@ -369,36 +372,6 @@ const PremManageProfile = () => {
     } catch (err) {
       console.error("Error fetching profile color:", err.message);
       return "#ffffff";
-    }
-  };
-
-  const updateProfileColor = async (newColor) => {
-    if (!userDetails || !userDetails.userid) {
-      alert("User details are not available");
-      return;
-    }
-
-    try {
-      const payload = {
-        userId: userDetails.userid, // Make sure you're using the correct user ID
-        color: newColor, // New color you want to update
-      };
-
-      // Make a request to update the color on the server
-      const response = await api.post("/auth/update-color", payload, {
-        headers: { "Content-Type": "application/json" },
-      });
-
-      if (response.status === 200) {
-        console.log("Profile color updated successfully!");
-        // Update state to reflect new color
-        setProfileColor(newColor);
-        localStorage.setItem("profileColor", newColor); // ✅ override cache
-
-      }
-    } catch (error) {
-      console.error("Error updating profile color:", error);
-      alert("Failed to update profile color.");
     }
   };
 
