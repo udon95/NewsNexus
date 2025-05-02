@@ -171,10 +171,12 @@ const PremManageProfile = () => {
             dob: editDate,
             gender: editGender,
           };
-          
+
           storedUser.color = profileColor; // ✅ save at top-level only
-          
+
           localStorage.setItem("userProfile", JSON.stringify(storedUser));
+          const event = new Event("userProfileUpdated");
+          window.dispatchEvent(event);
         }
         window.location.reload();
       }
