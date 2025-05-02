@@ -275,57 +275,22 @@ export const PremiumWriteArticle = () => {
 
       const result = await response.json();
 
-      // console.log("🏷️ AI result payload:", result);
-      // console.log("🏷️ AI accuracy:", result.accuracy);
-      // console.log("🏷️ AI feedback:", result.feedback);
-
       if (!response.ok) {
-        // console.log(result);
         if (result.feedback) {
-          // console.log("🔴 AI Feedback returned:", result.feedback);
           setAiFeedback(result.feedback);
           setAccuracy(result.accuracy || null);
-          // console.log("accuracy: ", result.accuracy);
 
           alert(
-            "❌ Article flagged by AI. Please review the highlighted sections."
+            "Article flagged by AI. Please review the highlighted sections."
           );
         } else {
           alert(result.error || "Submission failed.");
         }
 
-        // ✅ This is important to prevent saving
+        //  This is important to prevent saving
         return;
       }
 
-      // if (result.verdict === "true") {
-      //   if (result.explanation) {
-      //     alert(` Article passed AI check:\n${result.explanation}`);
-      //   } else {
-      //     alert(" Article passed AI check.");
-      //   }
-      // }
-
-      //  Save to articles table
-      // const { data, error } = await supabase
-      //   .from("articles")
-      //   .insert([
-      //     {
-      //       title: articleData.title,
-      //       text: articleData.content,
-      //       userid: articleData.created_by,
-      //       topicid: topics, // Insert the UUID
-      //       time: articleData.created_at,
-      //       status: "Published",
-      //       imagepath: firstImageUrl || null,
-      //     },
-      //   ])
-      //   .select("articleid");
-
-      // if (error) {
-      //   alert("Failed to save article.");
-      //   return;
-      // }
 
       const articleid = result.article?.articleid;
 

@@ -62,8 +62,9 @@ export const PremiumEditArticle = () => {
   const supabaseImagesInsertedRef = useRef(false);
   const [showUpdateSuccess, setShowUpdateSuccess] = useState(false);
   const [editorReady, setEditorReady] = useState(false);
+  const [aiFeedback, setAiFeedback] = useState("");
+  const [accuracy, setAccuracy] = useState(null);
 
- 
   const CustomParagraph = Paragraph.extend({
     addAttributes() {
       return {
@@ -268,7 +269,37 @@ export const PremiumEditArticle = () => {
         uploadedImageUrls.push(urlData.publicUrl);
       }
     }
+    const topicName = topicOptions.find((t) => t.topicid === topics)?.name;
+    const response = await fetch(
+      "https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/api/submit-article",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title,
+          content: updatedHTML,
+          type: "factual",
+          authorId: session.userid,
+          topicid: topics,
+          topicName,
+        }),
+      }
+    );
+    const result = await response.json();
 
+    if (!response.ok) {
+      if (result.feedback) {
+        setAiFeedback(result.feedback);
+        setAccuracy(result.accuracy || null);
+
+        alert("Article flagged by AI. Please review the highlighted sections.");
+      } else {
+        alert(result.error || "Submission failed.");
+      }
+
+      // ✅ This is important to prevent saving
+      return;
+    }
     // 📝 Insert new published article
     const { data, error } = await supabase
       .from("articles")
@@ -320,7 +351,9 @@ export const PremiumEditArticle = () => {
       }
     }
 
-    alert("Article posted!");
+    alert(`Article posted! Accuracy Score: ${result.accuracy}%`);
+    setAccuracy(result.accuracy);
+    setAiFeedback(result.feedback);
     handleClearInputs();
   };
 
@@ -420,7 +453,30 @@ export const PremiumEditArticle = () => {
         uploadedImageUrls.push(urlData.publicUrl);
       }
     }
+    
+    try {
+      const response = await fetch(
+        "https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/api/moderate",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ content: articleData.content }),
+        }
+      );
 
+      const result = await response.json();
+
+      if (result.error) {
+        alert(` Article flagged: ${result.error}."}`);
+        return;
+      }
+    } catch (err) {
+      alert("Failed to moderate content.");
+      console.error(err);
+      return;
+    }
     // Update article in DB
     const { data, error } = await supabase
       .from("room_articles")

@@ -24,28 +24,49 @@ import FloatingWriteButton from "./components/writeButton.jsx";
 import supabase from "./api/supabaseClient.js";
 import "./index.css";
 
-function RequireAuth({ children }) {
+function RequireAuth({ children, requirePremium = false }) {
   const [loading, setLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
     const localProfile = localStorage.getItem("userProfile");
 
-    // Try localStorage first
     if (localProfile) {
-      setIsAuthenticated(true);
-      setLoading(false);
-      return;
-    }
-    supabase.auth.getSession().then(({ data }) => {
-      if (data.session?.user) {
-        setIsAuthenticated(true);
+      const parsed = JSON.parse(localProfile);
+      const status = parsed?.role;
+      if (status === "Premium" || (!requirePremium && status)) {
+        setIsAuthorized(true);
+        setLoading(false);
+        return;
       }
+    }
+
+    // fallback to Supabase auth and user fetch
+    supabase.auth.getSession().then(async ({ data }) => {
+      const user = data?.session?.user;
+      if (!user) {
+        setIsAuthorized(false);
+        setLoading(false);
+        return;
+      }
+
+      const { data: userData } = await supabase
+        .from("usertype")
+        .select("usertype")
+        .eq("userid", user.id)
+        .single();
+
+      const status = userData?.status;
+      if (status === "Premium" || (!requirePremium && status)) {
+        setIsAuthorized(true);
+      }
+
       setLoading(false);
     });
-  }, []);
+  }, [requirePremium]);
 
   if (loading) return null; // or loading spinner
+  alert("Not Authenticated.");
   return isAuthenticated ? children : <Navigate to="/" replace />;
 }
 
@@ -105,7 +126,7 @@ function App() {
             <Route
               path="/premiumDashboard/*"
               element={
-                <RequireAuth>
+                <RequireAuth requirePremium={true}>
                   <PremiumDashboard />
                 </RequireAuth>
               }

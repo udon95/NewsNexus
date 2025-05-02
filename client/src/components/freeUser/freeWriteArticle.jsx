@@ -43,24 +43,8 @@ export const FreeWriteArticle = () => {
   const [newTopicName, setNewTopicName] = useState("");
   const [showLinkModal, setShowLinkModal] = useState(false);
   const [linkUrl, setLinkUrl] = useState("");
-
-  console.log("Auth session:", supabase.auth.getSession());
-
-  // useEffect(() => {
-  //   const checkSession = async () => {
-  //     const { data, error } = await supabase.auth.getSession();
-  //     console.log("Session check:", data?.session);
-
-  //     if (!data?.session) {
-  //       alert("You're not logged in");
-  //       return;
-  //     }
-
-  //     console.log("Logged in user:", data.session.user);
-  //   };
-
-  //   checkSession();
-  // }, []);
+  const [aiFeedback, setAiFeedback] = useState("");
+  const [accuracy, setAccuracy] = useState(null);
 
   const CustomParagraph = Paragraph.extend({
     addAttributes() {
@@ -224,62 +208,39 @@ export const FreeWriteArticle = () => {
     };
 
     articleData.topic = topics;
-    const selectedTopicId = topics; // this is the UUID
-    const selectedTopicName = topicOptions.find(t => t.topicid === selectedTopicId)?.name;
-    
-    // const { data, error } = await supabase
-    //   .from("articles")
-    //   .insert([
-    //     {
-    //       title: articleData.title,
-    //       text: articleData.content,
-    //       userid: articleData.created_by,
-    //       topicid: topics, // Insert the UUID
-    //       time: articleData.created_at,
-    //       status: "Published",
-    //       imagepath: firstImageUrl || null,
-    //     },
-    //   ])
-    //   .select("articleid");
+    const topicName = topicOptions.find((t) => t.topicid === topics)?.name;
 
-    // console.log(articleData.topic, error);
-
-    // if (error) {
-    //   alert("Failed to post article.");
-    //   return;
-    // }
-    const response = await fetch("http://localhost:5000/api/submit-article", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        title,
-        content: updatedHTML,
-        type: articleType, // or "opinion" if you add a toggle later
-        authorId: session.userid,
-        topicid: selectedTopicId,        // ✅ goes into DB
-        topicName: selectedTopicName 
-      }),
-    });
+    const response = await fetch(
+      "https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/api/submit-article",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title,
+          content: updatedHTML,
+          type: "factual",
+          authorId: session.userid,
+          topicid: topics,
+          topicName,
+        }),
+      }
+    );
 
     const result = await response.json();
 
     if (!response.ok) {
-      if (result.highlightedHTML) {
-        // 👇 Replace the editor content with marked up text
-        editor.commands.setContent(result.highlightedHTML);
-        alert(
-          "Some parts of your article were flagged. Please review the highlighted sections."
-        );
+      if (result.feedback) {
+        setAiFeedback(result.feedback);
+        setAccuracy(result.accuracy || null);
+
+        alert("Article flagged by AI. Please review the highlighted sections.");
       } else {
-        alert(result.error || "Failed to post article.");
+        alert(result.error || "Submission failed.");
       }
+
+      //  This is important to prevent saving
       return;
     }
-
-    alert("Article posted successfully!");
-    handleClearInputs();
 
     const articleid = data?.[0]?.articleid;
 
@@ -306,8 +267,9 @@ export const FreeWriteArticle = () => {
         .from("article_images")
         .insert([{ articleid, image_url: imageUrl }]);
     }
-
-    alert("Article posted!");
+    setAccuracy(result.accuracy);
+    setAiFeedback(result.feedback);
+    alert(`Article posted successfully. Accuracy Score: ${result.accuracy}%`);
     handleClearInputs();
   };
 
@@ -686,6 +648,24 @@ export const FreeWriteArticle = () => {
                     <LinkIcon size={16} />
                   </button>
                 </div>
+                {(accuracy !== null || aiFeedback) && (
+                  <div className="mt-4 p-4 border border-red-300 bg-red-50 rounded text-sm text-black">
+                    <strong>Fact Check Results:</strong>
+                    {accuracy !== null && (
+                      <p>
+                        <strong>Accuracy: </strong>
+                        {accuracy}%
+                      </p>
+                    )}
+                    <p>
+                      <strong>Feedback: </strong>
+                    </p>
+                    <div
+                      className="mt-1"
+                      dangerouslySetInnerHTML={{ __html: aiFeedback }}
+                    />
+                  </div>
+                )}
 
                 <div
                   className="min-h-[400px] max-h-[600px] overflow-y-auto border rounded-md bg-white p-4 mt-3 focus-within:outline-none"
