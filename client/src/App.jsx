@@ -132,7 +132,7 @@ function App() {
             <Route
               path="/freeDashboard/*"
               element={
-                <RequireAuth>
+                <RequireAuth onlyFree={true}>
                   <FreeDashboard />
                 </RequireAuth>
               }
