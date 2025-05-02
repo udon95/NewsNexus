@@ -57,13 +57,13 @@ export const PremiumWriteArticle = () => {
   const preSelectedRoomId = searchParams.get("roomid"); // e.g. uuid
 
   useEffect(() => {
-    if (preSelectedType === "room") {
+    if (preSelectedType === "room" && preSelectedRoomId) {
       setPostType("Room");
       setSelectedRoom(preSelectedRoomId);
+      console.log("prefill id", preSelectedRoomId);
     }
   }, [preSelectedType, preSelectedRoomId]);
 
-  
   const CustomParagraph = Paragraph.extend({
     addAttributes() {
       return {
@@ -1067,26 +1067,6 @@ export const PremiumWriteArticle = () => {
                       </option>
                     ))}
                   </select>
-                  {/* <div className="mt-4 flex gap-4 items-center">
-                    <label className="text-sm font-medium">
-                      Room Article Type:
-                    </label>
-                    {["factual", "opinion"].map((type) => (
-                      <label
-                        key={type}
-                        className="flex items-center gap-2 text-sm"
-                      >
-                        <input
-                          type="radio"
-                          name="roomArticleType"
-                          value={type}
-                          checked={roomArticleType === type}
-                          onChange={() => setRoomArticleType(type)}
-                        />
-                        {type.charAt(0).toUpperCase() + type.slice(1)}
-                      </label>
-                    ))}
-                  </div> */}
 
                   {/* Custom ▼ triangle */}
                   <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none text-gray-500 text-sm">
