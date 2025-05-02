@@ -89,10 +89,9 @@ const TestimonialSlider = () => {
 
   const filteredTestimonials = testimonials.filter((t) => {
     const avg = calculateAverageRating(t);
-    console.log("Filtered:", filteredTestimonials);
-
     return avg === null || avg >= 7;
   });
+  console.log("Filtered:", filteredTestimonials);
 
   if (filteredTestimonials.length === 0)
     return (
@@ -125,7 +124,9 @@ const TestimonialSlider = () => {
               {/* Name and Rating */}
               <div className="ml-4 ">
                 <p className="font-bold">{testimonial.users.username}</p>
-                {getRatingText(testimonial.rating)}
+                <p className="text-sm text-gray-500 italic">
+                  {getRatingText(testimonial.rating)}
+                </p>
               </div>
             </div>
 
