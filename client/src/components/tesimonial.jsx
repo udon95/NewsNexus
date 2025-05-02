@@ -125,7 +125,7 @@ const TestimonialSlider = () => {
               <div className="ml-4 ">
                 <p className="font-bold">{testimonial.users.username}</p>
                 <p className="text-sm text-gray-500 italic">
-                  {getRatingText(testimonial.rating)}
+                  {getRatingText(calculateAverageRating(testimonial))}
                 </p>
               </div>
             </div>
