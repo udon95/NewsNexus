@@ -1,7 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
-import { useSession } from "@supabase/auth-helpers-react";
 
 import Login from "./pages/login.jsx";
 import Register from "./pages/register.jsx";

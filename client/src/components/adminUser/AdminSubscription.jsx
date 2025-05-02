@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import AdminSidebar from "./adminSideBar.jsx";
 import supabase from "../../api/supabaseClient";
 
 const AdminSubscription = () => {
