@@ -1,5 +1,8 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { useEffect } from "react";
+import { Navigate } from "react-router-dom";
+import { useSession } from "@supabase/auth-helpers-react";
+
 import Login from "./pages/login.jsx";
 import Register from "./pages/register.jsx";
 import Home from "./pages/home.jsx";
@@ -15,14 +18,19 @@ import PremiumDashboard from "./components/premiumUser/premiumDashboard.jsx";
 import AdminDashboard from "./components/adminUser/adminDashboard.jsx";
 import ForgotPassword from "./pages/forgetPW";
 import ResetPassword from "./pages/resetPW.jsx";
-import ViewRooms from "./components/premiumUser/viewRooms.jsx";
-import RoomPage from "./components/premiumUser/roomPage.jsx";
 import SubscriptionStatus from "./components/payment.jsx";
 import PublicProfile from "./components/publicProfile.jsx";
 
 import FloatingWriteButton from "./components/writeButton.jsx";
 import supabase from "./api/supabaseClient.js";
 import "./index.css";
+
+function RequireAuth({ children }) {
+  const session = supabase.auth.getSession(); // if you're using async method, convert this to a hook or use useEffect + useState
+  const isLoggedIn = !!session?.data?.session;
+
+  return isLoggedIn ? children : <Navigate to="/" />;
+}
 
 function App() {
   useEffect(() => {
@@ -69,18 +77,36 @@ function App() {
               element={<PublicProfile />}
             />
 
-            <Route path="/freeDashboard/*" element={<FreeDashboard />} />
-            <Route path="/premiumDashboard/*" element={<PremiumDashboard />} />
-            <Route path="/adminDashboard/*" element={<AdminDashboard />} />
+            <Route
+              path="/freeDashboard/*"
+              element={
+                <RequireAuth>
+                  <FreeDashboard />
+                </RequireAuth>
+              }
+            />
+            <Route
+              path="/premiumDashboard/*"
+              element={
+                <RequireAuth>
+                  <PremiumDashboard />
+                </RequireAuth>
+              }
+            />
+            <Route
+              path="/adminDashboard/*"
+              element={
+                <RequireAuth>
+                  <AdminDashboard />
+                </RequireAuth>
+              }
+            />
 
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/reset-password" element={<ResetPassword />} />
-
-            <Route path="/rooms" element={<ViewRooms />} />
-            <Route path="/room/:id" element={<RoomPage />} />
           </Route>
         </Routes>
-        <FloatingWriteButton/>
+        <FloatingWriteButton />
       </div>
     </router>
   );

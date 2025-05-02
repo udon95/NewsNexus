@@ -54,22 +54,11 @@ export const PremiumWriteArticle = () => {
 
   const [searchParams] = useSearchParams();
   const preSelectedType = searchParams.get("type"); // e.g. "room"
-  const preSelectedRoomId = searchParams.get("roomid"); // e.g. uuid
 
   useEffect(() => {
-    const type = searchParams.get("type");
-    const roomid = searchParams.get("roomid");
-    console.log("type:", type, "roomid:", roomid);
-  }, [searchParams]);
-
-  
-  useEffect(() => {
-    if (preSelectedType === "room" && preSelectedRoomId) {
+    if (preSelectedType === "room" && preSelectedRoomId && rooms.length > 0) {
       setPostType("Room");
       setSelectedRoom(preSelectedRoomId);
-      console.log("prefill id", preSelectedRoomId);
-      console.log("prefill type", preSelectedType);
-
     }
   }, [preSelectedType, preSelectedRoomId]);
 
@@ -213,222 +202,6 @@ export const PremiumWriteArticle = () => {
 
   const MAX_WORDS = postType === "Room" ? 400 : 1000;
 
-  // const handlePostArticle = async () => {
-  //   // Retrieve user from localStorage
-  //   const storedUser = localStorage.getItem("userProfile");
-  //   if (!storedUser) {
-  //     alert("User not authenticated. Cannot upload.");
-  //     return;
-  //   }
-
-  //   const parsedUser = JSON.parse(storedUser);
-  //   const session = parsedUser?.user; // Assuming 'user' is the session data in your stored object
-
-  //   if (!session) {
-  //     alert("User not authenticated. Cannot upload.");
-  //     return;
-  //   }
-
-  //   console.log("User from localStorage:", session);
-
-  //   // Proceed if all necessary fields are filled
-  //   if (
-  //     !title ||
-  //     !articleContent ||
-  //     (postType === "General" && !topics) ||
-  //     (postType === "Room" && !selectedRoom)
-  //   ) {
-  //     alert("Please fill in all required fields.");
-  //     return;
-  //   }
-
-  //   let updatedHTML = articleContent;
-  //   const bucket =
-  //     postType === "Room" ? "room-article-images" : "articles-images";
-  //   let firstImageUrl = null;
-
-  //   const { data: sessionData, error: sessionError } =
-  //     await supabase.auth.getSession();
-
-  //   for (const img of pendingImages) {
-  //     const file = img.file;
-  //     const fileExt = file.name.split(".").pop();
-  //     const fileName = `${Date.now()}-${Math.random()
-  //       .toString(36)
-  //       .substring(2)}.${fileExt}`;
-
-  //     const { data: authSession } = await supabase.auth.getSession();
-  //     const supabaseUid = authSession?.session?.user?.id;
-  //     const filePath = `${supabaseUid}/${fileName}`;
-
-  //     const { error: uploadError } = await supabase.storage
-  //       .from(bucket)
-  //       .upload(filePath, file);
-
-  //     if (uploadError) {
-  //       alert("Image upload failed.");
-  //       return;
-  //     }
-
-  //     const { data: urlData } = supabase.storage
-  //       .from(bucket)
-  //       .getPublicUrl(filePath);
-  //     if (urlData?.publicUrl) {
-  //       if (!firstImageUrl) firstImageUrl = urlData.publicUrl; // Track first image URL
-  //       if (postType === "General") {
-  //         updatedHTML = updatedHTML.replaceAll(
-  //           img.previewUrl,
-  //           urlData.publicUrl
-  //         );
-  //       }
-  //     }
-  //   }
-
-  //   const articleData = {
-  //     title,
-  //     content: updatedHTML,
-  //     created_by: session.userid, // Use session ID for the user
-  //     created_at: new Date().toISOString(),
-  //   };
-
-  //   if (postType === "General") {
-  //     articleData.topic = topics;
-
-  //     const { data, error } = await supabase
-  //       .from("articles")
-  //       .insert([
-  //         {
-  //           title: articleData.title,
-  //           text: articleData.content,
-  //           userid: articleData.created_by,
-  //           topicid: topics, // Insert the UUID
-  //           time: articleData.created_at,
-  //           status: "Published",
-  //           imagepath: firstImageUrl || null,
-  //         },
-  //       ])
-  //       .select("articleid");
-
-  //     console.log(articleData.topic, error);
-
-  //     if (error) {
-  //       alert("Failed to post article.");
-  //       return;
-  //     }
-
-  //     const articleid = data?.[0]?.articleid;
-
-  //     for (const img of pendingImages) {
-  //       const fileExt = img.file.name.split(".").pop();
-  //       const fileName = `${Date.now()}-${Math.random()
-  //         .toString(36)
-  //         .substring(2)}.${fileExt}`;
-  //       const filePath = `${session.id}/${fileName}`;
-
-  //       await supabase.storage
-  //         .from("articles-images")
-  //         .upload(filePath, img.file, {
-  //           cacheControl: "3600",
-  //           upsert: false,
-  //         });
-
-  //       const { data: urlData } = supabase.storage
-  //         .from("articles-images")
-  //         .getPublicUrl(filePath);
-  //       const imageUrl = urlData?.publicUrl;
-
-  //       await supabase
-  //         .from("article_images")
-  //         .insert([{ articleid, image_url: imageUrl }]);
-  //     }
-  //   } else {
-  //     articleData.roomid = selectedRoom;
-  //     const { data, error } = await supabase
-  //       .from("room_articles")
-  //       .insert([
-  //         {
-  //           title: articleData.title,
-  //           content: articleData.content,
-  //           roomid: selectedRoom,
-  //           userid: session.userid,
-  //           created_at: articleData.created_at,
-  //           status: "Published",
-  //         },
-  //       ])
-  //       .select("postid");
-
-  //     if (error) {
-  //       alert("Failed to post article.");
-  //       return;
-  //     }
-
-  //     const postid = data?.[0]?.postid;
-  //     for (const img of pendingImages) {
-  //       const fileExt = img.file.name.split(".").pop();
-  //       const fileName = `${Date.now()}-${Math.random()
-  //         .toString(36)
-  //         .substring(2)}.${fileExt}`;
-  //       const { data: authSession } = await supabase.auth.getSession();
-  //       const supabaseUid = authSession?.session?.user?.id;
-  //       const filePath = `${supabaseUid}/${fileName}`;
-
-  //       await supabase.storage
-  //         .from("room-article-images")
-  //         .upload(filePath, img.file);
-
-  //       const { data: urlData } = supabase.storage
-  //         .from("room-article-images")
-  //         .getPublicUrl(filePath);
-
-  //       const imageUrl = urlData?.publicUrl;
-
-  //       await supabase
-  //         .from("room_article_images")
-  //         .insert([{ postid, image_url: imageUrl }]);
-  //     }
-  //   }
-
-  //   alert("Article posted!");
-  //   handleClearInputs();
-  // };
-
-  // const getOrCreateTopicId = async (topicName) => {
-  //   const matchedTopic = topicOptions.find(
-  //     (t) => t.name.toLowerCase() === topicName.toLowerCase()
-  //   );
-  //   if (matchedTopic) return matchedTopic.topicid;
-
-  //   const { data: newTopic, error: insertError } = await supabase
-  //     .from("topic_categories")
-  //     .insert([
-  //       {
-  //         name: topicName,
-  //         Creator: "User",
-  //         created_at: new Date().toISOString(),
-  //       },
-  //     ])
-  //     .select("topicid")
-  //     .single();
-
-  //   if (insertError) {
-  //     alert("Failed to create new topic.");
-  //     return null;
-  //   }
-  //   return newTopic.topicid;
-  // };
-
-  // useEffect(() => {
-  //   if (!editor) return;
-
-  //   const provider = new HocuspocusProvider({
-  //     url: "wss://lazg8po476.execute-api.ap-southeast-1.amazonaws.com/production/", // The WebSocket URL to your Hocuspocus server
-  //     document: editor,
-  //     collab: collabId, // Ensure each user joins the same room to sync their changes
-  //   });
-
-  //   return () => provider.disconnect();
-  // }, [editor, collabId]);
-
   const handlePostArticle = async () => {
     // Retrieve user from localStorage
     const storedUser = localStorage.getItem("userProfile");
@@ -445,10 +218,7 @@ export const PremiumWriteArticle = () => {
       return;
     }
 
-    // console.log("User from localStorage:", session);
-
     // Proceed if all necessary fields are filled
-
     if (
       !title ||
       !articleContent ||
@@ -460,6 +230,12 @@ export const PremiumWriteArticle = () => {
     }
 
     let updatedHTML = articleContent;
+    if (postType === "Room") {
+      updatedHTML = updatedHTML.replace(
+        /<img[^>]*src=["']blob:[^"']+["'][^>]*>/g,
+        ""
+      );
+    }
     const bucket =
       postType === "Room" ? "room-article-images" : "articles-images";
     let firstImageUrl = null;
@@ -674,6 +450,12 @@ export const PremiumWriteArticle = () => {
     }
 
     let updatedHTML = articleContent;
+    if (postType === "Room") {
+      updatedHTML = updatedHTML.replace(
+        /<img[^>]*src=["']blob:[^"']+["'][^>]*>/g,
+        ""
+      );
+    }
     const bucket =
       postType === "Room" ? "room-article-images" : "articles-images";
     let firstImageUrl = null;
