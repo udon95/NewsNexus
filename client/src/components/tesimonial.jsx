@@ -21,6 +21,41 @@ const StarRating = ({ rating }) => {
   );
 };
 
+// Converts numeric rating (1–10) to descriptive text
+const getRatingText = (rating) => {
+  if (rating >= 1 && rating <= 2) return "Very Poor";
+  if (rating >= 3 && rating <= 4) return "Poor";
+  if (rating >= 5 && rating <= 6) return "Average";
+  if (rating >= 7 && rating <= 8) return "Good";
+  if (rating === 9) return "Very Good";
+  if (rating === 10) return "Excellent";
+  return "Not Rated";
+};
+// Calculates average of non-null ratings and maps to sentiment
+const getOverallSentiment = (testimonial) => {
+  const categories = [
+    testimonial.design,
+    testimonial.factcheck,
+    testimonial.accessible,
+    testimonial.safety,
+    testimonial.price,
+    testimonial.news,
+  ];
+
+  const validRatings = categories.filter((rating) => rating !== null);
+  if (validRatings.length === 0) return "Not Rated";
+
+  const avg =
+    validRatings.reduce((sum, val) => sum + val, 0) / validRatings.length;
+
+  if (avg <= 2) return "Very Poor";
+  if (avg <= 4) return "Poor";
+  if (avg <= 6) return "Average";
+  if (avg <= 8) return "Good";
+  if (avg === 9) return "Very Good";
+  return "Excellent";
+};
+
 const TestimonialSlider = () => {
   const [testimonials, setTestimonials] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -44,7 +79,7 @@ const TestimonialSlider = () => {
     fetchTestimonials();
   }, []);
 
-  if (loading){
+  if (loading) {
     return <div>Loading ...</div>;
   }
 
@@ -60,27 +95,29 @@ const TestimonialSlider = () => {
         loop={true}
         className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden "
       >
-        {testimonials.map((testimonial, index) => (
-          <SwiperSlide key={index} className="p-6">
-            {/* User Profile Info */}
-            <div className="flex items-center border-b pb-3 ">
-              {/* Profile Letter */}
-              <div className="w-10 h-10 rounded-full bg-gray-500 text-white flex items-center justify-center text-lg font-bold">
-                {testimonial.users.username.charAt(0)}
+        {testimonials
+          .filter((t) => t.rating >= 7)
+          .map((testimonial, index) => (
+            <SwiperSlide key={index} className="p-6">
+              {/* User Profile Info */}
+              <div className="flex items-center border-b pb-3 ">
+                {/* Profile Letter */}
+                <div className="w-10 h-10 rounded-full bg-gray-500 text-white flex items-center justify-center text-lg font-bold">
+                  {testimonial.users.username.charAt(0)}
+                </div>
+
+                {/* Name and Rating */}
+                <div className="ml-4 ">
+                  <p className="font-bold">{testimonial.users.username}</p>
+                  <StarRating rating={testimonial.rating} />
+                </div>
               </div>
 
-              {/* Name and Rating */}
-              <div className="ml-4 ">
-                <p className="font-bold">{testimonial.users.username}</p>
-                <StarRating rating={testimonial.rating} />
-              </div>
-            </div>
-
-            <p className="text-gray-700 text-lg font-semiitalic mt-4">
-              {testimonial.share_experience}
-            </p>
-          </SwiperSlide>
-        ))}
+              <p className="text-gray-700 text-lg font-semiitalic mt-4">
+                Overall: {getOverallSentiment(testimonial)}
+              </p>
+            </SwiperSlide>
+          ))}
       </Swiper>
     </div>
   );
