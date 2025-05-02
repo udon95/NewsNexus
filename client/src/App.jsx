@@ -29,6 +29,14 @@ function RequireAuth({ children }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
+    const localProfile = localStorage.getItem("userProfile");
+
+    // Try localStorage first
+    if (localProfile) {
+      setIsAuthenticated(true);
+      setLoading(false);
+      return;
+    }
     supabase.auth.getSession().then(({ data }) => {
       if (data.session?.user) {
         setIsAuthenticated(true);
