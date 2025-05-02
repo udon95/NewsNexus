@@ -558,9 +558,9 @@ export const PremiumWriteArticle = () => {
               body: JSON.stringify({ content: updatedHTML }),
             }
           );
-          console.log("content", articleContent);
-          console.log("content", content);
-          console.log("updated html", updatedHTML);
+          console.log("article content", articleContent || null);
+          console.log("content", content || null);
+          console.log("updated html", updatedHTML || null);
           const result = await response.json();
 
           console.log("check", result);
