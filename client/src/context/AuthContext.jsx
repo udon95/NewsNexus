@@ -111,6 +111,7 @@ export const AuthProvider = ({ children }) => {
         JSON.stringify({
           user,
           role,
+          color,
           interests: interests
             ? interests.split(", ").map((topic) => topic.trim())
             : [],

@@ -166,12 +166,12 @@ const PremManageProfile = () => {
         if (storedUser) {
           storedUser.user.username = editUsername;
           storedUser.user.email = editEmail;
+          storedUser.profile.color = profileColor;
           storedUser.profile = {
             ...storedUser.profile,
             dob: editDate,
             gender: editGender,
           };
-          storedUser.profile.color = profileColor;
 
           localStorage.setItem("userProfile", JSON.stringify(storedUser));
         }
