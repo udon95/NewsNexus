@@ -369,6 +369,23 @@ router.put("/update-profile", async (req, res) => {
   if (!userId || !username || !email) {
     return res.status(400).json({ error: "Missing required fields" });
   }
+  // DOB age check (must be at least 16 years old)
+  const birthDate = new Date(dob);
+  const today = new Date();
+  let age = today.getFullYear() - birthDate.getFullYear();
+  const monthDiff = today.getMonth() - birthDate.getMonth();
+  if (
+    monthDiff < 0 ||
+    (monthDiff === 0 && today.getDate() < birthDate.getDate())
+  ) {
+    age--;
+  }
+
+  if (age < 16) {
+    return res
+      .status(400)
+      .json({ error: "You must be at least 16 years old." });
+  }
 
   try {
     // Update basic user details in the "users" table
@@ -391,8 +408,7 @@ router.put("/update-profile", async (req, res) => {
       .from("usertype")
       .update({ color })
       .eq("userid", userId);
-      if (errorColor) throw errorColor;
-
+    if (errorColor) throw errorColor;
 
     return res.json({ message: "Profile updated successfully" });
   } catch (error) {

@@ -136,13 +136,25 @@ const PremManageProfile = () => {
   const isValidDOB = (dob) => {
     const dobDate = new Date(dob);
     const today = new Date();
-    return dobDate <= today;
+    if (dobDate > today) return false;
+
+    let age = today.getFullYear() - dobDate.getFullYear();
+    const monthDiff = today.getMonth() - dobDate.getMonth();
+
+    if (
+      monthDiff < 0 ||
+      (monthDiff === 0 && today.getDate() < dobDate.getDate())
+    ) {
+      age--;
+    }
+
+    return age >= 16;
   };
 
   // update profile
   const updateProfile = async () => {
     if (!isValidDOB(editDate)) {
-      alert("Date of Birth cannot be later than today.", dobError);
+      alert("Must be at least 16 years old", dobError);
       return;
     }
 
@@ -231,9 +243,11 @@ const PremManageProfile = () => {
         const updatedUser = response.data.updatedUser;
         if (updatedUser) {
           const storedUser = JSON.parse(localStorage.getItem("userProfile"));
+
           if (storedUser) {
             storedUser.user.password = updatedUser.password;
             localStorage.setItem("userProfile", JSON.stringify(storedUser));
+            sessionStorage.setItem("userProfile", JSON.stringify(storedUser));
           }
         }
       }
@@ -263,6 +277,7 @@ const PremManageProfile = () => {
       if (storedUser) {
         storedUser.interests = selectedTopics.join(", ");
         localStorage.setItem("userProfile", JSON.stringify(storedUser));
+        sessionStorage.setItem("userProfile", JSON.stringify(storedUser));
       }
     } catch (error) {
       console.error("Error updating interests:", error.message);
@@ -347,37 +362,6 @@ const PremManageProfile = () => {
       setProfileColor(value);
     }
   };
-
-  // const fetchProfileColor = async (userId) => {
-  //   const localColor = localStorage.getItem("profileColor");
-  //   if (localColor) {
-  //     return localColor;
-  //   }
-
-  //   if (!userId) {
-  //     console.error("❌ fetchProfileColor called without userId.");
-  //     return "#ffffff";
-  //   }
-
-  //   try {
-  //     const { data, error } = await supabase
-  //       .from("usertype")
-  //       .select("color")
-  //       .eq("userid", userId);
-
-  //     if (error) throw error;
-
-  //     const color = data?.[0]?.color || "#ffffff";
-
-  //     // Step 3: Cache it
-  //     localStorage.setItem("profileColor", color);
-
-  //     return color;
-  //   } catch (err) {
-  //     console.error("Error fetching profile color:", err.message);
-  //     return "#ffffff";
-  //   }
-  // };
 
   return (
     <div className="w-screen min-h-screen flex flex-col overflow-hidden">

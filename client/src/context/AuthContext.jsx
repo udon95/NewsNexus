@@ -53,23 +53,23 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const handleProfileUpdate = () => {
       const storedUser =
-        sessionStorage.getItem("userProfile") ||
-        localStorage.getItem("userProfile");
-  
+        localStorage.getItem("userProfile") ||
+        sessionStorage.getItem("userProfile");
+
       if (storedUser) {
         const parsedUser = JSON.parse(storedUser);
         setUser(parsedUser.user);
         setUserType(parsedUser.role);
-        setColor(parsedUser.color); 
+        setColor(parsedUser.color);
         setProfile(parsedUser.profile || {});
         setInterests(parsedUser.interests || []);
       }
     };
-  
+
     window.addEventListener("userProfileUpdated", handleProfileUpdate);
-    return () => window.removeEventListener("userProfileUpdated", handleProfileUpdate);
+    return () =>
+      window.removeEventListener("userProfileUpdated", handleProfileUpdate);
   }, []);
-  
 
   const fetchUserRole = async (userId) => {
     try {
