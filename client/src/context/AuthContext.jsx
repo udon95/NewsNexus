@@ -60,7 +60,7 @@ export const AuthProvider = ({ children }) => {
         const parsedUser = JSON.parse(storedUser);
         setUser(parsedUser.user);
         setUserType(parsedUser.role);
-        setColor(parsedUser.color); // ✅ Live update header color
+        setColor(parsedUser.color); 
         setProfile(parsedUser.profile || {});
         setInterests(parsedUser.interests || []);
       }

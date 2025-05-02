@@ -175,6 +175,8 @@ const PremManageProfile = () => {
           storedUser.color = profileColor; // ✅ save at top-level only
 
           localStorage.setItem("userProfile", JSON.stringify(storedUser));
+          sessionStorage.setItem("userProfile", JSON.stringify(storedUser));
+
           const event = new Event("userProfileUpdated");
           window.dispatchEvent(event);
         }
