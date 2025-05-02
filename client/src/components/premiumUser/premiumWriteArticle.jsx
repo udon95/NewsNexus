@@ -544,8 +544,6 @@ export const PremiumWriteArticle = () => {
       return;
     } else {
       articleData.roomid = selectedRoom;
-      console.log("content", articleContent);
-
 
       //  CASE 2: Room Opinion Article (skip validation)
       if (postType === "Room") {
@@ -557,16 +555,21 @@ export const PremiumWriteArticle = () => {
               headers: {
                 "Content-Type": "application/json",
               },
-              body: JSON.stringify({ content: articleContent }),
+              body: JSON.stringify({ content: updatedHTML }),
             }
           );
+          console.log("content", articleContent);
+          console.log("content", content);
+          console.log("updated html", updatedHTML);
           const result = await response.json();
 
           console.log("check", result);
           console.log("check", result.reason);
 
           if (result.flagged) {
-            alert(` Article flagged: ${result.reason} || "Content violates policies."}`);
+            alert(
+              ` Article flagged: ${result.reason} || "Content violates policies."}`
+            );
             return;
           }
         } catch (err) {
