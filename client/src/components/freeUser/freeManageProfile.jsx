@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import useAuthHook from "../../hooks/useAuth";
+import TopicList from "../../components/topicList";
 import PasswordInput from "../showPW";
 import api from "../../api/axios";
 
@@ -37,13 +38,6 @@ const FreeManageProfile = () => {
             : data.interests.split(", ").map((topic) => topic.trim());
 
           setSelectedTopics(formattedInterests); //  Pre-select topics from stored interests
-          setDropdownValues((prev) => {
-            const updated = [...prev];
-            for (let i = 0; i < formattedInterests.length && i < 6; i++) {
-              updated[i] = formattedInterests[i];
-            }
-            return updated;
-          });
         }
       } catch (err) {
         console.error("Profile fetch error:", err.message);
@@ -63,7 +57,7 @@ const FreeManageProfile = () => {
   //         : [...prevTopics, topic] // Add if not selected
   //   );
   // };
-
+  
   useEffect(() => {
     async function fetchCategories() {
       const { data, error } = await supabase
@@ -84,16 +78,8 @@ const FreeManageProfile = () => {
   }, [dropdownValues]);
 
   const handleDropdownChange = (index, e) => {
-    const newValue = e.target.value;
-    const alreadySelected = dropdownValues.includes(newValue);
-
-    if (newValue && alreadySelected) {
-      alert("You’ve already selected this topic.");
-      return;
-    }
-
     const newValues = [...dropdownValues];
-    newValues[index] = newValue;
+    newValues[index] = e.target.value;
     setDropdownValues(newValues);
   };
 
@@ -405,7 +391,7 @@ const FreeManageProfile = () => {
               <h3 className="text-2xl font-bold font-grotesk mb-1 mt-6">
                 Interest Selection (Max 6):
               </h3>
-              <div className="p-4 bg-white shadow-md rounded-lg w-3/3 md:w-2/3 mb-1 font-grotesk">
+              <div className="p-4 bg-white shadow-md rounded-lg w-3/3 md:w-2/3 mb-1">
                 {/* <TopicList
                   allTopics={[]}
                   selectedTopics={selectedTopics} //  Pass selected topics
@@ -420,9 +406,9 @@ const FreeManageProfile = () => {
                     <select
                       value={dropdownValues[index]}
                       onChange={(e) => handleDropdownChange(index, e)}
-                      className="p-2 border rounded-lg font-grotesk"
+                      className="p-2 border rounded-lg"
                     >
-                      <option value="" classname="font-grotesk">Select a category</option>
+                      <option value="">Select a category</option>
                       {categories.map((cat) => (
                         <option key={cat.id} value={cat.name}>
                           {cat.name}
