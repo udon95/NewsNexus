@@ -20,6 +20,7 @@ import RoomPage from "./components/premiumUser/roomPage.jsx";
 import SubscriptionStatus from "./components/payment.jsx";
 import PublicProfile from "./components/publicProfile.jsx";
 
+import FloatingWriteButton from "./components/writeButton.jsx";
 import supabase from "./api/supabaseClient.js";
 import "./index.css";
 
@@ -46,6 +47,7 @@ function App() {
 
   return (
     <Routes>
+      <FloatingWriteButton />
       <Route path="/" element={<Layout />}>
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
