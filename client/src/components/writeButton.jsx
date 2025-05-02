@@ -17,8 +17,8 @@ const FloatingWriteButton = () => {
   } catch (err) {
     console.error("Error reading user from localStorage:", err);
   }
-  console.log("type", user.usertype);
-  console.log("role", user.role);
+  console.log("type", parsed.usertype);
+  console.log("role", parsed.role);
 
   if (!user) return null;
 
