@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import "../index.css";
 import Navbar from "../components/navbar.jsx";
 // import Search from "../components/search.jsx";
-import Testimonial from "../components/tesimonial.jsx";
+import Testimonial from "../components/testimonial.jsx";
 import LatestNews from "../components/latestNews.jsx";
 import downArrow from "../assets/DownArrow.svg";
 import useAuthHook from "../hooks/useAuth.jsx";
