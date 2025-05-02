@@ -9,7 +9,7 @@ import supabase from "../api/supabaseClient";
 const StarRating = ({ rating }) => {
   return (
     <div className="flex">
-      {[...Array(10)].map((_, index) => (
+      {[...Array(4)].map((_, index) => (
         <span
           key={index}
           className={index < rating ? "text-yellow-400" : "text-gray-300"}
@@ -123,7 +123,7 @@ const TestimonialSlider = () => {
             {/* User Profile Info */}
             <div className="flex items-center border-b pb-3 ">
               {/* Profile Letter */}
-              <div className="w-10 h-10 rounded-full bg-gray-500 text-white flex items-center justify-center text-lg font-bold">
+              <div className="w-10 h-10 rounded-full bg-gray-500 font-grotesk text-white flex items-center justify-center text-lg font-bold">
                 {testimonial.users.username.charAt(0) || "Anon."}
               </div>
 
@@ -137,14 +137,14 @@ const TestimonialSlider = () => {
                       rating={Math.round(calculateAverageRating(testimonial))}
                     />
                     <p className="text-sm text-gray-500 italic">
-                      {calculateAverageRating(testimonial).toFixed(1)} / 10
+                      {calculateAverageRating(testimonial).toFixed(1)} / 10.0
                     </p>
                   </>
                 )}
               </div>
             </div>
 
-            <p className="text-sm text-blue-600 mt-1 italic">
+            <p className="text-sm text-black mt-1 font-grotesk ">
               {getOverallSentiment(testimonial)}
             </p>
           </SwiperSlide>
