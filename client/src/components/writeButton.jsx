@@ -31,8 +31,9 @@ const FloatingWriteButton = () => {
   if (hiddenPaths.includes(currentPath)) return null;
 
   const handleClick = () => {
-    if (currentPath.startsWith("/rooms/")) {
+    if (currentPath.startsWith("/room/")) {
       const roomid = currentPath.split("/")[2]; // get room ID from URL
+      console.log("roomid", roomid);
       navigate(`/premiumDashboard/writeArticle?type=room&roomid=${roomid}`);
     } else {
       // Normal behavior
@@ -43,6 +44,11 @@ const FloatingWriteButton = () => {
       }
     }
   };
+
+  useEffect(() => {
+    console.log("Current URL:", window.location.href);
+  }, []);
+  
 
   return (
     <button
