@@ -57,6 +57,7 @@ const FreeManageProfile = () => {
   //         : [...prevTopics, topic] // Add if not selected
   //   );
   // };
+  
   useEffect(() => {
     async function fetchCategories() {
       const { data, error } = await supabase
@@ -75,6 +76,12 @@ const FreeManageProfile = () => {
     const selected = dropdownValues.filter((val) => val !== "");
     setSelectedTopics(selected);
   }, [dropdownValues]);
+
+  const handleDropdownChange = (index, e) => {
+    const newValues = [...dropdownValues];
+    newValues[index] = e.target.value;
+    setDropdownValues(newValues);
+  };
 
   useEffect(() => {
     if (editDate) {

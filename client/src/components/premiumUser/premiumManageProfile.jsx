@@ -78,6 +78,12 @@ const PremManageProfile = () => {
     setSelectedTopics(selected);
   }, [dropdownValues]);
 
+  const handleDropdownChange = (index, e) => {
+    const newValues = [...dropdownValues];
+    newValues[index] = e.target.value;
+    setDropdownValues(newValues);
+  };
+  
   //  Handle topic selection (toggle selection)
   // const handleTopicSelection = (topic) => {
   //   setSelectedTopics(
