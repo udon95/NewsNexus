@@ -7,17 +7,14 @@ const FloatingWriteButton = () => {
   const location = useLocation();
 
   let user = null;
+  let role = null;
 
   try {
     const stored = localStorage.getItem("userProfile");
     if (stored) {
       const parsed = JSON.parse(stored);
       user = parsed?.user;
-      console.log("type", parsed.usertype);
-      console.log("role", parsed.role);
-
-      console.log("utype", user.usertype);
-      console.log("urole", user.role);
+      role = parsed?.role;
     }
   } catch (err) {
     console.error("Error reading user from localStorage:", err);
@@ -39,7 +36,7 @@ const FloatingWriteButton = () => {
       navigate(`/premiumDashboard/writeArticle?type=room&roomid=${roomid}`);
     } else {
       // Normal behavior
-      if (user.role === "Premium") {
+      if (role === "Premium") {
         navigate("/premiumDashboard/writeArticle");
       } else {
         navigate("/freeDashboard/writeArticle");
