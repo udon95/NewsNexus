@@ -30,6 +30,7 @@ const PremManageProfile = () => {
   const [categories, setCategories] = useState([]);
   const [dropdownValues, setDropdownValues] = useState(Array(6).fill(""));
 
+  //load user profile
   useEffect(() => {
     const fetchUserProfile = async () => {
       try {
@@ -39,9 +40,9 @@ const PremManageProfile = () => {
 
           setUserDetails(data.user);
 
-          if (data.user && data.user.userid) {
-            const color = await fetchProfileColor(data.user.userid);
-            setProfileColor(color); // Set the profile color after fetching
+          if (data.color) {
+            setProfileColor(data.color);
+            setHexCode(data.color);
           }
 
           //  Ensure interests are always an array before setting state
@@ -67,6 +68,7 @@ const PremManageProfile = () => {
     fetchUserProfile();
   }, []);
 
+  // load all categories/topcs
   useEffect(() => {
     async function fetchCategories() {
       const { data, error } = await supabase
@@ -81,11 +83,13 @@ const PremManageProfile = () => {
     fetchCategories();
   }, []);
 
+  // set dropdown selection values
   useEffect(() => {
     const selected = dropdownValues.filter((val) => val !== "");
     setSelectedTopics(selected);
   }, [dropdownValues]);
 
+  // handle dropdown selection
   const handleDropdownChange = (index, e) => {
     const newValue = e.target.value;
     const alreadySelected = dropdownValues.includes(newValue);
@@ -100,16 +104,7 @@ const PremManageProfile = () => {
     setDropdownValues(newValues);
   };
 
-  //  Handle topic selection (toggle selection)
-  // const handleTopicSelection = (topic) => {
-  //   setSelectedTopics(
-  //     (prevTopics) =>
-  //       prevTopics.includes(topic)
-  //         ? prevTopics.filter((t) => t !== topic) // Remove if already selected
-  //         : [...prevTopics, topic] // Add if not selected
-  //   );
-  // };
-
+  // check birthdate valid
   useEffect(() => {
     if (editDate) {
       const dobDate = new Date(editDate);
@@ -144,6 +139,7 @@ const PremManageProfile = () => {
     return dobDate <= today;
   };
 
+  // update profile
   const updateProfile = async () => {
     if (!isValidDOB(editDate)) {
       alert("Date of Birth cannot be later than today.", dobError);
@@ -174,12 +170,10 @@ const PremManageProfile = () => {
             ...storedUser.profile,
             dob: editDate,
             gender: editGender,
-            color: profileColor,
           };
           storedUser.profile.color = profileColor;
 
           localStorage.setItem("userProfile", JSON.stringify(storedUser));
-          localStorage.setItem("profileColor", profileColor);
         }
         window.location.reload();
       }
@@ -192,6 +186,7 @@ const PremManageProfile = () => {
     }
   };
 
+  // update password
   const updatePassword = async () => {
     if (!editOldPassword || !editNewPassword || !editNewPasswordConfirm) {
       alert("Please fill in all password fields.");
@@ -243,6 +238,7 @@ const PremManageProfile = () => {
     }
   };
 
+  // update interests
   const updateInterests = async () => {
     try {
       const response = await api.put(
@@ -269,6 +265,7 @@ const PremManageProfile = () => {
     }
   };
 
+  // check passwords
   useEffect(() => {
     if (editNewPassword && editNewPassword.length < 8) {
       setPasswordError("New password must be at least 8 characters long.");
@@ -320,12 +317,14 @@ const PremManageProfile = () => {
   }, [userDetails, authProfile]);
 
   useEffect(() => {
-    const storedColor = localStorage.getItem("profileColor");
-    if (storedColor) {
-      setProfileColor(storedColor);
-      setHexCode(storedColor);
-    } else {
-      fetchProfileColor();
+    const storedUser = localStorage.getItem("userProfile");
+    if (storedUser) {
+      const parsed = JSON.parse(storedUser);
+      const storedColor = parsed.color;
+      if (storedColor) {
+        setProfileColor(storedColor);
+        setHexCode(storedColor);
+      }
     }
   }, []);
 
@@ -344,36 +343,36 @@ const PremManageProfile = () => {
     }
   };
 
-  const fetchProfileColor = async (userId) => {
-    const localColor = localStorage.getItem("profileColor");
-    if (localColor) {
-      return localColor;
-    }
+  // const fetchProfileColor = async (userId) => {
+  //   const localColor = localStorage.getItem("profileColor");
+  //   if (localColor) {
+  //     return localColor;
+  //   }
 
-    if (!userId) {
-      console.error("❌ fetchProfileColor called without userId.");
-      return "#ffffff";
-    }
+  //   if (!userId) {
+  //     console.error("❌ fetchProfileColor called without userId.");
+  //     return "#ffffff";
+  //   }
 
-    try {
-      const { data, error } = await supabase
-        .from("usertype")
-        .select("color")
-        .eq("userid", userId);
+  //   try {
+  //     const { data, error } = await supabase
+  //       .from("usertype")
+  //       .select("color")
+  //       .eq("userid", userId);
 
-      if (error) throw error;
+  //     if (error) throw error;
 
-      const color = data?.[0]?.color || "#ffffff";
+  //     const color = data?.[0]?.color || "#ffffff";
 
-      // Step 3: Cache it
-      localStorage.setItem("profileColor", color);
+  //     // Step 3: Cache it
+  //     localStorage.setItem("profileColor", color);
 
-      return color;
-    } catch (err) {
-      console.error("Error fetching profile color:", err.message);
-      return "#ffffff";
-    }
-  };
+  //     return color;
+  //   } catch (err) {
+  //     console.error("Error fetching profile color:", err.message);
+  //     return "#ffffff";
+  //   }
+  // };
 
   return (
     <div className="w-screen min-h-screen flex flex-col overflow-hidden">
