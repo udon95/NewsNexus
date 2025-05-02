@@ -2,7 +2,11 @@ import React, { useEffect, useState } from "react";
 import NewsCard from "./newsCard";
 import supabase from "../api/supabaseClient";
 
-const ExpertNewsCard = ({ searchQuery = "", topic = "", disableNavigation }) => {
+const ExpertNewsCard = ({
+  searchQuery = "",
+  topic = "",
+  disableNavigation,
+}) => {
   const [expertArticles, setExpertArticles] = useState([]);
 
   useEffect(() => {
@@ -15,7 +19,9 @@ const ExpertNewsCard = ({ searchQuery = "", topic = "", disableNavigation }) => 
 
       // Search filter
       if (searchQuery.trim()) {
-        articleQuery = articleQuery.or(`title.ilike.%${searchQuery}%,text.ilike.%${searchQuery}%`);
+        articleQuery = articleQuery.or(
+          `title.ilike.%${searchQuery}%,text.ilike.%${searchQuery}%`
+        );
       }
 
       // Topic filter
@@ -58,29 +64,37 @@ const ExpertNewsCard = ({ searchQuery = "", topic = "", disableNavigation }) => 
 
   return (
     <div className="w-full max-w-[900px] mx-auto space-y-6 font-grotesk">
-      {expertArticles.map((article) => (
-        <div key={article.articleid} className="relative">
-          <div
-            className="relative cursor-pointer"
-            onClickCapture={(e) => {
-              if (disableNavigation) {
-                e.preventDefault();
-                e.stopPropagation();
-                alert("You need to subscribe as Premium to access Expert articles!");
-              }
-            }}
-          >
-            <NewsCard
-              title={article.title}
-              imageUrl={article.imagepath}
-              articleid={article.articleid}
-            />
-            <span className="absolute top-3 right-12 bg-[#BFD8FF] text-blue-900 text-xs font-bold px-3 py-1 rounded-md shadow-md">
-              Expert
-            </span>
-          </div>
+      {expertArticles.length === 0 ? (
+        <div className="text-center text-gray-500 font-medium mt-6">
+          No expert articles available.
         </div>
-      ))}
+      ) : (
+        expertArticles.map((article) => (
+          <div key={article.articleid} className="relative">
+            <div
+              className="relative cursor-pointer"
+              onClickCapture={(e) => {
+                if (disableNavigation) {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  alert(
+                    "You need to subscribe as Premium to access Expert articles!"
+                  );
+                }
+              }}
+            >
+              <NewsCard
+                title={article.title}
+                imageUrl={article.imagepath}
+                articleid={article.articleid}
+              />
+              <span className="absolute top-3 right-12 bg-[#BFD8FF] text-blue-900 text-xs font-bold px-3 py-1 rounded-md shadow-md">
+                Expert
+              </span>
+            </div>
+          </div>
+        ))
+      )}
     </div>
   );
 };

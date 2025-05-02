@@ -558,15 +558,11 @@ export const PremiumWriteArticle = () => {
               body: JSON.stringify({ content: articleData.content }),
             }
           );
-          
+
           const result = await response.json();
 
-          console.log("check", result.error);
-
           if (result.error) {
-            alert(
-              ` Article flagged: ${result.error} || "Content violates policies."}`
-            );
+            alert(` Article flagged: ${result.error}."}`);
             return;
           }
         } catch (err) {

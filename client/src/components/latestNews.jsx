@@ -2,7 +2,12 @@ import React, { useEffect, useState } from "react";
 import NewsCard from "./newsCard";
 import supabase from "../api/supabaseClient";
 
-const LatestNews = ({ searchQuery = "", topic = "", displayLimit, timeFilter = "Latest" }) => {
+const LatestNews = ({
+  searchQuery = "",
+  topic = "",
+  displayLimit,
+  timeFilter = "Latest",
+}) => {
   const [latestArticles, setLatestArticles] = useState([]);
 
   useEffect(() => {
@@ -21,7 +26,9 @@ const LatestNews = ({ searchQuery = "", topic = "", displayLimit, timeFilter = "
       }
 
       if (searchQuery.trim()) {
-        query = query.or(`title.ilike.%${searchQuery}%,text.ilike.%${searchQuery}%`);
+        query = query.or(
+          `title.ilike.%${searchQuery}%,text.ilike.%${searchQuery}%`
+        );
       }
 
       const now = new Date();
@@ -58,7 +65,10 @@ const LatestNews = ({ searchQuery = "", topic = "", displayLimit, timeFilter = "
       }
 
       const filtered = articles.filter(
-        (a) => !expertApps.some((e) => e.userid === a.userid && e.topicid === a.topicid)
+        (a) =>
+          !expertApps.some(
+            (e) => e.userid === a.userid && e.topicid === a.topicid
+          )
       );
 
       setLatestArticles(filtered);
@@ -74,14 +84,20 @@ const LatestNews = ({ searchQuery = "", topic = "", displayLimit, timeFilter = "
   return (
     <div className="w-full max-w-[900px] mx-auto">
       <div className="space-y-6">
-        {articlesToDisplay.map((article) => (
-          <NewsCard
-            key={article.articleid}
-            articleid={article.articleid}
-            title={article.title}
-            imageUrl={article.imagepath}
-          />
-        ))}
+        {articlesToDisplay.length === 0 ? (
+          <div className="text-center text-gray-500 font-medium mt-6">
+            No latest articles available.
+          </div>
+        ) : (
+          articlesToDisplay.map((article) => (
+            <NewsCard
+              key={article.articleid}
+              articleid={article.articleid}
+              title={article.title}
+              imageUrl={article.imagepath}
+            />
+          ))
+        )}
       </div>
     </div>
   );

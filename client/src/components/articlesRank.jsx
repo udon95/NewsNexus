@@ -2,7 +2,11 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import supabase from "../api/supabaseClient";
 
-const ArticlesRank = ({ searchQuery = "", topic = "", selectedTime = "week" }) => {
+const ArticlesRank = ({
+  searchQuery = "",
+  topic = "",
+  selectedTime = "week",
+}) => {
   const [articles, setArticles] = useState([]);
   const navigate = useNavigate();
 
@@ -10,7 +14,9 @@ const ArticlesRank = ({ searchQuery = "", topic = "", selectedTime = "week" }) =
     const fetchRankedArticles = async () => {
       let query = supabase
         .from("articles")
-        .select("articleid, title, imagepath, total_votes, view_count, topicid, userid, status, text, time")
+        .select(
+          "articleid, title, imagepath, total_votes, view_count, topicid, userid, status, text, time"
+        )
         .eq("status", "Published");
 
       if (Array.isArray(topic) && topic.length > 0) {
@@ -20,7 +26,9 @@ const ArticlesRank = ({ searchQuery = "", topic = "", selectedTime = "week" }) =
       }
 
       if (searchQuery.trim()) {
-        query = query.or(`title.ilike.%${searchQuery}%,text.ilike.%${searchQuery}%`);
+        query = query.or(
+          `title.ilike.%${searchQuery}%,text.ilike.%${searchQuery}%`
+        );
       }
 
       const now = new Date();
@@ -59,14 +67,19 @@ const ArticlesRank = ({ searchQuery = "", topic = "", selectedTime = "week" }) =
       }
 
       const nonExpertArticles = data.filter(
-        (a) => !expertApps.some((e) => e.userid === a.userid && e.topicid === a.topicid)
+        (a) =>
+          !expertApps.some(
+            (e) => e.userid === a.userid && e.topicid === a.topicid
+          )
       );
 
       const ranked = nonExpertArticles
         .map((article) => ({
           ...article,
           ranking_score:
-            article.view_count > 0 ? article.total_votes / article.view_count : 0,
+            article.view_count > 0
+              ? article.total_votes / article.view_count
+              : 0,
         }))
         .sort((a, b) => b.ranking_score - a.ranking_score)
         .slice(0, 3);
@@ -111,6 +124,11 @@ const ArticlesRank = ({ searchQuery = "", topic = "", selectedTime = "week" }) =
           </p>
         </div>
       ))}
+      {articles.length === 0 && (
+        <div className="col-span-full text-center text-gray-500 font-medium mt-6">
+          No ranked articles available.
+        </div>
+      )}
     </div>
   );
 };
