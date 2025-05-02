@@ -364,7 +364,7 @@ router.get("/user-full/:userid", async (req, res) => {
 });
 
 router.put("/update-profile", async (req, res) => {
-  const { userId, username, email, dob, gender } = req.body;
+  const { userId, username, email, dob, gender, color } = req.body;
 
   if (!userId || !username || !email) {
     return res.status(400).json({ error: "Missing required fields" });
@@ -387,6 +387,13 @@ router.put("/update-profile", async (req, res) => {
 
     if (errorProfile) throw errorProfile;
 
+    const { error: errorColor } = await supabase
+      .from("usertype")
+      .update({ color })
+      .eq("userid", userId);
+      if (errorColor) throw errorColor;
+
+
     return res.json({ message: "Profile updated successfully" });
   } catch (error) {
     console.error("Error updating profile:", error.message);
@@ -395,7 +402,7 @@ router.put("/update-profile", async (req, res) => {
 });
 
 // Update Interests Endpoint
-router.post("/update-interests", async (req, res) => {
+router.put("/update-interests", async (req, res) => {
   const { userId, interests } = req.body;
 
   if (!userId || interests === undefined) {
@@ -418,7 +425,7 @@ router.post("/update-interests", async (req, res) => {
   }
 });
 
-router.post("/update-password", async (req, res) => {
+router.put("/update-password", async (req, res) => {
   const { userId, oldPassword, newPassword, newPasswordConfirm } = req.body;
 
   // Validate presence of fields

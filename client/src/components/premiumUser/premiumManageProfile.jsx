@@ -160,7 +160,7 @@ const PremManageProfile = () => {
         color: profileColor,
       };
 
-      const response = await api.post("/auth/update-profile", payload, {
+      const response = await api.put("/auth/update-profile", payload, {
         headers: { "Content-Type": "application/json" },
       });
 
@@ -215,7 +215,7 @@ const PremManageProfile = () => {
         newPasswordConfirm: editNewPasswordConfirm,
       };
 
-      const response = await api.post("/auth/update-password", payload, {
+      const response = await api.put("/auth/update-password", payload, {
         headers: { "Content-Type": "application/json" },
       });
 
@@ -242,7 +242,7 @@ const PremManageProfile = () => {
 
   const updateInterests = async () => {
     try {
-      const response = await api.post(
+      const response = await api.put(
         "/auth/update-interests",
         {
           userId: userDetails.userid,
@@ -329,8 +329,6 @@ const PremManageProfile = () => {
   const handleColorChange = (color) => {
     setProfileColor(color);
     setHexCode(color);
-    localStorage.setItem("profileColor", color);
-    updateProfileColor(color);
   };
 
   const handleHexChange = (event) => {
@@ -340,8 +338,6 @@ const PremManageProfile = () => {
       // Basic hex validation (e.g., #ffffff)
       setHexCode(value);
       setProfileColor(value);
-      localStorage.setItem("profileColor", value);
-      updateProfileColor(value); // Send color to backend
     }
   };
 
