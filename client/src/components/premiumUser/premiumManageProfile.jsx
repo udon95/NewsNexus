@@ -27,6 +27,9 @@ const PremManageProfile = () => {
   const [profileColor, setProfileColor] = useState("#ffffff");
   const [hexCode, setHexCode] = useState("#ffffff");
 
+  const [categories, setCategories] = useState([]);
+  const [dropdownValues, setDropdownValues] = useState(Array(6).fill(""));
+
   useEffect(() => {
     const fetchUserProfile = async () => {
       try {
@@ -56,15 +59,34 @@ const PremManageProfile = () => {
     fetchUserProfile();
   }, []);
 
+  useEffect(() => {
+    async function fetchCategories() {
+      const { data, error } = await supabase
+        .from("topic_categories")
+        .select("*");
+      if (error) {
+        console.error("Error fetching categories:", error);
+      } else {
+        setCategories(data);
+      }
+    }
+    fetchCategories();
+  }, []);
+
+  useEffect(() => {
+    const selected = dropdownValues.filter((val) => val !== "");
+    setSelectedTopics(selected);
+  }, [dropdownValues]);
+
   //  Handle topic selection (toggle selection)
-  const handleTopicSelection = (topic) => {
-    setSelectedTopics(
-      (prevTopics) =>
-        prevTopics.includes(topic)
-          ? prevTopics.filter((t) => t !== topic) // Remove if already selected
-          : [...prevTopics, topic] // Add if not selected
-    );
-  };
+  // const handleTopicSelection = (topic) => {
+  //   setSelectedTopics(
+  //     (prevTopics) =>
+  //       prevTopics.includes(topic)
+  //         ? prevTopics.filter((t) => t !== topic) // Remove if already selected
+  //         : [...prevTopics, topic] // Add if not selected
+  //   );
+  // };
 
   useEffect(() => {
     if (editDate) {
@@ -322,18 +344,18 @@ const PremManageProfile = () => {
       alert("User details are not available");
       return;
     }
-  
+
     try {
       const payload = {
         userId: userDetails.userid, // Make sure you're using the correct user ID
         color: newColor, // New color you want to update
       };
-  
+
       // Make a request to update the color on the server
       const response = await api.post("/auth/update-color", payload, {
         headers: { "Content-Type": "application/json" },
       });
-  
+
       if (response.status === 200) {
         console.log("Profile color updated successfully!");
         // Update state to reflect new color
@@ -474,11 +496,30 @@ const PremManageProfile = () => {
                 Interest Selection (Max 6):
               </h3>
               <div className="p-4 bg-white shadow-md rounded-lg w-3/3 md:w-2/3 mb-1">
-                <FetchTopics
+                {/* <FetchTopics
                   selectedTopics={selectedTopics} //  Pass selected topics
                   setSelectedTopics={setSelectedTopics} //  Allow updates
                   handleTopicSelection={handleTopicSelection}
-                />
+                /> */}
+                {Array.from({ length: 6 }).map((_, index) => (
+                  <div key={index} className="flex flex-row mb-4">
+                    <label className="mt-1 mr-2 font-grotesk text-2xl">
+                      {index + 1}.{" "}
+                    </label>
+                    <select
+                      value={dropdownValues[index]}
+                      onChange={(e) => handleDropdownChange(index, e)}
+                      className="p-2 border rounded-lg"
+                    >
+                      <option value="">Select a category</option>
+                      {categories.map((cat) => (
+                        <option key={cat.id} value={cat.name}>
+                          {cat.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                ))}
                 <button
                   onClick={updateInterests}
                   className="bg-[#3f414c] text-[white] cursor-pointer text-sm flex justify-end self-end w-fit ml-auto mr-0 mt-5 px-5 py-2.5 rounded-xl border-[none]"
