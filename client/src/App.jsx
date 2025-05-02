@@ -42,7 +42,6 @@ function RequireAuth({ children, requirePremium = false }) {
       }
     }
 
-    // fallback to Supabase auth and user fetch
     supabase.auth.getSession().then(async ({ data }) => {
       const user = data?.session?.user;
       if (!user) {
@@ -57,11 +56,12 @@ function RequireAuth({ children, requirePremium = false }) {
         .eq("userid", user.id)
         .single();
 
-      const status = userData?.usertype;
-      console.log("userdata status", status);
+      const role = userData?.usertype;
 
-      if (status === "Premium" || (!requirePremium && status)) {
+      if (role === "Premium" || (!requirePremium && role)) {
         setIsAuthorized(true);
+      } else {
+        setIsAuthorized(false);
       }
 
       setLoading(false);
@@ -69,8 +69,11 @@ function RequireAuth({ children, requirePremium = false }) {
   }, [requirePremium]);
 
   if (loading) return null; // or loading spinner
-  alert("Not Authenticated.");
-  return isAuthorized  ? children : <Navigate to="/" replace />;
+  if (isAuthorized === false) {
+    alert("You are not authorized to access this page.");
+    return <Navigate to="/" replace />;
+  }
+  return children;
 }
 
 function App() {
