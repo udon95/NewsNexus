@@ -49,6 +49,13 @@ const PremManageProfile = () => {
             : data.interests.split(", ").map((topic) => topic.trim());
 
           setSelectedTopics(formattedInterests); //  Pre-select topics from stored interests
+          setDropdownValues((prev) => {
+            const updated = [...prev];
+            for (let i = 0; i < formattedInterests.length && i < 6; i++) {
+              updated[i] = formattedInterests[i];
+            }
+            return updated;
+          });
         }
       } catch (err) {
         console.error("Profile fetch error:", err.message);
@@ -79,8 +86,16 @@ const PremManageProfile = () => {
   }, [dropdownValues]);
 
   const handleDropdownChange = (index, e) => {
+    const newValue = e.target.value;
+    const alreadySelected = dropdownValues.includes(newValue);
+
+    if (newValue && alreadySelected) {
+      alert("You’ve already selected this topic.");
+      return;
+    }
+
     const newValues = [...dropdownValues];
-    newValues[index] = e.target.value;
+    newValues[index] = newValue;
     setDropdownValues(newValues);
   };
 
@@ -518,11 +533,17 @@ const PremManageProfile = () => {
                       className="p-2 border rounded-lg"
                     >
                       <option value="">Select a category</option>
-                      {categories.map((cat) => (
-                        <option key={cat.id} value={selectedTopics}>
-                          {selectedTopics}
-                        </option>
-                      ))}
+                      {categories
+                        .filter(
+                          (cat) =>
+                            !dropdownValues.includes(cat.name) ||
+                            cat.name === dropdownValues[index]
+                        )
+                        .map((cat) => (
+                          <option key={cat.id} value={cat.name}>
+                            {cat.name}
+                          </option>
+                        ))}
                     </select>
                   </div>
                 ))}
