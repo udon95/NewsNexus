@@ -57,10 +57,19 @@ export const PremiumWriteArticle = () => {
   const preSelectedRoomId = searchParams.get("roomid"); // e.g. uuid
 
   useEffect(() => {
+    const type = searchParams.get("type");
+    const roomid = searchParams.get("roomid");
+    console.log("type:", type, "roomid:", roomid);
+  }, [searchParams]);
+
+  
+  useEffect(() => {
     if (preSelectedType === "room" && preSelectedRoomId) {
       setPostType("Room");
       setSelectedRoom(preSelectedRoomId);
       console.log("prefill id", preSelectedRoomId);
+      console.log("prefill type", preSelectedType);
+
     }
   }, [preSelectedType, preSelectedRoomId]);
 
