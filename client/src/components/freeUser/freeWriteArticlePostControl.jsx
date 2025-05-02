@@ -306,57 +306,6 @@ export const FreeWriteArticle = () => {
     articleData.topic = topics;
     const topicName = topicOptions.find((t) => t.topicid === topics)?.name;
 
-    //   const { data, error } = await supabase
-    //     .from("articles")
-    //     .insert([
-    //       {
-    //         title: articleData.title,
-    //         text: articleData.content,
-    //         userid: articleData.created_by,
-    //         topicid: topics, // Insert the UUID
-    //         time: articleData.created_at,
-    //         status: "Published",
-    //         imagepath: firstImageUrl || null,
-    //       },
-    //     ])
-    //     .select("articleid");
-
-    //   console.log(articleData.topic, error);
-
-    //   if (error) {
-    //     alert("Failed to post article.");
-    //     return;
-    //   }
-
-    //   const articleid = data?.[0]?.articleid;
-
-    //   for (const img of pendingImages) {
-    //     const fileExt = img.file.name.split(".").pop();
-    //     const fileName = `${Date.now()}-${Math.random()
-    //       .toString(36)
-    //       .substring(2)}.${fileExt}`;
-    //     const filePath = `${session.id}/${fileName}`;
-
-    //     await supabase.storage
-    //       .from("articles-images")
-    //       .upload(filePath, img.file, {
-    //         cacheControl: "3600",
-    //         upsert: false,
-    //       });
-
-    //     const { data: urlData } = supabase.storage
-    //       .from("articles-images")
-    //       .getPublicUrl(filePath);
-    //     const imageUrl = urlData?.publicUrl;
-
-    //     await supabase
-    //       .from("article_images")
-    //       .insert([{ articleid, image_url: imageUrl }]);
-    //   }
-
-    //   alert("Article posted!");
-    //   handleClearInputs();
-
     if (postType === "General") {
       const response = await fetch(
         "https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/api/submit-article",
@@ -377,50 +326,19 @@ export const FreeWriteArticle = () => {
       const result = await response.json();
 
       if (!response.ok) {
-        // console.log(result);
         if (result.feedback) {
-          // console.log("🔴 AI Feedback returned:", result.feedback);
           setAiFeedback(result.feedback);
           setAccuracy(result.accuracy || null);
           alert(
-            "❌ Article flagged by AI. Please review the highlighted sections."
+            " Article flagged by AI. Please review the highlighted sections."
           );
         } else {
           alert(result.error || "Submission failed.");
         }
 
-        // ✅ This is important to prevent saving
+        //  This is important to prevent saving
         return;
       }
-
-      // if (result.verdict === "true") {
-      //   if (result.explanation) {
-      //     alert(`✅ Article passed AI check:\n${result.explanation}`);
-      //   } else {
-      //     alert("✅ Article passed AI check.");
-      //   }
-      // }
-
-      // //  Save to articles table
-      // const { data, error } = await supabase
-      //   .from("articles")
-      //   .insert([
-      //     {
-      //       title: articleData.title,
-      //       text: articleData.content,
-      //       userid: articleData.created_by,
-      //       topicid: topics, // Insert the UUID
-      //       time: articleData.created_at,
-      //       status: "Published",
-      //       imagepath: firstImageUrl || null,
-      //     },
-      //   ])
-      //   .select("articleid");
-
-      // if (error) {
-      //   alert("Failed to save article.");
-      //   return;
-      // }
 
       const articleid = data?.[0]?.articleid;
 
@@ -660,8 +578,6 @@ export const FreeWriteArticle = () => {
     document.head.appendChild(style);
     return () => document.head.removeChild(style); // Cleanup
   }, []);
-
- 
 
   return (
     <div className="w-full min-h-screen bg-indigo-50 text-black font-grotesk flex justify-center">
