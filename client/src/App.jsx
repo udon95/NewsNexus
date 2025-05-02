@@ -39,7 +39,7 @@ function RequireAuth({ children, requirePremium = false, onlyFree = false }) {
 
     if (localProfile) {
       const parsed = JSON.parse(localProfile);
-      const status = parsed?.role;
+      const role = parsed?.role;
       if (validateRole(role)) {
         setIsAuthorized(true);
       } else {
@@ -64,7 +64,7 @@ function RequireAuth({ children, requirePremium = false, onlyFree = false }) {
         .single();
 
       const role = userData?.usertype;
-      
+
       if (validateRole(role)) {
         setIsAuthorized(true);
       } else {
@@ -75,7 +75,7 @@ function RequireAuth({ children, requirePremium = false, onlyFree = false }) {
     });
   }, [requirePremium]);
 
-  if (loading) return null; 
+  if (loading) return null;
 
   if (isAuthorized === false) {
     alert("You are not authorized to access this page.");
