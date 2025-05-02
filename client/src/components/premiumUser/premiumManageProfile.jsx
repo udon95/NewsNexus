@@ -166,13 +166,14 @@ const PremManageProfile = () => {
         if (storedUser) {
           storedUser.user.username = editUsername;
           storedUser.user.email = editEmail;
-          storedUser.profile.color = profileColor;
           storedUser.profile = {
             ...storedUser.profile,
             dob: editDate,
             gender: editGender,
           };
-
+          
+          storedUser.color = profileColor; // ✅ save at top-level only
+          
           localStorage.setItem("userProfile", JSON.stringify(storedUser));
         }
         window.location.reload();
