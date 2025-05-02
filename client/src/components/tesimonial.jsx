@@ -130,14 +130,22 @@ const TestimonialSlider = () => {
               {/* Name and Rating */}
               <div className="ml-4 ">
                 <p className="font-bold">{testimonial.users.username}</p>
-                <p className="text-sm text-gray-500 italic">
-                  {getRatingText(calculateAverageRating(testimonial))}
-                </p>
+
+                {calculateAverageRating(testimonial) !== null && (
+                  <>
+                    <StarRating
+                      rating={Math.round(calculateAverageRating(testimonial))}
+                    />
+                    <p className="text-sm text-gray-500 italic">
+                      {calculateAverageRating(testimonial).toFixed(1)} / 10
+                    </p>
+                  </>
+                )}
               </div>
             </div>
 
-            <p className="text-gray-700 text-lg font-semiitalic mt-4">
-              Overall: {getOverallSentiment(testimonial)}
+            <p className="text-sm text-blue-600 mt-1 italic">
+              {getOverallSentiment(testimonial)}
             </p>
           </SwiperSlide>
         ))}
