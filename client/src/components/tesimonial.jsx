@@ -68,14 +68,13 @@ const TestimonialSlider = () => {
       try {
         const { data, error } = await supabase
           .from("testimonial")
-          .select("*, users(username)")
+          .select("*, users:userid (username)")
           .eq("homepage_display", true);
 
         if (error) throw error;
         setTestimonials(data);
         setLoading(false);
         console.log("Raw testimonials:", data);
-
       } catch (error) {
         console.error("Error fetching testimonials");
         setLoading(false);
@@ -120,7 +119,7 @@ const TestimonialSlider = () => {
             <div className="flex items-center border-b pb-3 ">
               {/* Profile Letter */}
               <div className="w-10 h-10 rounded-full bg-gray-500 text-white flex items-center justify-center text-lg font-bold">
-                {testimonial.users.username.charAt(0)}
+                {testimonial.users.username.charAt(0) || "Anon."}
               </div>
 
               {/* Name and Rating */}
