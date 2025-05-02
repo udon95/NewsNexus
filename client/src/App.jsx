@@ -24,22 +24,29 @@ import FloatingWriteButton from "./components/writeButton.jsx";
 import supabase from "./api/supabaseClient.js";
 import "./index.css";
 
-function RequireAuth({ children, requirePremium = false }) {
+function RequireAuth({ children, requirePremium = false, onlyFree = false }) {
   const [loading, setLoading] = useState(true);
   const [isAuthorized, setIsAuthorized] = useState(false);
 
   useEffect(() => {
     const localProfile = localStorage.getItem("userProfile");
 
+    const validateRole = (role) => {
+      if (onlyFree) return role === "Free";
+      if (requirePremium) return role === "Premium";
+      return !!role; // any logged-in user
+    };
+
     if (localProfile) {
       const parsed = JSON.parse(localProfile);
       const status = parsed?.role;
-      console.log("parsed role", status);
-      if (status === "Premium" || (!requirePremium && status)) {
+      if (validateRole(role)) {
         setIsAuthorized(true);
-        setLoading(false);
-        return;
+      } else {
+        setIsAuthorized(false);
       }
+      setLoading(false);
+      return;
     }
 
     supabase.auth.getSession().then(async ({ data }) => {
@@ -57,8 +64,8 @@ function RequireAuth({ children, requirePremium = false }) {
         .single();
 
       const role = userData?.usertype;
-
-      if (role === "Premium" || (!requirePremium && role)) {
+      
+      if (validateRole(role)) {
         setIsAuthorized(true);
       } else {
         setIsAuthorized(false);
@@ -68,7 +75,8 @@ function RequireAuth({ children, requirePremium = false }) {
     });
   }, [requirePremium]);
 
-  if (loading) return null; // or loading spinner
+  if (loading) return null; 
+
   if (isAuthorized === false) {
     alert("You are not authorized to access this page.");
     return <Navigate to="/" replace />;
