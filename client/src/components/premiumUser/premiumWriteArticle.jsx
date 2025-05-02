@@ -27,6 +27,7 @@ import BulletList from "@tiptap/extension-bullet-list";
 import OrderedList from "@tiptap/extension-ordered-list";
 import { Extension } from "@tiptap/core";
 import { Paragraph } from "@tiptap/extension-paragraph";
+import { useSearchParams } from "react-router-dom";
 
 export const PremiumWriteArticle = () => {
   const [title, setTitle] = useState("");
@@ -51,6 +52,18 @@ export const PremiumWriteArticle = () => {
   const [accuracy, setAccuracy] = useState(null);
   const [showDraftNotification, setShowDraftNotification] = useState(false);
 
+  const [searchParams] = useSearchParams();
+  const preSelectedType = searchParams.get("type"); // e.g. "room"
+  const preSelectedRoomId = searchParams.get("roomid"); // e.g. uuid
+
+  useEffect(() => {
+    if (preSelectedType === "room") {
+      setPostType("Room");
+      setSelectedRoom(preSelectedRoomId);
+    }
+  }, [preSelectedType, preSelectedRoomId]);
+
+  
   const CustomParagraph = Paragraph.extend({
     addAttributes() {
       return {

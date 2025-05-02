@@ -1,16 +1,27 @@
 import { useNavigate, useLocation, useParams } from "react-router-dom";
 import { Plus } from "lucide-react";
-import useAuthHook from "../hooks/useAuth"; // adjust path if needed
 import React from "react";
 
 const FloatingWriteButton = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { user } = useAuthHook();
+
+  let user = null;
+
+  try {
+    const stored = localStorage.getItem("userProfile");
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      user = parsed?.user;
+    }
+  } catch (err) {
+    console.error("Error reading user from localStorage:", err);
+  }
+  console.log("type", user.usertype);
+  console.log("role", user.role);
 
   if (!user) return null;
 
-  // Don't show on write pages
   const currentPath = location.pathname;
 
   const hiddenPaths = [
@@ -25,7 +36,7 @@ const FloatingWriteButton = () => {
       navigate(`/premiumDashboard/writeArticle?type=room&roomid=${roomid}`);
     } else {
       // Normal behavior
-      if (user.usertype === "Premium") {
+      if (user.role === "Premium") {
         navigate("/premiumDashboard/writeArticle");
       } else {
         navigate("/freeDashboard/writeArticle");
