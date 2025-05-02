@@ -172,6 +172,11 @@
       }
 
       let updatedHTML = articleContent;
+
+      if (postType === "Room") {
+        updatedHTML = updatedHTML.replace(/<img[^>]*src=["']blob:[^"']+["'][^>]*>/g, '');
+      }      
+
       const bucket = postType === "Room" ? "room-article-images" : "articles-images";
       let firstImageUrl = null;
 
@@ -323,6 +328,11 @@
       }
     
       let updatedHTML = articleContent;
+
+      if (postType === "Room") {
+        updatedHTML = updatedHTML.replace(/<img[^>]*src=["']blob:[^"']+["'][^>]*>/g, '');
+      }      
+
       const bucket = postType === "Room" ? "room-article-images" : "articles-images";
       let firstImageUrl = null;
     
