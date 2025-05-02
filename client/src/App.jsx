@@ -34,6 +34,7 @@ function RequireAuth({ children, requirePremium = false }) {
     if (localProfile) {
       const parsed = JSON.parse(localProfile);
       const status = parsed?.role;
+      console.log("parsed role", status);
       if (status === "Premium" || (!requirePremium && status)) {
         setIsAuthorized(true);
         setLoading(false);
@@ -56,7 +57,9 @@ function RequireAuth({ children, requirePremium = false }) {
         .eq("userid", user.id)
         .single();
 
-      const status = userData?.status;
+      const status = userData?.usertype;
+      console.log("userdata status", status);
+
       if (status === "Premium" || (!requirePremium && status)) {
         setIsAuthorized(true);
       }
@@ -79,9 +82,9 @@ function App() {
 
           //  Update user status to "Free" after email verification
           await supabase
-            .from("users")
-            .update({ status: "Free" })
-            .eq("auth_id", userId);
+            .from("usertype")
+            .update({ usertype: "Free" })
+            .eq("userid", userId);
         }
       }
     );
