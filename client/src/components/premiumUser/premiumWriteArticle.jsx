@@ -487,7 +487,7 @@ export const PremiumWriteArticle = () => {
           // console.log("🔴 AI Feedback returned:", result.feedback);
           setAiFeedback(result.feedback);
           setAccuracy(result.accuracy || null);
-          console.log("accuracy: ", result.accuracy);
+          // console.log("accuracy: ", result.accuracy);
 
           alert(
             "❌ Article flagged by AI. Please review the highlighted sections."
