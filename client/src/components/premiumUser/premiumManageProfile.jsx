@@ -83,7 +83,7 @@ const PremManageProfile = () => {
     newValues[index] = e.target.value;
     setDropdownValues(newValues);
   };
-  
+
   //  Handle topic selection (toggle selection)
   // const handleTopicSelection = (topic) => {
   //   setSelectedTopics(
@@ -519,8 +519,8 @@ const PremManageProfile = () => {
                     >
                       <option value="">Select a category</option>
                       {categories.map((cat) => (
-                        <option key={cat.id} value={cat.name}>
-                          {cat.name}
+                        <option key={cat.id} value={selectedTopics}>
+                          {selectedTopics}
                         </option>
                       ))}
                     </select>
