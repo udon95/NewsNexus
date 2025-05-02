@@ -26,10 +26,20 @@ import supabase from "./api/supabaseClient.js";
 import "./index.css";
 
 function RequireAuth({ children }) {
-  const session = supabase.auth.getSession(); // if you're using async method, convert this to a hook or use useEffect + useState
-  const isLoggedIn = !!session?.data?.session;
+  const [loading, setLoading] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  return isLoggedIn ? children : <Navigate to="/" />;
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data }) => {
+      if (data.session?.user) {
+        setIsAuthenticated(true);
+      }
+      setLoading(false);
+    });
+  }, []);
+
+  if (loading) return null; // or loading spinner
+  return isAuthenticated ? children : <Navigate to="/" replace />;
 }
 
 function App() {

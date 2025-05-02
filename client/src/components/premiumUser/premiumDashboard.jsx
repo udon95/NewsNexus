@@ -9,7 +9,7 @@ import PremiumManageProfile from "./premiumManageProfile.jsx";
 import PremiumManageRooms from "./premiumManageRooms.jsx";
 import PremiumEditArticle from "./premiumEditArticle";
 import ViewRooms from "./viewRooms.jsx";
-import ViewRoomsPage from "./roomPage.jsx";
+import RoomPage from "./roomPage.jsx";
 
 function PremiumDashboard() {
   return (

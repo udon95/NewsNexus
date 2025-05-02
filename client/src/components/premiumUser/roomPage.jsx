@@ -243,7 +243,7 @@ const Room = () => {
       setLoading(true);
       const { data, error } = await supabase
         .from("rooms")
-        .select("name, description, member_count")
+        .select("name, description, member_count, room_type")
         .eq("roomid", roomid)
         .single();
 
@@ -283,6 +283,7 @@ const Room = () => {
           content,
           created_at,
           userid,
+          amendment,
           users:userid(username),
           room_comments(*),
           room_article_images(image_url)
@@ -960,9 +961,11 @@ const Room = () => {
       <Navbar />
       <div className="w-full max-w-4xl mx-auto p-6">
         <div className="flex justify-between items-center mb-1">
-          <h1 className="text-4xl font-bold">
-            Room: {room ? room.name : "Not Found"}
-          </h1>
+        <h1 className="text-4xl font-bold">
+             {room
+               ? `${room.room_type === "Private" ? "Private Room: " : "Room: "}${room.name}`
+               : "Not Found"}
+           </h1>
           <div className="flex gap-3">
             <button
               className={`px-6 py-2 rounded-full text-lg font-semibold transition-all ${
@@ -1139,6 +1142,16 @@ const Room = () => {
                 </span>
               </p>
 
+              {/* amendment/update */}
+              {article.amendment && (
+                <div className="border border-yellow-400 bg-yellow-50 text-yellow-900 rounded-md p-3 mt-4 mb-2">
+                  <p className="font-semibold text-sm mb-1">Update:</p>
+                  <p className="text-sm whitespace-pre-line">
+                    {article.amendment}
+                  </p>
+                </div>
+              )}
+              {/* community notes */}
               {article.approvedNotes?.length > 0 && (
                 <div className="border border-purple-400 bg-[#f4edff] text-purple-800 rounded-md p-3 mt-3 mb-4">
                   <p className="font-semibold text-sm mb-1">Community Note:</p>
@@ -1309,7 +1322,7 @@ const Room = () => {
             </div>
           ))
         )}
-        
+
         {reportTarget && (
           <div className="fixed inset-0 backdrop-blur-sm bg-black/10 flex items-center justify-center z-50">
             <div className="bg-white rounded-xl shadow-lg w-[90%] max-w-md p-6 relative">
