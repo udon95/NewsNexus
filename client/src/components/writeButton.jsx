@@ -1,6 +1,6 @@
 import { useNavigate, useLocation, useParams } from "react-router-dom";
 import { Plus } from "lucide-react";
-import React from "react";
+import { React, useEffect } from "react";
 
 const FloatingWriteButton = () => {
   const navigate = useNavigate();
@@ -48,7 +48,6 @@ const FloatingWriteButton = () => {
   useEffect(() => {
     console.log("Current URL:", window.location.href);
   }, []);
-  
 
   return (
     <button
