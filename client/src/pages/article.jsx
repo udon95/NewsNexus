@@ -434,6 +434,13 @@ const Article = () => {
               />
             )}
 
+            {articleData.amendment && (
+              <div className="border border-yellow-400 bg-yellow-50 text-yellow-900 rounded-md p-3 mt-4 mb-2 w-full">
+                <p className="font-semibold text-sm mb-1 uppercase">Update:</p>
+                <p className="text-sm whitespace-pre-line">{articleData.amendment}</p>
+              </div>
+            )}
+
             <ArticleContent
               articleRef={articleRef}
               title={articleData.title}
