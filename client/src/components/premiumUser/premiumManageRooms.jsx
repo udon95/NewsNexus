@@ -191,7 +191,7 @@ const ManageRooms = () => {
               <div key={room.roomid} className={rowStyle}>
                 <span>{index + 1}. {room.name}</span>
                 <div className="flex gap-2">
-                  <span className="mt-4">{room.member_count} members</span>
+                  <span className="mt-2">{room.member_count} members</span>
                   <button onClick={() => handleUpdateRoom(room.roomid, room.name, room.description)} className={buttonClass}>Update</button>
                   <button onClick={() => handleDeleteRoom(room.roomid)} className={buttonClass}>Delete</button>
                   <button onClick={() => handleExitRoom(room.roomid)} className={buttonClass}>Exit</button>
@@ -223,7 +223,7 @@ const ManageRooms = () => {
               <div key={room.roomid} className={rowStyle}>
                 <span>{index + 1}. {room.name}</span>
                 <div className="flex gap-2">
-                  <span className="mt-4">{room.member_count} members</span>
+                  <span className="mt-2">{room.member_count} members</span>
                   <button onClick={() => handleUpdateRoom(room.roomid, room.name, room.description)} className={buttonClass}>Update</button>
                   <button onClick={() => handleDeleteRoom(room.roomid)} className={buttonClass}>Delete</button>
                   <button onClick={() => handleExitRoom(room.roomid)} className={buttonClass}>Exit</button>
