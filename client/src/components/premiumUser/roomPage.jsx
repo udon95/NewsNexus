@@ -30,7 +30,12 @@ const Room = () => {
   const [trueParentCommentId, setTrueParentCommentId] = useState(null);
   const [carouselIndex, setCarouselIndex] = useState({});
   const [expandedArticles, setExpandedArticles] = useState({});
+  const { userType } = useAuthHook();
 
+  const isPremium = userType === "Premium";
+  {!isPremium && (
+    navigate("/")
+  )}
   const nextSlide = (postid, imageCount) => {
     setCarouselIndex((prev) => ({
       ...prev,
