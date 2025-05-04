@@ -5,7 +5,7 @@ import Navbar from "../navbar";
 import { MoreVertical, CornerDownLeft } from "lucide-react"; // Import 3-dot icon + comment icon
 
 const Room = () => {
-  const { id: roomid } = useParams();
+  const { roomid } = useParams();
   const navigate = useNavigate();
   const [room, setRoom] = useState(null);
   const [loading, setLoading] = useState(true);
