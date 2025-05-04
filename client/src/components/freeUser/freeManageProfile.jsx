@@ -359,6 +359,7 @@ const FreeManageProfile = () => {
                   yearDropdownItemNumber={100}
                   placeholderText="Select your date of birth (Above 16 years old)"
                   className="w-full p-2 border rounded-lg mb-2"
+                  wrapperClassName="w-full"
                   popperClassName="z-[50]"
                 />
                 <div>
@@ -431,13 +432,13 @@ const FreeManageProfile = () => {
               <div className="p-4 bg-white shadow-md rounded-lg w-3/3 md:w-2/3 mb-1">
                 {Array.from({ length: 6 }).map((_, index) => (
                   <div key={index} className="flex flex-row mb-4">
-                    <label className="mt-1 mr-2 font-grotesk text-2xl">
+                    <label className="mt-1 mr-2 font-grotesk text-2xl  w-6">
                       {index + 1}.{" "}
                     </label>
                     <select
                       value={dropdownValues[index]}
                       onChange={(e) => handleDropdownChange(index, e)}
-                      className="p-1 border rounded-lg font-grotesk"
+                      className="w-full p-2 border rounded-lg font-grotesk"
                     >
                       <option value="" classname="font-grotesk">
                         Select a category
