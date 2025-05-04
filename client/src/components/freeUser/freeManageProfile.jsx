@@ -313,166 +313,153 @@ const FreeManageProfile = () => {
   }, [userDetails, authProfile]);
 
   return (
-    <div className="w-screen min-h-screen flex flex-col overflow-hidden">
-      <div className="flex-grow w-full flex min-h-full overflow-hidden">
-        <div className="flex flex-grow max-md:flex-col min-h-full w-full">
-          <div className="flex-1 min-h-full bg-indigo-50 max-md:w-full">
-            <div className="flex flex-col flex-grow min-h-full md:px-5 pt-8 w-full text-2xl font-grotesk font-medium text-black max-md:px-4 max-md:pb-24">
-              {/* Profile Details */}
-              <h3 className="text-2xl font-grotesk font-bold mb-1">
-                Profile Particulars:
-              </h3>
-              <div className="p-4 bg-white shadow-md rounded-lg w-3/3 md:w-2/3">
-                <div className="mb-1">Name:</div>
-                <input
-                  type="text"
-                  value={editUsername}
-                  onChange={(e) => setEditUsername(e.target.value)}
-                  className="w-full p-2 border rounded-lg"
-                  placeholder="Username"
-                />
-                <div className="mb-1">Email:</div>
-                <input
-                  type="email"
-                  value={editEmail}
-                  onChange={(e) => setEditEmail(e.target.value)}
-                  className="w-full p-2 border rounded-lg mt-2"
-                  placeholder="E-mail"
-                />
-                <div className="mb-1">Date:</div>
-                <DatePicker
-                  selected={editDate ? new Date(editDate) : null}
-                  onChange={(date) => {
-                    const isoString = date?.toISOString().split("T")[0]; // 'yyyy-mm-dd'
-                    setEditDate(isoString);
-                  }}
-                  dateFormat="dd-MM-yyyy"
-                  maxDate={
-                    new Date(
-                      new Date().setFullYear(new Date().getFullYear() - 16)
-                    )
-                  }
-                  showMonthDropdown
-                  showYearDropdown
-                  dropdownMode="select"
-                  scrollableYearDropdown
-                  yearDropdownItemNumber={100}
-                  placeholderText="Select your date of birth (Above 16 years old)"
-                  className="w-full p-2 border rounded-lg mb-2"
-                  wrapperClassName="w-full"
-                  popperClassName="z-[50]"
-                />
-                <div>
-                  <div className="mb-1">Gender:</div>
-                  <select
-                    value={editGender}
-                    onChange={(e) => setEditGender(e.target.value)}
-                    className="w-full p-2 border rounded-lg mt-2"
-                  >
-                    <option value="">Select Gender</option>
-                    <option value="Male">Male</option>
-                    <option value="Female">Female</option>
-                    <option value="Other">Prefer Not To Say</option>
-                  </select>
-                </div>
-                <button
-                  onClick={updateProfile}
-                  className="bg-[#3f414c] text-[white] cursor-pointer text-sm flex justify-end self-end w-fit ml-auto mr-0 mt-5 px-5 py-2.5 rounded-xl border-[none]"
-                >
-                  Update
-                </button>
-              </div>
-
-              {/* Password Change */}
-              <h3 className="text-2xl font-bold  font-grotesk mb-1 mt-6">
-                Manage Password:
-              </h3>
-              <div className="p-4 bg-white shadow-md rounded-lg w-3/3 md:w-2/3">
-                <PasswordInput
-                  name="password"
-                  value={editOldPassword}
-                  onChange={(e) => setEditOldPassword(e.target.value)}
-                  className="w-full p-2 border rounded-lg"
-                  placeholder="Old Password"
-                />
-                {oldPasswordError && (
-                  <p className="text-red-600 text-sm mt-1">
-                    {oldPasswordError}
-                  </p>
-                )}
-                <PasswordInput
-                  name="password"
-                  value={editNewPassword}
-                  onChange={(e) => setEditNewPassword(e.target.value)}
-                  className="w-full p-2 border rounded-lg mt-2"
-                  placeholder="New Password "
-                />
-                <PasswordInput
-                  name="password"
-                  value={editNewPasswordConfirm}
-                  onChange={(e) => setEditNewPasswordConfirm(e.target.value)}
-                  className="w-full p-2 border rounded-lg mt-2"
-                  placeholder="Confirm New Password"
-                />
-                {passwordError && (
-                  <p className="text-red-600 text-sm mt-2">{passwordError}</p>
-                )}
-                <button
-                  onClick={updatePassword}
-                  className="bg-[#3f414c] text-[white] cursor-pointer text-sm flex justify-end self-end w-fit ml-auto mr-0 mt-5 px-5 py-2.5 rounded-xl border-[none]"
-                >
-                  Update
-                </button>
-              </div>
-
-              {/* Topic Interests */}
-              <h3 className="text-2xl font-bold font-grotesk mb-1 mt-6">
-                Interest Selection (Max 6):
-              </h3>
-              <div className="p-4 bg-white shadow-md rounded-lg w-3/3 md:w-2/3 mb-1">
-                {Array.from({ length: 6 }).map((_, index) => (
-                  <div key={index} className="flex flex-row mb-4">
-                    <label className="mt-1 mr-2 font-grotesk text-2xl  w-6">
-                      {index + 1}.{" "}
-                    </label>
-                    <select
-                      value={dropdownValues[index]}
-                      onChange={(e) => handleDropdownChange(index, e)}
-                      className="w-full p-2 border rounded-lg font-grotesk"
-                    >
-                      <option value="" classname="font-grotesk">
-                        Select a category
-                      </option>
-                      {categories
-                        .filter(
-                          (cat) =>
-                            !dropdownValues.includes(cat.name) ||
-                            cat.name === dropdownValues[index]
-                        )
-                        .map((cat) => (
-                          <option key={cat.id} value={cat.name}>
-                            {cat.name}
-                          </option>
-                        ))}
-                    </select>
-                  </div>
-                ))}
-                <button
-                  onClick={updateInterests}
-                  className="bg-[#3f414c] text-[white] cursor-pointer text-sm flex justify-end self-end w-fit ml-auto mr-0 mt-5 px-5 py-2.5 rounded-xl border-[none]"
-                >
-                  Update
-                </button>
-              </div>
-
-              {showError && (
-                <p className="text-red-600">
-                  You can only select up to 6 topics.
-                </p>
-              )}
-            </div>
+    <div className="flex justify-center w-full px-4 md:px-5 pt-8 text-black text-2xl font-grotesk font-medium">
+      <div className="w-full md:w-2/3 max-w-[1000px]">
+        <h3 className="text-2xl font-grotesk font-bold mb-1">
+          Profile Particulars:
+        </h3>
+        <div className="p-4 bg-white shadow-md rounded-lg font-grotesk">
+          <div className="mb-1">Name:</div>
+          <input
+            type="text"
+            value={editUsername}
+            onChange={(e) => setEditUsername(e.target.value)}
+            className="w-full p-2 border rounded-lg"
+            placeholder="Username"
+          />
+          <div className="mb-1">Email:</div>
+          <input
+            type="email"
+            value={editEmail}
+            onChange={(e) => setEditEmail(e.target.value)}
+            className="w-full p-2 border rounded-lg mt-2"
+            placeholder="E-mail"
+          />
+          <div className="mb-1">Date:</div>
+          <DatePicker
+            selected={editDate ? new Date(editDate) : null}
+            onChange={(date) => {
+              const isoString = date?.toISOString().split("T")[0]; // 'yyyy-mm-dd'
+              setEditDate(isoString);
+            }}
+            dateFormat="dd-MM-yyyy"
+            maxDate={
+              new Date(new Date().setFullYear(new Date().getFullYear() - 16))
+            }
+            showMonthDropdown
+            showYearDropdown
+            dropdownMode="select"
+            scrollableYearDropdown
+            yearDropdownItemNumber={100}
+            placeholderText="Select your date of birth (Above 16 years old)"
+            className="w-full p-2 border rounded-lg mb-2"
+            wrapperClassName="w-full"
+            popperClassName="z-[50]"
+          />
+          <div>
+            <div className="mb-1">Gender:</div>
+            <select
+              value={editGender}
+              onChange={(e) => setEditGender(e.target.value)}
+              className="w-full p-2 border rounded-lg mt-2"
+            >
+              <option value="">Select Gender</option>
+              <option value="Male">Male</option>
+              <option value="Female">Female</option>
+              <option value="Other">Prefer Not To Say</option>
+            </select>
           </div>
+          <button
+            onClick={updateProfile}
+            className="bg-[#3f414c] text-[white] cursor-pointer text-sm flex justify-end self-end w-fit ml-auto mr-0 mt-5 px-5 py-2.5 rounded-xl border-[none]"
+          >
+            Update
+          </button>
         </div>
+
+        {/* Password Change */}
+        <h3 className="text-2xl font-bold  font-grotesk mb-1 mt-6">
+          Manage Password:
+        </h3>
+        <div className="p-4 bg-white shadow-md rounded-lg font-grotesk">
+          <PasswordInput
+            name="password"
+            value={editOldPassword}
+            onChange={(e) => setEditOldPassword(e.target.value)}
+            className="w-full p-2 border rounded-lg"
+            placeholder="Old Password"
+          />
+          {oldPasswordError && (
+            <p className="text-red-600 text-sm mt-1">{oldPasswordError}</p>
+          )}
+          <PasswordInput
+            name="password"
+            value={editNewPassword}
+            onChange={(e) => setEditNewPassword(e.target.value)}
+            className="w-full p-2 border rounded-lg mt-2"
+            placeholder="New Password "
+          />
+          <PasswordInput
+            name="password"
+            value={editNewPasswordConfirm}
+            onChange={(e) => setEditNewPasswordConfirm(e.target.value)}
+            className="w-full p-2 border rounded-lg mt-2"
+            placeholder="Confirm New Password"
+          />
+          {passwordError && (
+            <p className="text-red-600 text-sm mt-2">{passwordError}</p>
+          )}
+          <button
+            onClick={updatePassword}
+            className="bg-[#3f414c] text-[white] cursor-pointer text-sm flex justify-end self-end w-fit ml-auto mr-0 mt-5 px-5 py-2.5 rounded-xl border-[none]"
+          >
+            Update
+          </button>
+        </div>
+
+        {/* Topic Interests */}
+        <h3 className="text-2xl font-bold font-grotesk mb-1 mt-6">
+          Interest Selection (Max 6):
+        </h3>
+        <div className="p-4 bg-white shadow-md rounded-lg font-grotesk">
+          {Array.from({ length: 6 }).map((_, index) => (
+            <div key={index} className="flex flex-row mb-4">
+              <label className="mt-1 mr-2 font-grotesk text-2xl  w-6">
+                {index + 1}.{" "}
+              </label>
+              <select
+                value={dropdownValues[index]}
+                onChange={(e) => handleDropdownChange(index, e)}
+                className="w-full p-2 border rounded-lg font-grotesk"
+              >
+                <option value="" classname="font-grotesk">
+                  Select a category
+                </option>
+                {categories
+                  .filter(
+                    (cat) =>
+                      !dropdownValues.includes(cat.name) ||
+                      cat.name === dropdownValues[index]
+                  )
+                  .map((cat) => (
+                    <option key={cat.id} value={cat.name}>
+                      {cat.name}
+                    </option>
+                  ))}
+              </select>
+            </div>
+          ))}
+          <button
+            onClick={updateInterests}
+            className="bg-[#3f414c] text-[white] cursor-pointer text-sm flex justify-end self-end w-fit ml-auto mr-0 mt-5 px-5 py-2.5 rounded-xl border-[none]"
+          >
+            Update
+          </button>
+        </div>
+
+        {showError && (
+          <p className="text-red-600">You can only select up to 6 topics.</p>
+        )}
       </div>
     </div>
   );

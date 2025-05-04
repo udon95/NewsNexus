@@ -54,6 +54,7 @@ export const PremiumWriteArticle = () => {
 
   const [searchParams] = useSearchParams();
   const preSelectedType = searchParams.get("type"); // e.g. "room"
+  const preSelectedRoomId = searchParams.get("roomid");
 
   useEffect(() => {
     if (preSelectedType === "room" && preSelectedRoomId && rooms.length > 0) {
