@@ -182,7 +182,7 @@ const PremManageProfile = () => {
             gender: editGender,
           };
 
-          storedUser.color = profileColor; // ✅ save at top-level only
+          storedUser.color = profileColor; // save at top-level only
 
           localStorage.setItem("userProfile", JSON.stringify(storedUser));
           sessionStorage.setItem("userProfile", JSON.stringify(storedUser));
@@ -389,16 +389,34 @@ const PremManageProfile = () => {
                   placeholder="E-mail"
                 />
                 Date:
-                <input
-                  type="date"
-                  value={editDate}
-                  onChange={(e) => setEditDate(e.target.value)}
-                  className="w-full p-2 border rounded-lg mb-2"
-                  placeholder="DOB"
-                />
-                {dobError && (
-                  <p className="text-red-600 text-sm mt-2">{dobError}</p>
-                )}
+                <div className="flex-grow relative group">
+                  <DatePicker
+                    selected={editDate ? new Date(editDate) : null}
+                    onChange={(date) => {
+                      const isoString = date?.toISOString().split("T")[0]; // 'yyyy-mm-dd'
+                      setEditDate(isoString);
+                    }}
+                    dateFormat="dd-MM-yyyy"
+                    maxDate={
+                      new Date(
+                        new Date().setFullYear(new Date().getFullYear() - 16)
+                      )
+                    }
+                    showMonthDropdown
+                    showYearDropdown
+                    dropdownMode="select"
+                    scrollableYearDropdown
+                    yearDropdownItemNumber={100}
+                    placeholderText="Select your date of birth (Above 16 years old)"
+                    className="w-full p-3 rounded-lg bg-[#F3F3F3] focus:ring-2 focus:ring-blue-500 shadow-lg font-grotesk"
+                    wrapperClassName="w-full"
+                  />
+                  {errors.dob && (
+                    <div className="absolute top-[-30px] left-1/2 -translate-x-1/2 bg-red-500 text-white text-xs p-2 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                      {errors.dob}
+                    </div>
+                  )}
+                </div>
                 <div>
                   Gender:
                   <select
@@ -490,7 +508,6 @@ const PremManageProfile = () => {
                 Interest Selection (Max 6):
               </h3>
               <div className="p-4 bg-white shadow-md rounded-lg w-3/3 md:w-2/3 mb-1">
-             
                 {Array.from({ length: 6 }).map((_, index) => (
                   <div key={index} className="flex flex-row mb-4">
                     <label className="mt-1 mr-2 font-grotesk text-2xl">
