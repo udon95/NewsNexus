@@ -268,7 +268,7 @@ function Register() {
                     dropdownMode="select"
                     scrollableYearDropdown
                     yearDropdownItemNumber={100}
-                    placeholderText="Select your date of birth"
+                    placeholderText="Select your date of birth (Above 16 years old)"
                     className="flex-grow p-3 rounded-lg bg-[#F3F3F3] focus:ring-2 focus:ring-blue-500 shadow-lg font-grotesk"
                     wrapperClassName="w-full"
                   />
