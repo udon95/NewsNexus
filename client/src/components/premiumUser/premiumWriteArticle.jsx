@@ -56,6 +56,63 @@ export const PremiumWriteArticle = () => {
   const preSelectedType = searchParams.get("type"); // e.g. "room"
   const preSelectedRoomId = searchParams.get("roomid");
 
+  // Fetch Topics from `topic_categories`
+  useEffect(() => {
+    const fetchTopics = async () => {
+      // Fetch both topicid and name from the topic_categories table
+      const { data, error } = await supabase
+        .from("topic_categories")
+        .select("topicid, name");
+
+      if (!error && data) {
+        setTopicOptions(data); // Data is an array of objects like { topicid, name }
+      }
+    };
+    fetchTopics();
+  }, []);
+
+  useEffect(() => {
+    const fetchUserRooms = async () => {
+      const storedUser = JSON.parse(localStorage.getItem("userProfile"));
+      const userId = storedUser?.user?.userid;
+      if (!userId) return;
+
+      // Step 1: Get roomids where this user is a member
+      const { data: memberData, error: memberError } = await supabase
+        .from("room_members")
+        .select("roomid")
+        .eq("userid", userId)
+        .is("exited_at", null); // only active memberships
+
+      if (memberError || !memberData) {
+        console.error("Error fetching room memberships:", memberError);
+        return;
+      }
+
+      const roomIds = memberData.map((entry) => entry.roomid).filter(Boolean);
+      const uniqueRoomIds = [...new Set(roomIds)];
+
+      if (uniqueRoomIds.length === 0) {
+        setRooms([]); // user is not in any rooms
+        return;
+      }
+
+      // Step 2: Fetch only those rooms from `rooms` table
+      const { data: roomData, error: roomError } = await supabase
+        .from("rooms")
+        .select("roomid, name") //  use the correct column (roomid!)
+        .in("roomid", uniqueRoomIds); //  this MUST match the key used in SELECT
+
+      if (!roomError && roomData) {
+        setRooms(roomData);
+      } else {
+        console.error("Error fetching room info:", roomError);
+      }
+    };
+
+    fetchUserRooms();
+  }, []);
+  
   useEffect(() => {
     if (
       preSelectedType === "room" &&
@@ -67,7 +124,6 @@ export const PremiumWriteArticle = () => {
       setSelectedRoom(preSelectedRoomId);
     }
   }, [preSelectedType, preSelectedRoomId, rooms]);
-  
 
   const CustomParagraph = Paragraph.extend({
     addAttributes() {
@@ -154,35 +210,6 @@ export const PremiumWriteArticle = () => {
       }
     },
   });
-
-  //NEW
-  // useEffect(() => {
-  //   const checkSession = async () => {
-  //     const {
-  //       data: { session },
-  //     } = await supabase.auth.getSession();
-  //     console.log("Session:", session);
-
-  //     if (!session?.user) {
-  //       console.warn("No active Supabase session!");
-  //     } else {
-  //       console.log("Supabase user is authenticated");
-  //     }
-  //   };
-
-  //   checkSession();
-  // }, []);
-
-  // //NEW
-  // useEffect(() => {
-  //   supabase.auth.onAuthStateChange((event, session) => {
-  //     if (event === "SIGNED_IN") {
-  //       console.log(" Logged in");
-  //     } else if (event === "SIGNED_OUT") {
-  //       console.log(" Logged out");
-  //     }
-  //   });
-  // }, []);
 
   useEffect(() => {
     if (!editor) return;
@@ -297,7 +324,6 @@ export const PremiumWriteArticle = () => {
         //  This is important to prevent saving
         return;
       }
-
 
       const articleid = result.article?.articleid;
 
@@ -526,62 +552,7 @@ export const PremiumWriteArticle = () => {
     e.target.value = null;
   };
 
-  // Fetch Topics from `topic_categories`
-  useEffect(() => {
-    const fetchTopics = async () => {
-      // Fetch both topicid and name from the topic_categories table
-      const { data, error } = await supabase
-        .from("topic_categories")
-        .select("topicid, name");
-
-      if (!error && data) {
-        setTopicOptions(data); // Data is an array of objects like { topicid, name }
-      }
-    };
-    fetchTopics();
-  }, []);
-
-  useEffect(() => {
-    const fetchUserRooms = async () => {
-      const storedUser = JSON.parse(localStorage.getItem("userProfile"));
-      const userId = storedUser?.user?.userid;
-      if (!userId) return;
-
-      // Step 1: Get roomids where this user is a member
-      const { data: memberData, error: memberError } = await supabase
-        .from("room_members")
-        .select("roomid")
-        .eq("userid", userId)
-        .is("exited_at", null); // only active memberships
-
-      if (memberError || !memberData) {
-        console.error("Error fetching room memberships:", memberError);
-        return;
-      }
-
-      const roomIds = memberData.map((entry) => entry.roomid).filter(Boolean);
-      const uniqueRoomIds = [...new Set(roomIds)];
-
-      if (uniqueRoomIds.length === 0) {
-        setRooms([]); // user is not in any rooms
-        return;
-      }
-
-      // Step 2: Fetch only those rooms from `rooms` table
-      const { data: roomData, error: roomError } = await supabase
-        .from("rooms")
-        .select("roomid, name") //  use the correct column (roomid!)
-        .in("roomid", uniqueRoomIds); //  this MUST match the key used in SELECT
-
-      if (!roomError && roomData) {
-        setRooms(roomData);
-      } else {
-        console.error("Error fetching room info:", roomError);
-      }
-    };
-
-    fetchUserRooms();
-  }, []);
+  
 
   const handleClearInputs = () => {
     setTitle("");
