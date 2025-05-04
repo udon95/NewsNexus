@@ -386,7 +386,7 @@ const PremManageProfile = () => {
                 Profile Particulars:
               </h3>
               <div className="p-4 bg-white shadow-md rounded-lg w-3/3 md:w-2/3 font-grotesk">
-                Name:
+                <div className="mb-1">Name:</div>
                 <input
                   type="text"
                   value={editUsername}
@@ -394,7 +394,7 @@ const PremManageProfile = () => {
                   className="w-full p-2 border rounded-lg mb-2"
                   placeholder="Username"
                 />
-                Email:
+                <div className="mb-1">Email:</div>
                 <input
                   type="email"
                   value={editEmail}
@@ -424,7 +424,7 @@ const PremManageProfile = () => {
                   className="w-full p-2 border rounded-lg mb-2"
                   popperClassName="z-[50]"
                 />
-                Gender:
+                <div className="mb-1">Gender:</div>
                 <select
                   value={editGender}
                   onChange={(e) => setEditGender(e.target.value)}
@@ -435,13 +435,13 @@ const PremManageProfile = () => {
                   <option value="Female">Female</option>
                   <option value="Other">Prefer Not To Say</option>
                 </select>
-                Choose Profile Color:
+                <div className="mb-1">Choose Profile Color:</div>
                 <HexColorPicker
                   color={profileColor}
                   onChange={handleColorChange}
                   className="mb-2"
                 />
-                Or Enter HexCode:
+                <div className="mb-1">Or Enter HexCode:</div>
                 <input
                   type="text"
                   value={hexCode}

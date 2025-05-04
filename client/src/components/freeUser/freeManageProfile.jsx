@@ -323,7 +323,7 @@ const FreeManageProfile = () => {
                 Profile Particulars:
               </h3>
               <div className="p-4 bg-white shadow-md rounded-lg w-3/3 md:w-2/3">
-                Name:
+                <div className="mb-1">Name:</div>
                 <input
                   type="text"
                   value={editUsername}
@@ -331,7 +331,7 @@ const FreeManageProfile = () => {
                   className="w-full p-2 border rounded-lg"
                   placeholder="Username"
                 />
-                Email:
+                <div className="mb-1">Email:</div>
                 <input
                   type="email"
                   value={editEmail}
@@ -339,36 +339,30 @@ const FreeManageProfile = () => {
                   className="w-full p-2 border rounded-lg mt-2"
                   placeholder="E-mail"
                 />
-                Date:
-                <div className="relative w-full">
-                  <DatePicker
-                    selected={editDate ? new Date(editDate) : null}
-                    onChange={(date) => {
-                      const isoString = date?.toISOString().split("T")[0]; // 'yyyy-mm-dd'
-                      setEditDate(isoString);
-                    }}
-                    dateFormat="dd-MM-yyyy"
-                    maxDate={
-                      new Date(
-                        new Date().setFullYear(new Date().getFullYear() - 16)
-                      )
-                    }
-                    showMonthDropdown
-                    showYearDropdown
-                    dropdownMode="select"
-                    scrollableYearDropdown
-                    yearDropdownItemNumber={100}
-                    placeholderText="Select your date of birth (Above 16 years old)"
-                    className="w-full p-2 pr-10 border rounded-lg mb-2 bg-white focus:outline-none font-grotesk"
-                  />
-                  {dobError && (
-                    <div className="absolute top-[-30px] left-1/2 -translate-x-1/2 bg-red-500 text-white text-xs p-2 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                      {dobError}
-                    </div>
-                  )}
-                </div>
+                <div className="mb-1">Date:</div>
+                <DatePicker
+                  selected={editDate ? new Date(editDate) : null}
+                  onChange={(date) => {
+                    const isoString = date?.toISOString().split("T")[0]; // 'yyyy-mm-dd'
+                    setEditDate(isoString);
+                  }}
+                  dateFormat="dd-MM-yyyy"
+                  maxDate={
+                    new Date(
+                      new Date().setFullYear(new Date().getFullYear() - 16)
+                    )
+                  }
+                  showMonthDropdown
+                  showYearDropdown
+                  dropdownMode="select"
+                  scrollableYearDropdown
+                  yearDropdownItemNumber={100}
+                  placeholderText="Select your date of birth (Above 16 years old)"
+                  className="w-full p-2 border rounded-lg mb-2"
+                  popperClassName="z-[50]"
+                />
                 <div>
-                  Gender:
+                  <div className="mb-1">Gender:</div>
                   <select
                     value={editGender}
                     onChange={(e) => setEditGender(e.target.value)}
