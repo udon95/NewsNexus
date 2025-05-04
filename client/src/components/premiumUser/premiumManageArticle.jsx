@@ -63,7 +63,7 @@ export const PremManageArticle = () => {
         likeCountMap[article.articleid] = article.total_votes;
       });
 
-      console.log("Fetched articles data:", JSON.stringify(data, null, 2)); // Debugging log
+      //console.log("Fetched articles data:", JSON.stringify(data, null, 2)); // Debugging log
       setPostedArticles(data);
       setViewCounts(viewCountMap);
       setLikeCounts(likeCountMap);
@@ -109,7 +109,7 @@ export const PremManageArticle = () => {
         return;
       }
 
-      console.log("Fetched articles data:", JSON.stringify(data, null, 2)); // Debugging log
+      //console.log("Fetched articles data:", JSON.stringify(data, null, 2)); // Debugging log
       setroomPostedArticles(data);
     };
     fetchroompostedArticles();
@@ -137,7 +137,7 @@ export const PremManageArticle = () => {
         return;
       }
 
-      console.log("Fetched articles data:", JSON.stringify(data, null, 2)); // Debugging log
+      //console.log("Fetched articles data:", JSON.stringify(data, null, 2)); // Debugging log
       setDraftArticles(data);
     };
     fetchdraftArticles();
@@ -164,7 +164,7 @@ export const PremManageArticle = () => {
         return;
       }
 
-      console.log("Fetched articles data:", JSON.stringify(data, null, 2)); // Debugging log
+      //console.log("Fetched articles data:", JSON.stringify(data, null, 2)); // Debugging log
       setroomDraftArticles(data);
     };
     fetchroomDraftArticles();
