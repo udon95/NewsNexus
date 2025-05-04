@@ -14,7 +14,7 @@ function Register() {
     email: "",
     password: "",
     confirmPassword: "",
-    dob: "",
+    dob: null,
     gender: "",
   });
   const [errors, setErrors] = useState({});
@@ -36,31 +36,23 @@ function Register() {
         newErrors.password = "Password must be at least 8 characters.";
       if (userData.password !== userData.confirmPassword)
         newErrors.confirmPassword = "Passwords do not match.";
-      if (!userData.dob) newErrors.dob = "Date of birth is required.";
+
       if (!userData.dob) {
         newErrors.dob = "Date of birth is required.";
       } else {
-        // Check that DOB is not in the future
-        if (new Date(userData.dob) > new Date()) {
-          newErrors.dob = "DOB cannot be in the future.";
-        } else {
-          // Calculate age from dob
-          const birthDate = new Date(userData.dob);
-          const today = new Date();
-          let age = today.getFullYear() - birthDate.getFullYear();
-          const monthDiff = today.getMonth() - birthDate.getMonth();
-          if (
-            monthDiff < 0 ||
-            (monthDiff === 0 && today.getDate() < birthDate.getDate())
-          ) {
-            age--;
-          }
-          // Check if age is less than 16
-          if (age < 16) {
-            newErrors.dob = "You must be at least 16 years old to register.";
-          }
+        const today = new Date();
+        const birthDate = new Date(userData.dob);
+        const age = today.getFullYear() - birthDate.getFullYear();
+        const monthDiff = today.getMonth() - birthDate.getMonth();
+        const dayDiff = today.getDate() - birthDate.getDate();
+        if (
+          age < 16 ||
+          (age === 16 && (monthDiff < 0 || (monthDiff === 0 && dayDiff < 0)))
+        ) {
+          newErrors.dob = "You must be at least 16 years old to register.";
         }
       }
+
       if (!userData.gender) newErrors.gender = "Please select a gender.";
 
       setErrors(newErrors);
@@ -105,13 +97,12 @@ function Register() {
   useEffect(() => {
     const today = new Date();
     today.setFullYear(today.getFullYear() - 16); // subtract 16 years
-  
+
     const yyyy = today.getFullYear();
     const mm = String(today.getMonth() + 1).padStart(2, "0");
     const dd = String(today.getDate()).padStart(2, "0");
     setMaxDate(`${yyyy}-${mm}-${dd}`);
   }, []);
-  
 
   // const handleTopicsSelect = (topics) => {
   //   setSelectedTopics(
@@ -261,14 +252,22 @@ function Register() {
                   <label className="text-2xl sm:text-2xl font-normal text-black w-30">
                     Date of Birth:
                   </label>
-                  <input
-                    type="date"
-                    name="dob"
-                    max={maxDate}
-                    value={userData.dob}
-                    onChange={handleInputChange}
-                    className="flex-grow p-3 rounded-lg bg-[#F3F3F3] focus:ring-2 focus:ring-blue-500 shadow-lg"
-                    placeholder="dd-mm-yyyy"
+                  <DatePicker
+                    selected={userData.dob}
+                    onChange={(date) =>
+                      setUserData((prev) => ({ ...prev, dob: date }))
+                    }
+                    dateFormat="dd-MM-yyyy"
+                    maxDate={
+                      new Date(
+                        new Date().setFullYear(new Date().getFullYear() - 16)
+                      )
+                    }
+                    showYearDropdown
+                    scrollableYearDropdown
+                    yearDropdownItemNumber={100}
+                    placeholderText="Select your date of birth"
+                    className="flex-grow p-3 rounded-lg bg-[#F3F3F3] focus:ring-2 focus:ring-blue-500 shadow-lg w-full"
                   />
                   {errors.dob && (
                     <div className="absolute top-[-30px] left-1/2 -translate-x-1/2 bg-red-500 text-white text-xs p-2 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300">
