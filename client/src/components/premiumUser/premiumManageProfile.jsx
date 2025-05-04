@@ -447,23 +447,14 @@ const PremManageProfile = () => {
                   onChange={handleColorChange}
                   className="mb-2"
                 />
-                <div>
-                  Or Enter HexCode:
-                  <input
-                    type="text"
-                    value={hexCode}
-                    onChange={handleHexChange}
-                    placeholder="#FFFFFF"
-                    className="ml-2 p-2 border rounded-lg mb-2"
-                  />
-                </div>
-                <div
-                  className="preview"
-                  style={{ backgroundColor: profileColor }}
-                >
-                  {/* Profile color preview */}
-                  <p>Your selected color</p>
-                </div>
+                Or Enter HexCode:
+                <input
+                  type="text"
+                  value={hexCode}
+                  onChange={handleHexChange}
+                  placeholder="#FFFFFF"
+                  className="w-full p-2 border rounded-lg mb-2"
+                />
                 <button
                   onClick={updateProfile}
                   className="bg-[#3f414c] text-[white] cursor-pointer text-sm flex justify-end self-end w-fit ml-auto mr-0 mt-5 px-5 py-2.5 rounded-xl border-[none] "
