@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../components/navbar.jsx";
-import Topic from "./topic.jsx";
 import supabase from "../api/supabaseClient.js";
 import PasswordInput from "../components/showPW.jsx";
 import "../index.css";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 
 function Register() {
   const [step, setStep] = useState(1);
@@ -20,6 +21,7 @@ function Register() {
   const [selectedTopics, setSelectedTopics] = useState([]);
   const [isValid, setIsValid] = useState(false); // Track form validation state
   const navigate = useNavigate();
+  const [maxDate, setMaxDate] = useState("");
 
   const [categories, setCategories] = useState([]);
   const [dropdownValues, setDropdownValues] = useState(Array(6).fill(""));
@@ -100,6 +102,17 @@ function Register() {
     setDropdownValues(newValues);
   };
 
+  useEffect(() => {
+    const today = new Date();
+    today.setFullYear(today.getFullYear() - 16); // subtract 16 years
+  
+    const yyyy = today.getFullYear();
+    const mm = String(today.getMonth() + 1).padStart(2, "0");
+    const dd = String(today.getDate()).padStart(2, "0");
+    setMaxDate(`${yyyy}-${mm}-${dd}`);
+  }, []);
+  
+
   // const handleTopicsSelect = (topics) => {
   //   setSelectedTopics(
   //     (prevTopics) =>
@@ -145,18 +158,6 @@ function Register() {
       alert("Error: " + error.message);
     }
   };
-
-  // const resendConfirmationEmail = async () => {
-  //   const { error } = await supabase.auth.resend({
-  //     type: "signup",
-  //     email: userData.email,
-  //     options: {
-  //       emailRedirectTo: window.location.origin + "/login",
-  //     },
-  //   });
-  //   if (error) return alert("Error resending email: " + error.message);
-  //   alert("A new confirmation link has been sent to your inbox.");
-  // };
 
   return (
     <div className="w-full min-h-screen min-w-screen flex flex-col bg-white">
@@ -217,7 +218,6 @@ function Register() {
                     Password:
                   </label>
                   <PasswordInput
-                    // type="password"
                     name="password"
                     value={userData.password}
                     onChange={(e) =>
@@ -240,7 +240,6 @@ function Register() {
                     Re-enter password:
                   </label>
                   <PasswordInput
-                    // type="password"
                     name="confirmPassword"
                     value={userData.confirmPassword}
                     onChange={(e) =>
@@ -265,6 +264,7 @@ function Register() {
                   <input
                     type="date"
                     name="dob"
+                    max={maxDate}
                     value={userData.dob}
                     onChange={handleInputChange}
                     className="flex-grow p-3 rounded-lg bg-[#F3F3F3] focus:ring-2 focus:ring-blue-500 shadow-lg"
