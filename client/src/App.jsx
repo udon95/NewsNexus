@@ -151,7 +151,7 @@ function App() {
               path="/room/:id"
               element={
                 <RequireAuth allowedUserType="Premium">
-                  <PremiumDashboard /> {/* acts as layout */}
+                  <RoomPage /> {/* acts as layout */}
                 </RequireAuth>
               }
             >
