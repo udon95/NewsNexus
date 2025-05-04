@@ -128,7 +128,7 @@ function App() {
               path="/public-profile/:username"
               element={<PublicProfile />}
             />
-             <Route path="rooms" element={<ViewRooms />} />
+             <Route path="/rooms" element={<ViewRooms />} />
 
             <Route
               path="/freeDashboard/*"
