@@ -35,7 +35,7 @@ const Room = () => {
 
   const isPremium = userType === "Premium";
   {!isPremium && (
-    navigate("/")
+    navigate("/rooms")
   )}
   const nextSlide = (postid, imageCount) => {
     setCarouselIndex((prev) => ({
