@@ -377,7 +377,7 @@ const PremManageProfile = () => {
 
   return (
     <div className="flex justify-center w-full px-4 md:px-5 pt-8 text-black text-2xl font-grotesk font-medium">
-      <div className="w-full md:w-2/3 max-w-[700px]">
+      <div className="w-full md:w-2/3 max-w-[1000px]">
         <h3 className="text-2xl font-grotesk font-bold mb-1">
           Profile Particulars:
         </h3>
@@ -496,7 +496,7 @@ const PremManageProfile = () => {
         <h3 className="text-2xl font-bold font-grotesk mb-1 mt-6">
           Interest Selection (Max 6):
         </h3>
-        <div className="p-4 bg-white shadow-md rounded-lg md:w-2/3 mb-1">
+        <div className="p-4 bg-white shadow-md rounded-lg ">
           {Array.from({ length: 6 }).map((_, index) => (
             <div key={index} className="flex flex-row mb-4 items-center">
               <label className="mt-1 mr-2 font-grotesk text-2xl w-6">
