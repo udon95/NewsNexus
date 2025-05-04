@@ -146,9 +146,16 @@ function App() {
                   <PremiumDashboard />
                 </RequireAuth>
               }
+            />
+            <Route
+              path="/room/:id"
+              element={
+                <RequireAuth allowedUserType="Premium">
+                  <PremiumDashboard /> {/* acts as layout */}
+                </RequireAuth>
+              }
             >
-              {" "}
-              <Route path="/room/:id" element={<RoomPage />} />
+              <Route index element={<RoomPage />} />
             </Route>
 
             <Route
