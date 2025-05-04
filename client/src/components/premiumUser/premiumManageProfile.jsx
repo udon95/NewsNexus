@@ -66,7 +66,7 @@ const PremManageProfile = () => {
     fetchUserProfile();
   }, []);
 
-  // load all categories/topcs
+  // load all categories/topics
   useEffect(() => {
     async function fetchCategories() {
       const { data, error } = await supabase
@@ -490,11 +490,7 @@ const PremManageProfile = () => {
                 Interest Selection (Max 6):
               </h3>
               <div className="p-4 bg-white shadow-md rounded-lg w-3/3 md:w-2/3 mb-1">
-                {/* <FetchTopics
-                  selectedTopics={selectedTopics} //  Pass selected topics
-                  setSelectedTopics={setSelectedTopics} //  Allow updates
-                  handleTopicSelection={handleTopicSelection}
-                /> */}
+             
                 {Array.from({ length: 6 }).map((_, index) => (
                   <div key={index} className="flex flex-row mb-4">
                     <label className="mt-1 mr-2 font-grotesk text-2xl">
