@@ -8,7 +8,6 @@ import PremiumWriteArticle from "./premiumWriteArticle.jsx";
 import PremiumManageProfile from "./premiumManageProfile.jsx";
 import PremiumManageRooms from "./premiumManageRooms.jsx";
 import PremiumEditArticle from "./premiumEditArticle";
-import ViewRooms from "./viewRooms.jsx";
 import RoomPage from "./roomPage.jsx";
 
 function PremiumDashboard() {
@@ -36,7 +35,7 @@ function PremiumDashboard() {
             <Route path="submitTestimonial" element={<PremiumSubmitTest />} />
             <Route path="manageRooms" element={<PremiumManageRooms />} />
             <Route path="applyExpert" element={<PremiumApplyExpert />} />
-            <Route path="rooms" element={<ViewRooms />} />
+           
             <Route path="room/:id" element={<RoomPage />} />
           </Routes>
         </div>

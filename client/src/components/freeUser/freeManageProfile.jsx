@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import useAuthHook from "../../hooks/useAuth";
-import TopicList from "../../components/topicList";
 import PasswordInput from "../showPW";
 import api from "../../api/axios";
 
@@ -20,8 +19,10 @@ const FreeManageProfile = () => {
   const [editOldPassword, setEditOldPassword] = useState("");
   const [editNewPassword, setEditNewPassword] = useState("");
   const [editNewPasswordConfirm, setEditNewPasswordConfirm] = useState("");
+  
   const [categories, setCategories] = useState([]);
   const [dropdownValues, setDropdownValues] = useState(Array(6).fill(""));
+
 
   useEffect(() => {
     const fetchUserProfile = async () => {
@@ -38,6 +39,13 @@ const FreeManageProfile = () => {
             : data.interests.split(", ").map((topic) => topic.trim());
 
           setSelectedTopics(formattedInterests); //  Pre-select topics from stored interests
+          setDropdownValues((prev) => {
+            const updated = [...prev];
+            for (let i = 0; i < formattedInterests.length && i < 6; i++) {
+              updated[i] = formattedInterests[i];
+            }
+            return updated;
+          });
         }
       } catch (err) {
         console.error("Profile fetch error:", err.message);
@@ -58,6 +66,7 @@ const FreeManageProfile = () => {
   //   );
   // };
   
+  // load all categories/topics
   useEffect(() => {
     async function fetchCategories() {
       const { data, error } = await supabase
@@ -72,14 +81,24 @@ const FreeManageProfile = () => {
     fetchCategories();
   }, []);
 
+  // set dropdown selection values
   useEffect(() => {
     const selected = dropdownValues.filter((val) => val !== "");
     setSelectedTopics(selected);
   }, [dropdownValues]);
 
+  // handle dropdown selection
   const handleDropdownChange = (index, e) => {
+    const newValue = e.target.value;
+    const alreadySelected = dropdownValues.includes(newValue);
+
+    if (newValue && alreadySelected) {
+      alert("You’ve already selected this topic.");
+      return;
+    }
+
     const newValues = [...dropdownValues];
-    newValues[index] = e.target.value;
+    newValues[index] = newValue;
     setDropdownValues(newValues);
   };
 
@@ -229,6 +248,7 @@ const FreeManageProfile = () => {
       if (storedUser) {
         storedUser.interests = selectedTopics.join(", ");
         localStorage.setItem("userProfile", JSON.stringify(storedUser));
+        sessionStorage.setItem("userProfile", JSON.stringify(storedUser));
       }
     } catch (error) {
       console.error("Error updating interests:", error.message);
@@ -392,12 +412,7 @@ const FreeManageProfile = () => {
                 Interest Selection (Max 6):
               </h3>
               <div className="p-4 bg-white shadow-md rounded-lg w-3/3 md:w-2/3 mb-1">
-                {/* <TopicList
-                  allTopics={[]}
-                  selectedTopics={selectedTopics} //  Pass selected topics
-                  setSelectedTopics={setSelectedTopics} //  Allow updates
-                  handleTopicSelection={handleTopicSelection}
-                /> */}
+              
                 {Array.from({ length: 6 }).map((_, index) => (
                   <div key={index} className="flex flex-row mb-4">
                     <label className="mt-1 mr-2 font-grotesk text-2xl">
@@ -406,14 +421,22 @@ const FreeManageProfile = () => {
                     <select
                       value={dropdownValues[index]}
                       onChange={(e) => handleDropdownChange(index, e)}
-                      className="p-2 border rounded-lg"
+                      className="p-1 border rounded-lg font-grotesk"
                     >
-                      <option value="">Select a category</option>
-                      {categories.map((cat) => (
-                        <option key={cat.id} value={cat.name}>
-                          {cat.name}
-                        </option>
-                      ))}
+                      <option value="" classname="font-grotesk">
+                        Select a category
+                      </option>
+                      {categories
+                        .filter(
+                          (cat) =>
+                            !dropdownValues.includes(cat.name) ||
+                            cat.name === dropdownValues[index]
+                        )
+                        .map((cat) => (
+                          <option key={cat.id} value={cat.name}>
+                            {cat.name}
+                          </option>
+                        ))}
                     </select>
                   </div>
                 ))}

@@ -16,6 +16,8 @@ const ViewRoomsPage = () => {
   const navigate = useNavigate();
   const { userType } = useAuthHook();
 
+  const isPremium = userType === "Premium";
+
   useEffect(() => {
     const fetchRoomImages = async () => {
       const roomImagesData = {};
@@ -217,6 +219,13 @@ const ViewRoomsPage = () => {
           <Search onSearch={handleSearch} />
         </div>
       </div>
+
+      {!isPremium && (
+        <div className="bg-yellow-100 text-yellow-800 p-3 rounded mb-4">
+          You're viewing as a Free user. Join Premium to participate in
+          discussions.
+        </div>
+      )}
 
       <div className="flex flex-col flex-grow items-center w-full px-4">
         <div className="w-full max-w-5xl p-6 font-grotesk">

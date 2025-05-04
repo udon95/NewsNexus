@@ -19,7 +19,7 @@ import ForgotPassword from "./pages/forgetPW";
 import ResetPassword from "./pages/resetPW.jsx";
 import SubscriptionStatus from "./components/payment.jsx";
 import PublicProfile from "./components/publicProfile.jsx";
-
+import ViewRooms from "./components/premiumUser/viewRooms.jsx";
 import FloatingWriteButton from "./components/writeButton.jsx";
 import supabase from "./api/supabaseClient.js";
 import "./index.css";
@@ -128,6 +128,7 @@ function App() {
               path="/public-profile/:username"
               element={<PublicProfile />}
             />
+             <Route path="rooms" element={<ViewRooms />} />
 
             <Route
               path="/freeDashboard/*"

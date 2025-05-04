@@ -1,10 +1,8 @@
 import { useEffect, useState } from "react";
 import useAuthHook from "../../hooks/useAuth";
-import TopicList from "../../components/topicList";
 import api from "../../api/axios";
 import PasswordInput from "../showPW";
 import { HexColorPicker } from "react-colorful";
-import FetchTopics from "../fetchTopics";
 import supabase from "../../api/supabaseClient";
 
 const PremManageProfile = () => {
