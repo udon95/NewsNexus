@@ -380,7 +380,7 @@ const PremManageProfile = () => {
       <div className="flex-grow flex flex-col items-center pt-8 px-4 md:px-5 text-2xl font-medium">
         {/* Profile Details */}
         <div className="flex justify-center w-full">
-          <div className="w-full md:w-2/3">
+          <div className="w-full md:w-2/3 max-w-[700px]">
             <h3 className="text-2xl font-grotesk font-bold mb-1">
               Profile Particulars:
             </h3>
