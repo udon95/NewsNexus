@@ -402,7 +402,7 @@ const PremManageProfile = () => {
                   className="w-full p-2 border rounded-lg mb-2"
                   placeholder="E-mail"
                 />
-                <label className="block mb-1">Date:</label>
+                <div className="mb-1">Date:</div>
                 <DatePicker
                   selected={editDate ? new Date(editDate) : null}
                   onChange={(date) => {
