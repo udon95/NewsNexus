@@ -340,7 +340,7 @@ const FreeManageProfile = () => {
                   placeholder="E-mail"
                 />
                 Date:
-                <div className="flex-grow relative group">
+                <div className="flex-grow relative w-full">
                   <DatePicker
                     selected={editDate ? new Date(editDate) : null}
                     onChange={(date) => {
@@ -359,8 +359,7 @@ const FreeManageProfile = () => {
                     scrollableYearDropdown
                     yearDropdownItemNumber={100}
                     placeholderText="Select your date of birth (Above 16 years old)"
-                    className="w-full p-3 rounded-lg bg-[#F3F3F3] focus:ring-2 focus:ring-blue-500 shadow-lg font-grotesk"
-                    wrapperClassName="w-full"
+                    className="w-full p-2 pr-10 border rounded-lg mb-2 bg-white focus:outline-none font-grotesk"
                   />
                   {dobError && (
                     <div className="absolute top-[-30px] left-1/2 -translate-x-1/2 bg-red-500 text-white text-xs p-2 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300">
@@ -465,7 +464,7 @@ const FreeManageProfile = () => {
                 ))}
                 <button
                   onClick={updateInterests}
-                  className="bg-[#3f414c] text-[white] cursor-pointer text-sm flex justify-end self-end w-fit ml-auto mr-0 mt-5 px-5 py-2.5 rounded-xl border-[none]"
+                  className="bg-gray-700 text-white text-sm px-4 py-2 rounded-lg mt-2 "
                 >
                   Update Interests
                 </button>
