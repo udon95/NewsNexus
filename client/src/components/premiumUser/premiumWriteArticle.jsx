@@ -56,14 +56,18 @@ export const PremiumWriteArticle = () => {
   const preSelectedType = searchParams.get("type"); // e.g. "room"
   const preSelectedRoomId = searchParams.get("roomid");
 
-  console.log(preSelectedRoomId);
-  console.log(preSelectedType);
   useEffect(() => {
-    if (preSelectedType === "room" && preSelectedRoomId && rooms.length > 0) {
+    if (
+      preSelectedType === "room" &&
+      preSelectedRoomId &&
+      rooms.length > 0 &&
+      rooms.some((r) => r.roomid === preSelectedRoomId)
+    ) {
       setPostType("Room");
       setSelectedRoom(preSelectedRoomId);
     }
-  }, [preSelectedType, preSelectedRoomId]);
+  }, [preSelectedType, preSelectedRoomId, rooms]);
+  
 
   const CustomParagraph = Paragraph.extend({
     addAttributes() {
