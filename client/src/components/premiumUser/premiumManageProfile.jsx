@@ -94,6 +94,12 @@ const PremManageProfile = () => {
     const newValue = e.target.value;
     const alreadySelected = dropdownValues.includes(newValue);
 
+    const selectedCount = dropdownValues.filter((val) => val !== "").length;
+    if (selectedCount >= 6 && newValue !== "" && !dropdownValues.includes("")) {
+      alert("You can only select up to 6 interests.");
+      return;
+    }
+
     if (newValue && alreadySelected) {
       alert("You’ve already selected this topic.");
       return;
@@ -259,6 +265,10 @@ const PremManageProfile = () => {
 
   // update interests
   const updateInterests = async () => {
+    if (selectedTopics.length > 6) {
+      alert("You can only select up to 6 interests.");
+      return;
+    }
     try {
       const response = await api.put(
         "/auth/update-interests",
@@ -272,7 +282,8 @@ const PremManageProfile = () => {
       );
       if (!response.data.message) {
         throw new Error("Failed to update interests");
-      }      alert("Interests updated successfully!");
+      }
+      alert("Interests updated successfully!");
 
       const storedUser = JSON.parse(localStorage.getItem("userProfile"));
       if (storedUser) {

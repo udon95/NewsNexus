@@ -84,6 +84,12 @@ const FreeManageProfile = () => {
     const newValue = e.target.value;
     const alreadySelected = dropdownValues.includes(newValue);
 
+    const selectedCount = dropdownValues.filter((val) => val !== "").length;
+    if (selectedCount >= 6 && newValue !== "" && !dropdownValues.includes("")) {
+      alert("You can only select up to 6 interests.");
+      return;
+    }
+
     if (newValue && alreadySelected) {
       alert("You’ve already selected this topic.");
       return;
@@ -143,7 +149,7 @@ const FreeManageProfile = () => {
         gender: editGender,
       };
 
-      const response = await api.post("/auth/update-profile", payload, {
+      const response = await api.put("/auth/update-profile", payload, {
         headers: { "Content-Type": "application/json" },
       });
 
@@ -197,7 +203,7 @@ const FreeManageProfile = () => {
         newPasswordConfirm: editNewPasswordConfirm,
       };
 
-      const response = await api.post("/auth/update-password", payload, {
+      const response = await api.put("/auth/update-password", payload, {
         headers: { "Content-Type": "application/json" },
       });
 
@@ -224,8 +230,12 @@ const FreeManageProfile = () => {
   };
 
   const updateInterests = async () => {
+    if (selectedTopics.length > 6) {
+      alert("You can only select up to 6 interests.");
+      return;
+    }
     try {
-      const response = await api.post(
+      const response = await api.put(
         "/auth/update-interests",
         {
           userId: userDetails.userid,
