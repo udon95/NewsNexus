@@ -422,6 +422,7 @@ const PremManageProfile = () => {
                   yearDropdownItemNumber={100}
                   placeholderText="Select your date of birth (Above 16 years old)"
                   className="w-full p-2 border rounded-lg mb-2"
+                  wrapperClassName="w-full"
                   popperClassName="z-[50]"
                 />
                 <div className="mb-1">Gender:</div>
