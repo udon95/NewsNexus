@@ -403,31 +403,31 @@ const PremManageProfile = () => {
                   placeholder="E-mail"
                 />
                 Date:
-                  <DatePicker
-                    selected={editDate ? new Date(editDate) : null}
-                    onChange={(date) => {
-                      const isoString = date?.toISOString().split("T")[0]; // 'yyyy-mm-dd'
-                      setEditDate(isoString);
-                    }}
-                    dateFormat="dd-MM-yyyy"
-                    maxDate={
-                      new Date(
-                        new Date().setFullYear(new Date().getFullYear() - 16)
-                      )
-                    }
-                    showMonthDropdown
-                    showYearDropdown
-                    dropdownMode="select"
-                    scrollableYearDropdown
-                    yearDropdownItemNumber={100}
-                    placeholderText="Select your date of birth (Above 16 years old)"
-                    className="w-full p-2 border rounded-lg mb-2 text-base text-black font-grotesk focus:outline-none"
-                    />
-                  {dobError && (
-                    <div className="absolute top-[-30px] left-1/2 -translate-x-1/2 bg-red-500 text-white text-xs p-2 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                      {dobError}
-                    </div>
-                  )}
+                <DatePicker
+                  selected={editDate ? new Date(editDate) : null}
+                  onChange={(date) => {
+                    const isoString = date?.toISOString().split("T")[0]; // 'yyyy-mm-dd'
+                    setEditDate(isoString);
+                  }}
+                  dateFormat="dd-MM-yyyy"
+                  maxDate={
+                    new Date(
+                      new Date().setFullYear(new Date().getFullYear() - 16)
+                    )
+                  }
+                  showMonthDropdown
+                  showYearDropdown
+                  dropdownMode="select"
+                  scrollableYearDropdown
+                  yearDropdownItemNumber={100}
+                  placeholderText="Select your date of birth (Above 16 years old)"
+                  className="w-full p-2 border rounded-lg mb-2"
+                />
+                {dobError && (
+                  <div className="absolute top-[-30px] left-1/2 -translate-x-1/2 bg-red-500 text-white text-xs p-2 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    {dobError}
+                  </div>
+                )}
                 <div>
                   Gender:
                   <select
