@@ -3,6 +3,8 @@ import useAuthHook from "../../hooks/useAuth";
 import PasswordInput from "../showPW";
 import api from "../../api/axios";
 import supabase from "../../api/supabaseClient";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 
 const FreeManageProfile = () => {
   const [selectedTopics, setSelectedTopics] = useState([]);
@@ -233,7 +235,9 @@ const FreeManageProfile = () => {
           headers: { "Content-Type": "application/json" },
         }
       );
-      if (error) throw error;
+      if (!response.data.message) {
+        throw new Error("Failed to update interests");
+      }
       alert("Interests updated successfully!");
 
       const storedUser = JSON.parse(localStorage.getItem("userProfile"));

@@ -4,6 +4,8 @@ import api from "../../api/axios";
 import PasswordInput from "../showPW";
 import { HexColorPicker } from "react-colorful";
 import supabase from "../../api/supabaseClient";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 
 const PremManageProfile = () => {
   const [selectedTopics, setSelectedTopics] = useState([]);
@@ -268,8 +270,9 @@ const PremManageProfile = () => {
           headers: { "Content-Type": "application/json" },
         }
       );
-      if (error) throw error;
-      alert("Interests updated successfully!");
+      if (!response.data.message) {
+        throw new Error("Failed to update interests");
+      }      alert("Interests updated successfully!");
 
       const storedUser = JSON.parse(localStorage.getItem("userProfile"));
       if (storedUser) {
