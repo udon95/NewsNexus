@@ -37,13 +37,13 @@ const FloatingWriteButton = () => {
         navigate(`/premiumDashboard/writeArticle?type=room&roomid=${roomid}`);
         return;
       }
+    }
 
-      // Normal behavior
-      if (role === "Premium") {
-        navigate("/premiumDashboard/writeArticle");
-      } else {
-        navigate("/freeDashboard/writeArticle");
-      }
+    // Normal behavior
+    if (role === "Premium") {
+      navigate("/premiumDashboard/writeArticle");
+    } else {
+      navigate("/freeDashboard/writeArticle");
     }
   };
 

@@ -80,7 +80,6 @@ const TestimonialSlider = () => {
         if (error) throw error;
         setTestimonials(data);
         setLoading(false);
-        console.log("Raw testimonials:", data);
       } catch (error) {
         console.error("Error fetching testimonials");
         setLoading(false);
@@ -97,7 +96,6 @@ const TestimonialSlider = () => {
     const avg = calculateAverageRating(t);
     return avg === null || avg >= 7;
   });
-  console.log("Filtered:", filteredTestimonials);
 
   if (filteredTestimonials.length === 0)
     return (
