@@ -36,7 +36,6 @@ function PremiumDashboard() {
             <Route path="manageRooms" element={<PremiumManageRooms />} />
             <Route path="applyExpert" element={<PremiumApplyExpert />} />
            
-            <Route path="/room/:id" element={<RoomPage />} />
           </Routes>
         </div>
       </main>
