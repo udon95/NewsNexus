@@ -33,6 +33,7 @@ const FloatingWriteButton = () => {
   const handleClick = () => {
     if (currentPath.startsWith("/room/")) {
       const roomid = currentPath.split("/")[2]; // get room ID from URL
+      console.log(roomid);
       if (roomid) {
         navigate(`/premiumDashboard/writeArticle?type=room&roomid=${roomid}`);
         return;

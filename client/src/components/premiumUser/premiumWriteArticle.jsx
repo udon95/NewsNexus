@@ -56,6 +56,8 @@ export const PremiumWriteArticle = () => {
   const preSelectedType = searchParams.get("type"); // e.g. "room"
   const preSelectedRoomId = searchParams.get("roomid");
 
+  console.log(preSelectedRoomId);
+  console.log(preSelectedType);
   useEffect(() => {
     if (preSelectedType === "room" && preSelectedRoomId && rooms.length > 0) {
       setPostType("Room");
