@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import supabase from "../../api/supabaseClient";
 import Navbar from "../navbar";
 import { MoreVertical, CornerDownLeft } from "lucide-react"; // Import 3-dot icon + comment icon
+import useAuthHook from "../../hooks/useAuth.jsx";
 
 const Room = () => {
   const { id: roomid } = useParams();
