@@ -552,7 +552,7 @@ const PremManageProfile = () => {
                   onClick={updateInterests}
                   className="bg-[#3f414c] text-[white] cursor-pointer text-sm flex justify-end self-end w-fit ml-auto mr-0 mt-5 px-5 py-2.5 rounded-xl border-[none]"
                 >
-                  Update Interests
+                  Update
                 </button>
               </div>
 
