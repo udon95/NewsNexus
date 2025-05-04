@@ -329,11 +329,7 @@ function Register() {
             </form>
           </div>
         ) : (
-          // <Topic
-          //   selectedTopics={selectedTopics}
-          //   handleTopicSelect={handleTopicsSelect} //  Pass function
-          //   handleSubmit={handleFinalSubmit}
-          <div className="flex flex-col items-center">
+          <div className="flex flex-col items-center font-grotesk">
             <h2 className="text-2xl font-bold mb-4">Select Your Interests</h2>
             <h2 className="text-xl mb-4">
               (Choose 6. Starting from Most Interested)
@@ -362,7 +358,7 @@ function Register() {
             <button
               type="button"
               onClick={() => handleFinalSubmit(selectedTopics)}
-              className="mt-4 px-4 py-2 bg-blue-500 text-white rounded-lg"
+              className="mt-4 px-4 py-2 bg-[#3F414C] hover:bg-[#3F414C] cursor-pointer text-white rounded-lg"
             >
               Submit
             </button>

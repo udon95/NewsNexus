@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import useAuthHook from "../../hooks/useAuth";
 import PasswordInput from "../showPW";
 import api from "../../api/axios";
+import supabase from "../../api/supabaseClient";
 
 const FreeManageProfile = () => {
   const [selectedTopics, setSelectedTopics] = useState([]);
