@@ -263,11 +263,13 @@ function Register() {
                         new Date().setFullYear(new Date().getFullYear() - 16)
                       )
                     }
+                    showMonthDropdown
                     showYearDropdown
+                    dropdownMode="select"
                     scrollableYearDropdown
                     yearDropdownItemNumber={100}
                     placeholderText="Select your date of birth"
-                    className="flex-grow p-3 rounded-lg bg-[#F3F3F3] focus:ring-2 focus:ring-blue-500 shadow-lg w-full"
+                    className="flex-grow p-3 rounded-lg bg-[#F3F3F3] focus:ring-2 focus:ring-blue-500 shadow-lg font-grotesk"
                   />
                   {errors.dob && (
                     <div className="absolute top-[-30px] left-1/2 -translate-x-1/2 bg-red-500 text-white text-xs p-2 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300">
@@ -283,7 +285,7 @@ function Register() {
                     name="gender"
                     value={userData.gender}
                     onChange={handleInputChange}
-                    className="flex-grow p-3 rounded-lg bg-[#F3F3F3] focus:ring-2  shadow-lg"
+                    className="flex-grow p-3 rounded-lg bg-[#F3F3F3] focus:ring-2  shadow-lg font-grotesk"
                   >
                     <option value="">Select Gender</option>
                     <option value="Male">Male</option>
