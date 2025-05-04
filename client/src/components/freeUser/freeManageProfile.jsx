@@ -344,8 +344,8 @@ const FreeManageProfile = () => {
                   <DatePicker
                     selected={editDate ? new Date(editDate) : null}
                     onChange={(date) => {
-                      const iso = date?.toISOString().split("T")[0];
-                      setEditDate(iso);
+                      const isoString = date?.toISOString().split("T")[0]; // 'yyyy-mm-dd'
+                      setEditDate(isoString);
                     }}
                     dateFormat="dd-MM-yyyy"
                     maxDate={
@@ -356,25 +356,11 @@ const FreeManageProfile = () => {
                     showMonthDropdown
                     showYearDropdown
                     dropdownMode="select"
-                    placeholderText="Select your date of birth"
-                    className="w-full p-2 pr-10 border rounded-lg mb-2 bg-white focus:outline-none"
+                    scrollableYearDropdown
+                    yearDropdownItemNumber={100}
+                    placeholderText="Select your date of birth (Above 16 years old)"
+                    className="w-full p-2 pr-10 border rounded-lg mb-2 bg-white focus:outline-none font-grotesk"
                   />
-                  <div className="absolute top-2 right-3 text-gray-400 pointer-events-none">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-5 w-5"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                      />
-                    </svg>
-                  </div>
                   {dobError && (
                     <div className="absolute top-[-30px] left-1/2 -translate-x-1/2 bg-red-500 text-white text-xs p-2 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                       {dobError}
