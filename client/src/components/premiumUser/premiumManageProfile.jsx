@@ -402,7 +402,7 @@ const PremManageProfile = () => {
                   className="w-full p-2 border rounded-lg mb-2"
                   placeholder="E-mail"
                 />
-                Date:
+                <label className="block mb-1">Date:</label>
                 <DatePicker
                   selected={editDate ? new Date(editDate) : null}
                   onChange={(date) => {
@@ -422,25 +422,19 @@ const PremManageProfile = () => {
                   yearDropdownItemNumber={100}
                   placeholderText="Select your date of birth (Above 16 years old)"
                   className="w-full p-2 border rounded-lg mb-2"
+                  popperClassName="z-[50]"
                 />
-                {dobError && (
-                  <div className="absolute top-[-30px] left-1/2 -translate-x-1/2 bg-red-500 text-white text-xs p-2 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                    {dobError}
-                  </div>
-                )}
-                <div>
-                  Gender:
-                  <select
-                    value={editGender}
-                    onChange={(e) => setEditGender(e.target.value)}
-                    className="w-full p-2 border rounded-lg mb-2"
-                  >
-                    <option value="">Select Gender</option>
-                    <option value="Male">Male</option>
-                    <option value="Female">Female</option>
-                    <option value="Other">Prefer Not To Say</option>
-                  </select>
-                </div>
+                Gender:
+                <select
+                  value={editGender}
+                  onChange={(e) => setEditGender(e.target.value)}
+                  className="w-full p-2 border rounded-lg mb-2"
+                >
+                  <option value="">Select Gender</option>
+                  <option value="Male">Male</option>
+                  <option value="Female">Female</option>
+                  <option value="Other">Prefer Not To Say</option>
+                </select>
                 Choose Profile Color:
                 <HexColorPicker
                   color={profileColor}
@@ -464,7 +458,7 @@ const PremManageProfile = () => {
               </div>
 
               {/* Password Change */}
-              <h3 className="text-2xl font-bold  font-grotesk mb-1 mt-6">
+              <h3 className="text-2xl font-bold font-grotesk mb-1 mt-6">
                 Manage Password:
               </h3>
               <div className="p-4 bg-white shadow-md rounded-lg w-3/3 md:w-2/3">

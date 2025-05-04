@@ -8,6 +8,9 @@
   font-weight: 500;
 }
 
+.react-datepicker-popper {
+  z-index: 9999 !important;
+}
 
 
 
