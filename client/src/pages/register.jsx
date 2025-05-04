@@ -252,31 +252,33 @@ function Register() {
                   <label className="text-2xl sm:text-2xl font-normal text-black w-30">
                     Date of Birth:
                   </label>
-                  <DatePicker
-                    selected={userData.dob}
-                    onChange={(date) =>
-                      setUserData((prev) => ({ ...prev, dob: date }))
-                    }
-                    dateFormat="dd-MM-yyyy"
-                    maxDate={
-                      new Date(
-                        new Date().setFullYear(new Date().getFullYear() - 16)
-                      )
-                    }
-                    showMonthDropdown
-                    showYearDropdown
-                    dropdownMode="select"
-                    scrollableYearDropdown
-                    yearDropdownItemNumber={100}
-                    placeholderText="Select your date of birth (Above 16 years old)"
-                    className="flex-grow p-3 rounded-lg bg-[#F3F3F3] focus:ring-2 focus:ring-blue-500 shadow-lg font-grotesk"
-                    wrapperClassName="w-full"
-                  />
-                  {errors.dob && (
-                    <div className="absolute top-[-30px] left-1/2 -translate-x-1/2 bg-red-500 text-white text-xs p-2 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                      {errors.dob}
-                    </div>
-                  )}
+                  <div className="flex-grow relative group">
+                    <DatePicker
+                      selected={userData.dob}
+                      onChange={(date) =>
+                        setUserData((prev) => ({ ...prev, dob: date }))
+                      }
+                      dateFormat="dd-MM-yyyy"
+                      maxDate={
+                        new Date(
+                          new Date().setFullYear(new Date().getFullYear() - 16)
+                        )
+                      }
+                      showMonthDropdown
+                      showYearDropdown
+                      dropdownMode="select"
+                      scrollableYearDropdown
+                      yearDropdownItemNumber={100}
+                      placeholderText="Select your date of birth (Above 16 years old)"
+                      className="w-full p-3 rounded-lg bg-[#F3F3F3] focus:ring-2 focus:ring-blue-500 shadow-lg font-grotesk"
+                      wrapperClassName="w-full"
+                    />
+                    {errors.dob && (
+                      <div className="absolute top-[-30px] left-1/2 -translate-x-1/2 bg-red-500 text-white text-xs p-2 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                        {errors.dob}
+                      </div>
+                    )}
+                  </div>
                 </div>
                 <div className="flex items-center mb-6 relative group">
                   <label className="text-2xl sm:text-2xl font-normal text-black w-30">
