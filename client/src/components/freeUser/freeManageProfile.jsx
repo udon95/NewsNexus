@@ -352,9 +352,9 @@ const FreeManageProfile = () => {
                     className="w-full p-3 rounded-lg bg-[#F3F3F3] focus:ring-2 focus:ring-blue-500 shadow-lg font-grotesk"
                     wrapperClassName="w-full"
                   />
-                  {errors.dob && (
+                  {dobError && (
                     <div className="absolute top-[-30px] left-1/2 -translate-x-1/2 bg-red-500 text-white text-xs p-2 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                      {errors.dob}
+                      {dobError}
                     </div>
                   )}
                 </div>
