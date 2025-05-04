@@ -403,7 +403,7 @@ const PremManageProfile = () => {
                   placeholder="E-mail"
                 />
                 Date:
-                <div className="flex-grow relative group">
+                <div className="relative w-full">
                   <DatePicker
                     selected={editDate ? new Date(editDate) : null}
                     onChange={(date) => {
