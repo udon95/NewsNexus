@@ -38,6 +38,7 @@ const Room = () => {
   {
     !isPremium && navigate("/rooms");
   }
+
   const nextSlide = (postid, imageCount) => {
     setCarouselIndex((prev) => ({
       ...prev,
@@ -260,7 +261,7 @@ const Room = () => {
       } else {
         setRoom(data);
 
-        if (user && data?.userid === user.userid) {
+        if (user && data?.created_by === user.userid) {
           setIsOwner(true);
         } else {
           setIsOwner(false);
