@@ -361,8 +361,6 @@ export const PremiumWriteArticle = () => {
         return;
       }
 
-    
-
       // if (postType === "General") {
 
       //   articleData.topic = topics;
