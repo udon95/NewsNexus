@@ -45,8 +45,11 @@ async function moderateText(content, imageUrl = null) {
       input.push({ type: "text", text: content });
     }
 
-    if (imageUrl) {
-      input.push({ type: "image_url", image_url: { url: imageUrl } });
+    for (const url of imageUrls) {
+      input.push({
+        type: "image_url",
+        image_url: { url },
+      });
     }
 
     const response = await fetch("https://api.openai.com/v1/moderations", {
@@ -62,7 +65,7 @@ async function moderateText(content, imageUrl = null) {
     });
 
     const data = await response.json();
-    console.log("Moderation results:", data);
+    console.log("Moderation results:", JSON.stringify(data, null, 2));
 
     // Flag if any input (text or image) was flagged
     const flagged = data.results?.some((r) => r.flagged);
