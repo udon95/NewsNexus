@@ -71,8 +71,11 @@ router.put("/:roomid", async (req, res) => {
 
 // 🔹 DELETE room by ID
 router.delete("/:roomid", async (req, res) => {
-  const { roomid } = req.params.roomid;
-  const { error } = await supabase.from("rooms").delete().eq("roomid", roomid);
+  const { roomid } = req.params;
+  const { error } = await supabase
+    .from("rooms")
+    .delete()
+    .eq("roomid", roomid);
 
   if (error) return res.status(500).json({ error: error.message });
   res.status(200).json({ message: "Room deleted" });
