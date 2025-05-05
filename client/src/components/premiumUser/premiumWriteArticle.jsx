@@ -290,7 +290,13 @@ export const PremiumWriteArticle = () => {
 
     // CASE 1: General Article (always factual)
     if (postType === "General") {
+      const doc = new DOMParser().parseFromString(updatedHTML, "text/html");
+      const extractedImageUrls = Array.from(doc.querySelectorAll("img"))
+        .map((img) => img.getAttribute("src"))
+        .filter((src) => src && !src.startsWith("blob:"));
+
       articleData.topic = topics;
+
       const response = await fetch(
         "https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/api/submit-article",
         {
@@ -303,7 +309,7 @@ export const PremiumWriteArticle = () => {
             authorId: session.userid,
             topicid: topics,
             topicName,
-            imageUrls: uploadedImageUrls || [],
+            imageUrls: extractedImageUrls || [],
           }),
         }
       );
@@ -494,7 +500,7 @@ export const PremiumWriteArticle = () => {
             .from("room-article-images")
             .remove(uploadedPaths);
 
-          alert(` Article flagged: ${result.error}`);
+          alert(`Article flagged: ${result.error}`);
           return;
         }
 
