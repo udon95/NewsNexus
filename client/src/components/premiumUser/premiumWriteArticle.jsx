@@ -290,13 +290,40 @@ export const PremiumWriteArticle = () => {
 
     // CASE 1: General Article (always factual)
     if (postType === "General") {
-      const doc = new DOMParser().parseFromString(updatedHTML, "text/html");
-      const extractedImageUrls = Array.from(doc.querySelectorAll("img"))
-        .map((img) => img.getAttribute("src"))
-        .filter((src) => src && !src.startsWith("blob:"));
+      const uploadedImageUrls = [];
+      const uploadedPaths = [];
 
-      articleData.topic = topics;
+      // Step 1: Upload pending images to Supabase and collect public URLs
+      for (const img of pendingImages) {
+        const file = img.file;
+        if (!file?.name) continue;
 
+        const fileExt = file.name.split(".").pop();
+        const fileName = `${Date.now()}-${Math.random()
+          .toString(36)
+          .substring(2)}.${fileExt}`;
+        const filePath = `user-${session.userid}/${fileName}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from("articles-images")
+          .upload(filePath, file);
+
+        if (uploadError) {
+          console.error("Image upload failed:", uploadError);
+          continue;
+        }
+
+        const { data: urlData } = supabase.storage
+          .from("articles-images")
+          .getPublicUrl(filePath);
+
+        if (urlData?.publicUrl) {
+          uploadedImageUrls.push(urlData.publicUrl);
+          uploadedPaths.push(filePath); // For cleanup if flagged
+        }
+      }
+
+      // Step 2: Submit article to backend (moderation happens there)
       const response = await fetch(
         "https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/api/submit-article",
         {
@@ -309,7 +336,7 @@ export const PremiumWriteArticle = () => {
             authorId: session.userid,
             topicid: topics,
             topicName,
-            imageUrls: extractedImageUrls || [],
+            imageUrls: uploadedImageUrls,
           }),
         }
       );
@@ -317,29 +344,72 @@ export const PremiumWriteArticle = () => {
       const result = await response.json();
 
       if (!response.ok) {
+        // Step 3: Cleanup uploaded Supabase images if moderation fails
+        if (uploadedPaths.length > 0) {
+          await supabase.storage.from("articles-images").remove(uploadedPaths);
+        }
+
         if (result.feedback) {
           setAiFeedback(result.feedback);
           setAccuracy(result.accuracy || null);
-
           alert(
             "Article flagged by AI. Please review the highlighted sections."
           );
         } else {
           alert(result.error || "Submission failed.");
         }
-
-        //  This is important to prevent saving
         return;
       }
 
-      const articleid = result.article?.articleid;
+    
 
-      // Save multiple images to article_images
-      for (const url of uploadedImageUrls) {
-        await supabase
-          .from("article_images")
-          .insert([{ articleid, image_url: url }]);
-      }
+      // if (postType === "General") {
+
+      //   articleData.topic = topics;
+
+      //   const response = await fetch(
+      //     "https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/api/submit-article",
+      //     {
+      //       method: "POST",
+      //       headers: { "Content-Type": "application/json" },
+      //       body: JSON.stringify({
+      //         title,
+      //         content: updatedHTML,
+      //         type: "factual",
+      //         authorId: session.userid,
+      //         topicid: topics,
+      //         topicName,
+      //         imageUrls: extractedImageUrls || [],
+      //       }),
+      //     }
+      //   );
+
+      //   const result = await response.json();
+
+      //   if (!response.ok) {
+      //     if (result.feedback) {
+      //       setAiFeedback(result.feedback);
+      //       setAccuracy(result.accuracy || null);
+
+      //       alert(
+      //         "Article flagged by AI. Please review the highlighted sections."
+      //       );
+      //     } else {
+      //       alert(result.error || "Submission failed.");
+      //     }
+
+      //     //  This is important to prevent saving
+      //     return;
+      //   }
+
+      //   const articleid = result.article?.articleid;
+
+      //   // Save multiple images to article_images
+      //   for (const url of uploadedImageUrls) {
+      //     await supabase
+      //       .from("article_images")
+      //       .insert([{ articleid, image_url: url }]);
+      //   }
       setAccuracy(result.accuracy);
       setAiFeedback(result.feedback);
       alert(`Article posted successfully. Accuracy Score: ${result.accuracy}%`);

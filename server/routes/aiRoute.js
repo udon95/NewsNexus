@@ -236,64 +236,82 @@ async function factCheck(content, topicName) {
 }
 
 router.post("/submit-article", async (req, res) => {
-  const {
-    title,
-    content,
-    authorId,
-    topicid,
-    topicName,
-    imageUrls = [],
-  } = req.body;
-
-  if (!title || !content || !authorId || !topicid || !topicName) {
-    return res.status(400).json({ error: "Missing required fields." });
-  }
-
-  const modResult = await moderateText(content, imageUrls);
-  if (modResult?.flagged) {
-    return res.status(400).json({
-      error: "Content flagged as inappropriate by text moderation.",
-    });
-  }
-
-  let factResult;
   try {
-    factResult = await factCheck(content, topicName);
-  } catch (err) {
-    console.error("Fact-check error:", err);
+    const {
+      title,
+      content,
+      authorId,
+      topicid,
+      topicName,
+      imageUrls = [],
+    } = req.body;
 
-    return res.status(err.status || 400).json({
-      error: err.error,
-      ...(typeof err.accuracy === "number" && { accuracy: err.accuracy }),
-      ...(err.feedback && { feedback: err.feedback }),
+    if (!title || !content || !authorId || !topicid || !topicName) {
+      return res.status(400).json({ error: "Missing required fields." });
+    }
+
+    const modResult = await moderateText(content, imageUrls);
+    if (modResult?.flagged) {
+      return res.status(400).json({
+        error: "Content flagged as inappropriate by text moderation.",
+        details: modResult,
+      });
+    }
+
+    let factResult;
+    try {
+      factResult = await factCheck(content, topicName);
+    } catch (err) {
+      console.error("Fact-check error:", err);
+
+      return res.status(err.status || 400).json({
+        error: err.error,
+        ...(typeof err.accuracy === "number" && { accuracy: err.accuracy }),
+        ...(err.feedback && { feedback: err.feedback }),
+      });
+    }
+
+    const imagepath = imageUrls.length > 0 ? imageUrls[0] : null;
+
+    // Insert into `articles`
+    const { data: inserted, error } = await supabase
+      .from("articles")
+      .insert([
+        {
+          title,
+          text: content,
+          userid: authorId,
+          topicid,
+          accuracy_score: factResult.accuracy,
+          imagepath,
+        },
+      ])
+      .select()
+      .single();
+
+    if (error) {
+      console.error("General insert error:", error);
+      return res.status(500).json({ error: error.message });
+    }
+    for (const url of imageUrls) {
+      await supabase.from("article_images").insert([
+        {
+          articleid: inserted.articleid,
+          image_url: url,
+        },
+      ]);
+    }
+
+    return res.json({
+      message: "Article saved successfully.",
+      article: inserted,
+      accuracy: factResult.accuracy,
+      feedback: factResult.feedback,
     });
+  } catch (err) {
+    console.error("Failed submitting article error:", err);
+    return res.status(500).json({ error: "Error during submission." });
   }
-
-  // Insert into `articles`
-  const { data: inserted, error } = await supabase
-    .from("articles")
-    .insert([
-      {
-        title,
-        text: content,
-        userid: authorId,
-        topicid,
-        accuracy_score: factResult.accuracy,
-      },
-    ])
-    .select()
-    .single();
-
-  if (error) {
-    console.error("General insert error:", error);
-    return res.status(500).json({ error: error.message });
-  }
-  return res.json({
-    message: "Article saved successfully.",
-    article: inserted,
-    accuracy: factResult.accuracy,
-    feedback: factResult.feedback,
-  });
 });
 
 router.post("/moderate", async (req, res) => {
