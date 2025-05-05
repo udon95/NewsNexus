@@ -294,7 +294,8 @@ router.post("/moderate", async (req, res) => {
 
   if (result?.flagged) {
     return res.status(400).json({
-      error: "Content flagged as inappropriate by text moderation.",
+      error: "Content flagged as inappropriate by text/image moderation.",
+      details: result.details,
     });
   }
   res.status(200).json({ message: "Content passed moderation." });
