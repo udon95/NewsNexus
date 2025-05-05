@@ -36,10 +36,8 @@ const Header = () => {
   };
 
   const handleProfileClick = () => {
-    // console.log("Navigating to:", userType);
     if (!userType) {
-      // console.warn("UserType is null! Fetching from sessionStorage...");
-      const cachedProfile = sessionStorage.getItem("userProfile");
+      const cachedProfile = localStorage.getItem("userProfile") || sessionStorage.getItem("userProfile");
       if (cachedProfile) {
         const data = JSON.parse(cachedProfile);
         setUserType(data.userType || "Unknown");

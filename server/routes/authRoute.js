@@ -83,7 +83,6 @@ router.post("/login", async (req, res) => {
 
       // Extract interests (ensure it doesn't break if null)
       const interests = interestData?.interesttype || "";
-      console.log("color: ", userProfile.usertype.color);
       // Return full user details
       return res.json({
         message: "Login Successful",
