@@ -303,6 +303,7 @@ export const PremiumWriteArticle = () => {
             authorId: session.userid,
             topicid: topics,
             topicName,
+            imageUrls: uploadedImageUrls || [],
           }),
         }
       );
@@ -341,8 +342,19 @@ export const PremiumWriteArticle = () => {
     } else {
       articleData.roomid = selectedRoom;
 
-      //  CASE 2: Room Opinion Article (skip validation)
+      //  CASE 2: Room Opinion Article (skip fact check)
       if (postType === "Room") {
+        console.log("Room moderation .current input:", {
+          content: articleData.content,
+          imageUrls: uploadedImageUrls.current,
+        });
+        console.log("Room image input:", {
+          imageUrls: uploadedImageUrls,
+        });
+        console.log("Room image pending input:", {
+          imageUrls: pendingImages,
+        });
+
         try {
           const response = await fetch(
             "https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/api/moderate",
@@ -353,7 +365,7 @@ export const PremiumWriteArticle = () => {
               },
               body: JSON.stringify({
                 content: articleData.content,
-                imageUrl: uploadedImageUrls || [],
+                imageUrls: pendingImages || [],
               }),
             }
           );

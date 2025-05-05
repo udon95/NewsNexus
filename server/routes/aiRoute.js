@@ -236,13 +236,13 @@ async function factCheck(content, topicName) {
 }
 
 router.post("/submit-article", async (req, res) => {
-  const { title, content, authorId, topicid, topicName } = req.body;
+  const { title, content, authorId, topicid, topicName, imageUrls=[] } = req.body;
 
   if (!title || !content || !authorId || !topicid || !topicName) {
     return res.status(400).json({ error: "Missing required fields." });
   }
 
-  const modResult = await moderateText(content);
+  const modResult = await moderateText(content, imageUrls);
   if (modResult?.flagged) {
     return res.status(400).json({
       error: "Content flagged as inappropriate by text moderation.",
