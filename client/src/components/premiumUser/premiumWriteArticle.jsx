@@ -340,6 +340,8 @@ export const PremiumWriteArticle = () => {
       return;
     } else {
       articleData.roomid = selectedRoom;
+      console.log ("going to else posttype room", selectedRoom);
+      console.log("post type", postType);
 
       //  CASE 2: Room Opinion Article (skip validation)
       if (postType === "Room") {

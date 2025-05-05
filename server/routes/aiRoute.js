@@ -13,16 +13,28 @@ const OPENAI_KEY = process.env.OPENAI_API_KEY;
 const PERPLEXITY_KEY = process.env.PERPLEXITY_API_KEY;
 
 async function moderateText(content) {
-  const res = await fetch("https://api.openai.com/v1/moderations", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${OPENAI_KEY}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ input: content }),
-  });
-  const data = await res.json();
-  return data.results?.[0];
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 8000);
+  try {
+    const res = await fetch("https://api.openai.com/v1/moderations", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${OPENAI_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ input: content }),
+      signal: controller.signal,
+    });
+    clearTimeout(timeout);
+    if (!res.ok) {
+      throw new Error(`OpenAI error: ${res.status} ${res.statusText}`);
+    }
+    const data = await res.json();
+    return data.results?.[0];
+  } catch (err) {
+    console.error("Moderation error: ", err.message || err);
+    return { flagged: false, error: "Moderation failed or timed out." };
+  }
 }
 
 const generateCategoryPrompt = (content, category) => `
@@ -526,11 +538,13 @@ router.post("/moderate", async (req, res) => {
   if (!content) return res.status(400).json({ error: "No content provided." });
 
   const result = await moderateText(content); // or use simpleModeration()
+
   if (result?.flagged) {
     return res.status(400).json({
       error: "Content flagged as inappropriate by text moderation.",
     });
   }
+  res.status(200).json({ message: "Content passed moderation." });
 });
 
 module.exports = router;
