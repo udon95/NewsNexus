@@ -37,7 +37,7 @@ const PERPLEXITY_KEY = process.env.PERPLEXITY_API_KEY;
 //   }
 // }
 
-async function moderateText(content, imageUrl = null) {
+async function moderateText(content, imageUrls = null) {
   try {
     const input = [];
 
@@ -290,10 +290,10 @@ router.post("/submit-article", async (req, res) => {
 });
 
 router.post("/moderate", async (req, res) => {
-  const { content, imageUrl } = req.body;
+  const { content, imageUrls = [] } = req.body;
   if (!content) return res.status(400).json({ error: "No content provided." });
 
-  const result = await moderateText(content, imageUrl);
+  const result = await moderateText(content, imageUrls);
 
   if (result?.flagged) {
     return res.status(400).json({

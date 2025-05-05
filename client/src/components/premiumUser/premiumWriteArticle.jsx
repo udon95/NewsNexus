@@ -353,7 +353,7 @@ export const PremiumWriteArticle = () => {
               },
               body: JSON.stringify({
                 content: articleData.content,
-                imageUrl: uploadedImageUrls || null,
+                imageUrl: uploadedImageUrls || [],
               }),
             }
           );
