@@ -67,6 +67,10 @@ async function moderateText(content, imageUrls = null) {
     const data = await response.json();
     console.log("Moderation results:", JSON.stringify(data, null, 2));
 
+    console.log("MODERATION RECEIVED INPUT:");
+    console.log("Text:", content);
+    console.log("Images:", imageUrls);
+
     // Flag if any input (text or image) was flagged
     const flagged = data.results?.some((r) => r.flagged);
     return { flagged, details: data.results };
@@ -236,7 +240,14 @@ async function factCheck(content, topicName) {
 }
 
 router.post("/submit-article", async (req, res) => {
-  const { title, content, authorId, topicid, topicName, imageUrls=[] } = req.body;
+  const {
+    title,
+    content,
+    authorId,
+    topicid,
+    topicName,
+    imageUrls = [],
+  } = req.body;
 
   if (!title || !content || !authorId || !topicid || !topicName) {
     return res.status(400).json({ error: "Missing required fields." });

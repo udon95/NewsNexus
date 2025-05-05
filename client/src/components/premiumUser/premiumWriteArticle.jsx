@@ -343,105 +343,200 @@ export const PremiumWriteArticle = () => {
       articleData.roomid = selectedRoom;
 
       //  CASE 2: Room Opinion Article (skip fact check)
+      //     if (postType === "Room") {
+
+      //       console.log("Room image pending input:", {
+      //         imageUrls: pendingImages,
+      //       });
+
+      //       try {
+      //         const response = await fetch(
+      //           "https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/api/moderate",
+      //           {
+      //             method: "POST",
+      //             headers: {
+      //               "Content-Type": "application/json",
+      //             },
+      //             body: JSON.stringify({
+      //               content: articleData.content,
+      //               imageUrls: uploadedImageUrls.current || [],
+      //             }),
+      //           }
+      //         );
+
+      //         const result = await response.json();
+
+      //         if (result.error) {
+      //           alert(` Article flagged: ${result.error}."}`);
+      //           return;
+      //         }
+      //       } catch (err) {
+      //         alert("Failed to moderate content.");
+      //         console.error(err);
+      //         return;
+      //       }
+      //       articleData.roomid = selectedRoom;
+      //       const { data, error } = await supabase
+      //         .from("room_articles")
+      //         .insert([
+      //           {
+      //             title: articleData.title,
+      //             content: articleData.content,
+      //             roomid: selectedRoom,
+      //             userid: session.userid,
+      //             created_at: articleData.created_at,
+      //             status: "Published",
+      //           },
+      //         ])
+      //         .select("postid");
+
+      //       if (error) {
+      //         alert("Failed to post room article.");
+      //         return;
+      //       }
+
+      //       const postid = data?.[0]?.postid;
+      //       if (postType === "Room" && postid) {
+      //         for (const img of pendingImages) {
+      //           const file = img.file;
+      //           if (!file?.name) continue;
+
+      //           const fileExt = file.name.split(".").pop();
+      //           const fileName = `${Date.now()}-${Math.random()
+      //             .toString(36)
+      //             .substring(2)}.${fileExt}`;
+      //           const filePath = `user-${session.userid}/${fileName}`;
+
+      //           const { error: uploadError } = await supabase.storage
+      //             .from("room-article-images")
+      //             .upload(filePath, file);
+
+      //           if (uploadError) {
+      //             console.error("Room image upload failed:", uploadError);
+      //             continue;
+      //           }
+
+      //           const { data: urlData } = supabase.storage
+      //             .from("room-article-images")
+      //             .getPublicUrl(filePath);
+
+      //           const publicUrl = urlData?.publicUrl;
+      //           if (publicUrl) {
+      //             await supabase
+      //               .from("room_article_images")
+      //               .insert([{ postid, image_url: publicUrl }]);
+      //           }
+      //         }
+      //       }
+      //     }
+      //   }
+
+      //   pendingImages.forEach((img) => URL.revokeObjectURL(img.previewUrl));
+      //   setPendingImages([]);
+      //   alert("Article posted successfully.");
+      //   handleClearInputs();
+      //   return;
+      // };
       if (postType === "Room") {
-        console.log("Room moderation .current input:", {
-          content: articleData.content,
-          imageUrls: uploadedImageUrls.current,
-        });
-        console.log("Room image input:", {
-          imageUrls: uploadedImageUrls,
-        });
-        console.log("Room image pending input:", {
-          imageUrls: pendingImages,
-        });
+        const uploadedImageUrls = [];
+        const uploadedPaths = [];
 
-        try {
-          const response = await fetch(
-            "https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/api/moderate",
-            {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                content: articleData.content,
-                imageUrls: pendingImages || [],
-              }),
-            }
-          );
+        // Step 1: Upload images to Supabase (but don't insert to DB yet)
+        for (const img of pendingImages) {
+          const file = img.file;
+          if (!file?.name) continue;
 
-          const result = await response.json();
+          const fileExt = file.name.split(".").pop();
+          const fileName = `${Date.now()}-${Math.random()
+            .toString(36)
+            .substring(2)}.${fileExt}`;
+          const filePath = `user-${session.userid}/${fileName}`;
 
-          if (result.error) {
-            alert(` Article flagged: ${result.error}."}`);
-            return;
+          const { error: uploadError } = await supabase.storage
+            .from("room-article-images")
+            .upload(filePath, file);
+
+          if (uploadError) {
+            console.error("Room image upload failed:", uploadError);
+            continue;
           }
-        } catch (err) {
-          alert("Failed to moderate content.");
-          console.error(err);
+
+          const { data: urlData } = supabase.storage
+            .from("room-article-images")
+            .getPublicUrl(filePath);
+
+          const publicUrl = urlData?.publicUrl;
+          if (publicUrl) {
+            uploadedImageUrls.push(publicUrl);
+            uploadedPaths.push(filePath); // for potential cleanup
+          }
+        }
+
+        // Step 2: Run moderation on content + image URLs
+        const response = await fetch(
+          "https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/api/moderate",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              content: articleData.content,
+              imageUrls: uploadedImageUrls,
+            }),
+          }
+        );
+
+        const result = await response.json();
+        if (!response.ok) {
+          // Step 3: Clean up flagged images
+          await supabase.storage
+            .from("room-article-images")
+            .remove(uploadedPaths);
+
+          alert(` Article flagged: ${result.error}`);
           return;
         }
-        articleData.roomid = selectedRoom;
-        const { data, error } = await supabase
+
+        // Step 4: Insert article into room_articles table
+        const { data: inserted, error } = await supabase
           .from("room_articles")
           .insert([
             {
-              title: articleData.title,
-              content: articleData.content,
+              title,
+              content: updatedHTML,
               roomid: selectedRoom,
-              userid: session.userid,
-              created_at: articleData.created_at,
-              status: "Published",
+              authorid: session.userid,
+              type: articleType,
+              status: "Posted",
             },
           ])
-          .select("postid");
+          .select()
+          .single();
 
         if (error) {
-          alert("Failed to post room article.");
+          console.error("Insert error:", error);
+          alert("Failed to post article.");
           return;
         }
 
-        const postid = data?.[0]?.postid;
-        if (postType === "Room" && postid) {
-          for (const img of pendingImages) {
-            const file = img.file;
-            if (!file?.name) continue;
+        const postid = inserted.postid;
 
-            const fileExt = file.name.split(".").pop();
-            const fileName = `${Date.now()}-${Math.random()
-              .toString(36)
-              .substring(2)}.${fileExt}`;
-            const filePath = `user-${session.userid}/${fileName}`;
-
-            const { error: uploadError } = await supabase.storage
-              .from("room-article-images")
-              .upload(filePath, file);
-
-            if (uploadError) {
-              console.error("Room image upload failed:", uploadError);
-              continue;
-            }
-
-            const { data: urlData } = supabase.storage
-              .from("room-article-images")
-              .getPublicUrl(filePath);
-
-            const publicUrl = urlData?.publicUrl;
-            if (publicUrl) {
-              await supabase
-                .from("room_article_images")
-                .insert([{ postid, image_url: publicUrl }]);
-            }
-          }
+        // Step 5: Save uploaded image URLs to room_article_images table
+        for (const url of uploadedImageUrls) {
+          await supabase.from("room_article_images").insert([
+            {
+              postid,
+              image_url: url,
+            },
+          ]);
         }
+
+        alert("Room article posted!");
+        handleClearInputs();
+        navigate("/premiumDashboard/manage-articles");
       }
     }
-
-    pendingImages.forEach((img) => URL.revokeObjectURL(img.previewUrl));
-    setPendingImages([]);
-    alert("Article posted successfully.");
-    handleClearInputs();
-    return;
   };
 
   const handleSaveDraft = async () => {
