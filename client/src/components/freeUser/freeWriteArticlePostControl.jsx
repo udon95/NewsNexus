@@ -70,14 +70,32 @@ export const FreeWriteArticle = () => {
     addKeyboardShortcuts() {
       return {
         Tab: () => {
-          this.editor.commands.updateAttributes("paragraph", {
-            style: "text-indent: 2em",
+          const { state, commands } = this.editor;
+          const { from } = state.selection;
+          const node =
+            state.doc.resolve(from).nodeAfter || state.doc.resolve(from).parent;
+          const currentStyle = node.attrs?.style || "";
+          const match = currentStyle.match(/text-indent:\s?(\d+)em/);
+          const currentIndent = match ? parseInt(match[1]) : 0;
+          const nextIndent = currentIndent + 2;
+
+          commands.updateAttributes("paragraph", {
+            style: `text-indent: ${nextIndent}em`,
           });
           return true;
         },
         "Shift-Tab": () => {
-          this.editor.commands.updateAttributes("paragraph", {
-            style: "text-indent: 0",
+          const { state, commands } = this.editor;
+          const { from } = state.selection;
+          const node =
+            state.doc.resolve(from).nodeAfter || state.doc.resolve(from).parent;
+          const currentStyle = node.attrs?.style || "";
+          const match = currentStyle.match(/text-indent:\s?(\d+)em/);
+          const currentIndent = match ? parseInt(match[1]) : 0;
+          const nextIndent = Math.max(0, currentIndent - 2);
+
+          commands.updateAttributes("paragraph", {
+            style: nextIndent === 0 ? null : `text-indent: ${nextIndent}em`,
           });
           return true;
         },
@@ -583,6 +601,12 @@ export const FreeWriteArticle = () => {
         color: #ff0000;
         padding: 0 2px;
         border-radius: 3px;
+      }
+      .ProseMirror {
+        outline: none;
+        position: relative;
+        caret-color: black;
+        box-sizing: border-box;
       }
     `;
     document.head.appendChild(style);
