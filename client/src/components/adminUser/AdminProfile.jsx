@@ -3,7 +3,7 @@ import supabase from "../../api/supabaseClient";
 import useAuthHook from "../../hooks/useAuth";
 
 const AdminProfile = () => {
-  const { user, profile } = useAuthHook();
+  const { user } = useAuthHook();
   const [newEmail, setNewEmail] = useState("");
   const [oldPass, setOldPass] = useState("");
   const [newPass, setNewPass] = useState("");
@@ -69,16 +69,6 @@ const AdminProfile = () => {
       fetchAdmin();
     }
   }, [user]);
-
-  useEffect(() => {
-    const checkSession = async () => {
-      const { data, error } = await supabase.auth.getSession();
-      if (!data.session) {
-        console.warn("❌ No active Supabase session.");
-      }
-    };
-    checkSession();
-  }, []);
   
 
   if (!user)
@@ -93,7 +83,7 @@ const AdminProfile = () => {
           Profile particulars:
         </div>
         <div className="ml-10 mt-5 max-w-[500px] bg-gray-100 rounded-2xl p-3 text-lg shadow-lg">
-          {admin.username || profile?.username || "No username"}
+          {admin.username}
         </div>
         <input
           className="ml-10 mt-8 min-w-[500px] bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300"
