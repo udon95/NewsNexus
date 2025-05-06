@@ -32,13 +32,11 @@ const Room = () => {
   const [carouselIndex, setCarouselIndex] = useState({});
   const [expandedArticles, setExpandedArticles] = useState({});
   const { userType } = useAuthHook();
-  const [isOwner, setIsOwner] = useState(false);
 
   const isPremium = userType === "Premium";
-  {
-    !isPremium && navigate("/rooms");
-  }
-
+  {!isPremium && (
+    navigate("/rooms")
+  )}
   const nextSlide = (postid, imageCount) => {
     setCarouselIndex((prev) => ({
       ...prev,
@@ -251,7 +249,7 @@ const Room = () => {
       setLoading(true);
       const { data, error } = await supabase
         .from("rooms")
-        .select("name, description, member_count, room_type, created_by")
+        .select("name, description, member_count, room_type")
         .eq("roomid", roomid)
         .single();
 
@@ -260,12 +258,6 @@ const Room = () => {
         setRoom(null);
       } else {
         setRoom(data);
-
-        if (user && data?.created_by === user.userid) {
-          setIsOwner(true);
-        } else {
-          setIsOwner(false);
-        }
       }
       setLoading(false);
     };
@@ -975,27 +967,24 @@ const Room = () => {
       <Navbar />
       <div className="w-full max-w-4xl mx-auto p-6">
         <div className="flex justify-between items-center mb-1">
-          <h1 className="text-4xl font-bold">
-            {room
-              ? `${room.room_type === "Private" ? "Private Room: " : "Room: "}${
-                  room.name
-                }`
-              : "Not Found"}
-          </h1>
+        <h1 className="text-4xl font-bold">
+             {room
+               ? `${room.room_type === "Private" ? "Private Room: " : "Room: "}${room.name}`
+               : "Not Found"}
+           </h1>
           <div className="flex gap-3">
-            {isMember && !isOwner && (
-              <button
-                className={`px-6 py-2 rounded-full text-lg font-semibold transition-all ${
-                  !isMember || isUpdating
-                    ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                    : "bg-blue-500 text-white hover:bg-blue-600"
-                }`}
-                onClick={handleExitRoom}
-                disabled={!isMember || isUpdating}
-              >
-                Exit
-              </button>
-            )}
+            <button
+              className={`px-6 py-2 rounded-full text-lg font-semibold transition-all ${
+                !isMember || isUpdating
+                  ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                  : "bg-blue-500 text-white hover:bg-blue-600"
+              }`}
+              onClick={handleExitRoom}
+              disabled={!isMember || isUpdating}
+            >
+              Exit
+            </button>
+
             <button
               className={`px-6 py-2 rounded-full text-lg font-semibold transition-all ${
                 isMember || isUpdating
@@ -1145,17 +1134,18 @@ const Room = () => {
                 </div>
               </div>
 
+              {/* DEVI MADE CHANGES HERE TO ADD "." SEPERATOR */}
               <p className="text-sm text-gray-600">
                 <span className="text-lg font-bold text-blue-900">
                   @{article.users?.username || "Unknown"}
                 </span>
+                <span className="mx-2">•</span>
                 <span className="text-black">
-                  {" "}
-                  {new Date(article.created_at).toLocaleDateString("en-GB", {
-                    day: "2-digit",
-                    month: "short",
-                    year: "numeric",
-                  })}
+                {new Date(article.created_at).toLocaleDateString("en-GB", {
+                  day: "2-digit",
+                  month: "short",
+                  year: "numeric",
+                })}
                 </span>
               </p>
 
