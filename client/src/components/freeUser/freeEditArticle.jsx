@@ -112,14 +112,32 @@ const EditFreeArticle = () => {
     addKeyboardShortcuts() {
       return {
         Tab: () => {
-          this.editor.commands.updateAttributes("paragraph", {
-            style: "text-indent: 2em",
+          const { state, commands } = this.editor;
+          const { from } = state.selection;
+          const node =
+            state.doc.resolve(from).nodeAfter || state.doc.resolve(from).parent;
+          const currentStyle = node.attrs?.style || "";
+          const match = currentStyle.match(/text-indent:\s?(\d+)em/);
+          const currentIndent = match ? parseInt(match[1]) : 0;
+          const nextIndent = currentIndent + 2;
+
+          commands.updateAttributes("paragraph", {
+            style: `text-indent: ${nextIndent}em`,
           });
           return true;
         },
         "Shift-Tab": () => {
-          this.editor.commands.updateAttributes("paragraph", {
-            style: "text-indent: 0",
+          const { state, commands } = this.editor;
+          const { from } = state.selection;
+          const node =
+            state.doc.resolve(from).nodeAfter || state.doc.resolve(from).parent;
+          const currentStyle = node.attrs?.style || "";
+          const match = currentStyle.match(/text-indent:\s?(\d+)em/);
+          const currentIndent = match ? parseInt(match[1]) : 0;
+          const nextIndent = Math.max(0, currentIndent - 2);
+
+          commands.updateAttributes("paragraph", {
+            style: nextIndent === 0 ? null : `text-indent: ${nextIndent}em`,
           });
           return true;
         },
@@ -407,7 +425,7 @@ const EditFreeArticle = () => {
     setShowDraftNotification(true);
     alert("Draft updated!");
     const words = articleContent.trim().split(/\s+/).filter(Boolean).length;
-    
+
     if (words > MAX_WORDS) {
       alert(`Draft exceeds ${MAX_WORDS} word limit. Please reduce content.`);
       return;
@@ -469,9 +487,9 @@ const EditFreeArticle = () => {
 
     const previewUrl = URL.createObjectURL(file);
     setPendingImages((prev) => [...prev, { file, previewUrl }]);
-    console.log("Added to pendingImages", previewUrl);
+    // console.log("Added to pendingImages", previewUrl);
 
-    console.log("Inserting image to editor");
+    // console.log("Inserting image to editor");
     editor.chain().focus().setImage({ src: previewUrl }).run();
     e.target.value = null;
   };
@@ -575,6 +593,12 @@ const EditFreeArticle = () => {
          padding: 0 2px;
          border-radius: 3px;
        }
+         .ProseMirror {
+        outline: none;
+        position: relative;
+        caret-color: black;
+        box-sizing: border-box;
+      }
      `;
     document.head.appendChild(style);
     return () => document.head.removeChild(style); // Cleanup
