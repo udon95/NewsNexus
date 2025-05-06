@@ -379,53 +379,6 @@ export const PremiumWriteArticle = () => {
         return;
       }
 
-      // if (postType === "General") {
-
-      //   articleData.topic = topics;
-
-      //   const response = await fetch(
-      //     "https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/api/submit-article",
-      //     {
-      //       method: "POST",
-      //       headers: { "Content-Type": "application/json" },
-      //       body: JSON.stringify({
-      //         title,
-      //         content: updatedHTML,
-      //         type: "factual",
-      //         authorId: session.userid,
-      //         topicid: topics,
-      //         topicName,
-      //         imageUrls: extractedImageUrls || [],
-      //       }),
-      //     }
-      //   );
-
-      //   const result = await response.json();
-
-      //   if (!response.ok) {
-      //     if (result.feedback) {
-      //       setAiFeedback(result.feedback);
-      //       setAccuracy(result.accuracy || null);
-
-      //       alert(
-      //         "Article flagged by AI. Please review the highlighted sections."
-      //       );
-      //     } else {
-      //       alert(result.error || "Submission failed.");
-      //     }
-
-      //     //  This is important to prevent saving
-      //     return;
-      //   }
-
-      //   const articleid = result.article?.articleid;
-
-      //   // Save multiple images to article_images
-      //   for (const url of uploadedImageUrls) {
-      //     await supabase
-      //       .from("article_images")
-      //       .insert([{ articleid, image_url: url }]);
-      //   }
       setAccuracy(result.accuracy);
       setAiFeedback(result.feedback);
       alert(`Article posted successfully. Accuracy Score: ${result.accuracy}%`);
@@ -434,101 +387,6 @@ export const PremiumWriteArticle = () => {
     } else {
       articleData.roomid = selectedRoom;
 
-      //  CASE 2: Room Opinion Article (skip fact check)
-      //     if (postType === "Room") {
-
-      //       console.log("Room image pending input:", {
-      //         imageUrls: pendingImages,
-      //       });
-
-      //       try {
-      //         const response = await fetch(
-      //           "https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/api/moderate",
-      //           {
-      //             method: "POST",
-      //             headers: {
-      //               "Content-Type": "application/json",
-      //             },
-      //             body: JSON.stringify({
-      //               content: articleData.content,
-      //               imageUrls: uploadedImageUrls.current || [],
-      //             }),
-      //           }
-      //         );
-
-      //         const result = await response.json();
-
-      //         if (result.error) {
-      //           alert(` Article flagged: ${result.error}."}`);
-      //           return;
-      //         }
-      //       } catch (err) {
-      //         alert("Failed to moderate content.");
-      //         console.error(err);
-      //         return;
-      //       }
-      //       articleData.roomid = selectedRoom;
-      //       const { data, error } = await supabase
-      //         .from("room_articles")
-      //         .insert([
-      //           {
-      //             title: articleData.title,
-      //             content: articleData.content,
-      //             roomid: selectedRoom,
-      //             userid: session.userid,
-      //             created_at: articleData.created_at,
-      //             status: "Published",
-      //           },
-      //         ])
-      //         .select("postid");
-
-      //       if (error) {
-      //         alert("Failed to post room article.");
-      //         return;
-      //       }
-
-      //       const postid = data?.[0]?.postid;
-      //       if (postType === "Room" && postid) {
-      //         for (const img of pendingImages) {
-      //           const file = img.file;
-      //           if (!file?.name) continue;
-
-      //           const fileExt = file.name.split(".").pop();
-      //           const fileName = `${Date.now()}-${Math.random()
-      //             .toString(36)
-      //             .substring(2)}.${fileExt}`;
-      //           const filePath = `user-${session.userid}/${fileName}`;
-
-      //           const { error: uploadError } = await supabase.storage
-      //             .from("room-article-images")
-      //             .upload(filePath, file);
-
-      //           if (uploadError) {
-      //             console.error("Room image upload failed:", uploadError);
-      //             continue;
-      //           }
-
-      //           const { data: urlData } = supabase.storage
-      //             .from("room-article-images")
-      //             .getPublicUrl(filePath);
-
-      //           const publicUrl = urlData?.publicUrl;
-      //           if (publicUrl) {
-      //             await supabase
-      //               .from("room_article_images")
-      //               .insert([{ postid, image_url: publicUrl }]);
-      //           }
-      //         }
-      //       }
-      //     }
-      //   }
-
-      //   pendingImages.forEach((img) => URL.revokeObjectURL(img.previewUrl));
-      //   setPendingImages([]);
-      //   alert("Article posted successfully.");
-      //   handleClearInputs();
-      //   return;
-      // };
       if (postType === "Room") {
         const uploadedImageUrls = [];
         const uploadedPaths = [];
@@ -735,7 +593,6 @@ export const PremiumWriteArticle = () => {
     setPendingImages([]);
     setShowDraftNotification(true);
     alert("Draft saved!");
-    handleClearInputs();
     handleClearInputs();
   };
 
