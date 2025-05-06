@@ -267,6 +267,9 @@ export const FreeWriteArticle = () => {
     const { data: sessionData, error: sessionError } =
       await supabase.auth.getSession();
 
+    const uploadedImageUrls = [];
+    const uploadedPaths = [];
+
     for (const img of pendingImages) {
       const file = img.file;
       const fileExt = file.name.split(".").pop();
@@ -290,9 +293,12 @@ export const FreeWriteArticle = () => {
       const { data: urlData } = supabase.storage
         .from(bucket)
         .getPublicUrl(filePath);
+
       if (urlData?.publicUrl) {
         if (!firstImageUrl) firstImageUrl = urlData.publicUrl; // Track first image URL
         updatedHTML = updatedHTML.replaceAll(img.previewUrl, urlData.publicUrl);
+        uploadedImageUrls.push(urlData.publicUrl);
+        uploadedPaths.push(filePath);
       }
     }
 
@@ -319,6 +325,7 @@ export const FreeWriteArticle = () => {
             authorId: session.userid,
             topicid: topics,
             topicName,
+            imageUrls: uploadedImageUrls,
           }),
         }
       );
@@ -326,6 +333,9 @@ export const FreeWriteArticle = () => {
       const result = await response.json();
 
       if (!response.ok) {
+        if (uploadedPaths.length > 0) {
+          await supabase.storage.from("articles-images").remove(uploadedPaths);
+        }
         if (result.feedback) {
           setAiFeedback(result.feedback);
           setAccuracy(result.accuracy || null);
@@ -340,14 +350,14 @@ export const FreeWriteArticle = () => {
         return;
       }
 
-      const articleid = data?.[0]?.articleid;
+      // const articleid = data?.[0]?.articleid;
 
-      // Save multiple images to article_images
-      for (const url of uploadedImageUrls) {
-        await supabase
-          .from("article_images")
-          .insert([{ articleid, image_url: url }]);
-      }
+      // // Save multiple images to article_images
+      // for (const url of uploadedImageUrls) {
+      //   await supabase
+      //     .from("article_images")
+      //     .insert([{ articleid, image_url: url }]);
+      // }
 
       pendingImages.forEach((img) => URL.revokeObjectURL(img.previewUrl)); // cleanup object URLs
       setPendingImages([]);
