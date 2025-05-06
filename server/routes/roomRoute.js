@@ -41,7 +41,8 @@ router.post("/", async (req, res) => {
 
   const { data, error } = await supabase
     .from("rooms")
-    .insert([{ name, description, room_type, created_by }]);
+    .insert([{ name, description, room_type, created_by }])
+    .select();
 
   if (error) return res.status(500).json({ error: error.message });
   res.status(201).json({ message: "Room created", data });
