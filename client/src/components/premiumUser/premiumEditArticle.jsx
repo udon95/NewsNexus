@@ -300,12 +300,16 @@ export const PremiumEditArticle = () => {
           authorId: session.userid,
           topicid: topics,
           topicName,
+          imageUrls: uploadedImageUrls,
         }),
       }
     );
     const result = await response.json();
 
     if (!response.ok) {
+      if (uploadedPaths.length > 0) {
+        await supabase.storage.from("articles-images").remove(uploadedPaths);
+      }
       if (result.feedback) {
         setAiFeedback(result.feedback);
         setAccuracy(result.accuracy || null);
@@ -315,38 +319,38 @@ export const PremiumEditArticle = () => {
         alert(result.error || "Submission failed.");
       }
 
-      // ✅ This is important to prevent saving
+      //  This is important to prevent saving
       return;
     }
     // 📝 Insert new published article
-    const { data, error } = await supabase
-      .from("articles")
-      .insert([
-        {
-          title,
-          text: updatedHTML,
-          userid: session.userid,
-          topicid: topics,
-          time: new Date().toISOString(),
-          status: "Published",
-          imagepath: firstImageUrl || null,
-        },
-      ])
-      .select("articleid");
+    // const { data, error } = await supabase
+    //   .from("articles")
+    //   .insert([
+    //     {
+    //       title,
+    //       text: updatedHTML,
+    //       userid: session.userid,
+    //       topicid: topics,
+    //       time: new Date().toISOString(),
+    //       status: "Published",
+    //       imagepath: firstImageUrl || null,
+    //     },
+    //   ])
+    //   .select("articleid");
 
-    if (error) {
-      console.error("Error posting article:", error);
-      return alert("Failed to post article.");
-    }
+    // if (error) {
+    //   console.error("Error posting article:", error);
+    //   return alert("Failed to post article.");
+    // }
 
-    const articleid = data?.[0]?.articleid;
+    // const articleid = data?.[0]?.articleid;
 
-    // Insert image URLs into article_images table
-    for (const url of uploadedImageUrls) {
-      await supabase
-        .from("article_images")
-        .insert([{ articleid, image_url: url }]);
-    }
+    // // Insert image URLs into article_images table
+    // for (const url of uploadedImageUrls) {
+    //   await supabase
+    //     .from("article_images")
+    //     .insert([{ articleid, image_url: url }]);
+    // }
 
     // Clean up preview blobs
     pendingImages.forEach((img) => {
@@ -369,9 +373,9 @@ export const PremiumEditArticle = () => {
       }
     }
 
-    alert(`Article posted! Accuracy Score: ${result.accuracy}%`);
     setAccuracy(result.accuracy);
     setAiFeedback(result.feedback);
+    alert(`Article posted! Accuracy Score: ${result.accuracy}%`);
     handleClearInputs();
   };
 
@@ -480,14 +484,21 @@ export const PremiumEditArticle = () => {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ content: articleData.content }),
+          body: JSON.stringify({
+            content: updatedHTML,
+            imageUrls: uploadedImageUrls,
+          }),
         }
       );
 
       const result = await response.json();
 
-      if (result.error) {
-        alert(` Article flagged: ${result.error}."}`);
+      if (!response.ok || result.error) {
+        alert(
+          `Room article flagged by moderation: ${
+            result.error || "Unknown issue"
+          }`
+        );
         return;
       }
     } catch (err) {
@@ -708,6 +719,33 @@ export const PremiumEditArticle = () => {
     };
 
     if (postType === "General") {
+      try {
+        const response = await fetch(
+          "https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/api/moderate",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              content: updatedHTML,
+              imageUrls: uploadedImageUrls, // ensure this is defined above
+            }),
+          }
+        );
+
+        const result = await response.json();
+        if (!response.ok || result.error) {
+          alert(
+            `Draft rejected by AI moderation: ${
+              result.error || "Unknown error"
+            }`
+          );
+          return;
+        }
+      } catch (err) {
+        alert("Draft moderation failed. Try again later.");
+        console.error("Moderation error:", err);
+        return;
+      }
       const { error } = await supabase
         .from("articles")
         .update({
@@ -732,6 +770,33 @@ export const PremiumEditArticle = () => {
           .insert([{ articleid: id, image_url: url }]);
       }
     } else {
+      try {
+        const response = await fetch(
+          "https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/api/moderate",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              content: updatedHTML,
+              imageUrls: uploadedImageUrls, // ensure this is defined above
+            }),
+          }
+        );
+
+        const result = await response.json();
+        if (!response.ok || result.error) {
+          alert(
+            `Draft rejected by AI moderation: ${
+              result.error || "Unknown error"
+            }`
+          );
+          return;
+        }
+      } catch (err) {
+        alert("Draft moderation failed. Try again later.");
+        console.error("Moderation error:", err);
+        return;
+      }
       const { error } = await supabase
         .from("room_articles")
         .update({
@@ -881,7 +946,7 @@ export const PremiumEditArticle = () => {
           // console.log("Fetched article status:", article.status);
           // console.log("Setting isDraft to:", article.status === "Draft");
 
-          console.log(generalData[0]);
+          // console.log(generalData[0]);
           if (generalData[0].status === "Draft") {
             const { data: imageRows } = await supabase
               .from("article_images")
@@ -962,6 +1027,8 @@ export const PremiumEditArticle = () => {
     setSelectedRoom("");
     setShowConfirm(false);
     setPendingImages([]);
+    setAccuracy(null);
+    setAiFeedback("");
 
     // Reset Tiptap editor content (this is the key)
     if (editor) {

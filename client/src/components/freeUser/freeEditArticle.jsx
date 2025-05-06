@@ -28,7 +28,6 @@ import BulletList from "@tiptap/extension-bullet-list";
 import OrderedList from "@tiptap/extension-ordered-list";
 import { Extension } from "@tiptap/core";
 import { Paragraph } from "@tiptap/extension-paragraph";
-import FreeSidebar from "./freeSideBar";
 
 const EditFreeArticle = () => {
   const navigate = useNavigate();
@@ -53,8 +52,9 @@ const EditFreeArticle = () => {
   const [articleStatus, setArticleStatus] = useState(null);
   const [amendment, setAmendment] = useState("");
   const [showUpdateSuccess, setShowUpdateSuccess] = useState(false);
-
-  console.log("Auth session:", supabase.auth.getSession());
+  const [aiFeedback, setAiFeedback] = useState("");
+  const [accuracy, setAccuracy] = useState(null);
+  // console.log("Auth session:", supabase.auth.getSession());
 
   const CustomParagraph = Paragraph.extend({
     addAttributes() {
@@ -278,6 +278,13 @@ const EditFreeArticle = () => {
     if (!title || !topics || !articleContent)
       return alert("Please fill in all fields.");
 
+    const doc = new DOMParser().parseFromString(articleContent, "text/html");
+    const imageUrls = Array.from(doc.querySelectorAll("img")).map(
+      (img) => img.src
+    );
+
+    const topicName = topicOptions.find((t) => t.topicid === topics)?.name;
+
     if (articleStatus === "Draft") {
       if (monthlyPostCount >= 4) {
         alert(
@@ -286,20 +293,64 @@ const EditFreeArticle = () => {
         return;
       }
 
-      // --- If it's a draft, update the full article ---
-      const { error } = await supabase
-        .from("articles")
-        .update({
-          title,
-          text: articleContent,
-          topicid: topics,
-          time: new Date().toISOString(),
-          status: "Published",
-        })
-        .eq("articleid", articleId);
+      const response = await fetch(
+        "https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/api/submit-article",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            title,
+            content: articleContent,
+            type: "factual",
+            authorId: session.userid,
+            topicid: topics,
+            topicName,
+            imageUrls,
+          }),
+        }
+      );
 
-      if (error) return alert("Failed to update article.");
-      alert("Article updated and published!");
+      const result = await response.json();
+
+      if (!response.ok) {
+        if (uploadedPaths.length > 0) {
+          await supabase.storage.from("articles-images").remove(uploadedPaths);
+        }
+        if (result.feedback) {
+          setAiFeedback(result.feedback);
+          setAccuracy(result.accuracy || null);
+          alert(
+            " Article flagged by AI. Please review the highlighted sections."
+          );
+        } else {
+          alert(result.error || "Submission failed.");
+        }
+
+        //  This is important to prevent saving
+        return;
+      }
+
+      // --- If it's a draft, update the full article ---
+      // const { error } = await supabase
+      //   .from("articles")
+      //   .update({
+      //     title,
+      //     text: articleContent,
+      //     topicid: topics,
+      //     time: new Date().toISOString(),
+      //     status: "Published",
+      //   })
+      //   .eq("articleid", articleId);
+
+      pendingImages.forEach((img) => URL.revokeObjectURL(img.previewUrl)); // cleanup object URLs
+      setPendingImages([]);
+
+      setAccuracy(result.accuracy);
+      setAiFeedback(result.feedback);
+      alert(`Article posted successfully. Accuracy Score: ${result.accuracy}%`);
+      handleClearInputs();
     } else if (articleStatus === "Published") {
       // --- If it's published, only insert amendment ---
       if (!amendment.trim()) return alert("Please enter your update.");
@@ -533,6 +584,8 @@ const EditFreeArticle = () => {
     setImages([]);
     setShowConfirm(false);
     setPendingImages([]);
+    setAccuracy(null);
+    setAiFeedback("");
 
     // Reset Tiptap editor content (this is the key)
     if (editor) {
