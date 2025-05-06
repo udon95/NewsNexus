@@ -13,6 +13,7 @@ const ViewRoomsPage = () => {
   const initialQuery = searchParams.get("query") || "";
   const [searchQuery, setSearchQuery] = useState(initialQuery);
   const [roomImages, setRoomImages] = useState({});
+  const [loadingImages, setLoadingImages] = useState(true);
   const navigate = useNavigate();
   const { userType } = useAuthHook();
   const [sizeFilter, setSizeFilter] = useState("All");
@@ -22,11 +23,13 @@ const ViewRoomsPage = () => {
   useEffect(() => {
     const fetchRoomImages = async () => {
       const roomImagesData = {};
+      setLoadingImages(true);
       for (const room of rooms) {
         const image = await getRoomImage(room.roomid);
         roomImagesData[room.roomid] = image;
       }
       setRoomImages(roomImagesData); // Update the state with all the images
+      setLoadingImages(false);
     };
 
     if (rooms.length > 0) {
@@ -164,9 +167,6 @@ const ViewRoomsPage = () => {
   };
 
   //DEVI ADDED CODE HERE --> SO THE ORDER OF ROOM DISPLAY IS RANK, PRIVATE, JOINED, AND ALL OTHER ROOMS
-  // const filteredRooms = rooms.filter((room) =>
-  //   room.name.toLowerCase().includes(searchQuery.toLowerCase())
-  // );
   const filteredRooms = rooms
   .filter((room) =>
     room.name.toLowerCase().includes(searchQuery.toLowerCase())
@@ -279,8 +279,11 @@ const ViewRoomsPage = () => {
                 className="w-80 h-60 mx-auto border border-black rounded-2xl shadow-md cursor-pointer hover:shadow-lg transition bg-white flex flex-col"
               >
                 <div className="w-full h-48 bg-gray-200 rounded-t-2xl overflow-hidden relative">
-                  {/*DEVI MADE CHANGES HERE*/}
-                  {roomImages[room.roomid] && roomImages[room.roomid] !== "/default-image.png" ? (
+                  {loadingImages ? (
+                    <div className="w-full h-full flex items-center justify-center bg-gray-200 text-gray-500 text-sm">
+                      Loading...
+                    </div>
+                  ) : roomImages[room.roomid] && roomImages[room.roomid] !== "/default-image.png" ? (
                     <img
                       src={roomImages[room.roomid]}
                       alt={room.name}
