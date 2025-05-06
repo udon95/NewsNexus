@@ -67,7 +67,8 @@ const AdminExperts = () => {
   }, []);
 
   useEffect(() => {
-    setUserTopic(topics.filter((topic) => topic.topicid == applicant.topicid));
+    setUserTopic(topics.find((topic) => topic.topicid == applicant.topicid));
+    console.log(applicant.topicid);
     console.log(userTopic);
 
   }, [applicant]);
