@@ -70,6 +70,17 @@ const AdminProfile = () => {
     }
   }, [user]);
 
+  useEffect(() => {
+    const checkSession = async () => {
+      const { data, error } = await supabase.auth.getSession();
+      if (!data.session) {
+        console.warn("❌ No active Supabase session.");
+      }
+    };
+    checkSession();
+  }, []);
+  
+
   if (!user)
     return (
       <p className="ml-10 mt-10 text-lg">Loading or not authenticated...</p>
