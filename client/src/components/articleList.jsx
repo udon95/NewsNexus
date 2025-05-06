@@ -220,7 +220,16 @@ const ArticleList = ({
               return (
                 <li
                   key={index}
-                  onClick={() => onArticleClick(article)} // Calls parent function when clicked
+                  // DEVI MADE CHANGES HERE SO THAT WHEN ARTICLE CARD CLICKED LEAD TO ARTICLE...ONLY IF EDIT CLICKED FROM 3DOT LEAD TO EDIT PAGE
+                  onClick={() => {
+                    if (!isDraft) {
+                      const route = isRoom
+                        ? `/room-article/${article.postid}`
+                        : `/article/${article.articleid}`;
+                      navigate(route);
+                    }
+                  }}
+                  
                   className="w-full h-60 border border-black rounded-2xl shadow-md cursor-pointer hover:shadow-lg transition bg-white flex flex-col"
                 >
                   {/* Article Information */}
