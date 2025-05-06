@@ -8,6 +8,8 @@ const AdminProfile = () => {
   const [oldPass, setOldPass] = useState("");
   const [newPass, setNewPass] = useState("");
   const [admin, setAdmin] = useState({});
+  const storedUser = JSON.parse(localStorage.getItem("userProfile"));
+
 
   const updateUserEmail = async () => {
     if (!newEmail) {
@@ -68,6 +70,7 @@ const AdminProfile = () => {
     if (user) {
       fetchAdmin();
     }
+    console.log(storedUser);
   }, [user]);
   
 
