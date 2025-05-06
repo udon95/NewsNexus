@@ -36,11 +36,10 @@ const ManageRooms = () => {
 
   const fetchInvites = async () => {
     const { data, error } = await supabase
-      .from("room_members")
+      .from("room_invites")
       .select("roomid, rooms(name)")
-      .eq("userid", userId)
-      .is("joined_at", null);
-
+      .eq("userid", userId);
+  
     if (!error) {
       const formatted = data.map((item, i) => ({
         id: item.roomid,
@@ -48,7 +47,7 @@ const ManageRooms = () => {
       }));
       setInvites(formatted);
     }
-  };
+  };  
 
   useEffect(() => {
     fetchRooms();
@@ -98,8 +97,13 @@ const ManageRooms = () => {
       const usernames = newPrivateRoom.invite
         .split(",")
         .map((s) => s.replace("@", "").trim())
-        .filter(Boolean)
-        .slice(0, 10);
+        .filter(Boolean);
+
+      if (usernames.length > 10) {
+        alert("You can only invite up to 10 users to a private room.");
+        return;
+      }
+
 
       for (let username of usernames) {
         await fetch(
@@ -108,7 +112,6 @@ const ManageRooms = () => {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-              inviter_id: userId,
               invitee_username: username,
               roomid,
             }),
@@ -170,18 +173,18 @@ const ManageRooms = () => {
     fetchInvites();
   };
 
-  const handleExitRoom = async (roomid) => {
+  const handleDeclineInvite = async (roomid) => {
     await fetch(
-      "https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/rooms/exit",
+      "https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/rooms/decline",
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ userid: userId, roomid }),
       }
     );
-    alert("Exited room");
-    fetchRooms();
-  };
+    alert("Invitation declined");
+    fetchInvites();
+  };  
 
   const rowStyle = "flex justify-between items-center mb-2";
   const buttonClass =
@@ -194,6 +197,7 @@ const ManageRooms = () => {
         <section>
           <h2 className="font-bold text-xl mb-2">My Public Discussion Rooms :</h2>
           <div className="flex gap-2 items-center mb-2">
+            <label>New:</label>
             <input placeholder="Name" value={newPublicRoom.name}
               onChange={e => setNewPublicRoom({ ...newPublicRoom, name: e.target.value })}
               className="w-1/4 px-3 py-2 border rounded-md text-base" />
@@ -210,7 +214,6 @@ const ManageRooms = () => {
                   <span className="mt-2">{room.member_count} members</span>
                   <button onClick={() => handleUpdateRoom(room.roomid, room.name, room.description, room.room_type)} className={buttonClass}>Update</button>
                   <button onClick={() => handleDeleteRoom(room.roomid)} className={buttonClass}>Delete</button>
-                  <button onClick={() => handleExitRoom(room.roomid)} className={buttonClass}>Exit</button>
                 </div>
               </div>
             ))}
@@ -221,6 +224,7 @@ const ManageRooms = () => {
         <section>
           <h2 className="font-bold text-xl mb-2">My Private Discussion Rooms :</h2>
           <div className="flex gap-2 items-center mb-2">
+            <label>New:</label>
             <input placeholder="Name" value={newPrivateRoom.name}
               onChange={e => setNewPrivateRoom({ ...newPrivateRoom, name: e.target.value })}
               className="w-1/4 px-3 py-2 border rounded-md text-base" />
@@ -229,7 +233,8 @@ const ManageRooms = () => {
               className="w-2/3 px-3 py-2 border rounded-md text-base" />
           </div>
           <div className="flex items-center gap-2 mb-2">
-            <input placeholder="@username1, @username2" value={newPrivateRoom.invite}
+            <label>Invite:</label>
+            <input placeholder="@user1, @user2 (max 10)" value={newPrivateRoom.invite}
               onChange={e => setNewPrivateRoom({ ...newPrivateRoom, invite: e.target.value })}
               className="w-full px-3 py-2 border rounded-md text-base" />
             <button onClick={handleAddPrivateRoom} className="bg-black text-white px-4 py-2 rounded text-base">+</button>
@@ -242,7 +247,6 @@ const ManageRooms = () => {
                   <span className="mt-2">{room.member_count} members</span>
                   <button onClick={() => handleUpdateRoom(room.roomid, room.name, room.description, room.room_type)} className={buttonClass}>Update</button>
                   <button onClick={() => handleDeleteRoom(room.roomid)} className={buttonClass}>Delete</button>
-                  <button onClick={() => handleExitRoom(room.roomid)} className={buttonClass}>Exit</button>
                 </div>
               </div>
             ))}
@@ -310,7 +314,7 @@ const ManageRooms = () => {
               <div key={invite.id} className={rowStyle}>
                 <span>{index + 1}. {invite.name}</span>
                 <button onClick={() => handleAcceptInvite(invite.id)} className={buttonClass}>Accept</button>
-                <button className={buttonClass}>Decline</button>
+                <button onClick={() => handleDeclineInvite(invite.id)} className={buttonClass}>Decline</button>
               </div>
             ))}
           </div>
