@@ -162,9 +162,27 @@ const ViewRoomsPage = () => {
     }
   };
 
+  //DEVI ADDED CODE HERE --> SO THE ORDER OF ROOM DISPLAY IS RANK, PRIVATE, JOINED, AND ALL OTHER ROOMS
   const filteredRooms = rooms.filter((room) =>
     room.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  const rankedRooms = filteredRooms.slice(0, 3);
+
+  // FINAL sorted room list: Private → Joined (latest) → Unjoined (latest)
+  const sortedFilteredRooms = [
+    // Only show private rooms if the user is a current member (exited_at is null)
+    ...filteredRooms.filter(
+      (r) => r.room_type === "Private" && userRooms.has(r.roomid)
+    ),
+    ...filteredRooms
+      .filter((r) => r.room_type !== "Private" && userRooms.has(r.roomid))
+      .sort((a, b) => new Date(b.created_at) - new Date(a.created_at)),
+    ...filteredRooms
+      .filter((r) => r.room_type !== "Private" && !userRooms.has(r.roomid))
+      .sort((a, b) => new Date(b.created_at) - new Date(a.created_at)),
+  ];
+  
 
   const getRoomImage = async (roomid) => {
     try {
@@ -242,11 +260,18 @@ const ViewRoomsPage = () => {
                 className="w-80 h-60 mx-auto border border-black rounded-2xl shadow-md cursor-pointer hover:shadow-lg transition bg-white flex flex-col"
               >
                 <div className="w-full h-48 bg-gray-200 rounded-t-2xl overflow-hidden relative">
-                  <img
-                    src={roomImages[room.roomid] || "/default-image.png"} // <-- Ensure we use roomImages state
-                    alt={room.name}
-                    className="w-full h-full object-cover"
-                  />
+                  {/*DEVI MADE CHANGES HERE*/}
+                  {roomImages[room.roomid] && roomImages[room.roomid] !== "/default-image.png" ? (
+                    <img
+                      src={roomImages[room.roomid]}
+                      alt={room.name}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center bg-gray-200 text-gray-500 text-sm">
+                      No Image
+                    </div>
+                  )}
 
                   <div className="absolute top-2 left-2 bg-black text-white text-sm font-bold px-3 py-1 rounded-lg border-2 border-white">
                     Rank #{index + 1}
@@ -262,9 +287,9 @@ const ViewRoomsPage = () => {
             ))}
           </div>
 
-          {/* ROOM LIST SECTION - UNTOUCHED */}
+          {/* DEVI MADE CHANGES HERE - ROOM LIST SECTION - FIXED ORDER: Private → Joined → Others */}
           <div className="w-full max-w-5xl space-y-4">
-            {filteredRooms.map((room) => (
+            {sortedFilteredRooms.map((room) => (
               <div
                 key={room.roomid}
                 onClick={() => handleRoomClick(room.roomid)}
@@ -277,8 +302,8 @@ const ViewRoomsPage = () => {
                 <button
                   className={`px-6 py-2 text-sm font-bold rounded-full ${
                     userRooms.has(room.roomid)
-                      ? "bg-gray-300 text-gray-600 cursor-not-allowed"
-                      : "bg-[#BFD8FF] text-black hover:bg-blue-300"
+                    ? "bg-gray-300 text-gray-600 cursor-not-allowed"
+                    : "bg-[#BFD8FF] text-black hover:bg-blue-300"
                   }`}
                   onClick={(e) => handleJoinAndRedirect(room.roomid, e)}
                   disabled={userRooms.has(room.roomid)}
@@ -288,7 +313,7 @@ const ViewRoomsPage = () => {
                       ? "Private"
                       : "Joined"
                     : "Join"}
-                </button>
+              </button>
               </div>
             ))}
           </div>
