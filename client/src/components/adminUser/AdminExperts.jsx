@@ -4,6 +4,8 @@ import supabase from "../../api/supabaseClient";
 const AdminExperts = () => {
   const [applications, setApplications] = useState([]);
   const [applicant, setApplicant] = useState(null);
+  const [topics, setTopics] = useState([]);
+  const [userTopic, setUserTopic] = useState(null);
 
   const handleClick = async (isApproved) => {
     // Ensure 'applicant' is defined
@@ -49,6 +51,26 @@ const AdminExperts = () => {
     fetchApplications();
   }, []);
 
+  useEffect(() => {
+    const fetchTopics = async () => {
+      const { data, error } = await supabase
+        .from("topic_categories")
+        .select("*");
+      if (error) {
+        console.error("Error fetching users:", error);
+      } else {
+        setTopics(data);
+        console.log(data);
+      }
+    };
+    fetchTopics();
+  }, []);
+
+  useEffect(() => {
+    setUserTopic(topics.filter((topic)=>topic.topicid == applicant.topicid ))
+
+  }, [applicant]);
+
   return (
     <div className="w-screen min-h-screen flex flex-col overflow-auto">
       <div className="flex">
@@ -60,6 +82,9 @@ const AdminExperts = () => {
               </div>
               <div className="ml-10 mt-5 max-w-[500px] bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300">
                 User:&emsp;{applicant.username}
+              </div>
+              <div className="ml-10 mt-5 max-w-[500px] bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300">
+                Topic:&emsp;{userTopic.name}
               </div>
               <div className="ml-10 mt-5 max-w-[500px] bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300">
                 Profession:
