@@ -8,7 +8,7 @@ const AdminProfile = () => {
   const [oldPass, setOldPass] = useState("");
   const [newPass, setNewPass] = useState("");
   const [admin, setAdmin] = useState({});
-  const storedUser = JSON.parse(localStorage.getItem("userProfile"));
+  const [jk, setjk] = useState("");
 
 
   const updateUserEmail = async () => {
@@ -70,7 +70,15 @@ const AdminProfile = () => {
     if (user) {
       fetchAdmin();
     }
-    console.log(storedUser);
+
+    const getSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        setjk(session.user);
+      }
+    };
+    getSession();
+    console.log(jk);
   }, [user]);
   
 

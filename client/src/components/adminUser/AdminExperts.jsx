@@ -66,11 +66,20 @@ const AdminExperts = () => {
     fetchTopics();
   }, []);
 
-  useEffect(() => {
-    setUserTopic(topics.find((topic) => topic.topicid == applicant.topicid));
-    console.log(userTopic);
+  // useEffect(() => {
+  //   setUserTopic(topics.find((topic) => topic.topicid == applicant.topicid));
+  //   console.log(userTopic);
 
-  }, [applicant]);
+  // }, [applicant]);
+
+const setApplicantWithTopic = (application) => {
+  setApplicant(application);
+  setUserTopic(topics.find((topic) => topic.topicid == application.topicid));
+  console.log(application.topicid);
+  console.log(userTopic);
+
+
+} 
 
   return (
     <div className="w-screen min-h-screen flex flex-col overflow-auto">
@@ -130,7 +139,7 @@ const AdminExperts = () => {
               <div
                 key={application.username}
                 className=" mt-8 min-w-150 bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300 cursor-pointer"
-                onClick={() => setApplicant(application)}
+                onClick={() => setApplicantWithTopic(application)}
               >
                 {application.username}
               </div>
