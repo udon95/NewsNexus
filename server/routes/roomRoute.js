@@ -82,7 +82,19 @@ router.delete("/:roomid", async (req, res) => {
 });
 
 router.post("/invite", async (req, res) => {
-  const { inviter_id, invitee_username, roomid } = req.body;
+  const { invitee_username, roomid } = req.body;
+
+  const { count, error: countError } = await supabase
+  .from("room_invites")
+  .select("*", { count: "exact", head: true })
+  .eq("roomid", roomid);
+
+  if (countError)
+  return res.status(500).json({ error: "Failed to count invites" });
+
+  if (count >= 10) {
+  return res.status(400).json({ error: "Invite limit of 10 reached" });
+  }
 
   const { data: user, error: userError } = await supabase
     .from("users")
@@ -90,20 +102,21 @@ router.post("/invite", async (req, res) => {
     .eq("username", invitee_username)
     .single();
 
-  if (userError || !user)
+  if (userError || !user) {
     return res.status(404).json({ error: "User not found" });
+  }
 
-  const { error } = await supabase.from("room_members").insert([
+  const { error: insertError } = await supabase.from("room_invites").insert([
     {
       userid: user.userid,
       roomid,
-      invited_by: inviter_id,
-      joined_at: null,
-      exited_at: null,
     },
   ]);
 
-  if (error) return res.status(500).json({ error: error.message });
+  if (insertError) {
+    return res.status(500).json({ error: insertError.message });
+  }
+
   res.status(200).json({ message: "Invitation sent" });
 });
 
@@ -112,25 +125,36 @@ router.post("/accept", async (req, res) => {
 
   const { error } = await supabase
     .from("room_members")
-    .update({ joined_at: new Date().toISOString() })
+    .upsert(
+      [{ userid, roomid, joined_at: new Date().toISOString(), exited_at: null }],
+      { onConflict: ['userid', 'roomid'] }
+    );
+
+  if (error) return res.status(500).json({ error: error.message });
+
+  const { error: deleteError } = await supabase
+    .from("room_invites")
+    .delete()
     .eq("userid", userid)
     .eq("roomid", roomid);
 
-  if (error) return res.status(500).json({ error: error.message });
+  if (deleteError) return res.status(500).json({ error: deleteError.message });
+
   res.status(200).json({ message: "Joined room" });
 });
 
-router.post("/exit", async (req, res) => {
+router.post("/decline", async (req, res) => {
   const { userid, roomid } = req.body;
 
   const { error } = await supabase
-    .from("room_members")
-    .update({ exited_at: new Date().toISOString() })
+    .from("room_invites")
+    .delete()
     .eq("userid", userid)
     .eq("roomid", roomid);
 
   if (error) return res.status(500).json({ error: error.message });
-  res.status(200).json({ message: "Exited room" });
+
+  res.status(200).json({ message: "Invitation declined" });
 });
 
 module.exports = router;
