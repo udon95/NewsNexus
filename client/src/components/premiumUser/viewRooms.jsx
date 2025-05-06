@@ -15,6 +15,7 @@ const ViewRoomsPage = () => {
   const [roomImages, setRoomImages] = useState({});
   const navigate = useNavigate();
   const { userType } = useAuthHook();
+  const [sizeFilter, setSizeFilter] = useState("All");
 
   const isPremium = userType === "Premium";
 
@@ -163,11 +164,24 @@ const ViewRoomsPage = () => {
   };
 
   //DEVI ADDED CODE HERE --> SO THE ORDER OF ROOM DISPLAY IS RANK, PRIVATE, JOINED, AND ALL OTHER ROOMS
-  const filteredRooms = rooms.filter((room) =>
+  // const filteredRooms = rooms.filter((room) =>
+  //   room.name.toLowerCase().includes(searchQuery.toLowerCase())
+  // );
+  const filteredRooms = rooms
+  .filter((room) =>
     room.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  )
+  .filter((room) => {
+    if (sizeFilter === "Small") return room.member_count < 10;
+    if (sizeFilter === "Medium") return room.member_count >= 10 && room.member_count <= 50;
+    if (sizeFilter === "Large") return room.member_count > 50;
+    return true; // All
+  });
 
-  const rankedRooms = filteredRooms.slice(0, 3);
+
+  const rankedRooms = filteredRooms
+  .filter((room) => room.room_type !== "Private")
+  .slice(0, 3);
 
   // FINAL sorted room list: Private → Joined (latest) → Unjoined (latest)
   const sortedFilteredRooms = [
@@ -233,8 +247,13 @@ const ViewRoomsPage = () => {
     <div className="relative min-h-screen w-screen flex flex-col bg-white">
       <Navbar />
       <div className="w-full flex justify-center mt-6 mb-6">
-        <div className="w-full max-w-3xl px-4">
-          <Search onSearch={handleSearch} />
+        <div className="w-full max-w-[900px] px-4">
+          <Search
+            onSearch={handleSearch}
+            showSizeFilter={true}
+            sizeFilter={sizeFilter}
+            onSizeFilterChange={setSizeFilter}
+          />
         </div>
       </div>
 
@@ -253,7 +272,7 @@ const ViewRoomsPage = () => {
 
           {/* RANKING CARD SECTION - UNTOUCHED */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6 w-full">
-            {filteredRooms.slice(0, 3).map((room, index) => (
+            {rankedRooms.map((room, index) => (
               <div
                 key={room.roomid}
                 onClick={() => handleRoomClick(room.roomid)}
@@ -269,7 +288,7 @@ const ViewRoomsPage = () => {
                     />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center bg-gray-200 text-gray-500 text-sm">
-                      No Image
+                      No Images Available
                     </div>
                   )}
 
