@@ -92,13 +92,56 @@ router.put("/:roomid", async (req, res) => {
 // 🔹 DELETE room by ID
 router.delete("/:roomid", async (req, res) => {
   const { roomid } = req.params;
-  const { error } = await supabase
-    .from("rooms")
-    .delete()
-    .eq("roomid", roomid);
+  const bucketName = "room-article-images";
 
-  if (error) return res.status(500).json({ error: error.message });
-  res.status(200).json({ message: "Room deleted" });
+  try {
+    // 1. Get all postids in the room
+    const { data: posts, error: postsError } = await supabase
+      .from("room_articles")
+      .select("postid")
+      .eq("roomid", roomid);
+
+    if (postsError) throw postsError;
+
+    const postIds = posts.map((p) => p.postid);
+
+    // 2. Get image URLs for those posts
+    if (postIds.length > 0) {
+      const { data: images, error: imagesError } = await supabase
+        .from("room_article_images")
+        .select("image_url")
+        .in("postid", postIds);
+
+      if (imagesError) throw imagesError;
+
+      const imagePaths = images.map((img) => {
+        const parts = img.image_url.split(`/object/public/${bucketName}/`);
+        return parts[1]; // extract path after bucket prefix
+      });
+
+      // 3. Delete from storage bucket
+      if (imagePaths.length > 0) {
+        const { error: storageError } = await supabase.storage
+          .from(bucketName)
+          .remove(imagePaths);
+
+        if (storageError) throw storageError;
+      }
+    }
+
+    // 4. Delete the room 
+    const { error: roomDeleteError } = await supabase
+      .from("rooms")
+      .delete()
+      .eq("roomid", roomid);
+
+    if (roomDeleteError) throw roomDeleteError;
+
+    return res.status(200).json({ message: "Room and images deleted" });
+  } catch (err) {
+    console.error("Delete failed:", err.message);
+    return res.status(500).json({ error: err.message });
+  }
 });
 
 router.post("/invite", async (req, res) => {
