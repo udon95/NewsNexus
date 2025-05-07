@@ -919,6 +919,12 @@ export const PremiumWriteArticle = () => {
         padding: 0 2px;
         border-radius: 3px;
       }
+         .ProseMirror {
+        outline: none;
+        position: relative;
+        caret-color: black;
+        box-sizing: border-box;
+      }
     `;
     document.head.appendChild(style);
     return () => document.head.removeChild(style); // Cleanup

@@ -97,6 +97,26 @@ async function moderateImages(imageUrls) {
   return { flagged, results };
 }
 
+const deleteImagesFromSupabase = async (imageUrls) => {
+  const bucket = "article-images"; // or your actual bucket name
+  const paths = imageUrls
+    .map((url) => {
+      const parts = url.split(`${bucket}/`);
+      return parts[1]; // path after the bucket
+    })
+    .filter(Boolean);
+
+  if (paths.length > 0) {
+    const { error } = await supabase.storage.from(bucket).remove(paths);
+    if (error) {
+      console.error(
+        "Failed to delete images after moderation block:",
+        error.message
+      );
+    }
+  }
+};
+
 const generateCategoryPrompt = (content, category) => `
 You are a category validation assistant.
 
@@ -273,6 +293,8 @@ router.post("/submit-article", async (req, res) => {
 
     const modResult = await moderateText(content);
     if (modResult?.flagged) {
+      await deleteImagesFromSupabase(imageUrls);
+
       return res.status(400).json({
         error: "Content flagged as inappropriate by text moderation.",
         details: modResult,
@@ -280,6 +302,8 @@ router.post("/submit-article", async (req, res) => {
     }
     const visionResult = await moderateImages(imageUrls);
     if (visionResult.flagged.length > 0) {
+      await deleteImagesFromSupabase(imageUrls);
+
       return res.status(400).json({
         error: "One or more images failed moderation.",
         flagged: visionResult.flagged,
@@ -350,6 +374,8 @@ router.post("/moderate", async (req, res) => {
   const result = await moderateText(content);
 
   if (result?.flagged) {
+    await deleteImagesFromSupabase(imageUrls);
+
     return res.status(400).json({
       error: "Content flagged as inappropriate.",
       details: result.details,
@@ -359,6 +385,8 @@ router.post("/moderate", async (req, res) => {
   const visionResult = await moderateImages(imageUrls);
 
   if (visionResult.flagged.length > 0) {
+    await deleteImagesFromSupabase(imageUrls);
+
     return res.status(400).json({
       error: "Images flagged as inappropriate.",
       flagged: visionResult.flagged,
