@@ -416,18 +416,20 @@ const ManageRooms = () => {
                 <span>
                   {index + 1}. {invite.name}
                 </span>
-                <button
-                  onClick={() => handleAcceptInvite(invite.id)}
-                  className={buttonClass}
-                >
-                  Accept
-                </button>
-                <button
-                  onClick={() => handleDeclineInvite(invite.id)}
-                  className={buttonClass}
-                >
-                  Decline
-                </button>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => handleAcceptInvite(invite.id)}
+                    className={buttonClass}
+                  >
+                    Accept
+                  </button>
+                  <button
+                    onClick={() => handleDeclineInvite(invite.id)}
+                    className={buttonClass}
+                  >
+                    Decline
+                  </button>
+                </div>  
               </div>
             ))}
           </div>
