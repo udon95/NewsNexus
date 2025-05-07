@@ -108,7 +108,7 @@ const PremiumApplyExpert = () => {
   return (
     <div className="flex flex-col items-center justify-center min-h-screen font-grotesk p-10">
       <div className="w-full max-w-2xl bg-white p-10 rounded-2xl shadow-lg">
-        <h2 className="text-2xl font-semibold mb-6">Expert User Application</h2>
+        <h2 className="text-2xl font-bold mb-6">Expert User Application</h2>
 
         <label className="block text-lg font-semibold">Full Name:</label>
         <input

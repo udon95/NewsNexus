@@ -195,7 +195,7 @@ const ManageRooms = () => {
       <div className="flex-1 p-10 bg-[#eef2fc] space-y-8">
         {/* Public Rooms */}
         <section>
-          <h2 className="font-bold text-xl mb-2">My Public Discussion Rooms :</h2>
+          <h1 className="font-bold text-xl mb-2">My Public Discussion Rooms:</h1>
           <div className="flex gap-2 items-center mb-2">
             <label>New:</label>
             <input placeholder="Name" value={newPublicRoom.name}
@@ -222,7 +222,7 @@ const ManageRooms = () => {
 
         {/* Private Rooms */}
         <section>
-          <h2 className="font-bold text-xl mb-2">My Private Discussion Rooms :</h2>
+          <h1 className="font-bold text-xl mb-2">My Private Discussion Rooms:</h1>
           <div className="flex gap-2 items-center mb-2">
             <label>New:</label>
             <input placeholder="Name" value={newPrivateRoom.name}
@@ -308,7 +308,7 @@ const ManageRooms = () => {
 
         {/* Invites */}
         <section>
-          <h2 className="font-bold text-xl mb-2">My Private Discussion Room Invites :</h2>
+          <h1 className="font-bold text-xl mb-2">My Private Discussion Room Invites :</h1>
           <div className="bg-white p-4 rounded-xl shadow space-y-2">
             {invites.map((invite, index) => (
               <div key={invite.id} className={rowStyle}>
