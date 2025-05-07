@@ -39,7 +39,7 @@ const ManageRooms = () => {
       .from("room_invites")
       .select("roomid, rooms(name)")
       .eq("userid", userId);
-  
+
     if (!error) {
       const formatted = data.map((item, i) => ({
         id: item.roomid,
@@ -47,7 +47,7 @@ const ManageRooms = () => {
       }));
       setInvites(formatted);
     }
-  };  
+  };
 
   useEffect(() => {
     fetchRooms();
@@ -104,7 +104,6 @@ const ManageRooms = () => {
         return;
       }
 
-
       for (let username of usernames) {
         await fetch(
           "https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/rooms/invite",
@@ -124,7 +123,12 @@ const ManageRooms = () => {
     }
   };
 
-  const handleUpdateRoom = (roomid, currentName, currentDescription, currentRoomType) => {
+  const handleUpdateRoom = (
+    roomid,
+    currentName,
+    currentDescription,
+    currentRoomType
+  ) => {
     setEditRoom({
       roomid,
       name: currentName,
@@ -133,10 +137,10 @@ const ManageRooms = () => {
     });
     setShowModal(true);
   };
-  
+
   const submitRoomUpdate = async () => {
     const { roomid, name, description, room_type } = editRoom;
-  
+
     await fetch(
       `https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/rooms/${roomid}`,
       {
@@ -145,7 +149,7 @@ const ManageRooms = () => {
         body: JSON.stringify({ name, description, room_type }),
       }
     );
-  
+
     setShowModal(false);
     fetchRooms();
   };
@@ -184,36 +188,75 @@ const ManageRooms = () => {
     );
     alert("Invitation declined");
     fetchInvites();
-  };  
+  };
 
   const rowStyle = "flex justify-between items-center mb-2";
   const buttonClass =
     "bg-gray-800 text-white px-4 py-2 rounded-md text-base hover:brightness-110";
 
   return (
-    <div className="flex min-h-screen front-grotesk w-full max-w-4xl justify-center">
-      <div className="flex-1 p-10 bg-[#eef2fc] space-y-8">
+    <div className="flex min-h-screen front-grotesk w-full  justify-center">
+      <div className="flex-1 p-10 space-y-8 max-w-4xl">
         {/* Public Rooms */}
         <section>
-          <h1 className="font-bold text-xl mb-2">My Public Discussion Rooms:</h1>
+          <h1 className="font-bold text-3xl mb-2">
+            My Public Discussion Rooms:
+          </h1>
           <div className="flex gap-2 items-center mb-2">
             <label>New:</label>
-            <input placeholder="Name" value={newPublicRoom.name}
-              onChange={e => setNewPublicRoom({ ...newPublicRoom, name: e.target.value })}
-              className="w-1/4 px-3 py-2 border rounded-md text-base" />
-            <input placeholder="Description" value={newPublicRoom.description}
-              onChange={e => setNewPublicRoom({ ...newPublicRoom, description: e.target.value })}
-              className="w-2/3 px-3 py-2 border rounded-md text-base" />
-            <button onClick={handleAddPublicRoom} className="bg-black text-white px-4 py-2 rounded text-base">+</button>
+            <input
+              placeholder="Name"
+              value={newPublicRoom.name}
+              onChange={(e) =>
+                setNewPublicRoom({ ...newPublicRoom, name: e.target.value })
+              }
+              className="w-1/4 px-3 py-2 border rounded-md text-base"
+            />
+            <input
+              placeholder="Description"
+              value={newPublicRoom.description}
+              onChange={(e) =>
+                setNewPublicRoom({
+                  ...newPublicRoom,
+                  description: e.target.value,
+                })
+              }
+              className="w-2/3 px-3 py-2 border rounded-md text-base"
+            />
+            <button
+              onClick={handleAddPublicRoom}
+              className="bg-black text-white px-4 py-2 rounded text-base"
+            >
+              +
+            </button>
           </div>
           <div className="bg-white p-4 rounded-xl shadow space-y-2">
             {publicRooms.map((room, index) => (
               <div key={room.roomid} className={rowStyle}>
-                <span>{index + 1}. {room.name}</span>
+                <span>
+                  {index + 1}. {room.name}
+                </span>
                 <div className="flex gap-2">
                   <span className="mt-2">{room.member_count} members</span>
-                  <button onClick={() => handleUpdateRoom(room.roomid, room.name, room.description, room.room_type)} className={buttonClass}>Update</button>
-                  <button onClick={() => handleDeleteRoom(room.roomid)} className={buttonClass}>Delete</button>
+                  <button
+                    onClick={() =>
+                      handleUpdateRoom(
+                        room.roomid,
+                        room.name,
+                        room.description,
+                        room.room_type
+                      )
+                    }
+                    className={buttonClass}
+                  >
+                    Update
+                  </button>
+                  <button
+                    onClick={() => handleDeleteRoom(room.roomid)}
+                    className={buttonClass}
+                  >
+                    Delete
+                  </button>
                 </div>
               </div>
             ))}
@@ -222,31 +265,75 @@ const ManageRooms = () => {
 
         {/* Private Rooms */}
         <section>
-          <h1 className="font-bold text-xl mb-2">My Private Discussion Rooms:</h1>
+          <h1 className="font-bold text-3xl mb-2">
+            My Private Discussion Rooms:
+          </h1>
           <div className="flex gap-2 items-center mb-2">
             <label>New:</label>
-            <input placeholder="Name" value={newPrivateRoom.name}
-              onChange={e => setNewPrivateRoom({ ...newPrivateRoom, name: e.target.value })}
-              className="w-1/4 px-3 py-2 border rounded-md text-base" />
-            <input placeholder="Description" value={newPrivateRoom.description}
-              onChange={e => setNewPrivateRoom({ ...newPrivateRoom, description: e.target.value })}
-              className="w-2/3 px-3 py-2 border rounded-md text-base" />
+            <input
+              placeholder="Name"
+              value={newPrivateRoom.name}
+              onChange={(e) =>
+                setNewPrivateRoom({ ...newPrivateRoom, name: e.target.value })
+              }
+              className="w-1/4 px-3 py-2 border rounded-md text-base"
+            />
+            <input
+              placeholder="Description"
+              value={newPrivateRoom.description}
+              onChange={(e) =>
+                setNewPrivateRoom({
+                  ...newPrivateRoom,
+                  description: e.target.value,
+                })
+              }
+              className="w-2/3 px-3 py-2 border rounded-md text-base"
+            />
           </div>
           <div className="flex items-center gap-2 mb-2">
             <label>Invite:</label>
-            <input placeholder="@user1, @user2 (max 10)" value={newPrivateRoom.invite}
-              onChange={e => setNewPrivateRoom({ ...newPrivateRoom, invite: e.target.value })}
-              className="w-full px-3 py-2 border rounded-md text-base" />
-            <button onClick={handleAddPrivateRoom} className="bg-black text-white px-4 py-2 rounded text-base">+</button>
+            <input
+              placeholder="@user1, @user2 (max 10)"
+              value={newPrivateRoom.invite}
+              onChange={(e) =>
+                setNewPrivateRoom({ ...newPrivateRoom, invite: e.target.value })
+              }
+              className="w-full px-3 py-2 border rounded-md text-base"
+            />
+            <button
+              onClick={handleAddPrivateRoom}
+              className="bg-black text-white px-4 py-2 rounded text-base"
+            >
+              +
+            </button>
           </div>
           <div className="bg-white p-4 rounded-xl shadow space-y-2">
             {privateRooms.map((room, index) => (
               <div key={room.roomid} className={rowStyle}>
-                <span>{index + 1}. {room.name}</span>
+                <span>
+                  {index + 1}. {room.name}
+                </span>
                 <div className="flex gap-2">
                   <span className="mt-2">{room.member_count} members</span>
-                  <button onClick={() => handleUpdateRoom(room.roomid, room.name, room.description, room.room_type)} className={buttonClass}>Update</button>
-                  <button onClick={() => handleDeleteRoom(room.roomid)} className={buttonClass}>Delete</button>
+                  <button
+                    onClick={() =>
+                      handleUpdateRoom(
+                        room.roomid,
+                        room.name,
+                        room.description,
+                        room.room_type
+                      )
+                    }
+                    className={buttonClass}
+                  >
+                    Update
+                  </button>
+                  <button
+                    onClick={() => handleDeleteRoom(room.roomid)}
+                    className={buttonClass}
+                  >
+                    Delete
+                  </button>
                 </div>
               </div>
             ))}
@@ -257,37 +344,49 @@ const ManageRooms = () => {
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
             <div className="bg-white p-6 rounded-xl shadow-md w-full max-w-md space-y-4">
               <h2 className="text-xl font-semibold">Update Room</h2>
-        
+
               <div>
-                <label className="block text-sm font-medium mb-1">Room Name</label>
+                <label className="block text-sm font-medium mb-1">
+                  Room Name
+                </label>
                 <input
                   value={editRoom.name}
-                  onChange={(e) => setEditRoom({ ...editRoom, name: e.target.value })}
+                  onChange={(e) =>
+                    setEditRoom({ ...editRoom, name: e.target.value })
+                  }
                   className="w-full px-3 py-2 border rounded-md"
                 />
               </div>
-        
+
               <div>
-                <label className="block text-sm font-medium mb-1">Room Description</label>
+                <label className="block text-sm font-medium mb-1">
+                  Room Description
+                </label>
                 <input
                   value={editRoom.description}
-                  onChange={(e) => setEditRoom({ ...editRoom, description: e.target.value })}
+                  onChange={(e) =>
+                    setEditRoom({ ...editRoom, description: e.target.value })
+                  }
                   className="w-full px-3 py-2 border rounded-md"
                 />
               </div>
-        
+
               <div>
-                <label className="block text-sm font-medium mb-1">Room Type</label>
+                <label className="block text-sm font-medium mb-1">
+                  Room Type
+                </label>
                 <select
                   value={editRoom.room_type}
-                  onChange={(e) => setEditRoom({ ...editRoom, room_type: e.target.value })}
+                  onChange={(e) =>
+                    setEditRoom({ ...editRoom, room_type: e.target.value })
+                  }
                   className="w-full px-3 py-2 border rounded-md"
                 >
                   <option value="Public">Public</option>
                   <option value="Private">Private</option>
                 </select>
               </div>
-        
+
               <div className="flex justify-end gap-2 pt-2">
                 <button
                   onClick={() => setShowModal(false)}
@@ -308,13 +407,27 @@ const ManageRooms = () => {
 
         {/* Invites */}
         <section>
-          <h1 className="font-bold text-xl mb-2">My Private Discussion Room Invites :</h1>
+          <h1 className="font-bold text-3xl mb-2">
+            My Private Discussion Room Invites :
+          </h1>
           <div className="bg-white p-4 rounded-xl shadow space-y-2">
             {invites.map((invite, index) => (
               <div key={invite.id} className={rowStyle}>
-                <span>{index + 1}. {invite.name}</span>
-                <button onClick={() => handleAcceptInvite(invite.id)} className={buttonClass}>Accept</button>
-                <button onClick={() => handleDeclineInvite(invite.id)} className={buttonClass}>Decline</button>
+                <span>
+                  {index + 1}. {invite.name}
+                </span>
+                <button
+                  onClick={() => handleAcceptInvite(invite.id)}
+                  className={buttonClass}
+                >
+                  Accept
+                </button>
+                <button
+                  onClick={() => handleDeclineInvite(invite.id)}
+                  className={buttonClass}
+                >
+                  Decline
+                </button>
               </div>
             ))}
           </div>
