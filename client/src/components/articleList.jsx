@@ -252,7 +252,7 @@ const ArticleList = ({
                   onClick={() => {
                     if (!isDraft) {
                       const route = isRoom
-                        ? `/room-article/${article.postid}`
+                        ? `/room/${article.roomid}`
                         : `/article/${article.title}`;
                       navigate(route);
                     }
