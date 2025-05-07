@@ -26,6 +26,7 @@ import BulletList from "@tiptap/extension-bullet-list";
 import OrderedList from "@tiptap/extension-ordered-list";
 import { Extension } from "@tiptap/core";
 import { Paragraph } from "@tiptap/extension-paragraph";
+import ListItem from '@tiptap/extension-list-item';
 
 export const FreeWriteArticle = () => {
   const [title, setTitle] = useState("");
@@ -111,11 +112,12 @@ export const FreeWriteArticle = () => {
       CustomParagraph,
       BulletList,
       OrderedList,
+      ListItem,
       UnderlineExtension,
       TiptapLink,
       Highlight,
       Image,
-      IndentExtension, //INDENT
+      // IndentExtension, //INDENT
       Heading.configure({ levels: [1, 2, 3] }),
       TextAlign.configure({ types: ["heading", "paragraph"] }),
       Placeholder.configure({ placeholder: "Start writing your article..." }),
