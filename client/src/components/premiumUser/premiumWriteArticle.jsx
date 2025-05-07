@@ -223,6 +223,23 @@ export const PremiumWriteArticle = () => {
       }),
     ],
     content: "",
+    editorProps: {
+      handlePaste(view, event, slice) {
+        const items = event.clipboardData?.items || [];
+        const hasImage = Array.from(items).some((item) =>
+          item.type.startsWith("image")
+        );
+
+        if (hasImage) {
+          alert(
+            "Pasting images is not allowed. Please use the Upload Image button."
+          );
+          return true; 
+        }
+
+        return false; 
+      },
+    },
     onUpdate: ({ editor }) => {
       const html = editor.getHTML();
       const text = editor.getText();
