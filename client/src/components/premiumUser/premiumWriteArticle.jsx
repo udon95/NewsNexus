@@ -496,12 +496,36 @@ export const PremiumWriteArticle = () => {
     }
 
     // ---------------------- ROOM ARTICLE ----------------------
+    let uploadedRoomImageUrls = [];
+
+    for (const img of pendingImages) {
+      const imageName = `${Date.now()}-${img.file.name}`;
+      const { data: storageResult, error: uploadError } = await supabase.storage
+        .from("room-article-images")
+        .upload(`user-${userId}/${imageName}`, img.file);
+
+      if (uploadError) {
+        console.error("Error uploading image:", uploadError);
+        alert("Image upload failed.");
+        return;
+      }
+
+      const { data: publicUrlData } = supabase.storage
+        .from("room-article-images")
+        .getPublicUrl(`user-${userId}/${imageName}`);
+
+      uploadedRoomImageUrls.push(publicUrlData.publicUrl);
+    }
+
+    // 2. Replace blob URLs in HTML with public URLs
+    let i = 0;
     updatedHTML = updatedHTML.replace(
       /<img[^>]*src=["']blob:[^"']+["'][^>]*>/g,
-      ""
+      () => `<img src="${uploadedRoomImageUrls[i++]}" />`
     );
-    const imageUrls = pendingImages.map((img) => img.previewUrl);
-    console.log("room images", imageUrls);
+
+    console.log("room images", uploadedRoomImageUrls);
+
     const articleData = {
       title,
       content: updatedHTML,
@@ -517,7 +541,7 @@ export const PremiumWriteArticle = () => {
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ content: articleData.content, imageUrls }),
+          body: JSON.stringify({ content: articleData.content, imageUrls:uploadedImageUrls }),
         }
       );
 
