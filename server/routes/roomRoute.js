@@ -52,7 +52,7 @@ router.get("/:userid", async (req, res) => {
 
 // 🔹 CREATE new room
 router.post("/", async (req, res) => {
-  const { name, description, room_type, created_by } = req.body;
+  const { name, description, room_type, created_by, member_limit } = req.body;
 
   if (!name || !description || !room_type || !created_by) {
     return res.status(400).json({ error: "Missing required fields" });
@@ -60,7 +60,7 @@ router.post("/", async (req, res) => {
 
   const { data, error } = await supabase
     .from("rooms")
-    .insert([{ name, description, room_type, created_by }])
+    .insert([{ name, description, room_type, created_by, member_limit: member_limit || 20, }])
     .select();
 
   if (error) return res.status(500).json({ error: error.message });
@@ -70,12 +70,16 @@ router.post("/", async (req, res) => {
 // 🔹 UPDATE room by ID
 router.put("/:roomid", async (req, res) => {
   const { roomid } = req.params;
-  const { name, description, room_type } = req.body;
+  const { name, description, room_type, member_limit } = req.body;
 
   if (!name && !description && !room_type) {
     return res.status(400).json({ error: "No fields to update" });
   }
-
+  
+  if (member_limit !== undefined) {
+    updateData.member_limit = member_limit;
+  }
+  
   const { data, error } = await supabase
     .from("rooms")
     .update({ name, description, room_type })

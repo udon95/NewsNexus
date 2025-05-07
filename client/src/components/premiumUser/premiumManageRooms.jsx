@@ -10,11 +10,13 @@ const ManageRooms = () => {
   const [newPublicRoom, setNewPublicRoom] = useState({
     name: "",
     description: "",
+    member_limit: 20,
   });
   const [newPrivateRoom, setNewPrivateRoom] = useState({
     name: "",
     description: "",
     invite: "",
+    member_limit: 20,
   });
   const [showModal, setShowModal] = useState(false);
   const [editRoom, setEditRoom] = useState({
@@ -22,6 +24,7 @@ const ManageRooms = () => {
     name: "",
     description: "",
     room_type: "Public",
+    member_limit: 20,
   });
 
   const userProfile = JSON.parse(localStorage.getItem("userProfile"));
@@ -80,6 +83,7 @@ const ManageRooms = () => {
           ...newPublicRoom,
           room_type: "Public",
           created_by: userId,
+          member_limit: newPublicRoom.member_limit || 20,
         }),
       }
     );
@@ -101,6 +105,7 @@ const ManageRooms = () => {
           ...newPrivateRoom,
           room_type: "Private",
           created_by: userId,
+          member_limit: newPublicRoom.member_limit || 20,
         }),
       }
     );
@@ -143,26 +148,28 @@ const ManageRooms = () => {
     roomid,
     currentName,
     currentDescription,
-    currentRoomType
+    currentRoomType,
+    currentLimit
   ) => {
     setEditRoom({
       roomid,
       name: currentName,
       description: currentDescription,
       room_type: currentRoomType,
+      member_limit: currentLimit || 20,
     });
     setShowModal(true);
   };
 
   const submitRoomUpdate = async () => {
-    const { roomid, name, description, room_type } = editRoom;
+    const { roomid, name, description, room_type, member_limit } = editRoom;
 
     await fetch(
       `https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/rooms/${roomid}`,
       {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, description, room_type }),
+        body: JSON.stringify({ name, description, room_type, member_limit }),
       }
     );
 
