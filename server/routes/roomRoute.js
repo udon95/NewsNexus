@@ -18,7 +18,26 @@ const supabase = require("../supabaseClient"); // Import Supabase client
 // Note: You can also move these to server.js if you prefer centralized middleware.
 // router.use(bodyParser.json());
 
-// GET all rooms
+// GET rooms the user joined (not created by them)
+router.get("/joined/:userid", async (req, res) => {
+  const { userid } = req.params;
+
+  const { data, error } = await supabase
+    .from("room_members")
+    .select("roomid, rooms(*)")
+    .eq("userid", userid)
+    .is("exited_at", null);
+
+  if (error) return res.status(500).json({ error: error.message });
+
+  const joinedRooms = data
+    .map((entry) => entry.rooms)
+    .filter((room) => room.created_by !== userid); // exclude own rooms
+
+  res.status(200).json(joinedRooms); // includes room_type field
+});
+
+// GET rooms the user created
 // When mounted at /rooms, this endpoint will be accessible at GET /rooms
 router.get("/:userid", async (req, res) => {
   const { userid } = req.params;
@@ -156,6 +175,20 @@ router.post("/decline", async (req, res) => {
   if (error) return res.status(500).json({ error: error.message });
 
   res.status(200).json({ message: "Invitation declined" });
+});
+
+router.post("/exit", async (req, res) => {
+  const { userid, roomid } = req.body;
+
+  const { error } = await supabase
+    .from("room_members")
+    .update({ exited_at: new Date().toISOString() })
+    .eq("userid", userid)
+    .eq("roomid", roomid);
+
+  if (error) return res.status(500).json({ error: error.message });
+
+  res.status(200).json({ message: "Exited room" });
 });
 
 module.exports = router;
