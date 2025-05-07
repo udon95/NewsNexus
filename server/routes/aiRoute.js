@@ -287,20 +287,20 @@ router.post("/submit-article", async (req, res) => {
   try {
     const {
       title,
-      content: updatedHTML,
+      content,
       authorId,
       topicid,
       topicName,
       imageUrls = [],
     } = req.body;
 
-    const strippedText = extractTextFromHTML(updatedHTML);
+    const strippedText = extractTextFromHTML(updatedHtmls);
 
-    if (!title || !strippedText || !authorId || !topicid || !topicName) {
+    if (!title || !content || !authorId || !topicid || !topicName) {
       return res.status(400).json({ error: "Missing required fields." });
     }
 
-    const modResult = await moderateText(strippedText);
+    const modResult = await moderateText(content);
     if (modResult?.flagged) {
       await deleteImagesFromSupabase(imageUrls);
 
@@ -322,7 +322,7 @@ router.post("/submit-article", async (req, res) => {
 
     let factResult;
     try {
-      factResult = await factCheck(strippedText, topicName);
+      factResult = await factCheck(content, topicName);
     } catch (err) {
       console.error("Fact-check error:", err);
 
@@ -341,7 +341,7 @@ router.post("/submit-article", async (req, res) => {
       .insert([
         {
           title,
-          text: updatedHTML,
+          text: content,
           userid: authorId,
           topicid,
           accuracy_score: factResult.accuracy,
