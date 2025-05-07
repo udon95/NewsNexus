@@ -1,4 +1,3 @@
-// 文件路径：pages/premiumManageRooms.jsx
 import { useState, useEffect } from "react";
 import supabase from "../../api/supabaseClient";
 

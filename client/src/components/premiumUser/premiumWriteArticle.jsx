@@ -397,9 +397,9 @@ export const PremiumWriteArticle = () => {
       console.log("img2", result);
 
       if (!response.ok) {
-        if (result.error) {
-          alert(result.error); // Display moderation failure
-        }
+        // if (result.error) {
+        //   alert(result.error); // Display moderation failure
+        // }
 
         if (result.feedback) {
           setAiFeedback(result.feedback);
