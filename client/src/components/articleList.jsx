@@ -22,6 +22,34 @@ const ArticleList = ({
   const visibleArticles = showAll ? articles : articles.slice(0, 3);
 
   useEffect(() => {
+    const deleteExpiredDrafts = async () => {
+      const now = new Date();
+  
+      for (const article of articles) {
+        if (!isDraft) continue;
+  
+        const createdAt = isRoom
+          ? new Date(article.created_at)
+          : new Date(article.time);
+  
+        const expiryDate = new Date(createdAt);
+        expiryDate.setDate(expiryDate.getDate() + 7);
+  
+        if (now >= expiryDate) {
+          const id = isRoom ? article.postid : article.articleid;
+          if (isRoom) {
+            await handleDeleteRoomArticle(id);
+          } else {
+            await handleDeleteArticle(id);
+          }
+        }
+      }
+    };
+  
+    deleteExpiredDrafts();
+  }, [articles, isDraft, isRoom]);
+
+  useEffect(() => {
     const fetchVotes = async () => {
       if (!isDraft && !isRoom && articles.length > 0) {
         const articleIds = articles.map((a) => a.articleid);
