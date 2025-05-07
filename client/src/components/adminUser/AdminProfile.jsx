@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import supabase from "../../api/supabaseClient";
 import useAuthHook from "../../hooks/useAuth";
+import api from "../../api/axios";
+
 
 const AdminProfile = () => {
   const { user } = useAuthHook();
@@ -8,7 +10,24 @@ const AdminProfile = () => {
   const [oldPass, setOldPass] = useState("");
   const [newPass, setNewPass] = useState("");
   const [admin, setAdmin] = useState({});
-  const [jk, setjk] = useState("");
+  const [userDetails, setUserDetails] = useState(null);
+
+
+  // const updateUserEmail = async () => {
+  //   if (!newEmail) {
+  //     alert("Please enter a new email address.");
+  //     return;
+  //   }
+  //   const { error } = await supabase.auth.updateUser({ email: newEmail });
+  //   if (error) {
+  //     console.error("Error updating email:", error.message);
+  //     alert("Failed to update email.");
+  //   } else {
+  //     alert(
+  //       "Email update initiated. Please check your new email to confirm the change."
+  //     );
+  //   }
+  // };
 
 
   const updateUserEmail = async () => {
@@ -16,45 +35,98 @@ const AdminProfile = () => {
       alert("Please enter a new email address.");
       return;
     }
-    const { error } = await supabase.auth.updateUser({ email: newEmail });
-    if (error) {
-      console.error("Error updating email:", error.message);
-      alert("Failed to update email.");
-    } else {
-      alert(
-        "Email update initiated. Please check your new email to confirm the change."
+
+    try {
+      const payload = {
+        userId: userDetails.userid,
+        email: newEmail,
+      };
+
+      const response = await api.put("/auth/update-admin-email", payload, {
+        headers: { "Content-Type": "application/json" },
+      });
+
+      if (response.data.message) {
+        alert("Profile updated successfully!");
+        const storedUser = JSON.parse(localStorage.getItem("userProfile"));
+        if (storedUser) {
+          storedUser.user.email = newEmail;
+          localStorage.setItem("userProfile", JSON.stringify(storedUser));
+          sessionStorage.setItem("userProfile", JSON.stringify(storedUser));
+        }
+      }
+    } catch (error) {
+      console.error(
+        "Error updating profile:",
+        error.response?.data?.error || error.message
       );
     }
   };
 
+  // const updatePassword = async () => {
+  //   if (!oldPass || !newPass) {
+  //     alert("Please enter both current and new passwords.");
+  //     return;
+  //   }
+
+  //   if (!user?.email) {
+  //     alert("No authenticated user found.");
+  //     return;
+  //   }
+  //   const { error: signInError } = await supabase.auth.signInWithPassword({
+  //     email: user.email,
+  //     password: oldPass,
+  //   });
+  //   if (signInError) {
+  //     console.error("Authentication error:", signInError.message);
+  //     alert("Current password is incorrect.");
+  //     return;
+  //   }
+  //   const { error: updateError } = await supabase.auth.updateUser({
+  //     password: newPass,
+  //   });
+
+  //   if (updateError) {
+  //     console.error("Error updating password:", updateError.message);
+  //     alert("Failed to update password.");
+  //   } else {
+  //     alert("Password updated successfully.");
+  //   }
+  // };
+
   const updatePassword = async () => {
     if (!oldPass || !newPass) {
-      alert("Please enter both current and new passwords.");
+      alert("Please fill in all password fields.");
       return;
     }
 
-    if (!user?.email) {
-      alert("No authenticated user found.");
-      return;
-    }
-    const { error: signInError } = await supabase.auth.signInWithPassword({
-      email: user.email,
-      password: oldPass,
-    });
-    if (signInError) {
-      console.error("Authentication error:", signInError.message);
-      alert("Current password is incorrect.");
-      return;
-    }
-    const { error: updateError } = await supabase.auth.updateUser({
-      password: newPass,
-    });
+    try {
+      const payload = {
+        userId: userDetails.userid,
+        oldPassword: oldPass,
+        newPassword: newPass,
+      };
 
-    if (updateError) {
-      console.error("Error updating password:", updateError.message);
-      alert("Failed to update password.");
-    } else {
-      alert("Password updated successfully.");
+      const response = await api.put("/auth/update-admin-password", payload, {
+        headers: { "Content-Type": "application/json" },
+      });
+
+      if (response.data.message) {
+        alert("Password updated successfully!");
+
+        const updatedUser = response.data.updatedUser;
+        if (updatedUser) {
+          const storedUser = JSON.parse(localStorage.getItem("userProfile"));
+          if (storedUser) {
+            storedUser.user.password = updatedUser.password;
+            localStorage.setItem("userProfile", JSON.stringify(storedUser));
+            sessionStorage.setItem("userProfile", JSON.stringify(storedUser));
+          }
+        }
+      }
+    } catch (error) {
+      console.error("Error updating password:", error.message);
+      alert("An error occurred while updating the password.");
     }
   };
 
@@ -70,17 +142,25 @@ const AdminProfile = () => {
     if (user) {
       fetchAdmin();
     }
-
-    const getSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
-        setjk(session.user);
-      }
-    };
-    getSession();
-    console.log(jk);
   }, [user]);
   
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      try {
+        const storedUser = localStorage.getItem("userProfile");
+        if (storedUser) {
+          const data = JSON.parse(storedUser);
+
+          setUserDetails(data.user);
+
+        }
+      } catch (err) {
+        console.error("Profile fetch error:", err.message);
+      }
+    };
+
+    fetchUserProfile();
+  }, []);
 
   if (!user)
     return (

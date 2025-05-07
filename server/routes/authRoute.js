@@ -416,6 +416,83 @@ router.put("/update-profile", async (req, res) => {
   }
 });
 
+router.put("/update-admin-email", async (req, res) => {
+  const { userId, email } = req.body;
+
+  if (!userId || !email) {
+    return res.status(400).json({ error: "Missing required fields" });
+  }
+
+  try {
+    // Update basic user details in the "admin" table
+    const { error: errorUser } = await supabase
+      .from("admin")
+      .update({ email })
+      .eq("adminid", userId);
+
+    if (errorUser) throw errorUser;
+
+    return res.json({ message: "Email updated successfully" });
+  } catch (error) {
+    console.error("Error updating Email:", error.message);
+    return res.status(500).json({ error: error.message });
+  }
+});
+
+router.put("/update-admin-password", async (req, res) => {
+  const { userId, oldPassword, newPassword } = req.body;
+
+  // Validate presence of fields
+  if (!userId || !oldPassword || !newPassword ) {
+    return res.status(400).json({ error: "Missing required fields" });
+  }
+
+  // Check for minimum length
+  if (newPassword.length < 8) {
+    return res
+      .status(400)
+      .json({ error: "New password must be at least 8 characters long" });
+  }
+
+  try {
+    // Fetch the user's current password from the "users" table
+    const { data: userData, error: fetchError } = await supabase
+      .from("admin")
+      .select("password")
+      .eq("adminid", userId)
+      .single();
+
+    if (fetchError) throw fetchError;
+
+    // Compare provided old password with the hashed password in the DB
+    const isMatch = await bcrypt.compare(oldPassword, userData.password);
+    if (!isMatch) {
+      return res.status(400).json({ error: "Old password is incorrect" });
+    }
+    const { data: updateAuthData, error: updateAuthError } =
+      await supabase.auth.updateUser({
+        password: newPassword,
+      });
+    if (updateAuthError) throw updateAuthError;
+    // Hash the new password
+    const salt = await bcrypt.genSalt(10);
+    const hashedNewPassword = await bcrypt.hash(newPassword, salt);
+
+    // Update the password in the "users" table
+    const { error: updateError } = await supabase
+      .from("admin")
+      .update({ password: hashedNewPassword })
+      .eq("adminid", userId);
+
+    if (updateError) throw updateError;
+
+    return res.json({ message: "Password updated successfully" });
+  } catch (err) {
+    console.error("Error updating password:", err.message);
+    return res.status(500).json({ error: err.message });
+  }
+});
+
 // Update Interests Endpoint
 router.put("/update-interests", async (req, res) => {
   const { userId, interests } = req.body;
