@@ -28,7 +28,7 @@ import OrderedList from "@tiptap/extension-ordered-list";
 import { Extension } from "@tiptap/core";
 import { Paragraph } from "@tiptap/extension-paragraph";
 import { useSearchParams } from "react-router-dom";
-
+import ListItem from "@tiptap/extension-list-item";
 
 export const PremiumWriteArticle = () => {
   const [title, setTitle] = useState("");
@@ -56,11 +56,9 @@ export const PremiumWriteArticle = () => {
   const [isUploading, setIsUploading] = useState(false);
   const [uploadAction, setUploadAction] = useState(""); // "post" or "draft"
 
-
   const [searchParams] = useSearchParams();
   const preSelectedType = searchParams.get("type"); // e.g. "room"
   const preSelectedRoomId = searchParams.get("roomid");
-
 
   // Fetch Topics from `topic_categories`
   useEffect(() => {
@@ -70,7 +68,6 @@ export const PremiumWriteArticle = () => {
         .from("topic_categories")
         .select("topicid, name");
 
-
       if (!error && data) {
         setTopicOptions(data); // Data is an array of objects like { topicid, name }
       }
@@ -78,13 +75,11 @@ export const PremiumWriteArticle = () => {
     fetchTopics();
   }, []);
 
-
   useEffect(() => {
     const fetchUserRooms = async () => {
       const storedUser = JSON.parse(localStorage.getItem("userProfile"));
       const userId = storedUser?.user?.userid;
       if (!userId) return;
-
 
       // Step 1: Get roomids where this user is a member
       const { data: memberData, error: memberError } = await supabase
@@ -93,29 +88,24 @@ export const PremiumWriteArticle = () => {
         .eq("userid", userId)
         .is("exited_at", null); // only active memberships
 
-
       if (memberError || !memberData) {
         console.error("Error fetching room memberships:", memberError);
         return;
       }
 
-
       const roomIds = memberData.map((entry) => entry.roomid).filter(Boolean);
       const uniqueRoomIds = [...new Set(roomIds)];
-
 
       if (uniqueRoomIds.length === 0) {
         setRooms([]); // user is not in any rooms
         return;
       }
 
-
       // Step 2: Fetch only those rooms from `rooms` table
       const { data: roomData, error: roomError } = await supabase
         .from("rooms")
         .select("roomid, name") //  use the correct column (roomid!)
         .in("roomid", uniqueRoomIds); //  this MUST match the key used in SELECT
-
 
       if (!roomError && roomData) {
         setRooms(roomData);
@@ -124,10 +114,9 @@ export const PremiumWriteArticle = () => {
       }
     };
 
-
     fetchUserRooms();
   }, []);
- 
+
   useEffect(() => {
     if (
       preSelectedType === "room" &&
@@ -139,7 +128,6 @@ export const PremiumWriteArticle = () => {
       setSelectedRoom(preSelectedRoomId);
     }
   }, [preSelectedType, preSelectedRoomId, rooms]);
-
 
   const CustomParagraph = Paragraph.extend({
     addAttributes() {
@@ -170,7 +158,7 @@ export const PremiumWriteArticle = () => {
           const match = currentStyle.match(/text-indent:\s?(\d+)em/);
           const currentIndent = match ? parseInt(match[1]) : 0;
           const nextIndent = currentIndent + 2;
-  
+
           commands.updateAttributes("paragraph", {
             style: `text-indent: ${nextIndent}em`,
           });
@@ -185,7 +173,7 @@ export const PremiumWriteArticle = () => {
           const match = currentStyle.match(/text-indent:\s?(\d+)em/);
           const currentIndent = match ? parseInt(match[1]) : 0;
           const nextIndent = Math.max(0, currentIndent - 2);
-  
+
           commands.updateAttributes("paragraph", {
             style: nextIndent === 0 ? "" : `text-indent: ${nextIndent}em`,
           });
@@ -196,23 +184,22 @@ export const PremiumWriteArticle = () => {
           const { from } = state.selection;
           const node =
             state.doc.resolve(from).nodeAfter || state.doc.resolve(from).parent;
-  
+
           const isEmpty = node.content.size === 0;
           const currentStyle = node.attrs?.style || "";
-  
+
           if (isEmpty && currentStyle.includes("text-indent")) {
             commands.updateAttributes("paragraph", {
               style: "",
             });
             return true;
           }
-  
+
           return false;
         },
       };
     },
-  });  
-
+  });
 
   const editor = useEditor({
     extensions: [
@@ -220,11 +207,12 @@ export const PremiumWriteArticle = () => {
       CustomParagraph,
       BulletList,
       OrderedList,
+      ListItem,
       UnderlineExtension,
       TiptapLink,
       Highlight,
       Image,
-      IndentExtension, //INDENT
+      // IndentExtension, //INDENT
       Heading.configure({ levels: [1, 2, 3] }),
       TextAlign.configure({ types: ["heading", "paragraph"] }),
       Placeholder.configure({ placeholder: "Start writing your article..." }),
@@ -241,26 +229,21 @@ export const PremiumWriteArticle = () => {
       const wordsArray = text.trim().split(/\s+/).filter(Boolean);
       const words = wordsArray.length;
 
-
       if (words > MAX_WORDS) {
         // Prevent typing beyond limit
         editor.commands.setContent(articleContent); // rollback
         return;
       }
 
-
       setWordCount(words);
 
-
       setArticleContent(html);
-
 
       if (postType === "General") {
         const doc = new DOMParser().parseFromString(html, "text/html");
         const imageSrcsInEditor = Array.from(doc.querySelectorAll("img")).map(
           (img) => img.getAttribute("src")
         );
-
 
         setPendingImages((prev) =>
           prev.filter((img) => imageSrcsInEditor.includes(img.previewUrl))
@@ -269,10 +252,8 @@ export const PremiumWriteArticle = () => {
     },
   });
 
-
   useEffect(() => {
     if (!editor) return;
-
 
     if (postType === "General") {
       // Insert all pending images into editor
@@ -294,9 +275,7 @@ export const PremiumWriteArticle = () => {
     }
   }, [postType]);
 
-
   const MAX_WORDS = postType === "Room" ? 400 : 1000;
-
 
   const handlePostArticle = async () => {
     setUploadAction("post");
@@ -307,19 +286,19 @@ export const PremiumWriteArticle = () => {
     if (!storedUser) {
       alert("User not authenticated. Cannot upload.");
       setIsUploading(false);
-      setUploadAction("");  // DEVI ADDED THIS
+      setUploadAction(""); // DEVI ADDED THIS
       return;
     }
- 
+
     const parsedUser = JSON.parse(storedUser);
     const session = parsedUser?.user;
     if (!session) {
       alert("User not authenticated. Cannot upload.");
       setIsUploading(false);
-      setUploadAction("");  // DEVI ADDED THIS
+      setUploadAction(""); // DEVI ADDED THIS
       return;
     }
- 
+
     if (
       !title ||
       !articleContent ||
@@ -328,55 +307,59 @@ export const PremiumWriteArticle = () => {
     ) {
       alert("Please fill in all required fields.");
       setIsUploading(false);
-      setUploadAction("");  // DEVI ADDED THIS
+      setUploadAction(""); // DEVI ADDED THIS
       return;
     }
- 
-    const bucket = postType === "Room" ? "room-article-images" : "articles-images";
+
+    const bucket =
+      postType === "Room" ? "room-article-images" : "articles-images";
     let firstImageUrl = null;
     let updatedHTML = articleContent;
     let uploadedImageUrls = [];
- 
+
     const topicName = topicOptions.find((t) => t.topicid === topics)?.name;
- 
+
     // ---------------------- GENERAL ARTICLE ----------------------
     if (postType === "General") {
       // 1. Upload pendingImages and update HTML
       for (const img of pendingImages) {
         const file = img.file;
         if (!file?.name) continue;
- 
+
         const fileExt = file.name.split(".").pop();
-        const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+        const fileName = `${Date.now()}-${Math.random()
+          .toString(36)
+          .substring(2)}.${fileExt}`;
         const filePath = `user-${session.userid}/${fileName}`;
- 
+
         const { error: uploadError } = await supabase.storage
           .from(bucket)
           .upload(filePath, file);
- 
+
         if (uploadError) {
           console.error("Image upload failed:", uploadError);
           alert("Image upload failed.");
           setIsUploading(false);
-          setUploadAction("");  // DEVI ADDED THIS
+          setUploadAction(""); // DEVI ADDED THIS
           return;
         }
- 
-        const { data: urlData } = supabase.storage.from(bucket).getPublicUrl(filePath);
+
+        const { data: urlData } = supabase.storage
+          .from(bucket)
+          .getPublicUrl(filePath);
         const publicUrl = urlData?.publicUrl;
- 
+
         if (publicUrl) {
           if (!firstImageUrl) firstImageUrl = publicUrl;
-          console.log('img1', firstImageUrl)
+          console.log("img1", firstImageUrl);
           updatedHTML = updatedHTML.replaceAll(img.previewUrl, publicUrl);
           uploadedImageUrls.push(publicUrl);
         }
       }
 
+      console.log(firstImageUrl);
+      console.log("imgnew", firstImageUrl);
 
-      console.log(firstImageUrl)
-      console.log('imgnew', firstImageUrl)
- 
       // 2. Submit to external API (make sure firstImageUrl is passed!)
       const response = await fetch(
         // "https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/api/submit-article",
@@ -399,38 +382,41 @@ export const PremiumWriteArticle = () => {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             title,
-            content: updatedHTML,
+            content: editor.getText(),
             type: "factual",
             authorId: session.userid,
             topicid: topics,
             topicName,
-            imagepath: firstImageUrl, // Optional: keep for backward compatibility
-            images: uploadedImageUrls, // ✅ NEW: sends array of image URLs
+            // imagepath: firstImageUrl, // Optional: keep for backward compatibility
+            imageUrls: uploadedImageUrls, // NEW: sends array of image URLs
           }),
         }
       );
- 
+
       const result = await response.json();
-      console.log('img2', result)
+      console.log("img2", result);
 
-
- 
       if (!response.ok) {
+        if (result.error) {
+          alert(result.error); // Display moderation failure
+        }
+
         if (result.feedback) {
           setAiFeedback(result.feedback);
           setAccuracy(result.accuracy || null);
-          alert("Article flagged by AI. Please review the highlighted sections.");
+          alert(
+            "Article flagged by AI. Please review the highlighted sections."
+          );
         } else {
           alert(result.error || "Submission failed.");
         }
         setIsUploading(false);
-        setUploadAction("");  // DEVI ADDED THIS
+        setUploadAction(""); // DEVI ADDED THIS
         return;
       }
- 
-      const articleid = result.article?.articleid;
-      console.log('result', result.article)
 
+      const articleid = result.article?.articleid;
+      console.log("result", result.article);
 
       if (articleid && firstImageUrl) {
         // 3. Update imagepath in the `articles` table after successful submission
@@ -438,41 +424,38 @@ export const PremiumWriteArticle = () => {
           .from("articles")
           .update({ imagepath: firstImageUrl })
           .eq("articleid", articleid);
-   
+
         if (error) {
           console.error("Error updating imagepath:", error);
           alert("Failed to update image path.");
           setIsUploading(false);
-          setUploadAction("");  // DEVI ADDED THIS
+          setUploadAction(""); // DEVI ADDED THIS
           return;
         }
-   
+
         console.log("Image path updated for article:", articleid);
       }
 
-
       for (const url of uploadedImageUrls) {
-        await supabase.from("article_images").insert([
-          { articleid, image_url: url }
-        ]);
-      console.log('img3', url)
-
-
+        await supabase
+          .from("article_images")
+          .insert([{ articleid, image_url: url }]);
+        console.log("img3", url);
       }
- 
+
       setAccuracy(result.accuracy);
       setAiFeedback(result.feedback);
       alert(`Article posted successfully. Accuracy Score: ${result.accuracy}%`);
       handleClearInputs();
       return;
     }
- 
+
     // ---------------------- ROOM ARTICLE ----------------------
     updatedHTML = updatedHTML.replace(
       /<img[^>]*src=["']blob:[^"']+["'][^>]*>/g,
       ""
     );
- 
+
     const articleData = {
       title,
       content: updatedHTML,
@@ -481,7 +464,7 @@ export const PremiumWriteArticle = () => {
       created_at: new Date().toISOString(),
       status: "Published",
     };
- 
+
     try {
       const response = await fetch(
         "https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/api/moderate",
@@ -491,75 +474,75 @@ export const PremiumWriteArticle = () => {
           body: JSON.stringify({ content: articleData.content }),
         }
       );
- 
+
       const result = await response.json();
       if (result.error) {
         alert(`Article flagged: ${result.error}`);
         setIsUploading(false);
-        setUploadAction("");  // DEVI ADDED THIS
+        setUploadAction(""); // DEVI ADDED THIS
         return;
       }
     } catch (err) {
       alert("Failed to moderate content.");
       console.error(err);
       setIsUploading(false);
-      setUploadAction("");  // DEVI ADDED THIS
+      setUploadAction(""); // DEVI ADDED THIS
       return;
     }
- 
+
     const { data, error } = await supabase
       .from("room_articles")
       .insert([articleData])
       .select("postid");
- 
+
     if (error) {
       alert("Failed to post room article.");
       setIsUploading(false);
-      setUploadAction("");  // DEVI ADDED THIS
+      setUploadAction(""); // DEVI ADDED THIS
       return;
     }
- 
+
     const postid = data?.[0]?.postid;
     if (postid) {
       for (const img of pendingImages) {
         const file = img.file;
         if (!file?.name) continue;
- 
+
         const fileExt = file.name.split(".").pop();
-        const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+        const fileName = `${Date.now()}-${Math.random()
+          .toString(36)
+          .substring(2)}.${fileExt}`;
         const filePath = `user-${session.userid}/${fileName}`;
- 
+
         const { error: uploadError } = await supabase.storage
           .from("room-article-images")
           .upload(filePath, file);
- 
+
         if (uploadError) {
           console.error("Room image upload failed:", uploadError);
           continue;
         }
- 
+
         const { data: urlData } = supabase.storage
           .from("room-article-images")
           .getPublicUrl(filePath);
- 
+
         const publicUrl = urlData?.publicUrl;
         if (publicUrl) {
-          await supabase.from("room_article_images").insert([
-            { postid, image_url: publicUrl }
-          ]);
+          await supabase
+            .from("room_article_images")
+            .insert([{ postid, image_url: publicUrl }]);
         }
       }
     }
- 
+
     pendingImages.forEach((img) => URL.revokeObjectURL(img.previewUrl));
     setPendingImages([]);
     alert("Article posted successfully.");
     handleClearInputs();
     setIsUploading(false);
-    setUploadAction("");  // DEVI ADDED THIS
+    setUploadAction(""); // DEVI ADDED THIS
   };
- 
-
 
   const handleSaveDraft = async () => {
     setUploadAction("draft");
@@ -571,276 +554,267 @@ export const PremiumWriteArticle = () => {
     if (!storedUser) {
       alert("User not authenticated. Cannot save draft.");
       setIsUploading(false);
-      setUploadAction("");  // DEVI ADDED THIS
+      setUploadAction(""); // DEVI ADDED THIS
       return;
     }
-  
 
-
-  const parsedUser = JSON.parse(storedUser);
-  const session = parsedUser?.user;
-  // if (!session) return alert("User not authenticated.");
-  if (!session) {
-    alert("User not authenticated.");
-    setIsUploading(false);
-    setUploadAction("");  // DEVI ADDED THIS
-    return;
-  }
-  
-
-  if (
-    !title ||
-    !articleContent ||
-    (postType === "General" && !topics) ||
-    (postType === "Room" && !selectedRoom)
-  ) {
-    alert("Please fill in all required fields.");
-    setIsUploading(false);
-    setUploadAction("");  // DEVI ADDED THIS
-    return;
-  }
-
-
-  let updatedHTML = articleContent;
-  const bucket = postType === "Room" ? "room-article-images" : "articles-images";
-  let firstImageUrl = null;
-  let uploadedImageUrls = [];
-
-
-  // if (postType === "General") {
-  //   // Upload images and replace blob URLs
-  //   for (const img of pendingImages) {
-  //     const file = img.file;
-  //     if (!file?.name) continue;
-
-
-  //     const fileExt = file.name.split('.').pop();
-  //     const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
-  //     const filePath = `user-${session.userid}/${fileName}`;
-
-
-  //     const { error: uploadError } = await supabase.storage
-  //       .from(bucket)
-  //       .upload(filePath, file);
-
-
-  //     if (uploadError) {
-  //       console.error("Image upload failed:", uploadError);
-  //       alert("Image upload failed.");
-  //       setIsUploading(false);
-  //       setUploadAction("");  // DEVI ADDED THIS
-  //       return;
-  //     }
-
-
-  //     const { data: urlData } = supabase.storage
-  //       .from(bucket)
-  //       .getPublicUrl(filePath);
-
-
-  //     if (urlData?.publicUrl) {
-  //       if (!firstImageUrl) firstImageUrl = urlData.publicUrl;
-  //       updatedHTML = updatedHTML.replaceAll(img.previewUrl, urlData.publicUrl);
-  //       uploadedImageUrls.push(urlData.publicUrl);
-  //     }
-  //   }
-
-
-  //   // Save article draft
-  //   const { data, error } = await supabase
-  //     .from("articles")
-  //     .insert([{
-  //       title,
-  //       text: updatedHTML,
-  //       userid: session.userid,
-  //       topicid: topics,
-  //       time: new Date().toISOString(),
-  //       status: "Draft",
-  //       imagepath: firstImageUrl || null,
-  //     }])
-  //     .select("articleid");
-
-
-  //   if (error) {
-  //     console.error("Failed to save draft:", error);
-  //     alert("Failed to save draft.");
-  //     return;
-  //   }
-
-
-  //   const articleid = data?.[0]?.articleid;
-  //   for (const url of uploadedImageUrls) {
-  //     await supabase.from("article_images").insert([
-  //       { articleid, image_url: url }
-  //     ]);
-  //   }
-
-
-  // } 
-  
-  //DEVI MADE CHANGES HERE (IF THE OLD ONE IS THE INTENDED CORRECT CODDE, IT IS COMMENTED OUT ABOVE JUST CHANGE):
-  // Previously, drafts were saved without moderation — this could allow inappropriate or unverified content into the system.
-  // Now, draft saving follows the same AI moderation process as posting (for consistency and safety).
-  // If AI flags the content, the draft is NOT saved and the user is alerted with feedback.
-  // This ensures all saved content (even drafts) pass the same baseline content checks.
-  if (postType === "General") {
-    for (const img of pendingImages) {
-      const file = img.file;
-      if (!file?.name) continue;
-  
-      const fileExt = file.name.split(".").pop();
-      const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
-      const filePath = `user-${session.userid}/${fileName}`;
-  
-      const { error: uploadError } = await supabase.storage
-        .from(bucket)
-        .upload(filePath, file);
-  
-      if (uploadError) {
-        console.error("Image upload failed:", uploadError);
-        alert("Image upload failed.");
-        setIsUploading(false);
-        setUploadAction("");
-        return;
-      }
-  
-      const { data: urlData } = supabase.storage.from(bucket).getPublicUrl(filePath);
-      if (urlData?.publicUrl) {
-        if (!firstImageUrl) firstImageUrl = urlData.publicUrl;
-        updatedHTML = updatedHTML.replaceAll(img.previewUrl, urlData.publicUrl);
-        uploadedImageUrls.push(urlData.publicUrl);
-      }
-    }
-  
-    const response = await fetch("https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/api/moderate", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ content: updatedHTML }),
-    });
-  
-    const result = await response.json();
-    if (result.error) {
-      alert(`Draft flagged: ${result.error}`);
+    const parsedUser = JSON.parse(storedUser);
+    const session = parsedUser?.user;
+    // if (!session) return alert("User not authenticated.");
+    if (!session) {
+      alert("User not authenticated.");
       setIsUploading(false);
-      setUploadAction("");
+      setUploadAction(""); // DEVI ADDED THIS
       return;
     }
-  
-    const { data, error } = await supabase
-      .from("articles")
-      .insert([{
-        title,
-        text: updatedHTML,
-        userid: session.userid,
-        topicid: topics,
-        time: new Date().toISOString(),
-        status: "Draft",
-        imagepath: firstImageUrl || null,
-      }])
-      .select("articleid");
-  
-    if (error) {
-      console.error("Failed to save draft:", error);
-      alert("Failed to save draft.");
+
+    if (
+      !title ||
+      !articleContent ||
+      (postType === "General" && !topics) ||
+      (postType === "Room" && !selectedRoom)
+    ) {
+      alert("Please fill in all required fields.");
       setIsUploading(false);
-      setUploadAction("");
-      return;
-    }
-  
-    const articleid = data?.[0]?.articleid;
-    for (const url of uploadedImageUrls) {
-      await supabase.from("article_images").insert([{ articleid, image_url: url }]);
-    }
-  }  
-  else {
-    // Clean blob URLs before saving room content
-    updatedHTML = updatedHTML.replace(
-      /<img[^>]*src=["']blob:[^"']+["'][^>]*>/g,
-      ""
-    );
-
-
-    const { data, error } = await supabase
-      .from("room_articles")
-      .insert([{
-        title,
-        content: updatedHTML,
-        roomid: selectedRoom,
-        userid: session.userid,
-        created_at: new Date().toISOString(),
-        status: "Draft",
-      }])
-      .select("postid");
-
-
-    if (error) {
-      console.error("Error saving draft:", error);
-      alert("Failed to save draft.");
+      setUploadAction(""); // DEVI ADDED THIS
       return;
     }
 
+    let updatedHTML = articleContent;
+    const bucket =
+      postType === "Room" ? "room-article-images" : "articles-images";
+    let firstImageUrl = null;
+    let uploadedImageUrls = [];
 
-    const postid = data?.[0]?.postid;
+    // if (postType === "General") {
+    //   // Upload images and replace blob URLs
+    //   for (const img of pendingImages) {
+    //     const file = img.file;
+    //     if (!file?.name) continue;
 
+    //     const fileExt = file.name.split('.').pop();
+    //     const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+    //     const filePath = `user-${session.userid}/${fileName}`;
 
-    if (postid) {
+    //     const { error: uploadError } = await supabase.storage
+    //       .from(bucket)
+    //       .upload(filePath, file);
+
+    //     if (uploadError) {
+    //       console.error("Image upload failed:", uploadError);
+    //       alert("Image upload failed.");
+    //       setIsUploading(false);
+    //       setUploadAction("");  // DEVI ADDED THIS
+    //       return;
+    //     }
+
+    //     const { data: urlData } = supabase.storage
+    //       .from(bucket)
+    //       .getPublicUrl(filePath);
+
+    //     if (urlData?.publicUrl) {
+    //       if (!firstImageUrl) firstImageUrl = urlData.publicUrl;
+    //       updatedHTML = updatedHTML.replaceAll(img.previewUrl, urlData.publicUrl);
+    //       uploadedImageUrls.push(urlData.publicUrl);
+    //     }
+    //   }
+
+    //   // Save article draft
+    //   const { data, error } = await supabase
+    //     .from("articles")
+    //     .insert([{
+    //       title,
+    //       text: updatedHTML,
+    //       userid: session.userid,
+    //       topicid: topics,
+    //       time: new Date().toISOString(),
+    //       status: "Draft",
+    //       imagepath: firstImageUrl || null,
+    //     }])
+    //     .select("articleid");
+
+    //   if (error) {
+    //     console.error("Failed to save draft:", error);
+    //     alert("Failed to save draft.");
+    //     return;
+    //   }
+
+    //   const articleid = data?.[0]?.articleid;
+    //   for (const url of uploadedImageUrls) {
+    //     await supabase.from("article_images").insert([
+    //       { articleid, image_url: url }
+    //     ]);
+    //   }
+
+    // }
+
+    //DEVI MADE CHANGES HERE (IF THE OLD ONE IS THE INTENDED CORRECT CODDE, IT IS COMMENTED OUT ABOVE JUST CHANGE):
+    // Previously, drafts were saved without moderation — this could allow inappropriate or unverified content into the system.
+    // Now, draft saving follows the same AI moderation process as posting (for consistency and safety).
+    // If AI flags the content, the draft is NOT saved and the user is alerted with feedback.
+    // This ensures all saved content (even drafts) pass the same baseline content checks.
+    if (postType === "General") {
       for (const img of pendingImages) {
         const file = img.file;
         if (!file?.name) continue;
 
-
-        const fileExt = file.name.split('.').pop();
-        const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+        const fileExt = file.name.split(".").pop();
+        const fileName = `${Date.now()}-${Math.random()
+          .toString(36)
+          .substring(2)}.${fileExt}`;
         const filePath = `user-${session.userid}/${fileName}`;
 
-
         const { error: uploadError } = await supabase.storage
-          .from("room-article-images")
+          .from(bucket)
           .upload(filePath, file);
 
-
         if (uploadError) {
-          console.error("Room draft image upload failed:", uploadError);
-          continue;
+          console.error("Image upload failed:", uploadError);
+          alert("Image upload failed.");
+          setIsUploading(false);
+          setUploadAction("");
+          return;
         }
 
-
         const { data: urlData } = supabase.storage
-          .from("room-article-images")
+          .from(bucket)
           .getPublicUrl(filePath);
+        if (urlData?.publicUrl) {
+          if (!firstImageUrl) firstImageUrl = urlData.publicUrl;
+          updatedHTML = updatedHTML.replaceAll(
+            img.previewUrl,
+            urlData.publicUrl
+          );
+          uploadedImageUrls.push(urlData.publicUrl);
+        }
+      }
 
+      const response = await fetch(
+        "https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/api/moderate",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ content: updatedHTML }),
+        }
+      );
 
-        const publicUrl = urlData?.publicUrl;
-        if (publicUrl) {
-          await supabase.from("room_article_images").insert([
-            { postid, image_url: publicUrl }
-          ]);
+      const result = await response.json();
+      if (result.error) {
+        alert(`Draft flagged: ${result.error}`);
+        setIsUploading(false);
+        setUploadAction("");
+        return;
+      }
+
+      const { data, error } = await supabase
+        .from("articles")
+        .insert([
+          {
+            title,
+            text: updatedHTML,
+            userid: session.userid,
+            topicid: topics,
+            time: new Date().toISOString(),
+            status: "Draft",
+            imagepath: firstImageUrl || null,
+          },
+        ])
+        .select("articleid");
+
+      if (error) {
+        console.error("Failed to save draft:", error);
+        alert("Failed to save draft.");
+        setIsUploading(false);
+        setUploadAction("");
+        return;
+      }
+
+      const articleid = data?.[0]?.articleid;
+      for (const url of uploadedImageUrls) {
+        await supabase
+          .from("article_images")
+          .insert([{ articleid, image_url: url }]);
+      }
+    } else {
+      // Clean blob URLs before saving room content
+      updatedHTML = updatedHTML.replace(
+        /<img[^>]*src=["']blob:[^"']+["'][^>]*>/g,
+        ""
+      );
+
+      const { data, error } = await supabase
+        .from("room_articles")
+        .insert([
+          {
+            title,
+            content: updatedHTML,
+            roomid: selectedRoom,
+            userid: session.userid,
+            created_at: new Date().toISOString(),
+            status: "Draft",
+          },
+        ])
+        .select("postid");
+
+      if (error) {
+        console.error("Error saving draft:", error);
+        alert("Failed to save draft.");
+        return;
+      }
+
+      const postid = data?.[0]?.postid;
+
+      if (postid) {
+        for (const img of pendingImages) {
+          const file = img.file;
+          if (!file?.name) continue;
+
+          const fileExt = file.name.split(".").pop();
+          const fileName = `${Date.now()}-${Math.random()
+            .toString(36)
+            .substring(2)}.${fileExt}`;
+          const filePath = `user-${session.userid}/${fileName}`;
+
+          const { error: uploadError } = await supabase.storage
+            .from("room-article-images")
+            .upload(filePath, file);
+
+          if (uploadError) {
+            console.error("Room draft image upload failed:", uploadError);
+            continue;
+          }
+
+          const { data: urlData } = supabase.storage
+            .from("room-article-images")
+            .getPublicUrl(filePath);
+
+          const publicUrl = urlData?.publicUrl;
+          if (publicUrl) {
+            await supabase
+              .from("room_article_images")
+              .insert([{ postid, image_url: publicUrl }]);
+          }
         }
       }
     }
-  }
 
-
-  // Cleanup
-  pendingImages.forEach(img => URL.revokeObjectURL(img.previewUrl));
-  setPendingImages([]);
-  setShowDraftNotification(true);
-  alert("Draft saved!");
-  handleClearInputs();
-  setIsUploading(false);
-  setUploadAction("");  // DEVI ADDED THIS
-
-};
+    // Cleanup
+    pendingImages.forEach((img) => URL.revokeObjectURL(img.previewUrl));
+    setPendingImages([]);
+    setShowDraftNotification(true);
+    alert("Draft saved!");
+    handleClearInputs();
+    setIsUploading(false);
+    setUploadAction(""); // DEVI ADDED THIS
+  };
 
   const [pendingImages, setPendingImages] = useState([]);
-
 
   // const handleEditorImageUpload = (e) => {
   //   const file = e.target.files[0];
   //   if (file) {
   //     const previewUrl = URL.createObjectURL(file);
   //     setPendingImages((prev) => [...prev, { file, previewUrl }]);
-
 
   //     if (postType === "General") {
   //       editor.chain().focus().setImage({ src: previewUrl }).run();
@@ -853,27 +827,25 @@ export const PremiumWriteArticle = () => {
   const handleEditorImageUpload = (e) => {
     const file = e.target.files[0];
     if (!file) return;
-  
+
     const MAX_FILE_SIZE_MB = 50;
     const maxSizeBytes = MAX_FILE_SIZE_MB * 1024 * 1024;
-  
+
     if (file.size > maxSizeBytes) {
       alert(`Image is too large. Max file size is ${MAX_FILE_SIZE_MB}MB.`);
       e.target.value = null;
       return;
     }
-  
+
     const previewUrl = URL.createObjectURL(file);
     setPendingImages((prev) => [...prev, { file, previewUrl }]);
-  
+
     if (postType === "General") {
       editor.chain().focus().setImage({ src: previewUrl }).run();
     }
-  
-    e.target.value = null;
-  };  
- 
 
+    e.target.value = null;
+  };
 
   const handleClearInputs = () => {
     setTitle("");
@@ -885,15 +857,13 @@ export const PremiumWriteArticle = () => {
     setPendingImages([]);
     setAccuracy(null);
     setAiFeedback("");
-    setUploadAction("");  // <- DEVI ADDED THIS FOR THE LOAD AND POST INDICATOR
-
+    setUploadAction(""); // <- DEVI ADDED THIS FOR THE LOAD AND POST INDICATOR
 
     // Reset Tiptap editor content (this is the key)
     if (editor) {
       editor.commands.clearContent();
     }
   };
-
 
   useEffect(() => {
     const style = document.createElement("style");
@@ -954,40 +924,33 @@ export const PremiumWriteArticle = () => {
     return () => document.head.removeChild(style); // Cleanup
   }, []);
 
-
   const handleSubmitTopicApplication = async () => {
     const rawInput = newTopicName.trim();
     const normalizedInput = rawInput.toLowerCase();
-
 
     if (!normalizedInput) {
       alert("Please enter a topic name.");
       return;
     }
 
-
     // 🔍 Check if topic already exists in `topic_categories`
     const { data: existingTopics, error: topicFetchError } = await supabase
       .from("topic_categories")
       .select("name");
-
 
     if (topicFetchError) {
       alert("Error checking existing topics.");
       return;
     }
 
-
     const topicExists = existingTopics.some(
       (topic) => topic.name.trim().toLowerCase() === normalizedInput
     );
-
 
     if (topicExists) {
       alert("This topic already exists. Please choose an existing topic.");
       return;
     }
-
 
     // 🔍 Check if user already applied for this topic
     const { data: userApplications, error: appFetchError } = await supabase
@@ -996,23 +959,19 @@ export const PremiumWriteArticle = () => {
       .eq("requested_by", userId)
       .eq("status", "Pending");
 
-
     if (appFetchError) {
       alert("Error checking your previous applications.");
       return;
     }
 
-
     const alreadyApplied = userApplications.some(
       (app) => app.topic_name.trim().toLowerCase() === normalizedInput
     );
-
 
     if (alreadyApplied) {
       alert("You’ve already applied for this topic.");
       return;
     }
-
 
     // Insert the application
     const { error: insertError } = await supabase
@@ -1026,7 +985,6 @@ export const PremiumWriteArticle = () => {
         },
       ]);
 
-
     if (insertError) {
       alert("Failed to apply for topic.");
     } else {
@@ -1036,12 +994,10 @@ export const PremiumWriteArticle = () => {
     }
   };
 
-
   return (
     <div className="w-full min-h-screen bg-indigo-50 text-black font-grotesk flex justify-center">
       <main className="w-full max-w-4xl p-10 flex flex-col gap-6">
         <h1 className="text-3xl font-bold mb-1">Publish Your Articles :</h1>
-
 
         <div className="flex flex-col gap-5 w-full">
           <div>
@@ -1056,7 +1012,6 @@ export const PremiumWriteArticle = () => {
               className="w-full p-2 border border-gray-300 rounded-md bg-white"
             />
           </div>
-
 
           <div>
             <label className="block text-xl font-semibold mb-1">
@@ -1077,7 +1032,6 @@ export const PremiumWriteArticle = () => {
                   </label>
                 ))}
               </div>
-
 
               {postType === "General" ? (
                 <div className="flex items-center gap-2 w-full">
@@ -1100,7 +1054,6 @@ export const PremiumWriteArticle = () => {
                         {showTopicsDropdown ? "▲" : "▼"}
                       </button>{" "}
                     </div>
-
 
                     {showTopicsDropdown && (
                       <div className="absolute z-10 w-full mt-1 bg-white border rounded-md shadow-md max-h-40 overflow-y-auto">
@@ -1143,7 +1096,6 @@ export const PremiumWriteArticle = () => {
                     ))}
                   </select>
 
-
                   {/* Custom ▼ triangle */}
                   <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none text-gray-500 text-sm">
                     ▼
@@ -1152,7 +1104,6 @@ export const PremiumWriteArticle = () => {
               )}
             </div>
           </div>
-
 
           <div>
             <label className="block text-xl font-semibold mb-1">
@@ -1175,7 +1126,6 @@ export const PremiumWriteArticle = () => {
                 >
                   Upload Image
                 </button>
-
 
                 {/* Preview attached images for Room posts */}
                 {pendingImages.length > 0 && (
@@ -1214,9 +1164,8 @@ export const PremiumWriteArticle = () => {
 
                               // DEVI MADE CHANGES HERE - Optionally force cleanup of deleted image nodes from the DOM, NOT REALLY NEED?
                               // if (editor) {
-                                // editor.commands.focus().run();
-                              // }                              
-
+                              // editor.commands.focus().run();
+                              // }
                             }, 0);
                           }}
                           className="absolute top-1 right-1 bg-white text-red-600 rounded-full w-6 h-6 flex items-center justify-center shadow-md hover:bg-red-100"
@@ -1227,7 +1176,6 @@ export const PremiumWriteArticle = () => {
                     ))}
                   </div>
                 )}
-
 
                 <div className="flex flex-wrap items-center gap-2 bg-white p-3 mt-4 border rounded-lg shadow-md text-sm font-medium">
                   <select
@@ -1247,7 +1195,6 @@ export const PremiumWriteArticle = () => {
                     <option value="2">H2</option>
                     <option value="3">H3</option>
                   </select>
-
 
                   <button
                     onClick={() => editor.chain().focus().toggleBold().run()}
@@ -1328,7 +1275,6 @@ export const PremiumWriteArticle = () => {
                   </button>
                 </div>
 
-
                 {(accuracy !== null || aiFeedback) && (
                   <div className="mt-4 p-4 border border-red-300 bg-red-50 rounded text-sm text-black">
                     <strong>Fact Check Results:</strong>
@@ -1347,7 +1293,6 @@ export const PremiumWriteArticle = () => {
                     />
                   </div>
                 )}
-
 
                 <div
                   className="min-h-[400px] max-h-[600px] overflow-y-auto border rounded-md bg-white p-4 mt-3 focus-within:outline-none"
@@ -1378,7 +1323,6 @@ export const PremiumWriteArticle = () => {
             )}
           </div>
 
-
           {/* <div className="flex justify-end gap-3">
             <button
               className="bg-red-500 text-white px-4 py-2 rounded-md"
@@ -1405,37 +1349,37 @@ export const PremiumWriteArticle = () => {
             </button>
           </div> */}
 
-        <div className="flex justify-end gap-3">
-          <button
-            className="bg-red-500 text-white px-4 py-2 rounded-md disabled:opacity-50"
-            onClick={(e) => {
-              e.preventDefault();
-              setShowConfirm(true);
-            }}
-            disabled={isUploading}
-          >
-            Clear
-          </button>
+          <div className="flex justify-end gap-3">
+            <button
+              className="bg-red-500 text-white px-4 py-2 rounded-md disabled:opacity-50"
+              onClick={(e) => {
+                e.preventDefault();
+                setShowConfirm(true);
+              }}
+              disabled={isUploading}
+            >
+              Clear
+            </button>
 
-          <button
-            className="bg-gray-600 text-white px-4 py-2 rounded-md disabled:opacity-50"
-            onClick={handleSaveDraft}
-            disabled={isUploading}
-          >
-            {isUploading && uploadAction === "draft" ? "Saving..." : "Save Draft"}
-          </button>
+            <button
+              className="bg-gray-600 text-white px-4 py-2 rounded-md disabled:opacity-50"
+              onClick={handleSaveDraft}
+              disabled={isUploading}
+            >
+              {isUploading && uploadAction === "draft"
+                ? "Saving..."
+                : "Save Draft"}
+            </button>
 
-          <button
-            className="bg-blue-600 text-white px-4 py-2 rounded-md disabled:opacity-50"
-            onClick={handlePostArticle}
-            disabled={isUploading}
-          >
-            {isUploading && uploadAction === "post" ? "Posting..." : "Post"}
-          </button>
+            <button
+              className="bg-blue-600 text-white px-4 py-2 rounded-md disabled:opacity-50"
+              onClick={handlePostArticle}
+              disabled={isUploading}
+            >
+              {isUploading && uploadAction === "post" ? "Posting..." : "Post"}
+            </button>
+          </div>
         </div>
-
-        </div>
-
 
         {showConfirm && (
           <div className="fixed inset-0 backdrop-blur-sm bg-white/5 flex items-center justify-center z-50">
@@ -1459,7 +1403,6 @@ export const PremiumWriteArticle = () => {
           </div>
         )}
 
-
         {showLinkModal && (
           <div className="fixed inset-0 flex items-center justify-center backdrop-blur-sm bg-white/10 z-50">
             <div className="bg-white rounded-md p-6 shadow-lg w-[90%] max-w-sm">
@@ -1476,12 +1419,10 @@ export const PremiumWriteArticle = () => {
                   onClick={() => {
                     if (!linkUrl.trim()) return;
 
-
                     const hasSelection =
                       editor &&
                       editor.view.state.selection?.from !==
                         editor.view.state.selection?.to;
-
 
                     if (hasSelection) {
                       editor
@@ -1509,7 +1450,6 @@ export const PremiumWriteArticle = () => {
                         .run();
                     }
 
-
                     setShowLinkModal(false);
                     setLinkUrl("");
                   }}
@@ -1531,7 +1471,6 @@ export const PremiumWriteArticle = () => {
           </div>
         )}
 
-
         {showDraftNotification && (
           <div className="fixed inset-0 backdrop-blur-sm bg-white/5 flex items-center justify-center z-50">
             <div
@@ -1545,7 +1484,6 @@ export const PremiumWriteArticle = () => {
                 Your draft will expire in 7 days. Don't forget to publish it
                 before then!
               </p>
-
 
               {/* OK Button to acknowledge the notification */}
               <div className="flex justify-end mt-4">
@@ -1561,44 +1499,47 @@ export const PremiumWriteArticle = () => {
         )}
 
         {showTopicApplication && (
-            <div className="fixed inset-0 backdrop-blur-sm bg-white/10 flex items-center justify-center z-50">
-              <div className="bg-white p-6 rounded-lg shadow-xl w-[90%] max-w-md text-center">
-                <h2 className="text-xl font-semibold mb-3 text-left">Topic Application</h2>
-                <p className="text-gray-600 text-sm mb-4">
+          <div className="fixed inset-0 backdrop-blur-sm bg-white/10 flex items-center justify-center z-50">
+            <div className="bg-white p-6 rounded-lg shadow-xl w-[90%] max-w-md text-center">
+              <h2 className="text-xl font-semibold mb-3 text-left">
+                Topic Application
+              </h2>
+              <p className="text-gray-600 text-sm mb-4">
                 <ul className="text-gray-600 text-sm mb-4 list-disc list-inside text-left space-y-2">
                   <li>Your requested topic will be reviewed by our admins.</li>
-                  <li>Approved if 15 or more users apply for the same topic.</li>
+                  <li>
+                    Approved if 15 or more users apply for the same topic.
+                  </li>
                   <li>Please post under an existing topic in the meantime.</li>
                 </ul>
-                </p>
-                <input
-                  type="text"
-                  value={newTopicName}
-                  onChange={(e) => setNewTopicName(e.target.value)}
-                  placeholder="Enter your proposed topic name..."
-                  className="w-full p-2 mb-4 border border-gray-300 rounded-md"
-                />
-                <div className="flex justify-end gap-3">
-                  <button
-                    className="bg-blue-600 text-white px-4 py-2 rounded-md"
-                    onClick={handleSubmitTopicApplication}
-                  >
-                    Apply
-                  </button>
-                  <button
-                    className="bg-gray-300 text-black px-4 py-2 rounded-md"
-                    onClick={() => {
-                      setNewTopicName("");
-                      setShowTopicApplication(false);
-                    }}
-                  >
-                    Cancel
-                  </button>
-                </div>
+              </p>
+              <input
+                type="text"
+                value={newTopicName}
+                onChange={(e) => setNewTopicName(e.target.value)}
+                placeholder="Enter your proposed topic name..."
+                className="w-full p-2 mb-4 border border-gray-300 rounded-md"
+              />
+              <div className="flex justify-end gap-3">
+                <button
+                  className="bg-blue-600 text-white px-4 py-2 rounded-md"
+                  onClick={handleSubmitTopicApplication}
+                >
+                  Apply
+                </button>
+                <button
+                  className="bg-gray-300 text-black px-4 py-2 rounded-md"
+                  onClick={() => {
+                    setNewTopicName("");
+                    setShowTopicApplication(false);
+                  }}
+                >
+                  Cancel
+                </button>
               </div>
             </div>
-          )}
-
+          </div>
+        )}
       </main>
     </div>
   );
