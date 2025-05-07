@@ -334,9 +334,6 @@ export const PremiumWriteArticle = () => {
 
       console.log("imgnew", firstImageUrl);
 
-      console.log("updatedhtml", updatedHTML);
-      console.log("text?", editor.getText());
-
       // 2. Submit to external API (make sure firstImageUrl is passed!)
       const response = await fetch(
         "https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/api/submit-article",
@@ -345,7 +342,7 @@ export const PremiumWriteArticle = () => {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             title,
-            content: updatedHTML,
+            content: editor.getText(),
             type: "factual",
             authorId: session.userid,
             topicid: topics,
@@ -359,17 +356,16 @@ export const PremiumWriteArticle = () => {
       console.log("img2", result);
 
       if (!response.ok || result?.flagged) {
-        console.warn("Inappropriate content", result);
-        alert("Article contains inappropriate content.");
-        if (result.feedback) {
-          setAiFeedback(result.feedback);
-          setAccuracy(result.accuracy || null);
-          alert(
-            "Article flagged by AI. Please review the highlighted sections."
-          );
-        } else {
-          alert(result.error || "Submission failed.");
-        }
+        console.warn("❌ Moderation failed or flagged:", result);
+        alert(result?.error || "Article contains inappropriate content.");
+        // await deleteSupabaseImages(uploadedImageUrls);
+        return;
+      }
+      if (result.feedback) {
+        setAiFeedback(result.feedback);
+        setAccuracy(result.accuracy || null);
+        alert("Article flagged by AI. Please review the highlighted sections.");
+
         setIsUploading(false);
         return;
       }
