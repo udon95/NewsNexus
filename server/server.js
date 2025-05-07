@@ -31,6 +31,22 @@ const supabase = createClient(
   process.env.SUPABASE_ANON_KEY
 );
 
+const fs = require("fs");
+const visionKey = process.env.GOOGLE_VISION_KEY_JSON;
+const keyPath = "/tmp/google-vision-key.json";
+
+if (visionKey) {
+  fs.writeFileSync(keyPath, visionKey);
+  process.env.GOOGLE_APPLICATION_CREDENTIALS = keyPath;
+
+  // Debug logs (remove after testing)
+  console.log("[Google Vision] Key file written to:", keyPath);
+  console.log("[Google Vision] ENV matches:", process.env.GOOGLE_APPLICATION_CREDENTIALS === keyPath);
+} else {
+  console.error("[Google Vision] ❌ GOOGLE_VISION_KEY_JS not found in environment.");
+}
+
+
 app.get("/", (req, res) => {
   res.send("Hello, World!");
 });

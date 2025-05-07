@@ -2,6 +2,7 @@ const express = require("express");
 const fetch = require("node-fetch");
 const router = express.Router();
 const { createClient } = require("@supabase/supabase-js");
+const { ImageAnnotatorClient } = require("@google-cloud/vision");
 
 router.use(express.json());
 
@@ -332,6 +333,38 @@ router.post("/moderate", async (req, res) => {
     });
   }
   res.status(200).json({ message: "Content passed moderation." });
+});
+
+router.post("/test-vision", async (req, res) => {
+  try {
+    const { imageUrls } = req.body;
+
+    if (!Array.isArray(imageUrls) || imageUrls.length === 0) {
+      return res
+        .status(400)
+        .json({ error: "imageUrls must be a non-empty array." });
+    }
+
+    // Initialize the Vision API client
+    const client = new ImageAnnotatorClient();
+    const results = [];
+
+    // Call SafeSearch Detection
+    for (const url of imageUrls) {
+      const [result] = await client.safeSearchDetection(url);
+      results.push({
+        imageUrl: url,
+        safeSearch: result.safeSearchAnnotation || null,
+      });
+    }
+    return res.status(200).json({
+      message: "Google Vision SafeSearch Detection successful ",
+      results,
+    });
+  } catch (err) {
+    console.error("Vision API error:", err);
+    return res.status(500).json({ error: "Failed to call Google Vision API." });
+  }
 });
 
 module.exports = router;
