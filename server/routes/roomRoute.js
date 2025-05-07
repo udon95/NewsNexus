@@ -2,9 +2,10 @@ const express = require("express");
 const router = express.Router();
 const supabase = require("../supabaseClient");
 
-// 🔹 GET all rooms created by user
+// 🔹 GET all rooms created by a user
 router.get("/:userid", async (req, res) => {
   const { userid } = req.params;
+
   const { data, error } = await supabase
     .from("rooms")
     .select("roomid, name, description, room_type, created_by, member_limit, member_count")
@@ -70,12 +71,14 @@ router.put("/:roomid", async (req, res) => {
 // 🔹 DELETE room by ID
 router.delete("/:roomid", async (req, res) => {
   const { roomid } = req.params;
+
   const { error } = await supabase
     .from("rooms")
     .delete()
     .eq("roomid", roomid);
 
   if (error) return res.status(500).json({ error: error.message });
+
   res.status(200).json({ message: "Room deleted" });
 });
 
@@ -107,9 +110,9 @@ router.post("/invite", async (req, res) => {
     return res.status(404).json({ error: "User not found" });
   }
 
-  const { error: insertError } = await supabase.from("room_invites").insert([
-    { userid: user.userid, roomid },
-  ]);
+  const { error: insertError } = await supabase
+    .from("room_invites")
+    .insert([{ userid: user.userid, roomid }]);
 
   if (insertError) {
     console.error("Invite insert error:", insertError.message);
@@ -159,3 +162,4 @@ router.post("/decline", async (req, res) => {
 });
 
 module.exports = router;
+
