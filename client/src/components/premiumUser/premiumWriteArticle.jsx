@@ -781,11 +781,11 @@ export const PremiumWriteArticle = () => {
   // };
 
   return (
-    <div className="w-full min-h-screen bg-indigo-50 text-black font-grotesk flex justify-center">
-      <main className="w-full max-w-4xl p-10 flex flex-col gap-6">
+    <div className="w-full min-h-screen  text-black font-grotesk flex justify-center">
+      <main className="w-full max-w-4xl p-10 flex flex-col ">
         <h1 className="text-3xl font-bold mb-2">Publish Your Articles :</h1>
 
-        <div className="flex flex-col gap-2 w-full">
+        <div className="flex flex-col gap-5 w-full">
           <div>
             <label className="block text-xl font-semibold mb-1">
               Article Title:
