@@ -5,11 +5,13 @@ const { createClient } = require("@supabase/supabase-js");
 const { ImageAnnotatorClient } = require("@google-cloud/vision");
 
 router.use(express.json());
+const { JSDOM } = require("jsdom");
 
 const supabase = createClient(
   process.env.SUPABASE_URL,
   process.env.SUPABASE_ANON_KEY
 );
+
 const OPENAI_KEY = process.env.OPENAI_API_KEY;
 const PERPLEXITY_KEY = process.env.PERPLEXITY_API_KEY;
 
@@ -37,6 +39,11 @@ const PERPLEXITY_KEY = process.env.PERPLEXITY_API_KEY;
 //     return { flagged: false, error: "Moderation failed or timed out." };
 //   }
 // }
+
+function extractTextFromHTML(html) {
+  const dom = new JSDOM(html);
+  return dom.window.document.body.textContent || "";
+}
 
 async function moderateText(content) {
   try {
@@ -280,18 +287,20 @@ router.post("/submit-article", async (req, res) => {
   try {
     const {
       title,
-      content,
+      content: updatedHTML,
       authorId,
       topicid,
       topicName,
       imageUrls = [],
     } = req.body;
 
-    if (!title || !content || !authorId || !topicid || !topicName) {
+    const strippedText = extractTextFromHTML(updatedHTML);
+
+    if (!title || !strippedText || !authorId || !topicid || !topicName) {
       return res.status(400).json({ error: "Missing required fields." });
     }
 
-    const modResult = await moderateText(content);
+    const modResult = await moderateText(strippedText);
     if (modResult?.flagged) {
       await deleteImagesFromSupabase(imageUrls);
 
@@ -313,7 +322,7 @@ router.post("/submit-article", async (req, res) => {
 
     let factResult;
     try {
-      factResult = await factCheck(content, topicName);
+      factResult = await factCheck(strippedText, topicName);
     } catch (err) {
       console.error("Fact-check error:", err);
 
@@ -332,7 +341,7 @@ router.post("/submit-article", async (req, res) => {
       .insert([
         {
           title,
-          text: content,
+          text: updatedHTML,
           userid: authorId,
           topicid,
           accuracy_score: factResult.accuracy,
