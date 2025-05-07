@@ -204,7 +204,7 @@ const ArticleList = ({
 
   return (
     <div className="mt-6 font-grotesk w-full pb-4">
-      <h2 className="text-2xl font-bold font-grotesk mb-2 w-3/3 md:w-2/3">
+      <h2 className="text-3xl font-bold mb-2 w-3/3 md:w-2/3">
         {title}
       </h2>
       {articles.length === 0 ? (

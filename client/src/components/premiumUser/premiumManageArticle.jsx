@@ -245,7 +245,7 @@ export const PremManageArticle = () => {
   const roomDrafts = filterArticles(roomdraftArticles);
 
   return (
-    <div className="w-full min-h-screen bg-indigo-50 text-black font-grotesk flex justify-center">
+    <div className="w-full min-h-screen text-black font-grotesk flex justify-center">
       <main className="w-full text-xl flex flex-col max-md:flex-col max-w-4xl">
         <Manage
           onSearch={setSearchQuery}
