@@ -234,10 +234,10 @@ export const PremiumWriteArticle = () => {
           alert(
             "Pasting images is not allowed. Please use the Upload Image button."
           );
-          return true; 
+          return true;
         }
 
-        return false; 
+        return false;
       },
     },
     onUpdate: ({ editor }) => {
@@ -500,7 +500,8 @@ export const PremiumWriteArticle = () => {
       /<img[^>]*src=["']blob:[^"']+["'][^>]*>/g,
       ""
     );
-
+    const imageUrls = pendingImages.map((img) => img.previewUrl);
+    console.log("room images", imageUrls);
     const articleData = {
       title,
       content: updatedHTML,
@@ -516,7 +517,7 @@ export const PremiumWriteArticle = () => {
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ content: articleData.content }),
+          body: JSON.stringify({ content: articleData.content, imageUrls }),
         }
       );
 

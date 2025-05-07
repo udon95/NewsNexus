@@ -98,7 +98,7 @@ async function moderateImages(imageUrls) {
 }
 
 const deleteImagesFromSupabase = async (imageUrls) => {
-  const bucket = "articles-images"; 
+  const bucket = "articles-images";
   const paths = imageUrls
     .map((url) => {
       const parts = url.split(`${bucket}/`);
@@ -346,7 +346,6 @@ router.post("/submit-article", async (req, res) => {
       console.error("General insert error:", error);
       return res.status(500).json({ error: error.message });
     }
-    
 
     return res.json({
       message: "Article saved successfully.",
