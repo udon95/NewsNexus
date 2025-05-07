@@ -350,7 +350,7 @@ export const PremiumWriteArticle = () => {
             authorId: session.userid,
             topicid: topics,
             topicName,
-            imageUrls: firstImageUrl, // Critical part
+            imageUrls: uploadedImageUrls, // Critical part
           }),
         }
       );
