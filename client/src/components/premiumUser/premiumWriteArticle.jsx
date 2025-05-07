@@ -275,6 +275,34 @@ export const PremiumWriteArticle = () => {
     }
   }, [postType]);
 
+  useEffect(() => {
+    if (!editor) return;
+
+    const handlePaste = (event) => {
+      const clipboardItems = event.clipboardData?.items;
+      if (!clipboardItems) return;
+
+      for (const item of clipboardItems) {
+        if (item.type.startsWith("image/")) {
+          event.preventDefault(); // Block image paste
+          alert("Pasting images is disabled. Please use the Upload button.");
+          return;
+        }
+      }
+    };
+
+    const editorElement = editor?.view?.dom;
+    if (editorElement) {
+      editorElement.addEventListener("paste", handlePaste);
+    }
+
+    return () => {
+      if (editorElement) {
+        editorElement.removeEventListener("paste", handlePaste);
+      }
+    };
+  }, [editor]);
+
   const MAX_WORDS = postType === "Room" ? 400 : 1000;
 
   const handlePostArticle = async () => {
