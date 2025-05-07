@@ -332,10 +332,9 @@ export const PremiumWriteArticle = () => {
         }
       }
 
-      console.log(firstImageUrl);
       console.log("imgnew", firstImageUrl);
 
-      console.log("uploaded imageurls", uploadedImageUrls);
+      console.log("updatedhtml", updatedHTML);
 
       // 2. Submit to external API (make sure firstImageUrl is passed!)
       const response = await fetch(
