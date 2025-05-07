@@ -145,17 +145,44 @@ const Room = () => {
       "Are you sure you want to delete this article?"
     );
     if (!confirmed) return;
-
+  
+    const bucketName = "room-article-images";
+  
+    const { data: images, error: fetchError } = await supabase
+      .from("room_article_images")
+      .select("image_url")
+      .eq("postid", postid);
+  
+    if (fetchError) {
+      console.error("Error fetching room article images:", fetchError);
+      return;
+    }
+  
+    if (images && images.length > 0) {
+      const imagePaths = images.map((img) => {
+        const parts = img.image_url.split(`/object/public/${bucketName}/`);
+        return parts[1]; 
+      });
+  
+      const { error: storageError } = await supabase.storage
+        .from(bucketName)
+        .remove(imagePaths);
+  
+      if (storageError) {
+        console.error("Error deleting images from storage:", storageError);
+      }
+    }
+  
     const { error } = await supabase
       .from("room_articles")
       .delete()
       .eq("postid", postid);
-
+  
     if (error) {
       console.error("Error deleting article:", error);
       return;
     }
-
+  
     setArticles((prev) => prev.filter((a) => a.postid !== postid));
     setArticleMenu(null);
   };
