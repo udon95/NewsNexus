@@ -94,7 +94,7 @@ export const PremManageArticle = () => {
         .select(
           `
           postid,
-          
+          roomid,
           title,
           created_at,
           room_article_images(image_url)
