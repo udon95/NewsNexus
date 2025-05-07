@@ -432,6 +432,13 @@ router.put("/update-admin-email", async (req, res) => {
 
     if (errorUser) throw errorUser;
 
+    const { data: updateAuthData, error: updateAuthError } =
+      await supabase.auth.updateUser({
+        email: email,
+      });
+
+    if (updateAuthError) throw updateAuthError;
+
     return res.json({ message: "Email updated successfully" });
   } catch (error) {
     console.error("Error updating Email:", error.message);

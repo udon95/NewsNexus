@@ -54,6 +54,7 @@ const AdminProfile = () => {
           localStorage.setItem("userProfile", JSON.stringify(storedUser));
           sessionStorage.setItem("userProfile", JSON.stringify(storedUser));
         }
+        window.location.reload();
       }
     } catch (error) {
       console.error(
@@ -123,6 +124,7 @@ const AdminProfile = () => {
             sessionStorage.setItem("userProfile", JSON.stringify(storedUser));
           }
         }
+        window.location.reload();
       }
     } catch (error) {
       console.error("Error updating password:", error.message);
