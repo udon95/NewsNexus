@@ -56,10 +56,11 @@ const Explore = () => {
       if (!topicError && topicData) {
         setTopics(topicData);
 
-        // 🧠 Match name from URL to topicid
+        // Match name from URL to topicid
         if (initialTopic && topicData.length > 0) {
           const matched = topicData.find(
-            (t) => t.name.toLowerCase().trim() === initialTopic.toLowerCase().trim()
+            (t) =>
+              t.name.toLowerCase().trim() === initialTopic.toLowerCase().trim()
           );
           if (matched) {
             setSelectedTopic(matched.topicid);
@@ -107,7 +108,9 @@ const Explore = () => {
     setSearchParams(params);
   }, [searchQuery, selectedTopic]);
 
-  const selectedTopicName = topics.find((t) => t.topicid === selectedTopic)?.name;
+  const selectedTopicName = topics.find(
+    (t) => t.topicid === selectedTopic
+  )?.name;
   const interestTopicIDs = topics
     .filter((t) =>
       userInterests.map((i) => i.toLowerCase()).includes(t.name.toLowerCase())

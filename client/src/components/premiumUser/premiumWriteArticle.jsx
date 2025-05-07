@@ -335,6 +335,8 @@ export const PremiumWriteArticle = () => {
       console.log(firstImageUrl);
       console.log("imgnew", firstImageUrl);
 
+      console.log("uploaded imageurls", uploadedImageUrls);
+
       // 2. Submit to external API (make sure firstImageUrl is passed!)
       const response = await fetch(
         "https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/api/submit-article",
@@ -348,7 +350,7 @@ export const PremiumWriteArticle = () => {
             authorId: session.userid,
             topicid: topics,
             topicName,
-            imagepath: firstImageUrl, // ✅ Critical part
+            imageUrls: firstImageUrl, // Critical part
           }),
         }
       );

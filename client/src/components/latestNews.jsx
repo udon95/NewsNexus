@@ -53,7 +53,7 @@ const LatestNews = ({
         return;
       }
 
-      // ✅ Filter out expert-authored articles
+      // Filter out expert-authored articles
       const { data: expertApps, error: expertError } = await supabase
         .from("expert_application")
         .select("userid, topicid")
