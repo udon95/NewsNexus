@@ -427,7 +427,7 @@ export const PremiumWriteArticle = () => {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             title,
-            content: editor.getText(),
+            content: updatedHTML,
             type: "factual",
             authorId: session.userid,
             topicid: topics,

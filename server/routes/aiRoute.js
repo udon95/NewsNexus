@@ -346,14 +346,7 @@ router.post("/submit-article", async (req, res) => {
       console.error("General insert error:", error);
       return res.status(500).json({ error: error.message });
     }
-    for (const url of imageUrls) {
-      await supabase.from("article_images").insert([
-        {
-          articleid: inserted.articleid,
-          image_url: url,
-        },
-      ]);
-    }
+    
 
     return res.json({
       message: "Article saved successfully.",
