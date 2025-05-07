@@ -37,7 +37,7 @@ const PERPLEXITY_KEY = process.env.PERPLEXITY_API_KEY;
 //   }
 // }
 
-async function moderateText(content, imageUrls = null) {
+async function moderateText(content, imageUrl = null) {
   try {
     const input = [];
 
@@ -45,10 +45,15 @@ async function moderateText(content, imageUrls = null) {
       input.push({ type: "text", text: content });
     }
 
-    for (const url of imageUrls) {
+    // for (const url of imageUrls) {
+    //   input.push({
+    //     type: "image_url",
+    //     image_url: { url },
+    //   });
+    if (imageUrl) {
       input.push({
         type: "image_url",
-        image_url: { url },
+        image_url: { url: imageUrl },
       });
     }
 
@@ -243,7 +248,7 @@ router.post("/submit-article", async (req, res) => {
       authorId,
       topicid,
       topicName,
-      imageUrls = [],
+      imageUrls = null,
     } = req.body;
 
     if (!title || !content || !authorId || !topicid || !topicName) {
