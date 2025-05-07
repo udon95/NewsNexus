@@ -11,6 +11,7 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@google-cloud/vision": "^5.1.0",
     "@hocuspocus/provider": "^2.15.2",
     "@supabase/supabase-js": "^2.49.1",
     "@tiptap/extension-collaboration": "^2.11.7",
