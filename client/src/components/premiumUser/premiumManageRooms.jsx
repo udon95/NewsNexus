@@ -22,6 +22,7 @@ const ManageRooms = () => {
     name: "",
     description: "",
     room_type: "Public",
+    member_limit: 20,
   });
 
   const userProfile = JSON.parse(localStorage.getItem("userProfile"));
@@ -41,7 +42,7 @@ const ManageRooms = () => {
       .from("room_invites")
       .select("roomid, rooms(name)")
       .eq("userid", userId);
-  
+
     if (!error) {
       const formatted = data.map((item, i) => ({
         id: item.roomid,
@@ -49,7 +50,7 @@ const ManageRooms = () => {
       }));
       setInvites(formatted);
     }
-  };  
+  };
 
   useEffect(() => {
     fetchRooms();
@@ -57,18 +58,15 @@ const ManageRooms = () => {
   }, [userId]);
 
   const handleAddPublicRoom = async () => {
-    const res = await fetch(
-      "https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/rooms",
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...newPublicRoom,
-          room_type: "Public",
-          created_by: userId,
-        }),
-      }
-    );
+    const res = await fetch("https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/rooms", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        ...newPublicRoom,
+        room_type: "Public",
+        created_by: userId,
+      }),
+    });
 
     if (res.ok) {
       alert("Public room created");
@@ -78,18 +76,15 @@ const ManageRooms = () => {
   };
 
   const handleAddPrivateRoom = async () => {
-    const res = await fetch(
-      "https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/rooms",
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...newPrivateRoom,
-          room_type: "Private",
-          created_by: userId,
-        }),
-      }
-    );
+    const res = await fetch("https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/rooms", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        ...newPrivateRoom,
+        room_type: "Private",
+        created_by: userId,
+      }),
+    });
 
     if (res.ok) {
       alert("Private room created");
@@ -107,17 +102,11 @@ const ManageRooms = () => {
       }
 
       for (let username of usernames) {
-        await fetch(
-          "https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/rooms/invite",
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              invitee_username: username,
-              roomid,
-            }),
-          }
-        );
+        await fetch("https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/rooms/invite", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ invitee_username: username, roomid }),
+        });
       }
 
       setNewPrivateRoom({ name: "", description: "", invite: "", member_limit: 20 });
@@ -125,67 +114,56 @@ const ManageRooms = () => {
     }
   };
 
-  const handleUpdateRoom = (roomid, currentName, currentDescription, currentRoomType) => {
+  const handleUpdateRoom = (roomid, currentName, currentDescription, currentRoomType, currentLimit) => {
     setEditRoom({
       roomid,
       name: currentName,
       description: currentDescription,
       room_type: currentRoomType,
+      member_limit: currentLimit ?? 20,
     });
     setShowModal(true);
   };
-  
+
   const submitRoomUpdate = async () => {
-    const { roomid, name, description, room_type } = editRoom;
-  
-    await fetch(
-      `https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/rooms/${roomid}`,
-      {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, description, room_type }),
-      }
-    );
-  
+    const { roomid, name, description, room_type, member_limit } = editRoom;
+
+    await fetch(`https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/rooms/${roomid}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name, description, room_type, member_limit }),
+    });
+
     setShowModal(false);
     fetchRooms();
   };
 
   const handleDeleteRoom = async (roomid) => {
-    await fetch(
-      `https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/rooms/${roomid}`,
-      {
-        method: "DELETE",
-      }
-    );
+    await fetch(`https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/rooms/${roomid}`, {
+      method: "DELETE",
+    });
     fetchRooms();
   };
 
   const handleAcceptInvite = async (roomid) => {
-    await fetch(
-      "https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/rooms/accept",
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userid: userId, roomid }),
-      }
-    );
+    await fetch("https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/rooms/accept", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userid: userId, roomid }),
+    });
     alert("Joined room");
     fetchInvites();
   };
 
   const handleDeclineInvite = async (roomid) => {
-    await fetch(
-      "https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/rooms/decline",
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userid: userId, roomid }),
-      }
-    );
+    await fetch("https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/rooms/decline", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userid: userId, roomid }),
+    });
     alert("Invitation declined");
     fetchInvites();
-  };  
+  };
 
   const rowStyle = "flex justify-between items-center mb-2";
   const buttonClass =
@@ -224,7 +202,7 @@ const ManageRooms = () => {
                 <span>{index + 1}. {room.name}</span>
                 <div className="flex gap-2">
                   <span className="mt-2">{room.member_count} members</span>
-                  <button onClick={() => handleUpdateRoom(room.roomid, room.name, room.description, room.room_type)} className={buttonClass}>Update</button>
+                  <button onClick={() => handleUpdateRoom(room.roomid, room.name, room.description, room.room_type, room.member_limit)} className={buttonClass}>Update</button>
                   <button onClick={() => handleDeleteRoom(room.roomid)} className={buttonClass}>Delete</button>
                 </div>
               </div>
@@ -268,7 +246,7 @@ const ManageRooms = () => {
                 <span>{index + 1}. {room.name}</span>
                 <div className="flex gap-2">
                   <span className="mt-2">{room.member_count} members</span>
-                  <button onClick={() => handleUpdateRoom(room.roomid, room.name, room.description, room.room_type)} className={buttonClass}>Update</button>
+                  <button onClick={() => handleUpdateRoom(room.roomid, room.name, room.description, room.room_type, room.member_limit)} className={buttonClass}>Update</button>
                   <button onClick={() => handleDeleteRoom(room.roomid)} className={buttonClass}>Delete</button>
                 </div>
               </div>
@@ -276,11 +254,12 @@ const ManageRooms = () => {
           </div>
         </section>
 
+        {/* Modal for Editing Room */}
         {showModal && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
             <div className="bg-white p-6 rounded-xl shadow-md w-full max-w-md space-y-4">
               <h2 className="text-xl font-semibold">Update Room</h2>
-        
+
               <div>
                 <label className="block text-sm font-medium mb-1">Room Name</label>
                 <input
@@ -289,7 +268,7 @@ const ManageRooms = () => {
                   className="w-full px-3 py-2 border rounded-md"
                 />
               </div>
-        
+
               <div>
                 <label className="block text-sm font-medium mb-1">Room Description</label>
                 <input
@@ -298,7 +277,7 @@ const ManageRooms = () => {
                   className="w-full px-3 py-2 border rounded-md"
                 />
               </div>
-        
+
               <div>
                 <label className="block text-sm font-medium mb-1">Room Type</label>
                 <select
@@ -310,18 +289,25 @@ const ManageRooms = () => {
                   <option value="Private">Private</option>
                 </select>
               </div>
-        
-              <div className="flex justify-end gap-2 pt-2">
-                <button
-                  onClick={() => setShowModal(false)}
-                  className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
+
+              <div>
+                <label className="block text-sm font-medium mb-1">Member Limit</label>
+                <select
+                  value={editRoom.member_limit}
+                  onChange={(e) => setEditRoom({ ...editRoom, member_limit: parseInt(e.target.value) })}
+                  className="w-full px-3 py-2 border rounded-md"
                 >
+                  <option value={20}>Limit: 20</option>
+                  <option value={50}>Limit: 50</option>
+                  <option value={100}>Limit: 100</option>
+                </select>
+              </div>
+
+              <div className="flex justify-end gap-2 pt-2">
+                <button onClick={() => setShowModal(false)} className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400">
                   Cancel
                 </button>
-                <button
-                  onClick={submitRoomUpdate}
-                  className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-                >
+                <button onClick={submitRoomUpdate} className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
                   Save
                 </button>
               </div>
@@ -348,4 +334,3 @@ const ManageRooms = () => {
 };
 
 export default ManageRooms;
-
