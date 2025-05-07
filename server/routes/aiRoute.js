@@ -38,26 +38,8 @@ const PERPLEXITY_KEY = process.env.PERPLEXITY_API_KEY;
 //   }
 // }
 
-async function moderateText(content, imageUrl = null) {
+async function moderateText(content) {
   try {
-    const input = [];
-
-    if (content) {
-      input.push({ type: "text", text: content });
-    }
-
-    // for (const url of imageUrls) {
-    //   input.push({
-    //     type: "image_url",
-    //     image_url: { url },
-    //   });
-    if (imageUrl) {
-      input.push({
-        type: "image_url",
-        image_url: { url: imageUrl },
-      });
-    }
-
     const response = await fetch("https://api.openai.com/v1/moderations", {
       method: "POST",
       headers: {
@@ -66,20 +48,53 @@ async function moderateText(content, imageUrl = null) {
       },
       body: JSON.stringify({
         model: "omni-moderation-latest",
-        input,
+        input: content,
       }),
     });
 
     const data = await response.json();
     console.log("Moderation results:", JSON.stringify(data, null, 2));
 
-    // Flag if any input (text or image) was flagged
-    const flagged = data.results?.some((r) => r.flagged);
-    return { flagged, details: data.results };
+    const flagged = data.results[0].flagged;
+    return {
+      flagged,
+      details: data.results[0].categories,
+      confidence: data.results[0].category_scores,
+    };
   } catch (err) {
     console.error("Moderation error:", err.message || err);
     return { flagged: false, error: "Moderation failed." };
   }
+}
+
+async function moderateImages(imageUrls) {
+  const client = new ImageAnnotatorClient();
+  const flagged = [];
+  const results = [];
+
+  const levels = [
+    "UNKNOWN",
+    "VERY_UNLIKELY",
+    "UNLIKELY",
+    "POSSIBLE",
+    "LIKELY",
+    "VERY_LIKELY",
+  ];
+
+  for (const url of imageUrls) {
+    const [res] = await client.safeSearchDetection(url);
+    const safeSearch = res.safeSearchAnnotation || {};
+
+    const isFlagged =
+      levels.indexOf(safeSearch.adult) >= 3 ||
+      levels.indexOf(safeSearch.violence) >= 3 ||
+      levels.indexOf(safeSearch.racy) >= 3;
+
+    results.push({ imageUrl: url, safeSearch, isFlagged });
+    if (isFlagged) flagged.push(url);
+  }
+
+  return { flagged, results };
 }
 
 const generateCategoryPrompt = (content, category) => `
@@ -249,18 +264,26 @@ router.post("/submit-article", async (req, res) => {
       authorId,
       topicid,
       topicName,
-      imageUrls = null,
+      imageUrls = [],
     } = req.body;
 
     if (!title || !content || !authorId || !topicid || !topicName) {
       return res.status(400).json({ error: "Missing required fields." });
     }
 
-    const modResult = await moderateText(content, imageUrls);
+    const modResult = await moderateText(content);
     if (modResult?.flagged) {
       return res.status(400).json({
         error: "Content flagged as inappropriate by text moderation.",
         details: modResult,
+      });
+    }
+    const visionResult = await moderateImages(imageUrls);
+    if (visionResult.flagged.length > 0) {
+      return res.status(400).json({
+        error: "One or more images failed moderation.",
+        flagged: visionResult.flagged,
+        details: visionResult.results,
       });
     }
 
@@ -324,18 +347,30 @@ router.post("/moderate", async (req, res) => {
   const { content, imageUrls = [] } = req.body;
   if (!content) return res.status(400).json({ error: "No content provided." });
 
-  const result = await moderateText(content, imageUrls);
+  const result = await moderateText(content);
 
   if (result?.flagged) {
     return res.status(400).json({
-      error: "Content flagged as inappropriate by text/image moderation.",
+      error: "Content flagged as inappropriate.",
       details: result.details,
     });
   }
-  res.status(200).json({ message: "Content passed moderation." });
+
+  const visionResult = await moderateImages(imageUrls);
+
+  if (visionResult.flagged.length > 0) {
+    return res.status(400).json({
+      error: "Images flagged as inappropriate.",
+      flagged: visionResult.flagged,
+      details: visionResult.results,
+    });
+  }
+  return res
+    .status(200)
+    .json({ message: "Content passed all moderation checks." });
 });
 
-router.post("/test-vision", async (req, res) => {
+router.post("/vision", async (req, res) => {
   try {
     const { imageUrls } = req.body;
 
@@ -345,25 +380,16 @@ router.post("/test-vision", async (req, res) => {
         .json({ error: "imageUrls must be a non-empty array." });
     }
 
-    // Initialize the Vision API client
-    const client = new ImageAnnotatorClient();
-    const results = [];
+    const { flagged, results } = await moderateImages(imageUrls);
 
-    // Call SafeSearch Detection
-    for (const url of imageUrls) {
-      const [result] = await client.safeSearchDetection(url);
-      results.push({
-        imageUrl: url,
-        safeSearch: result.safeSearchAnnotation || null,
-      });
-    }
     return res.status(200).json({
-      message: "Google Vision SafeSearch Detection successful ",
+      message: " Google Vision SafeSearch completed",
+      flagged,
       results,
     });
   } catch (err) {
     console.error("Vision API error:", err);
-    return res.status(500).json({ error: "Failed to call Google Vision API." });
+    return res.status(500).json({ error: "Failed to process Vision API." });
   }
 });
 
