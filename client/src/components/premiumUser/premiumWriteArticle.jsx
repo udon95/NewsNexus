@@ -335,6 +335,7 @@ export const PremiumWriteArticle = () => {
       console.log("imgnew", firstImageUrl);
 
       console.log("updatedhtml", updatedHTML);
+      console.log("text?", editor.getText());
 
       // 2. Submit to external API (make sure firstImageUrl is passed!)
       const response = await fetch(
@@ -357,7 +358,9 @@ export const PremiumWriteArticle = () => {
       const result = await response.json();
       console.log("img2", result);
 
-      if (!response.ok) {
+      if (!response.ok || result?.flagged) {
+        console.warn("Inappropriate content", result);
+        alert("Article contains inappropriate content.");
         if (result.feedback) {
           setAiFeedback(result.feedback);
           setAccuracy(result.accuracy || null);
