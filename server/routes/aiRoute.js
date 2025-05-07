@@ -98,7 +98,7 @@ async function moderateImages(imageUrls) {
 }
 
 const deleteImagesFromSupabase = async (imageUrls) => {
-  const bucket = "article-images"; // or your actual bucket name
+  const bucket = "articles-images"; 
   const paths = imageUrls
     .map((url) => {
       const parts = url.split(`${bucket}/`);
