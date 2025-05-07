@@ -2,12 +2,12 @@ const express = require("express");
 const router = express.Router();
 const supabase = require("../supabaseClient");
 
-// GET all rooms by creator
+// 🔹 GET all rooms created by user
 router.get("/:userid", async (req, res) => {
   const { userid } = req.params;
   const { data, error } = await supabase
     .from("rooms")
-    .select("*")
+    .select("roomid, name, description, room_type, created_by, member_limit, member_count")
     .eq("created_by", userid);
 
   if (error) return res.status(500).json({ error: error.message });
@@ -27,7 +27,7 @@ router.post("/", async (req, res) => {
     description,
     room_type,
     created_by,
-    member_limit: member_limit || 20, // fallback to default if undefined
+    member_limit: parseInt(member_limit) || 20,
   };
 
   const { data, error } = await supabase
@@ -52,7 +52,7 @@ router.put("/:roomid", async (req, res) => {
   if (name !== undefined) updateFields.name = name;
   if (description !== undefined) updateFields.description = description;
   if (room_type !== undefined) updateFields.room_type = room_type;
-  if (member_limit !== undefined) updateFields.member_limit = member_limit;
+  if (member_limit !== undefined) updateFields.member_limit = parseInt(member_limit);
 
   const { data, error } = await supabase
     .from("rooms")
@@ -88,8 +88,10 @@ router.post("/invite", async (req, res) => {
     .select("*", { count: "exact", head: true })
     .eq("roomid", roomid);
 
-  if (countError)
+  if (countError) {
+    console.error("Invite count error:", countError.message);
     return res.status(500).json({ error: "Failed to count invites" });
+  }
 
   if (count >= 10) {
     return res.status(400).json({ error: "Invite limit of 10 reached" });
@@ -106,13 +108,11 @@ router.post("/invite", async (req, res) => {
   }
 
   const { error: insertError } = await supabase.from("room_invites").insert([
-    {
-      userid: user.userid,
-      roomid,
-    },
+    { userid: user.userid, roomid },
   ]);
 
   if (insertError) {
+    console.error("Invite insert error:", insertError.message);
     return res.status(500).json({ error: insertError.message });
   }
 
