@@ -358,9 +358,10 @@ export const PremiumWriteArticle = () => {
       if (!response.ok || result?.flagged) {
         console.warn("❌ Moderation failed or flagged:", result);
         alert(result?.error || "Article contains inappropriate content.");
-        // await deleteSupabaseImages(uploadedImageUrls);
+        await deleteSupabaseImages(uploadedImageUrls);
         return;
       }
+      
       if (result.feedback) {
         setAiFeedback(result.feedback);
         setAccuracy(result.accuracy || null);
