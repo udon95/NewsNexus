@@ -26,7 +26,7 @@ import BulletList from "@tiptap/extension-bullet-list";
 import OrderedList from "@tiptap/extension-ordered-list";
 import { Extension } from "@tiptap/core";
 import { Paragraph } from "@tiptap/extension-paragraph";
-import ListItem from '@tiptap/extension-list-item';
+import ListItem from "@tiptap/extension-list-item";
 
 export const FreeWriteArticle = () => {
   const [title, setTitle] = useState("");
@@ -71,32 +71,14 @@ export const FreeWriteArticle = () => {
     addKeyboardShortcuts() {
       return {
         Tab: () => {
-          const { state, commands } = this.editor;
-          const { from } = state.selection;
-          const node =
-            state.doc.resolve(from).nodeAfter || state.doc.resolve(from).parent;
-          const currentStyle = node.attrs?.style || "";
-          const match = currentStyle.match(/text-indent:\s?(\d+)em/);
-          const currentIndent = match ? parseInt(match[1]) : 0;
-          const nextIndent = currentIndent + 2;
-
-          commands.updateAttributes("paragraph", {
-            style: `text-indent: ${nextIndent}em`,
+          this.editor.commands.updateAttributes("paragraph", {
+            style: "text-indent: 2em",
           });
           return true;
         },
         "Shift-Tab": () => {
-          const { state, commands } = this.editor;
-          const { from } = state.selection;
-          const node =
-            state.doc.resolve(from).nodeAfter || state.doc.resolve(from).parent;
-          const currentStyle = node.attrs?.style || "";
-          const match = currentStyle.match(/text-indent:\s?(\d+)em/);
-          const currentIndent = match ? parseInt(match[1]) : 0;
-          const nextIndent = Math.max(0, currentIndent - 2);
-
-          commands.updateAttributes("paragraph", {
-            style: nextIndent === 0 ? null : `text-indent: ${nextIndent}em`,
+          this.editor.commands.updateAttributes("paragraph", {
+            style: "text-indent: 0",
           });
           return true;
         },
