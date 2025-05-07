@@ -376,8 +376,8 @@ const PremManageProfile = () => {
   };
 
   return (
-    <div className="flex justify-center w-full px-4 md:px-5 pt-8 text-black text-2xl font-grotesk font-medium">
-      <div className="w-full md:w-2/3 max-w-[1000px]">
+    <div className="flex flex-col items-center justify-center min-h-screen font-grotesk p-10">
+      <div className="w-full max-w-2xl bg-white p-10 rounded-2xl shadow-lg">
         <h3 className="text-2xl font-grotesk font-bold mb-1">
           Profile Particulars:
         </h3>

@@ -53,7 +53,9 @@ const PremiumApplyExpert = () => {
       .single();
 
     if (existing) {
-      setErrorMessage("You’ve already submitted an application for this topic.");
+      setErrorMessage(
+        "You’ve already submitted an application for this topic."
+      );
       return;
     }
 
@@ -78,7 +80,9 @@ const PremiumApplyExpert = () => {
 
     if (totalArticles < 10 || avgAccuracy < 75) {
       setErrorMessage(
-        `You need at least 10 published articles in this category with ≥75% accuracy. You have ${totalArticles}, avg ${avgAccuracy.toFixed(2)}%.`
+        `You need at least 10 published articles in this category with ≥75% accuracy. You have ${totalArticles}, avg ${avgAccuracy.toFixed(
+          2
+        )}%.`
       );
       return;
     }
@@ -115,7 +119,9 @@ const PremiumApplyExpert = () => {
           className="w-full p-4 mt-2 text-lg text-gray-700 bg-gray-200 rounded-xl outline-none focus:bg-white"
         />
 
-        <label className="block mt-4 text-lg font-semibold">Professional Position:</label>
+        <label className="block mt-4 text-lg font-semibold">
+          Professional Position:
+        </label>
         <input
           type="text"
           placeholder="Your professional position (Industry)"
@@ -124,13 +130,17 @@ const PremiumApplyExpert = () => {
           className="w-full p-4 mt-2 text-lg text-gray-700 bg-gray-200 rounded-xl outline-none focus:bg-white"
         />
 
-        <label className="block mt-4 text-lg font-semibold">Which Category:</label>
+        <label className="block mt-4 text-lg font-semibold">
+          Which Category:
+        </label>
         <select
           value={selectedTopicId}
           onChange={(e) => setSelectedTopicId(e.target.value)}
           className="w-full p-4 mt-2 text-lg bg-gray-200 rounded-xl outline-none focus:bg-white"
         >
-          <option value="" disabled>Select a category</option>
+          <option value="" disabled>
+            Select a category
+          </option>
           {topics.map((topic) => (
             <option key={topic.topicid} value={topic.topicid}>
               {topic.name}
@@ -139,7 +149,9 @@ const PremiumApplyExpert = () => {
         </select>
 
         {/* ✅ NEW CV FIELD */}
-        <label className="block mt-4 text-lg font-semibold">CV / Experience Summary:</label>
+        <label className="block mt-4 text-lg font-semibold">
+          CV / Experience Summary:
+        </label>
         <textarea
           placeholder="Briefly describe your qualifications or experience"
           value={cv}
@@ -147,13 +159,17 @@ const PremiumApplyExpert = () => {
           className="w-full h-40 p-4 mt-2 text-lg text-gray-700 bg-gray-200 rounded-xl outline-none focus:bg-white resize-none"
         />
 
-        <label className="block mt-6 text-lg font-semibold">Requirements:</label>
+        <label className="block mt-6 text-lg font-semibold">
+          Requirements:
+        </label>
         <div className="w-full mt-2 text-gray-800 text-base p-4 bg-gray-100 rounded-xl border whitespace-pre-wrap">
           {staticRequirements}
         </div>
 
         {errorMessage && (
-          <div className="mt-4 text-red-600 text-sm font-semibold">{errorMessage}</div>
+          <div className="mt-4 text-red-600 text-sm font-semibold">
+            {errorMessage}
+          </div>
         )}
 
         <button
