@@ -195,7 +195,7 @@ const ManageRooms = () => {
     "bg-gray-800 text-white px-4 py-2 rounded-md text-base hover:brightness-110";
 
   return (
-    <div className="flex min-h-screen front-grotesk w-full  justify-center">
+    <div className="flex min-h-screen font-grotesk w-full  justify-center">
       <div className="flex-1 p-10 space-y-8 max-w-4xl">
         {/* Public Rooms */}
         <section>
