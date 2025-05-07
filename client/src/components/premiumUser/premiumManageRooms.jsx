@@ -4,6 +4,8 @@ import supabase from "../../api/supabaseClient";
 const ManageRooms = () => {
   const [publicRooms, setPublicRooms] = useState([]);
   const [privateRooms, setPrivateRooms] = useState([]);
+  const [joinedPublicRooms, setJoinedPublicRooms] = useState([]);
+  const [joinedPrivateRooms, setJoinedPrivateRooms] = useState([]);
   const [invites, setInvites] = useState([]);
   const [newPublicRoom, setNewPublicRoom] = useState({
     name: "",
@@ -34,6 +36,19 @@ const ManageRooms = () => {
     setPrivateRooms(data.filter((room) => room.room_type === "Private"));
   };
 
+  const fetchJoinedRooms = async () => {
+    const res = await fetch(
+      `https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/rooms/joined/${userId}`
+    );
+    const data = await res.json();
+  
+    const publicJoined = data.filter((room) => room.room_type === "Public");
+    const privateJoined = data.filter((room) => room.room_type === "Private");
+  
+    setJoinedPublicRooms(publicJoined);
+    setJoinedPrivateRooms(privateJoined);
+  };    
+
   const fetchInvites = async () => {
     const { data, error } = await supabase
       .from("room_invites")
@@ -51,6 +66,7 @@ const ManageRooms = () => {
 
   useEffect(() => {
     fetchRooms();
+    fetchJoinedRooms();
     fetchInvites();
   }, [userId]);
 
@@ -164,6 +180,19 @@ const ManageRooms = () => {
     fetchRooms();
   };
 
+  const handleExitRoom = async (roomid) => {
+    await fetch(
+      "https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/rooms/exit",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userid: userId, roomid }),
+      }
+    );
+    alert("You exited the room");
+    fetchJoinedRooms(); // refresh
+  };  
+
   const handleAcceptInvite = async (roomid) => {
     await fetch(
       "https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/rooms/accept",
@@ -231,32 +260,45 @@ const ManageRooms = () => {
             </button>
           </div>
           <div className="bg-white p-4 rounded-xl shadow space-y-2">
-            {publicRooms.map((room, index) => (
+            {[...publicRooms, ...joinedPublicRooms].map((room, index) => (
               <div key={room.roomid} className={rowStyle}>
                 <span>
                   {index + 1}. {room.name}
                 </span>
                 <div className="flex gap-2">
-                  <span className="mt-2">{room.member_count} members</span>
-                  <button
-                    onClick={() =>
-                      handleUpdateRoom(
-                        room.roomid,
-                        room.name,
-                        room.description,
-                        room.room_type
-                      )
-                    }
-                    className={buttonClass}
-                  >
-                    Update
-                  </button>
-                  <button
-                    onClick={() => handleDeleteRoom(room.roomid)}
-                    className={buttonClass}
-                  >
-                    Delete
-                  </button>
+                  {room.created_by === userId && (
+                    <span className="mt-2">{room.member_count} members</span>
+                  )}
+                  {room.created_by === userId ? (
+                    <>
+                      <button
+                        onClick={() =>
+                          handleUpdateRoom(
+                            room.roomid,
+                            room.name,
+                            room.description,
+                            room.room_type
+                          )
+                        }
+                        className={buttonClass}
+                      >
+                        Update
+                      </button>
+                      <button
+                        onClick={() => handleDeleteRoom(room.roomid)}
+                        className={buttonClass}
+                      >
+                        Delete
+                      </button>
+                    </>
+                  ) : (
+                    <button
+                      onClick={() => handleExitRoom(room.roomid)}
+                      className={buttonClass}
+                    >
+                      Exit
+                    </button>
+                  )}
                 </div>
               </div>
             ))}
@@ -308,32 +350,45 @@ const ManageRooms = () => {
             </button>
           </div>
           <div className="bg-white p-4 rounded-xl shadow space-y-2">
-            {privateRooms.map((room, index) => (
+            {[...privateRooms, ...joinedPrivateRooms].map((room, index) => (
               <div key={room.roomid} className={rowStyle}>
                 <span>
                   {index + 1}. {room.name}
                 </span>
                 <div className="flex gap-2">
-                  <span className="mt-2">{room.member_count} members</span>
-                  <button
-                    onClick={() =>
-                      handleUpdateRoom(
-                        room.roomid,
-                        room.name,
-                        room.description,
-                        room.room_type
-                      )
-                    }
-                    className={buttonClass}
-                  >
-                    Update
-                  </button>
-                  <button
-                    onClick={() => handleDeleteRoom(room.roomid)}
-                    className={buttonClass}
-                  >
-                    Delete
-                  </button>
+                  {room.created_by === userId && (
+                    <span className="mt-2">{room.member_count} members</span>
+                  )}
+                  {room.created_by === userId ? (
+                    <>
+                      <button
+                        onClick={() =>
+                          handleUpdateRoom(
+                            room.roomid,
+                            room.name,
+                            room.description,
+                            room.room_type
+                          )
+                        }
+                        className={buttonClass}
+                      >
+                        Update
+                      </button>
+                      <button
+                        onClick={() => handleDeleteRoom(room.roomid)}
+                        className={buttonClass}
+                      >
+                        Delete
+                      </button>
+                    </>
+                  ) : (
+                    <button
+                      onClick={() => handleExitRoom(room.roomid)}
+                      className={buttonClass}
+                    >
+                      Exit
+                    </button>
+                  )}
                 </div>
               </div>
             ))}
