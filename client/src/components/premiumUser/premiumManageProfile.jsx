@@ -378,7 +378,7 @@ const PremManageProfile = () => {
   return (
     <div className="flex justify-center w-full px-4 md:px-5 pt-8 text-black text-2xl font-grotesk font-medium">
       <div className="w-full max-w-4xl font-grotesk">
-        <h1 className="text-3xl font-grotesk font-bold mb-1">Profile Particulars:</h1>
+        <h1 className="text-3xl font-bold mb-2">Profile Particulars:</h1>
         <div className="p-4 bg-white shadow-md rounded-lg">
           <div className="mb-1">Name:</div>
           <input
@@ -451,7 +451,7 @@ const PremManageProfile = () => {
         </div>
 
         {/* Password Change */}
-        <h1 className="text-3xl font-bold font-grotesk mb-1 mt-6">
+        <h1 className="text-3xl font-bold mb-2 mt-6">
           Manage Password:
         </h1>
         <div className="p-4 bg-white shadow-md rounded-lg ">
@@ -491,7 +491,7 @@ const PremManageProfile = () => {
         </div>
 
         {/* Topic Interests */}
-        <h1 className="text-3xl font-bold font-grotesk mb-1 mt-6">
+        <h1 className="text-3xl font-bold mb-2 mt-6">
           Interest Selection (Max 6):
         </h1>
         <div className="p-4 bg-white shadow-md rounded-lg ">

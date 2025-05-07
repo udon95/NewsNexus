@@ -80,7 +80,7 @@ export const PremiumSubmitTest = () => {
     <div className="w-full min-h-screen bg-indigo-50 text-black font-grotesk flex justify-center">
       <main className="w-full max-w-4xl p-10 max-md:flex-col gap-6">
         <div className="flex flex-col w-full">
-          <h1 className="text-3xl font-bold font-grotesk mb-1">Share Your Experience :</h1>
+          <h1 className="text-3xl font-bold mb-2">Share Your Experience :</h1>
 
           <ul className="mb-4 relative">
             {feedbackQuestions.map((question) => (
