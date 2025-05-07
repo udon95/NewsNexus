@@ -26,7 +26,7 @@ export const FreeSidebar = () => {
         ></button>
 
         <div className="flex flex-col gap-4 mt-2 text-lg font-grotesk">
-        <Link to="/freeDashboard/manageArticles" className="font-bold" onClick={() => setIsOpen(false)}>
+        <Link to="/freeDashboard/manageArticles" className="tracking-wide" onClick={() => setIsOpen(false)}>
             Manage My Articles &gt;
           </Link>
           <Link to="/freeDashboard/writeArticle" className="tracking-wide" onClick={() => setIsOpen(false)}>

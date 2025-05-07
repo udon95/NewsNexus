@@ -377,11 +377,9 @@ const PremManageProfile = () => {
 
   return (
     <div className="flex justify-center w-full px-4 md:px-5 pt-8 text-black text-2xl font-grotesk font-medium">
-      <div className="w-full md:w-2/3 max-w-[1000px]">
-        <h3 className="text-2xl font-grotesk font-bold mb-1">
-          Profile Particulars:
-        </h3>
-        <div className="p-4 bg-white shadow-md rounded-lg font-grotesk">
+      <div className="w-full max-w-4xl font-grotesk">
+        <h1 className="text-3xl font-bold mb-2">Profile Particulars:</h1>
+        <div className="p-4 bg-white shadow-md rounded-lg">
           <div className="mb-1">Name:</div>
           <input
             type="text"
@@ -453,9 +451,9 @@ const PremManageProfile = () => {
         </div>
 
         {/* Password Change */}
-        <h3 className="text-2xl font-bold font-grotesk mb-1 mt-6">
+        <h1 className="text-3xl font-bold mb-2 mt-6">
           Manage Password:
-        </h3>
+        </h1>
         <div className="p-4 bg-white shadow-md rounded-lg ">
           <PasswordInput
             name="password"
@@ -493,9 +491,9 @@ const PremManageProfile = () => {
         </div>
 
         {/* Topic Interests */}
-        <h3 className="text-2xl font-bold font-grotesk mb-1 mt-6">
+        <h1 className="text-3xl font-bold mb-2 mt-6">
           Interest Selection (Max 6):
-        </h3>
+        </h1>
         <div className="p-4 bg-white shadow-md rounded-lg ">
           {Array.from({ length: 6 }).map((_, index) => (
             <div key={index} className="flex flex-row mb-4 items-center">

@@ -22,6 +22,34 @@ const ArticleList = ({
   const visibleArticles = showAll ? articles : articles.slice(0, 3);
 
   useEffect(() => {
+    const deleteExpiredDrafts = async () => {
+      const now = new Date();
+  
+      for (const article of articles) {
+        if (!isDraft) continue;
+  
+        const createdAt = isRoom
+          ? new Date(article.created_at)
+          : new Date(article.time);
+  
+        const expiryDate = new Date(createdAt);
+        expiryDate.setDate(expiryDate.getDate() + 7);
+  
+        if (now >= expiryDate) {
+          const id = isRoom ? article.postid : article.articleid;
+          if (isRoom) {
+            await handleDeleteRoomArticle(id);
+          } else {
+            await handleDeleteArticle(id);
+          }
+        }
+      }
+    };
+  
+    deleteExpiredDrafts();
+  }, [articles, isDraft, isRoom]);
+
+  useEffect(() => {
     const fetchVotes = async () => {
       if (!isDraft && !isRoom && articles.length > 0) {
         const articleIds = articles.map((a) => a.articleid);
@@ -204,7 +232,7 @@ const ArticleList = ({
 
   return (
     <div className="mt-6 font-grotesk w-full pb-4">
-      <h2 className="text-2xl font-bold font-grotesk mb-2 w-3/3 md:w-2/3">
+      <h2 className="text-3xl font-bold mb-2 w-3/3 md:w-2/3">
         {title}
       </h2>
       {articles.length === 0 ? (
@@ -220,7 +248,16 @@ const ArticleList = ({
               return (
                 <li
                   key={index}
-                  onClick={() => onArticleClick(article)} // Calls parent function when clicked
+                  // DEVI MADE CHANGES HERE SO THAT WHEN ARTICLE CARD CLICKED LEAD TO ARTICLE...ONLY IF EDIT CLICKED FROM 3DOT LEAD TO EDIT PAGE
+                  onClick={() => {
+                    if (!isDraft) {
+                      const route = isRoom
+                        ? `/room/${article.roomid}`
+                        : `/article/${article.title}`;
+                      navigate(route);
+                    }
+                  }}
+                  
                   className="w-full h-60 border border-black rounded-2xl shadow-md cursor-pointer hover:shadow-lg transition bg-white flex flex-col"
                 >
                   {/* Article Information */}

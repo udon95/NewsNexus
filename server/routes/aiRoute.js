@@ -2,13 +2,16 @@ const express = require("express");
 const fetch = require("node-fetch");
 const router = express.Router();
 const { createClient } = require("@supabase/supabase-js");
+const { ImageAnnotatorClient } = require("@google-cloud/vision");
 
 router.use(express.json());
+const { JSDOM } = require("jsdom");
 
 const supabase = createClient(
   process.env.SUPABASE_URL,
   process.env.SUPABASE_ANON_KEY
 );
+
 const OPENAI_KEY = process.env.OPENAI_API_KEY;
 const PERPLEXITY_KEY = process.env.PERPLEXITY_API_KEY;
 
@@ -37,21 +40,13 @@ const PERPLEXITY_KEY = process.env.PERPLEXITY_API_KEY;
 //   }
 // }
 
-async function moderateText(content, imageUrls = null) {
+function extractTextFromHTML(html) {
+  const dom = new JSDOM(html);
+  return dom.window.document.body.textContent || "";
+}
+
+async function moderateText(content) {
   try {
-    const input = [];
-
-    if (content) {
-      input.push({ type: "text", text: content });
-    }
-
-    for (const url of imageUrls) {
-      input.push({
-        type: "image_url",
-        image_url: { url },
-      });
-    }
-
     const response = await fetch("https://api.openai.com/v1/moderations", {
       method: "POST",
       headers: {
@@ -60,21 +55,74 @@ async function moderateText(content, imageUrls = null) {
       },
       body: JSON.stringify({
         model: "omni-moderation-latest",
-        input,
+        input: content,
       }),
     });
 
     const data = await response.json();
     console.log("Moderation results:", JSON.stringify(data, null, 2));
 
-    // Flag if any input (text or image) was flagged
-    const flagged = data.results?.some((r) => r.flagged);
-    return { flagged, details: data.results };
+    const flagged = data.results[0].flagged;
+    return {
+      flagged,
+      details: data.results[0].categories,
+      confidence: data.results[0].category_scores,
+    };
   } catch (err) {
     console.error("Moderation error:", err.message || err);
     return { flagged: false, error: "Moderation failed." };
   }
 }
+
+async function moderateImages(imageUrls) {
+  const client = new ImageAnnotatorClient();
+  const flagged = [];
+  const results = [];
+
+  const levels = [
+    "UNKNOWN",
+    "VERY_UNLIKELY",
+    "UNLIKELY",
+    "POSSIBLE",
+    "LIKELY",
+    "VERY_LIKELY",
+  ];
+
+  for (const url of imageUrls) {
+    const [res] = await client.safeSearchDetection(url);
+    const safeSearch = res.safeSearchAnnotation || {};
+
+    const isFlagged =
+      levels.indexOf(safeSearch.adult) >= 3 ||
+      levels.indexOf(safeSearch.violence) >= 3 ||
+      levels.indexOf(safeSearch.racy) >= 3;
+
+    results.push({ imageUrl: url, safeSearch, isFlagged });
+    if (isFlagged) flagged.push(url);
+  }
+
+  return { flagged, results };
+}
+
+const deleteImagesFromSupabase = async (imageUrls) => {
+  const bucket = "articles-images";
+  const paths = imageUrls
+    .map((url) => {
+      const parts = url.split(`${bucket}/`);
+      return parts[1]; // path after the bucket
+    })
+    .filter(Boolean);
+
+  if (paths.length > 0) {
+    const { error } = await supabase.storage.from(bucket).remove(paths);
+    if (error) {
+      console.error(
+        "Failed to delete images after moderation block:",
+        error.message
+      );
+    }
+  }
+};
 
 const generateCategoryPrompt = (content, category) => `
 You are a category validation assistant.
@@ -239,28 +287,42 @@ router.post("/submit-article", async (req, res) => {
   try {
     const {
       title,
-      content,
+      content: updatedHTML,
       authorId,
       topicid,
       topicName,
       imageUrls = [],
     } = req.body;
 
-    if (!title || !content || !authorId || !topicid || !topicName) {
+    const strippedText = extractTextFromHTML(updatedHTML);
+
+    if (!title || !strippedText || !authorId || !topicid || !topicName) {
       return res.status(400).json({ error: "Missing required fields." });
     }
 
-    const modResult = await moderateText(content, imageUrls);
+    const modResult = await moderateText(strippedText);
     if (modResult?.flagged) {
+      await deleteImagesFromSupabase(imageUrls);
+
       return res.status(400).json({
         error: "Content flagged as inappropriate by text moderation.",
         details: modResult,
       });
     }
+    const visionResult = await moderateImages(imageUrls);
+    if (visionResult.flagged.length > 0) {
+      await deleteImagesFromSupabase(imageUrls);
+
+      return res.status(400).json({
+        error: "One or more images failed moderation.",
+        flagged: visionResult.flagged,
+        details: visionResult.results,
+      });
+    }
 
     let factResult;
     try {
-      factResult = await factCheck(content, topicName);
+      factResult = await factCheck(strippedText, topicName);
     } catch (err) {
       console.error("Fact-check error:", err);
 
@@ -279,7 +341,7 @@ router.post("/submit-article", async (req, res) => {
       .insert([
         {
           title,
-          text: content,
+          text: updatedHTML,
           userid: authorId,
           topicid,
           accuracy_score: factResult.accuracy,
@@ -292,14 +354,6 @@ router.post("/submit-article", async (req, res) => {
     if (error) {
       console.error("General insert error:", error);
       return res.status(500).json({ error: error.message });
-    }
-    for (const url of imageUrls) {
-      await supabase.from("article_images").insert([
-        {
-          articleid: inserted.articleid,
-          image_url: url,
-        },
-      ]);
     }
 
     return res.json({
@@ -318,15 +372,54 @@ router.post("/moderate", async (req, res) => {
   const { content, imageUrls = [] } = req.body;
   if (!content) return res.status(400).json({ error: "No content provided." });
 
-  const result = await moderateText(content, imageUrls);
+  const result = await moderateText(content);
 
   if (result?.flagged) {
+    await deleteImagesFromSupabase(imageUrls);
+
     return res.status(400).json({
-      error: "Content flagged as inappropriate by text/image moderation.",
+      error: "Content flagged as inappropriate.",
       details: result.details,
     });
   }
-  res.status(200).json({ message: "Content passed moderation." });
+
+  const visionResult = await moderateImages(imageUrls);
+
+  if (visionResult.flagged.length > 0) {
+    await deleteImagesFromSupabase(imageUrls);
+
+    return res.status(400).json({
+      error: "Images flagged as inappropriate.",
+      flagged: visionResult.flagged,
+      details: visionResult.results,
+    });
+  }
+  return res
+    .status(200)
+    .json({ message: "Content passed all moderation checks." });
+});
+
+router.post("/vision", async (req, res) => {
+  try {
+    const { imageUrls } = req.body;
+
+    if (!Array.isArray(imageUrls) || imageUrls.length === 0) {
+      return res
+        .status(400)
+        .json({ error: "imageUrls must be a non-empty array." });
+    }
+
+    const { flagged, results } = await moderateImages(imageUrls);
+
+    return res.status(200).json({
+      message: " Google Vision SafeSearch completed",
+      flagged,
+      results,
+    });
+  } catch (err) {
+    console.error("Vision API error:", err);
+    return res.status(500).json({ error: "Failed to process Vision API." });
+  }
 });
 
 module.exports = router;

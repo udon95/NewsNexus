@@ -28,6 +28,7 @@ import OrderedList from "@tiptap/extension-ordered-list";
 import { Extension } from "@tiptap/core";
 import { Paragraph } from "@tiptap/extension-paragraph";
 import { useSearchParams } from "react-router-dom";
+import ListItem from "@tiptap/extension-list-item";
 
 export const PremiumWriteArticle = () => {
   const [title, setTitle] = useState("");
@@ -51,6 +52,9 @@ export const PremiumWriteArticle = () => {
   const [aiFeedback, setAiFeedback] = useState("");
   const [accuracy, setAccuracy] = useState(null);
   const [showDraftNotification, setShowDraftNotification] = useState(false);
+  const [showTopicApplication, setShowTopicApplication] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadAction, setUploadAction] = useState(""); // "post" or "draft"
 
   const [searchParams] = useSearchParams();
   const preSelectedType = searchParams.get("type"); // e.g. "room"
@@ -171,9 +175,27 @@ export const PremiumWriteArticle = () => {
           const nextIndent = Math.max(0, currentIndent - 2);
 
           commands.updateAttributes("paragraph", {
-            style: nextIndent === 0 ? null : `text-indent: ${nextIndent}em`,
+            style: nextIndent === 0 ? "" : `text-indent: ${nextIndent}em`,
           });
           return true;
+        },
+        Backspace: () => {
+          const { state, commands } = this.editor;
+          const { from } = state.selection;
+          const node =
+            state.doc.resolve(from).nodeAfter || state.doc.resolve(from).parent;
+
+          const isEmpty = node.content.size === 0;
+          const currentStyle = node.attrs?.style || "";
+
+          if (isEmpty && currentStyle.includes("text-indent")) {
+            commands.updateAttributes("paragraph", {
+              style: "",
+            });
+            return true;
+          }
+
+          return false;
         },
       };
     },
@@ -185,11 +207,12 @@ export const PremiumWriteArticle = () => {
       CustomParagraph,
       BulletList,
       OrderedList,
+      ListItem,
       UnderlineExtension,
       TiptapLink,
       Highlight,
       Image,
-      IndentExtension, //INDENT
+      // IndentExtension, //INDENT
       Heading.configure({ levels: [1, 2, 3] }),
       TextAlign.configure({ types: ["heading", "paragraph"] }),
       Placeholder.configure({ placeholder: "Start writing your article..." }),
@@ -200,6 +223,23 @@ export const PremiumWriteArticle = () => {
       }),
     ],
     content: "",
+    editorProps: {
+      handlePaste(view, event, slice) {
+        const items = event.clipboardData?.items || [];
+        const hasImage = Array.from(items).some((item) =>
+          item.type.startsWith("image")
+        );
+
+        if (hasImage) {
+          alert(
+            "Pasting images is not allowed. Please use the Upload Image button."
+          );
+          return true;
+        }
+
+        return false;
+      },
+    },
     onUpdate: ({ editor }) => {
       const html = editor.getHTML();
       const text = editor.getText();
@@ -252,25 +292,58 @@ export const PremiumWriteArticle = () => {
     }
   }, [postType]);
 
+  // useEffect(() => {
+  //   if (!editor) return;
+
+  //   const handlePaste = (event) => {
+  //     const clipboardItems = event.clipboardData?.items;
+  //     if (!clipboardItems) return;
+
+  //     for (const item of clipboardItems) {
+  //       if (item.type.startsWith("image/")) {
+  //         event.preventDefault(); // Block image paste
+  //         alert("Pasting images is disabled. Please use the Upload button.");
+  //         return;
+  //       }
+  //     }
+  //   };
+
+  //   const editorElement = editor?.view?.dom;
+  //   if (editorElement) {
+  //     editorElement.addEventListener("paste", handlePaste);
+  //   }
+
+  //   return () => {
+  //     if (editorElement) {
+  //       editorElement.removeEventListener("paste", handlePaste);
+  //     }
+  //   };
+  // }, [editor]);
+
   const MAX_WORDS = postType === "Room" ? 400 : 1000;
 
   const handlePostArticle = async () => {
-    // Retrieve user from localStorage
+    setUploadAction("post");
+
+    if (isUploading) return;
+    setIsUploading(true);
     const storedUser = localStorage.getItem("userProfile");
     if (!storedUser) {
       alert("User not authenticated. Cannot upload.");
+      setIsUploading(false);
+      setUploadAction(""); // DEVI ADDED THIS
       return;
     }
 
     const parsedUser = JSON.parse(storedUser);
-    const session = parsedUser?.user; // Assuming 'user' is the session data in your stored object
-
+    const session = parsedUser?.user;
     if (!session) {
       alert("User not authenticated. Cannot upload.");
+      setIsUploading(false);
+      setUploadAction(""); // DEVI ADDED THIS
       return;
     }
 
-    // Proceed if all necessary fields are filled
     if (
       !title ||
       !articleContent ||
@@ -278,40 +351,22 @@ export const PremiumWriteArticle = () => {
       (postType === "Room" && !selectedRoom)
     ) {
       alert("Please fill in all required fields.");
+      setIsUploading(false);
+      setUploadAction(""); // DEVI ADDED THIS
       return;
     }
 
-    let updatedHTML = articleContent;
-    if (postType === "Room") {
-      updatedHTML = updatedHTML.replace(
-        /<img[^>]*src=["']blob:[^"']+["'][^>]*>/g,
-        ""
-      );
-    }
     const bucket =
       postType === "Room" ? "room-article-images" : "articles-images";
     let firstImageUrl = null;
-
-    const { data: sessionData, error: sessionError } =
-      await supabase.auth.getSession();
-
-    const articleData = {
-      title,
-      content: updatedHTML,
-      created_by: session.userid, // Use session ID for the user
-      created_at: new Date().toISOString(),
-    };
-
+    let updatedHTML = articleContent;
     let uploadedImageUrls = [];
 
     const topicName = topicOptions.find((t) => t.topicid === topics)?.name;
 
-    // CASE 1: General Article (always factual)
+    // ---------------------- GENERAL ARTICLE ----------------------
     if (postType === "General") {
-      const uploadedImageUrls = [];
-      const uploadedPaths = [];
-
-      // Step 1: Upload pending images to Supabase and collect public URLs
+      // 1. Upload pendingImages and update HTML
       for (const img of pendingImages) {
         const file = img.file;
         if (!file?.name) continue;
@@ -323,26 +378,49 @@ export const PremiumWriteArticle = () => {
         const filePath = `user-${session.userid}/${fileName}`;
 
         const { error: uploadError } = await supabase.storage
-          .from("articles-images")
+          .from(bucket)
           .upload(filePath, file);
 
         if (uploadError) {
           console.error("Image upload failed:", uploadError);
-          continue;
+          alert("Image upload failed.");
+          setIsUploading(false);
+          setUploadAction(""); // DEVI ADDED THIS
+          return;
         }
 
         const { data: urlData } = supabase.storage
-          .from("articles-images")
+          .from(bucket)
           .getPublicUrl(filePath);
+        const publicUrl = urlData?.publicUrl;
 
-        if (urlData?.publicUrl) {
-          uploadedImageUrls.push(urlData.publicUrl);
-          uploadedPaths.push(filePath); // For cleanup if flagged
+        if (publicUrl) {
+          if (!firstImageUrl) firstImageUrl = publicUrl;
+          console.log("img1", firstImageUrl);
+          updatedHTML = updatedHTML.replaceAll(img.previewUrl, publicUrl);
+          uploadedImageUrls.push(publicUrl);
         }
       }
 
-      // Step 2: Submit article to backend (moderation happens there)
+      console.log(firstImageUrl);
+      console.log("imgnew", firstImageUrl);
+
+      // 2. Submit to external API (make sure firstImageUrl is passed!)
       const response = await fetch(
+        // "https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/api/submit-article",
+        // {
+        //   method: "POST",
+        //   headers: { "Content-Type": "application/json" },
+        //   body: JSON.stringify({
+        //     title,
+        //     content: updatedHTML,
+        //     type: "factual",
+        //     authorId: session.userid,
+        //     topicid: topics,
+        //     topicName,
+        //     imagepath: firstImageUrl, // ✅ Critical part
+        //   }),
+        // }
         "https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/api/submit-article",
         {
           method: "POST",
@@ -354,18 +432,19 @@ export const PremiumWriteArticle = () => {
             authorId: session.userid,
             topicid: topics,
             topicName,
-            imageUrls: uploadedImageUrls,
+            // imagepath: firstImageUrl, // Optional: keep for backward compatibility
+            imageUrls: uploadedImageUrls, // NEW: sends array of image URLs
           }),
         }
       );
 
       const result = await response.json();
+      console.log("img2", result);
 
       if (!response.ok) {
-        // Step 3: Cleanup uploaded Supabase images if moderation fails
-        if (uploadedPaths.length > 0) {
-          await supabase.storage.from("articles-images").remove(uploadedPaths);
-        }
+        // if (result.error) {
+        //   alert(result.error); // Display moderation failure
+        // }
 
         if (result.feedback) {
           setAiFeedback(result.feedback);
@@ -376,7 +455,37 @@ export const PremiumWriteArticle = () => {
         } else {
           alert(result.error || "Submission failed.");
         }
+        setIsUploading(false);
+        setUploadAction(""); // DEVI ADDED THIS
         return;
+      }
+
+      const articleid = result.article?.articleid;
+      console.log("result", result.article);
+
+      if (articleid && firstImageUrl) {
+        // 3. Update imagepath in the `articles` table after successful submission
+        const { data, error } = await supabase
+          .from("articles")
+          .update({ imagepath: firstImageUrl })
+          .eq("articleid", articleid);
+
+        if (error) {
+          console.error("Error updating imagepath:", error);
+          alert("Failed to update image path.");
+          setIsUploading(false);
+          setUploadAction(""); // DEVI ADDED THIS
+          return;
+        }
+
+        console.log("Image path updated for article:", articleid);
+      }
+
+      for (const url of uploadedImageUrls) {
+        await supabase
+          .from("article_images")
+          .insert([{ articleid, image_url: url }]);
+        console.log("img3", url);
       }
 
       setAccuracy(result.accuracy);
@@ -384,118 +493,150 @@ export const PremiumWriteArticle = () => {
       alert(`Article posted successfully. Accuracy Score: ${result.accuracy}%`);
       handleClearInputs();
       return;
-    } else {
-      articleData.roomid = selectedRoom;
+    }
 
-      if (postType === "Room") {
-        const uploadedImageUrls = [];
-        const uploadedPaths = [];
+    // ---------------------- ROOM ARTICLE ----------------------
+    let uploadedRoomImageUrls = [];
 
-        // Step 1: Upload images to Supabase (but don't insert to DB yet)
-        for (const img of pendingImages) {
-          const file = img.file;
-          if (!file?.name) continue;
+    for (const img of pendingImages) {
+      const imageName = `${Date.now()}-${img.file.name}`;
+      const { data: storageResult, error: uploadError } = await supabase.storage
+        .from("room-article-images")
+        .upload(`user-${userId}/${imageName}`, img.file);
 
-          const fileExt = file.name.split(".").pop();
-          const fileName = `${Date.now()}-${Math.random()
-            .toString(36)
-            .substring(2)}.${fileExt}`;
-          const filePath = `user-${session.userid}/${fileName}`;
+      if (uploadError) {
+        console.error("Error uploading image:", uploadError);
+        alert("Image upload failed.");
+        return;
+      }
 
-          const { error: uploadError } = await supabase.storage
-            .from("room-article-images")
-            .upload(filePath, file);
+      const { data: publicUrlData } = supabase.storage
+        .from("room-article-images")
+        .getPublicUrl(`user-${userId}/${imageName}`);
 
-          if (uploadError) {
-            console.error("Room image upload failed:", uploadError);
-            continue;
-          }
+      uploadedRoomImageUrls.push(publicUrlData.publicUrl);
+    }
 
-          const { data: urlData } = supabase.storage
-            .from("room-article-images")
-            .getPublicUrl(filePath);
+    // 2. Replace blob URLs in HTML with public URLs
+    let i = 0;
+    updatedHTML = updatedHTML.replace(
+      /<img[^>]*src=["']blob:[^"']+["'][^>]*>/g,
+      () => `<img src="${uploadedRoomImageUrls[i++]}" />`
+    );
 
-          const publicUrl = urlData?.publicUrl;
-          if (publicUrl) {
-            uploadedImageUrls.push(publicUrl);
-            uploadedPaths.push(filePath); // for potential cleanup
-          }
+    console.log("room images", uploadedRoomImageUrls);
+
+    const articleData = {
+      title,
+      content: updatedHTML,
+      roomid: selectedRoom,
+      userid: session.userid,
+      created_at: new Date().toISOString(),
+      status: "Published",
+    };
+
+    try {
+      const response = await fetch(
+        "https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/api/moderate",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ content: articleData.content, imageUrls:uploadedImageUrls }),
+        }
+      );
+
+      const result = await response.json();
+      if (result.error) {
+        alert(`Article flagged: ${result.error}`);
+        setIsUploading(false);
+        setUploadAction(""); // DEVI ADDED THIS
+        return;
+      }
+    } catch (err) {
+      alert("Failed to moderate content.");
+      console.error(err);
+      setIsUploading(false);
+      setUploadAction(""); // DEVI ADDED THIS
+      return;
+    }
+
+    const { data, error } = await supabase
+      .from("room_articles")
+      .insert([articleData])
+      .select("postid");
+
+    if (error) {
+      alert("Failed to post room article.");
+      setIsUploading(false);
+      setUploadAction(""); // DEVI ADDED THIS
+      return;
+    }
+
+    const postid = data?.[0]?.postid;
+    if (postid) {
+      for (const img of pendingImages) {
+        const file = img.file;
+        if (!file?.name) continue;
+
+        const fileExt = file.name.split(".").pop();
+        const fileName = `${Date.now()}-${Math.random()
+          .toString(36)
+          .substring(2)}.${fileExt}`;
+        const filePath = `user-${session.userid}/${fileName}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from("room-article-images")
+          .upload(filePath, file);
+
+        if (uploadError) {
+          console.error("Room image upload failed:", uploadError);
+          continue;
         }
 
-        // Step 2: Run moderation on content + image URLs
-        const response = await fetch(
-          "https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/api/moderate",
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              content: articleData.content,
-              imageUrls: uploadedImageUrls,
-            }),
-          }
-        );
+        const { data: urlData } = supabase.storage
+          .from("room-article-images")
+          .getPublicUrl(filePath);
 
-        const result = await response.json();
-        if (!response.ok) {
-          // Step 3: Clean up flagged images
-          await supabase.storage
-            .from("room-article-images")
-            .remove(uploadedPaths);
-
-          alert(`Article flagged: ${result.error}`);
-          return;
+        const publicUrl = urlData?.publicUrl;
+        if (publicUrl) {
+          await supabase
+            .from("room_article_images")
+            .insert([{ postid, image_url: publicUrl }]);
         }
-
-        // Step 4: Insert article into room_articles table
-        const { data: inserted, error } = await supabase
-          .from("room_articles")
-          .insert([
-            {
-              title,
-              content: updatedHTML,
-              roomid: selectedRoom,
-              authorid: session.userid,
-              type: articleType,
-              status: "Posted",
-            },
-          ])
-          .select()
-          .single();
-
-        if (error) {
-          console.error("Insert error:", error);
-          alert("Failed to post article.");
-          return;
-        }
-
-        const postid = inserted.postid;
-
-        // Step 5: Save uploaded image URLs to room_article_images table
-        for (const url of uploadedImageUrls) {
-          await supabase.from("room_article_images").insert([
-            {
-              postid,
-              image_url: url,
-            },
-          ]);
-        }
-
-        alert("Room article posted!");
-        handleClearInputs();
-        navigate("/premiumDashboard/manage-articles");
       }
     }
+
+    pendingImages.forEach((img) => URL.revokeObjectURL(img.previewUrl));
+    setPendingImages([]);
+    alert("Article posted successfully.");
+    handleClearInputs();
+    setIsUploading(false);
+    setUploadAction(""); // DEVI ADDED THIS
   };
 
   const handleSaveDraft = async () => {
+    setUploadAction("draft");
+
+    if (isUploading) return;
+    setIsUploading(true);
     const storedUser = localStorage.getItem("userProfile");
-    if (!storedUser) return alert("User not authenticated. Cannot save draft.");
+    // if (!storedUser) return alert("User not authenticated. Cannot save draft.");
+    if (!storedUser) {
+      alert("User not authenticated. Cannot save draft.");
+      setIsUploading(false);
+      setUploadAction(""); // DEVI ADDED THIS
+      return;
+    }
 
     const parsedUser = JSON.parse(storedUser);
     const session = parsedUser?.user;
-    if (!session) return alert("User not authenticated.");
+    // if (!session) return alert("User not authenticated.");
+    if (!session) {
+      alert("User not authenticated.");
+      setIsUploading(false);
+      setUploadAction(""); // DEVI ADDED THIS
+      return;
+    }
 
     if (
       !title ||
@@ -504,47 +645,182 @@ export const PremiumWriteArticle = () => {
       (postType === "Room" && !selectedRoom)
     ) {
       alert("Please fill in all required fields.");
+      setIsUploading(false);
+      setUploadAction(""); // DEVI ADDED THIS
       return;
     }
 
     let updatedHTML = articleContent;
-    if (postType === "Room") {
+    const bucket =
+      postType === "Room" ? "room-article-images" : "articles-images";
+    let firstImageUrl = null;
+    let uploadedImageUrls = [];
+
+    // if (postType === "General") {
+    //   // Upload images and replace blob URLs
+    //   for (const img of pendingImages) {
+    //     const file = img.file;
+    //     if (!file?.name) continue;
+
+    //     const fileExt = file.name.split('.').pop();
+    //     const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+    //     const filePath = `user-${session.userid}/${fileName}`;
+
+    //     const { error: uploadError } = await supabase.storage
+    //       .from(bucket)
+    //       .upload(filePath, file);
+
+    //     if (uploadError) {
+    //       console.error("Image upload failed:", uploadError);
+    //       alert("Image upload failed.");
+    //       setIsUploading(false);
+    //       setUploadAction("");  // DEVI ADDED THIS
+    //       return;
+    //     }
+
+    //     const { data: urlData } = supabase.storage
+    //       .from(bucket)
+    //       .getPublicUrl(filePath);
+
+    //     if (urlData?.publicUrl) {
+    //       if (!firstImageUrl) firstImageUrl = urlData.publicUrl;
+    //       updatedHTML = updatedHTML.replaceAll(img.previewUrl, urlData.publicUrl);
+    //       uploadedImageUrls.push(urlData.publicUrl);
+    //     }
+    //   }
+
+    //   // Save article draft
+    //   const { data, error } = await supabase
+    //     .from("articles")
+    //     .insert([{
+    //       title,
+    //       text: updatedHTML,
+    //       userid: session.userid,
+    //       topicid: topics,
+    //       time: new Date().toISOString(),
+    //       status: "Draft",
+    //       imagepath: firstImageUrl || null,
+    //     }])
+    //     .select("articleid");
+
+    //   if (error) {
+    //     console.error("Failed to save draft:", error);
+    //     alert("Failed to save draft.");
+    //     return;
+    //   }
+
+    //   const articleid = data?.[0]?.articleid;
+    //   for (const url of uploadedImageUrls) {
+    //     await supabase.from("article_images").insert([
+    //       { articleid, image_url: url }
+    //     ]);
+    //   }
+
+    // }
+
+    //DEVI MADE CHANGES HERE (IF THE OLD ONE IS THE INTENDED CORRECT CODDE, IT IS COMMENTED OUT ABOVE JUST CHANGE):
+    // Previously, drafts were saved without moderation — this could allow inappropriate or unverified content into the system.
+    // Now, draft saving follows the same AI moderation process as posting (for consistency and safety).
+    // If AI flags the content, the draft is NOT saved and the user is alerted with feedback.
+    // This ensures all saved content (even drafts) pass the same baseline content checks.
+    if (postType === "General") {
+      for (const img of pendingImages) {
+        const file = img.file;
+        if (!file?.name) continue;
+
+        const fileExt = file.name.split(".").pop();
+        const fileName = `${Date.now()}-${Math.random()
+          .toString(36)
+          .substring(2)}.${fileExt}`;
+        const filePath = `user-${session.userid}/${fileName}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from(bucket)
+          .upload(filePath, file);
+
+        if (uploadError) {
+          console.error("Image upload failed:", uploadError);
+          alert("Image upload failed.");
+          setIsUploading(false);
+          setUploadAction("");
+          return;
+        }
+
+        const { data: urlData } = supabase.storage
+          .from(bucket)
+          .getPublicUrl(filePath);
+        if (urlData?.publicUrl) {
+          if (!firstImageUrl) firstImageUrl = urlData.publicUrl;
+          updatedHTML = updatedHTML.replaceAll(
+            img.previewUrl,
+            urlData.publicUrl
+          );
+          uploadedImageUrls.push(urlData.publicUrl);
+        }
+      }
+
+      const response = await fetch(
+        "https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/api/moderate",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ content: updatedHTML }),
+        }
+      );
+
+      const result = await response.json();
+      if (result.error) {
+        alert(`Draft flagged: ${result.error}`);
+        setIsUploading(false);
+        setUploadAction("");
+        return;
+      }
+
+      const { data, error } = await supabase
+        .from("articles")
+        .insert([
+          {
+            title,
+            text: updatedHTML,
+            userid: session.userid,
+            topicid: topics,
+            time: new Date().toISOString(),
+            status: "Draft",
+            imagepath: firstImageUrl || null,
+          },
+        ])
+        .select("articleid");
+
+      if (error) {
+        console.error("Failed to save draft:", error);
+        alert("Failed to save draft.");
+        setIsUploading(false);
+        setUploadAction("");
+        return;
+      }
+
+      const articleid = data?.[0]?.articleid;
+      for (const url of uploadedImageUrls) {
+        await supabase
+          .from("article_images")
+          .insert([{ articleid, image_url: url }]);
+      }
+    } else {
+      // Clean blob URLs before saving room content
       updatedHTML = updatedHTML.replace(
         /<img[^>]*src=["']blob:[^"']+["'][^>]*>/g,
         ""
       );
-    }
-    const bucket =
-      postType === "Room" ? "room-article-images" : "articles-images";
-    let firstImageUrl = null;
 
-    const articleData = {
-      title,
-      text: updatedHTML,
-      userid: session.userid,
-      topicid: topics,
-      time: new Date().toISOString(),
-      imagepath: firstImageUrl || null,
-      status: "Draft",
-    };
-
-    let uploadedImageUrls = [];
-
-    if (postType === "General") {
-      articleData.topicid = topics;
-
-      const { error } = await supabase.from("articles").insert([articleData]);
-      if (error) return alert("Failed to save draft.");
-    } else {
       const { data, error } = await supabase
         .from("room_articles")
         .insert([
           {
-            title: articleData.title,
-            content: articleData.text,
+            title,
+            content: updatedHTML,
             roomid: selectedRoom,
             userid: session.userid,
-            created_at: articleData.time,
+            created_at: new Date().toISOString(),
             status: "Draft",
           },
         ])
@@ -552,11 +828,13 @@ export const PremiumWriteArticle = () => {
 
       if (error) {
         console.error("Error saving draft:", error);
-        return alert("Failed to save draft.");
+        alert("Failed to save draft.");
+        return;
       }
 
       const postid = data?.[0]?.postid;
-      if (postType === "Room" && postid) {
+
+      if (postid) {
         for (const img of pendingImages) {
           const file = img.file;
           if (!file?.name) continue;
@@ -589,25 +867,53 @@ export const PremiumWriteArticle = () => {
         }
       }
     }
+
+    // Cleanup
     pendingImages.forEach((img) => URL.revokeObjectURL(img.previewUrl));
     setPendingImages([]);
     setShowDraftNotification(true);
     alert("Draft saved!");
     handleClearInputs();
+    setIsUploading(false);
+    setUploadAction(""); // DEVI ADDED THIS
   };
 
   const [pendingImages, setPendingImages] = useState([]);
 
+  // const handleEditorImageUpload = (e) => {
+  //   const file = e.target.files[0];
+  //   if (file) {
+  //     const previewUrl = URL.createObjectURL(file);
+  //     setPendingImages((prev) => [...prev, { file, previewUrl }]);
+
+  //     if (postType === "General") {
+  //       editor.chain().focus().setImage({ src: previewUrl }).run();
+  //     }
+  //   }
+  //   e.target.value = null;
+  // };
+
+  //DEVI MADE CHANGES HERE: IMPLEMENT FILE SIZE LIMITATION
   const handleEditorImageUpload = (e) => {
     const file = e.target.files[0];
-    if (file) {
-      const previewUrl = URL.createObjectURL(file);
-      setPendingImages((prev) => [...prev, { file, previewUrl }]);
+    if (!file) return;
 
-      if (postType === "General") {
-        editor.chain().focus().setImage({ src: previewUrl }).run();
-      }
+    const MAX_FILE_SIZE_MB = 50;
+    const maxSizeBytes = MAX_FILE_SIZE_MB * 1024 * 1024;
+
+    if (file.size > maxSizeBytes) {
+      alert(`Image is too large. Max file size is ${MAX_FILE_SIZE_MB}MB.`);
+      e.target.value = null;
+      return;
     }
+
+    const previewUrl = URL.createObjectURL(file);
+    setPendingImages((prev) => [...prev, { file, previewUrl }]);
+
+    if (postType === "General") {
+      editor.chain().focus().setImage({ src: previewUrl }).run();
+    }
+
     e.target.value = null;
   };
 
@@ -621,6 +927,7 @@ export const PremiumWriteArticle = () => {
     setPendingImages([]);
     setAccuracy(null);
     setAiFeedback("");
+    setUploadAction(""); // <- DEVI ADDED THIS FOR THE LOAD AND POST INDICATOR
 
     // Reset Tiptap editor content (this is the key)
     if (editor) {
@@ -682,7 +989,7 @@ export const PremiumWriteArticle = () => {
         padding: 0 2px;
         border-radius: 3px;
       }
-      .ProseMirror {
+         .ProseMirror {
         outline: none;
         position: relative;
         caret-color: black;
@@ -702,7 +1009,7 @@ export const PremiumWriteArticle = () => {
       return;
     }
 
-    // Check if topic already exists in `topic_categories`
+    // 🔍 Check if topic already exists in `topic_categories`
     const { data: existingTopics, error: topicFetchError } = await supabase
       .from("topic_categories")
       .select("name");
@@ -721,7 +1028,7 @@ export const PremiumWriteArticle = () => {
       return;
     }
 
-    // Check if user already applied for this topic
+    // 🔍 Check if user already applied for this topic
     const { data: userApplications, error: appFetchError } = await supabase
       .from("topic_applications")
       .select("topic_name")
@@ -930,6 +1237,11 @@ export const PremiumWriteArticle = () => {
                                 .getHTML()
                                 .replaceAll('<img src="__toRemove__"', "");
                               editor.commands.setContent(updatedHtml);
+
+                              // DEVI MADE CHANGES HERE - Optionally force cleanup of deleted image nodes from the DOM, NOT REALLY NEED?
+                              // if (editor) {
+                              // editor.commands.focus().run();
+                              // }
                             }, 0);
                           }}
                           className="absolute top-1 right-1 bg-white text-red-600 rounded-full w-6 h-6 flex items-center justify-center shadow-md hover:bg-red-100"
@@ -1087,7 +1399,7 @@ export const PremiumWriteArticle = () => {
             )}
           </div>
 
-          <div className="flex justify-end gap-3">
+          {/* <div className="flex justify-end gap-3">
             <button
               className="bg-red-500 text-white px-4 py-2 rounded-md"
               onClick={(e) => {
@@ -1110,6 +1422,37 @@ export const PremiumWriteArticle = () => {
               onClick={handlePostArticle}
             >
               Post
+            </button>
+          </div> */}
+
+          <div className="flex justify-end gap-3">
+            <button
+              className="bg-red-500 text-white px-4 py-2 rounded-md disabled:opacity-50"
+              onClick={(e) => {
+                e.preventDefault();
+                setShowConfirm(true);
+              }}
+              disabled={isUploading}
+            >
+              Clear
+            </button>
+
+            <button
+              className="bg-gray-600 text-white px-4 py-2 rounded-md disabled:opacity-50"
+              onClick={handleSaveDraft}
+              disabled={isUploading}
+            >
+              {isUploading && uploadAction === "draft"
+                ? "Saving..."
+                : "Save Draft"}
+            </button>
+
+            <button
+              className="bg-blue-600 text-white px-4 py-2 rounded-md disabled:opacity-50"
+              onClick={handlePostArticle}
+              disabled={isUploading}
+            >
+              {isUploading && uploadAction === "post" ? "Posting..." : "Post"}
             </button>
           </div>
         </div>
@@ -1225,6 +1568,49 @@ export const PremiumWriteArticle = () => {
                   className="bg-blue-600 text-white px-4 py-2 rounded-md"
                 >
                   OK
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {showTopicApplication && (
+          <div className="fixed inset-0 backdrop-blur-sm bg-white/10 flex items-center justify-center z-50">
+            <div className="bg-white p-6 rounded-lg shadow-xl w-[90%] max-w-md text-center">
+              <h2 className="text-xl font-semibold mb-3 text-left">
+                Topic Application
+              </h2>
+              <p className="text-gray-600 text-sm mb-4">
+                <ul className="text-gray-600 text-sm mb-4 list-disc list-inside text-left space-y-2">
+                  <li>Your requested topic will be reviewed by our admins.</li>
+                  <li>
+                    Approved if 15 or more users apply for the same topic.
+                  </li>
+                  <li>Please post under an existing topic in the meantime.</li>
+                </ul>
+              </p>
+              <input
+                type="text"
+                value={newTopicName}
+                onChange={(e) => setNewTopicName(e.target.value)}
+                placeholder="Enter your proposed topic name..."
+                className="w-full p-2 mb-4 border border-gray-300 rounded-md"
+              />
+              <div className="flex justify-end gap-3">
+                <button
+                  className="bg-blue-600 text-white px-4 py-2 rounded-md"
+                  onClick={handleSubmitTopicApplication}
+                >
+                  Apply
+                </button>
+                <button
+                  className="bg-gray-300 text-black px-4 py-2 rounded-md"
+                  onClick={() => {
+                    setNewTopicName("");
+                    setShowTopicApplication(false);
+                  }}
+                >
+                  Cancel
                 </button>
               </div>
             </div>

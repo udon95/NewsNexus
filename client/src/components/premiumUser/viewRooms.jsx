@@ -13,19 +13,23 @@ const ViewRoomsPage = () => {
   const initialQuery = searchParams.get("query") || "";
   const [searchQuery, setSearchQuery] = useState(initialQuery);
   const [roomImages, setRoomImages] = useState({});
+  const [loadingImages, setLoadingImages] = useState(true);
   const navigate = useNavigate();
   const { userType } = useAuthHook();
+  const [sizeFilter, setSizeFilter] = useState("All");
 
   const isPremium = userType === "Premium";
 
   useEffect(() => {
     const fetchRoomImages = async () => {
       const roomImagesData = {};
+      setLoadingImages(true);
       for (const room of rooms) {
         const image = await getRoomImage(room.roomid);
         roomImagesData[room.roomid] = image;
       }
       setRoomImages(roomImagesData); // Update the state with all the images
+      setLoadingImages(false);
     };
 
     if (rooms.length > 0) {
@@ -163,11 +167,21 @@ const ViewRoomsPage = () => {
   };
 
   //DEVI ADDED CODE HERE --> SO THE ORDER OF ROOM DISPLAY IS RANK, PRIVATE, JOINED, AND ALL OTHER ROOMS
-  const filteredRooms = rooms.filter((room) =>
+  const filteredRooms = rooms
+  .filter((room) =>
     room.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  )
+  .filter((room) => {
+    if (sizeFilter === "Small") return room.member_count < 10;
+    if (sizeFilter === "Medium") return room.member_count >= 10 && room.member_count <= 50;
+    if (sizeFilter === "Large") return room.member_count > 50;
+    return true; // All
+  });
 
-  const rankedRooms = filteredRooms.slice(0, 3);
+
+  const rankedRooms = filteredRooms
+  .filter((room) => room.room_type !== "Private")
+  .slice(0, 3);
 
   // FINAL sorted room list: Private → Joined (latest) → Unjoined (latest)
   const sortedFilteredRooms = [
@@ -233,8 +247,13 @@ const ViewRoomsPage = () => {
     <div className="relative min-h-screen w-screen flex flex-col bg-white">
       <Navbar />
       <div className="w-full flex justify-center mt-6 mb-6">
-        <div className="w-full max-w-3xl px-4">
-          <Search onSearch={handleSearch} />
+        <div className="w-full max-w-[900px] px-4">
+          <Search
+            onSearch={handleSearch}
+            showSizeFilter={true}
+            sizeFilter={sizeFilter}
+            onSizeFilterChange={setSizeFilter}
+          />
         </div>
       </div>
 
@@ -253,15 +272,18 @@ const ViewRoomsPage = () => {
 
           {/* RANKING CARD SECTION - UNTOUCHED */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6 w-full">
-            {filteredRooms.slice(0, 3).map((room, index) => (
+            {rankedRooms.map((room, index) => (
               <div
                 key={room.roomid}
                 onClick={() => handleRoomClick(room.roomid)}
                 className="w-80 h-60 mx-auto border border-black rounded-2xl shadow-md cursor-pointer hover:shadow-lg transition bg-white flex flex-col"
               >
                 <div className="w-full h-48 bg-gray-200 rounded-t-2xl overflow-hidden relative">
-                  {/*DEVI MADE CHANGES HERE*/}
-                  {roomImages[room.roomid] && roomImages[room.roomid] !== "/default-image.png" ? (
+                  {loadingImages ? (
+                    <div className="w-full h-full flex items-center justify-center bg-gray-200 text-gray-500 text-sm">
+                      Loading...
+                    </div>
+                  ) : roomImages[room.roomid] && roomImages[room.roomid] !== "/default-image.png" ? (
                     <img
                       src={roomImages[room.roomid]}
                       alt={room.name}
@@ -269,7 +291,7 @@ const ViewRoomsPage = () => {
                     />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center bg-gray-200 text-gray-500 text-sm">
-                      No Image
+                      No Images Available
                     </div>
                   )}
 

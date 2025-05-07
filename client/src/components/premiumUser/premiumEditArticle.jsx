@@ -31,6 +31,7 @@ import { Extension } from "@tiptap/core";
 import { Paragraph } from "@tiptap/extension-paragraph";
 import { useParams, useNavigate } from "react-router-dom";
 import { NodeSelection } from "prosemirror-state";
+import ListItem from "@tiptap/extension-list-item";
 
 export const PremiumEditArticle = () => {
   const [title, setTitle] = useState("");
@@ -146,11 +147,12 @@ export const PremiumEditArticle = () => {
       CustomParagraph,
       BulletList,
       OrderedList,
+      ListItem,
       UnderlineExtension,
       TiptapLink,
       Highlight,
       Image,
-      IndentExtension, //INDENT
+      // IndentExtension, //INDENT
       Heading.configure({ levels: [1, 2, 3] }),
       TextAlign.configure({ types: ["heading", "paragraph"] }),
       Placeholder.configure({ placeholder: "Start writing your article..." }),
@@ -1169,638 +1171,640 @@ export const PremiumEditArticle = () => {
   };
 
   return (
-    <div className="w-full min-w-screen min-h-screen flex flex-col overflow-hidden bg-indigo-50 justify-center">
-      <main className="flex-grow w-full flex min-h-full overflow-hidden">
-        <aside className="md:w-[250px] md:flex-none"></aside>
-        <main className="w-full max-w-4xl p-10 flex flex-col gap-6 mx-auto">
-          <h1 className="text-3xl font-bold mb-1">
-            {isDraft
-              ? "Edit Your Draft Articles :"
-              : "Edit Your Posted Articles :"}
-          </h1>
+    <div className="w-full min-h-screen bg-indigo-50 text-black font-grotesk flex justify-center">
+      <main className="w-full max-w-4xl p-10 flex flex-col gap-6">
+        <h1 className="text-3xl font-bold mb-1">
+          {isDraft
+            ? "Edit Your Draft Articles :"
+            : "Edit Your Posted Articles :"}
+        </h1>
 
-          <div className="flex flex-col gap-5 w-full">
-            <div>
-              <label className="block text-xl font-semibold mb-1">
-                Article Title:
-              </label>
-              <input
-                type="text"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                placeholder="Enter title..."
-                disabled={!isDraft}
-                className="w-full p-2 border border-black rounded-md bg-white text-black"
-              />
-            </div>
+        <div className="flex flex-col gap-5 w-full">
+          <div>
+            <label className="block text-xl font-semibold mb-1">
+              Article Title:
+            </label>
+            <input
+              type="text"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="Enter title..."
+              disabled={!isDraft}
+              className="w-full p-2 border border-black rounded-md bg-white text-black"
+            />
+          </div>
 
-            <div>
-              <label className="block text-xl font-semibold mb-1">
-                Post Type:
-              </label>
-              <div className="flex flex-wrap md:flex-nowrap gap-4 items-center">
-                <div className="flex gap-4">
-                  <label className="flex items-center gap-2">
-                    <input
-                      type="radio"
-                      name="postType"
-                      value="General"
-                      checked={postType === "General"}
-                      disabled
-                    />
-                    General
-                  </label>
-                  <label className="flex items-center gap-2">
-                    <input
-                      type="radio"
-                      name="postType"
-                      value="Room"
-                      checked={postType === "Room"}
-                      disabled
-                    />
-                    Room
-                  </label>
-                </div>
+          <div>
+            <label className="block text-xl font-semibold mb-1">
+              Post Type:
+            </label>
+            <div className="flex flex-wrap md:flex-nowrap gap-4 items-center">
+              <div className="flex gap-4">
+                <label className="flex items-center gap-2">
+                  <input
+                    type="radio"
+                    name="postType"
+                    value="General"
+                    checked={postType === "General"}
+                    disabled
+                  />
+                  General
+                </label>
+                <label className="flex items-center gap-2">
+                  <input
+                    type="radio"
+                    name="postType"
+                    value="Room"
+                    checked={postType === "Room"}
+                    disabled
+                  />
+                  Room
+                </label>
+              </div>
 
-                {postType === "General" ? (
-                  <div className="flex items-center gap-2 w-full">
-                    <div className="relative w-full">
-                      <div
-                        onClick={() =>
-                          isDraft && setShowTopicsDropdown(!showTopicsDropdown)
-                        }
-                        className={`p-2 border rounded-md bg-white w-full cursor-${
-                          isDraft ? "pointer" : "default"
-                        } flex justify-between items-center`}
-                      >
-                        {topics
-                          ? topicOptions.find((t) => t.topicid === topics)?.name
-                          : "Select a topic"}
+              {postType === "General" ? (
+                <div className="flex items-center gap-2 w-full">
+                  <div className="relative w-full">
+                    <div
+                      onClick={() =>
+                        isDraft && setShowTopicsDropdown(!showTopicsDropdown)
+                      }
+                      className={`p-2 border rounded-md bg-white w-full cursor-${
+                        isDraft ? "pointer" : "default"
+                      } flex justify-between items-center`}
+                    >
+                      {topics
+                        ? topicOptions.find((t) => t.topicid === topics)?.name
+                        : "Select a topic"}
 
-                        <button
-                          className="ml-2 text-gray-500 text-sm"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            isDraft &&
-                              setShowTopicsDropdown(!showTopicsDropdown);
-                          }}
-                        >
-                          {showTopicsDropdown ? "▲" : "▼"}
-                        </button>
-                      </div>
-
-                      {showTopicsDropdown && (
-                        <div className="absolute z-10 w-full mt-1 bg-white border rounded-md shadow-md max-h-40 overflow-y-auto">
-                          {topicOptions.map((topic, i) => (
-                            <div
-                              key={i}
-                              onClick={() => {
-                                setTopics(topic.topicid);
-                                setShowTopicsDropdown(false);
-                              }}
-                              className="p-2 hover:bg-indigo-100 cursor-pointer text-black font-medium"
-                            >
-                              {topic.name}
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                    {isDraft && (
                       <button
-                        className="bg-black text-white rounded-md p-2 flex items-center justify-center h-full"
-                        onClick={() => setShowTopicApplication(true)}
+                        className="ml-2 text-gray-500 text-sm"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          isDraft && setShowTopicsDropdown(!showTopicsDropdown);
+                        }}
                       >
-                        <Plus size={16} />
+                        {showTopicsDropdown ? "▲" : "▼"}
                       </button>
+                    </div>
+
+                    {showTopicsDropdown && (
+                      <div className="absolute z-10 w-full mt-1 bg-white border rounded-md shadow-md max-h-40 overflow-y-auto">
+                        {topicOptions.map((topic, i) => (
+                          <div
+                            key={i}
+                            onClick={() => {
+                              setTopics(topic.topicid);
+                              setShowTopicsDropdown(false);
+                            }}
+                            className="p-2 hover:bg-indigo-100 cursor-pointer text-black font-medium"
+                          >
+                            {topic.name}
+                          </div>
+                        ))}
+                      </div>
                     )}
                   </div>
-                ) : (
-                  <div className="relative w-full">
-                    <select
-                      value={selectedRoom}
-                      onChange={(e) => setSelectedRoom(e.target.value)}
-                      className="p-2 border rounded-md w-full bg-white appearance-none pr-8"
-                      disabled={!isDraft}
-                    >
-                      <option value="" disabled>
-                        Select a room
-                      </option>
-                      {rooms.map((room) => (
-                        <option key={room.roomid} value={room.roomid}>
-                          {room.name}
-                        </option>
-                      ))}
-                    </select>
-                    <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none text-gray-500 text-sm">
-                      ▼
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-xl font-semibold mb-1">
-                Article Content:
-              </label>
-              {editor ? (
-                <>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    id="imageUploadInput"
-                    className="hidden"
-                    onChange={handleEditorImageUpload}
-                  />
-
                   {isDraft && (
                     <button
-                      className="w-full mt-2 bg-indigo-600 text-white px-4 py-2 rounded-md"
-                      onClick={() =>
-                        document.getElementById("imageUploadInput").click()
-                      }
+                      className="bg-black text-white rounded-md p-2 flex items-center justify-center h-full"
+                      onClick={() => setShowTopicApplication(true)}
                     >
-                      Upload Image
+                      <Plus size={16} />
                     </button>
                   )}
-
-                  {pendingImages.length > 0 && (
-                    <div className="mt-3 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                      {pendingImages.map((img, index) => (
-                        <div
-                          key={index}
-                          className="relative border rounded-lg overflow-hidden shadow"
-                        >
-                          <img
-                            src={img.previewUrl}
-                            className="object-cover w-full"
-                            style={{ height: "8rem" }}
-                            alt={`Preview ${index}`}
-                          />
-                          {isDraft && (
-                            <button
-                              onClick={() => {
-                                const url = img.previewUrl;
-
-                                if (url?.startsWith("blob:")) {
-                                  URL.revokeObjectURL(url);
-                                }
-
-                                setPendingImages((prev) =>
-                                  prev.filter((_, i) => i !== index)
-                                );
-
-                                if (
-                                  editor &&
-                                  isDraft &&
-                                  postType === "General"
-                                ) {
-                                  const html = editor.getHTML();
-                                  const tempDiv = document.createElement("div");
-                                  tempDiv.innerHTML = html;
-
-                                  const imgs = tempDiv.querySelectorAll("img");
-                                  imgs.forEach((imgTag) => {
-                                    if (imgTag.src === url) {
-                                      imgTag.remove();
-                                    }
-                                  });
-
-                                  editor.commands.setContent(tempDiv.innerHTML);
-                                  editor.setEditable(true);
-                                  setArticleContent(tempDiv.innerHTML);
-                                }
-                              }}
-                              className="absolute top-1 right-1 bg-white text-red-600 rounded-full w-6 h-6 flex items-center justify-center shadow-md hover:bg-red-100"
-                            >
-                              ×
-                            </button>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  )}
-
-                  <div className="flex flex-wrap items-center gap-2 bg-white p-3 mt-4 border rounded-lg shadow-md text-sm font-medium">
-                    <select
-                      onChange={(e) => {
-                        const level = parseInt(e.target.value);
-                        if (level === 0) {
-                          editor.chain().focus().setParagraph().run();
-                        } else {
-                          editor.chain().focus().toggleHeading({ level }).run();
-                        }
-                      }}
-                      className="border rounded px-2 py-1"
-                      defaultValue="0"
-                    >
-                      <option value="0">Normal</option>
-                      <option value="1">H1</option>
-                      <option value="2">H2</option>
-                      <option value="3">H3</option>
-                    </select>
-
-                    <button
-                      onClick={() => editor.chain().focus().toggleBold().run()}
-                      className="p-1 hover:bg-gray-100 rounded"
-                    >
-                      <Bold size={16} />
-                    </button>
-                    <button
-                      onClick={() =>
-                        editor.chain().focus().toggleItalic().run()
-                      }
-                      className="p-1 hover:bg-gray-100 rounded"
-                    >
-                      <Italic size={16} />
-                    </button>
-                    <button
-                      onClick={() =>
-                        editor.chain().focus().toggleUnderline().run()
-                      }
-                      className="p-1 hover:bg-gray-100 rounded"
-                    >
-                      <UnderlineIcon size={16} />
-                    </button>
-                    <button
-                      onClick={() =>
-                        editor.chain().focus().toggleOrderedList().run()
-                      }
-                      className="p-1 hover:bg-gray-100 rounded"
-                    >
-                      <ListOrdered size={16} />
-                    </button>
-                    <button
-                      onClick={() =>
-                        editor.chain().focus().toggleBulletList().run()
-                      }
-                      className="p-1 hover:bg-gray-100 rounded"
-                    >
-                      <List size={16} />
-                    </button>
-                    <button
-                      onClick={() =>
-                        editor.chain().focus().setTextAlign("left").run()
-                      }
-                      className="p-1 hover:bg-gray-100 rounded"
-                    >
-                      <AlignLeft size={16} />
-                    </button>
-                    <button
-                      onClick={() =>
-                        editor.chain().focus().setTextAlign("center").run()
-                      }
-                      className="p-1 hover:bg-gray-100 rounded"
-                    >
-                      <AlignCenter size={16} />
-                    </button>
-                    <button
-                      onClick={() =>
-                        editor.chain().focus().setTextAlign("right").run()
-                      }
-                      className="p-1 hover:bg-gray-100 rounded"
-                    >
-                      <AlignRight size={16} />
-                    </button>
-                    <button
-                      onClick={() =>
-                        editor.chain().focus().toggleHighlight().run()
-                      }
-                      className="p-1 hover:bg-gray-100 rounded"
-                    >
-                      <Highlighter size={16} />
-                    </button>
-                    <button
-                      onClick={() => {
-                        setLinkUrl("");
-                        setShowLinkModal(true);
-                      }}
-                      className="p-1 hover:bg-gray-100 rounded"
-                    >
-                      <LinkIcon size={16} />
-                    </button>
-                  </div>
-
-                  <div
-                    className="min-h-[400px] max-h-[600px] overflow-y-auto border rounded-md bg-white p-4 mt-3 focus-within:outline-none"
-                    onClick={() => editor.commands.focus()}
-                  >
-                    <EditorContent
-                      editor={editor}
-                      className={`min-h-[200px] w-full outline-none p-2 text-base leading-relaxed ${
-                        !isDraft ? "pointer-events-none opacity-60" : ""
-                      }`}
-                      onClick={() => isDraft && editor.commands.focus()}
-                    />
-                  </div>
-                  <p className="text-sm text-gray-500 mt-1">
-                    Word Count: {wordCount} / {MAX_WORDS}
-                    {wordCount >= MAX_WORDS && (
-                      <p className="text-grey-600 text-sm mt-1">
-                        You’ve reached the maximum word count.
-                      </p>
-                    )}
-                  </p>
-
-                  {!isDraft && (
-                    <div className="mt-6">
-                      <label className="block text-xl font-semibold mb-1">
-                        Update (max 200 words):
-                      </label>
-                      <textarea
-                        value={amendment}
-                        rows={5}
-                        className="w-full border border-black rounded-md p-2 bg-white"
-                        placeholder="Enter your update..."
-                        onChange={(e) => {
-                          const words = e.target.value
-                            .trim()
-                            .split(/\s+/)
-                            .filter(Boolean);
-                          if (words.length <= 200) setAmendment(e.target.value);
-                        }}
-                      />
-                      <p className="text-sm text-gray-500 mt-1">
-                        Word Count:{" "}
-                        {amendment.trim().split(/\s+/).filter(Boolean).length} /
-                        200
-                      </p>
-                    </div>
-                  )}
-                </>
+                </div>
               ) : (
-                <p className="text-gray-500">Loading editor...</p>
-              )}
-            </div>
-
-            <div className="flex justify-end gap-3">
-              {isDraft ? (
-                <>
-                  <button
-                    className="bg-gray-400 text-white px-4 py-2 rounded-md"
-                    onClick={() => navigate("/premiumDashboard/manageArticles")}
+                <div className="relative w-full">
+                  <select
+                    value={selectedRoom}
+                    onChange={(e) => setSelectedRoom(e.target.value)}
+                    className="p-2 border rounded-md w-full bg-white appearance-none pr-8"
+                    disabled={!isDraft}
                   >
-                    Cancel
-                  </button>
-
-                  <button
-                    className="bg-yellow-500 text-white px-4 py-2 rounded-md"
-                    onClick={handleSaveDraft}
-                  >
-                    Update
-                  </button>
-
-                  {postType === "General" ? (
-                    <button
-                      className="bg-blue-600 text-white px-4 py-2 rounded-md"
-                      onClick={handlePostGeneralArticle}
-                    >
-                      Post Draft (General)
-                    </button>
-                  ) : (
-                    <button
-                      className="bg-blue-600 text-white px-4 py-2 rounded-md"
-                      onClick={handlePostRoomArticle}
-                    >
-                      Post Draft (Room)
-                    </button>
-                  )}
-                </>
-              ) : (
-                <>
-                  <button
-                    className="bg-gray-400 text-white px-4 py-2 rounded-md"
-                    onClick={() => navigate("/premiumDashboard/manageArticles")}
-                  >
-                    Cancel
-                  </button>
-
-                  <button
-                    className="bg-blue-600 text-white px-4 py-2 rounded-md"
-                    onClick={async () => {
-                      const words = amendment
-                        .trim()
-                        .split(/\s+/)
-                        .filter(Boolean);
-                      if (words.length === 0)
-                        return alert(
-                          "Please enter an amendment before submitting."
-                        );
-                      if (words.length > 200)
-                        return alert("Amendment must be 200 words or fewer.");
-
-                      const targetTable =
-                        postType === "General" ? "articles" : "room_articles";
-                      const targetKey =
-                        postType === "General" ? "articleid" : "postid";
-
-                      const { error } = await supabase
-                        .from(targetTable)
-                        .update({ amendment: amendment.trim() })
-                        .eq(targetKey, id);
-
-                      if (error) return alert("Failed to submit amendment.");
-                      setShowUpdateSuccess(true);
-                    }}
-                  >
-                    Add Update
-                  </button>
-                </>
+                    <option value="" disabled>
+                      Select a room
+                    </option>
+                    {rooms.map((room) => (
+                      <option key={room.roomid} value={room.roomid}>
+                        {room.name}
+                      </option>
+                    ))}
+                  </select>
+                  <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none text-gray-500 text-sm">
+                    ▼
+                  </div>
+                </div>
               )}
             </div>
           </div>
 
-          {showConfirm && (
-            <div className="fixed inset-0 backdrop-blur-sm bg-white/5 flex items-center justify-center z-50">
-              <div className="bg-white p-6 rounded-lg shadow-xl text-center">
-                <p className="text-lg font-semibold mb-4">Clear all fields?</p>
-                <div className="flex justify-center gap-4">
-                  <button
-                    className="bg-red-500 text-white px-4 py-2 rounded-md"
-                    onClick={handleClearInputs}
-                  >
-                    Confirm
-                  </button>
-                  <button
-                    className="bg-gray-500 text-white px-4 py-2 rounded-md"
-                    onClick={() => navigate("/premiumDashboard/manageArticles")}
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
-          {showTopicApplication && (
-            <div className="fixed inset-0 backdrop-blur-sm bg-white/10 flex items-center justify-center z-50">
-              <div className="bg-white p-6 rounded-lg shadow-xl w-[90%] max-w-md text-center">
-                <h2 className="text-xl font-semibold mb-3 text-left">
-                  Topic Application
-                </h2>
-                <p className="text-gray-600 text-sm mb-4">
-                  <ul className="text-gray-600 text-sm mb-4 list-disc list-inside text-left space-y-2">
-                    <li>
-                      Your requested topic will be reviewed by our admins.
-                    </li>
-                    <li>
-                      Approved if 15 or more users apply for the same topic.
-                    </li>
-                    <li>
-                      Please post under an existing topic in the meantime.
-                    </li>
-                  </ul>
-                </p>
+          <div>
+            <label className="block text-xl font-semibold mb-1">
+              Article Content:
+            </label>
+            {editor ? (
+              <>
                 <input
-                  type="text"
-                  value={newTopicName}
-                  onChange={(e) => setNewTopicName(e.target.value)}
-                  placeholder="Enter your proposed topic name..."
-                  className="w-full p-2 mb-4 border border-gray-300 rounded-md"
+                  type="file"
+                  accept="image/*"
+                  id="imageUploadInput"
+                  className="hidden"
+                  onChange={handleEditorImageUpload}
                 />
-                <div className="flex justify-end gap-3">
+
+                {isDraft && (
                   <button
-                    className="bg-blue-600 text-white px-4 py-2 rounded-md"
-                    onClick={handleSubmitTopicApplication}
+                    className="w-full mt-2 bg-indigo-600 text-white px-4 py-2 rounded-md"
+                    onClick={() =>
+                      document.getElementById("imageUploadInput").click()
+                    }
                   >
-                    Apply
+                    Upload Image
                   </button>
-                  <button
-                    className="bg-gray-300 text-black px-4 py-2 rounded-md"
-                    onClick={() => {
-                      setNewTopicName("");
-                      setShowTopicApplication(false);
-                    }}
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
+                )}
 
-          {showLinkModal && (
-            <div className="fixed inset-0 flex items-center justify-center backdrop-blur-sm bg-white/10 z-50">
-              <div className="bg-white rounded-md p-6 shadow-lg w-[90%] max-w-sm">
-                <h2 className="text-lg font-semibold mb-4">Insert Link</h2>
-                <input
-                  type="text"
-                  value={linkUrl}
-                  onChange={(e) => setLinkUrl(e.target.value)}
-                  placeholder="https://example.com"
-                  className="w-full p-2 border border-gray-300 rounded-md mb-4"
-                />
-                <div className="flex justify-end gap-2">
-                  <button
-                    onClick={() => {
-                      if (!linkUrl.trim()) return;
+                {pendingImages.length > 0 && (
+                  <div className="mt-3 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                    {pendingImages.map((img, index) => (
+                      <div
+                        key={index}
+                        className="relative border rounded-lg overflow-hidden shadow"
+                      >
+                        <img
+                          src={img.previewUrl}
+                          className="object-cover w-full"
+                          style={{ height: "8rem" }}
+                          alt={`Preview ${index}`}
+                        />
+                        {isDraft && (
+                          <button
+                            onClick={() => {
+                              const url = img.previewUrl;
 
-                      const hasSelection =
-                        editor &&
-                        editor.view.state.selection?.from !==
-                          editor.view.state.selection?.to;
+                              if (url?.startsWith("blob:")) {
+                                URL.revokeObjectURL(url);
+                              }
 
-                      if (hasSelection) {
-                        editor
-                          .chain()
-                          .focus()
-                          .extendMarkRange("link")
-                          .setLink({ href: linkUrl })
-                          .run();
+                              setPendingImages((prev) =>
+                                prev.filter((_, i) => i !== index)
+                              );
+
+                              if (editor && isDraft && postType === "General") {
+                                const html = editor.getHTML();
+                                const tempDiv = document.createElement("div");
+                                tempDiv.innerHTML = html;
+
+                                const imgs = tempDiv.querySelectorAll("img");
+                                imgs.forEach((imgTag) => {
+                                  if (imgTag.src === url) {
+                                    imgTag.remove();
+                                  }
+                                });
+
+                                editor.commands.setContent(tempDiv.innerHTML);
+                                editor.setEditable(true);
+                                setArticleContent(tempDiv.innerHTML);
+                              }
+                            }}
+                            className="absolute top-1 right-1 bg-white text-red-600 rounded-full w-6 h-6 flex items-center justify-center shadow-md hover:bg-red-100"
+                          >
+                            ×
+                          </button>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                <div className="flex flex-wrap items-center gap-2 bg-white p-3 mt-4 border rounded-lg shadow-md text-sm font-medium">
+                  <select
+                    onChange={(e) => {
+                      const level = parseInt(e.target.value);
+                      if (level === 0) {
+                        editor.chain().focus().setParagraph().run();
                       } else {
-                        editor
-                          .chain()
-                          .focus()
-                          .insertContent([
-                            {
-                              type: "text",
-                              text: "Link",
-                              marks: [
-                                {
-                                  type: "link",
-                                  attrs: { href: linkUrl },
-                                },
-                              ],
-                            },
-                          ])
-                          .run();
+                        editor.chain().focus().toggleHeading({ level }).run();
                       }
-
-                      setShowLinkModal(false);
-                      setLinkUrl("");
                     }}
-                    className="bg-blue-600 text-white px-4 py-2 rounded-md"
+                    className="border rounded px-2 py-1"
+                    defaultValue="0"
                   >
-                    OK
+                    <option value="0">Normal</option>
+                    <option value="1">H1</option>
+                    <option value="2">H2</option>
+                    <option value="3">H3</option>
+                  </select>
+
+                  <button
+                    onClick={() => editor.chain().focus().toggleBold().run()}
+                    className="p-1 hover:bg-gray-100 rounded"
+                  >
+                    <Bold size={16} />
+                  </button>
+                  <button
+                    onClick={() => editor.chain().focus().toggleItalic().run()}
+                    className="p-1 hover:bg-gray-100 rounded"
+                  >
+                    <Italic size={16} />
+                  </button>
+                  <button
+                    onClick={() =>
+                      editor.chain().focus().toggleUnderline().run()
+                    }
+                    className="p-1 hover:bg-gray-100 rounded"
+                  >
+                    <UnderlineIcon size={16} />
+                  </button>
+                  <button
+                    onClick={() =>
+                      editor.chain().focus().toggleOrderedList().run()
+                    }
+                    className="p-1 hover:bg-gray-100 rounded"
+                  >
+                    <ListOrdered size={16} />
+                  </button>
+                  <button
+                    onClick={() =>
+                      editor.chain().focus().toggleBulletList().run()
+                    }
+                    className="p-1 hover:bg-gray-100 rounded"
+                  >
+                    <List size={16} />
+                  </button>
+                  <button
+                    onClick={() =>
+                      editor.chain().focus().setTextAlign("left").run()
+                    }
+                    className="p-1 hover:bg-gray-100 rounded"
+                  >
+                    <AlignLeft size={16} />
+                  </button>
+                  <button
+                    onClick={() =>
+                      editor.chain().focus().setTextAlign("center").run()
+                    }
+                    className="p-1 hover:bg-gray-100 rounded"
+                  >
+                    <AlignCenter size={16} />
+                  </button>
+                  <button
+                    onClick={() =>
+                      editor.chain().focus().setTextAlign("right").run()
+                    }
+                    className="p-1 hover:bg-gray-100 rounded"
+                  >
+                    <AlignRight size={16} />
+                  </button>
+                  <button
+                    onClick={() =>
+                      editor.chain().focus().toggleHighlight().run()
+                    }
+                    className="p-1 hover:bg-gray-100 rounded"
+                  >
+                    <Highlighter size={16} />
                   </button>
                   <button
                     onClick={() => {
-                      setShowLinkModal(false);
                       setLinkUrl("");
+                      setShowLinkModal(true);
                     }}
-                    className="bg-gray-300 px-4 py-2 rounded-md"
+                    className="p-1 hover:bg-gray-100 rounded"
                   >
-                    Cancel
+                    <LinkIcon size={16} />
                   </button>
                 </div>
-              </div>
-            </div>
-          )}
-          {showDraftNotification && (
-            <div className="fixed inset-0 backdrop-blur-sm bg-white/5 flex items-center justify-center z-50">
-              <div
-                className="bg-white p-6 rounded-lg shadow-xl text-left"
-                style={{ maxWidth: "400px", width: "auto" }}
-              >
-                <p className="text-lg font-semibold mb-2">
-                  Draft saved successfully!
-                </p>
-                <p className="text-sm text-gray-500 mt-2">
-                  Your draft will expire in 7 days. Don't forget to publish it
-                  before then!
+
+                {(accuracy !== null || aiFeedback) && (
+                  <div className="mt-4 p-4 border border-red-300 bg-red-50 rounded text-sm text-black">
+                    <strong>Fact Check Results:</strong>
+                    {accuracy !== null && (
+                      <p>
+                        <strong>Accuracy: </strong>
+                        {accuracy}%
+                      </p>
+                    )}
+                    <p>
+                      <strong>Feedback: </strong>
+                    </p>
+                    <div
+                      className="mt-1"
+                      dangerouslySetInnerHTML={{ __html: aiFeedback }}
+                    />
+                  </div>
+                )}
+
+                <div
+                  className="min-h-[400px] max-h-[600px] overflow-y-auto border rounded-md bg-white p-4 mt-3 focus-within:outline-none"
+                  onClick={() => editor.commands.focus()}
+                >
+                  <EditorContent
+                    editor={editor}
+                    className={`min-h-[200px] w-full outline-none p-2 text-base leading-relaxed ${
+                      !isDraft ? "pointer-events-none opacity-60" : ""
+                    }`}
+                    onClick={() => isDraft && editor.commands.focus()}
+                  />
+                </div>
+                <p className="text-sm text-gray-500 mt-1">
+                  Word Count: {wordCount} / {MAX_WORDS}
+                  {wordCount >= MAX_WORDS && (
+                    <p className="text-grey-600 text-sm mt-1">
+                      You’ve reached the maximum word count.
+                    </p>
+                  )}
                 </p>
 
-                {/* OK Button to acknowledge the notification */}
-                <div className="flex justify-end mt-4">
-                  <button
-                    onClick={() => setShowDraftNotification(false)} // Close the notification
-                    className="bg-blue-600 text-white px-4 py-2 rounded-md"
-                  >
-                    OK
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
-          {showUpdateSuccess && (
-            <div className="fixed inset-0 backdrop-blur-sm bg-white/5 flex items-center justify-center z-50">
-              <div
-                className="bg-white p-6 rounded-lg shadow-xl text-left"
-                style={{ maxWidth: "400px", width: "auto" }}
-              >
-                <p className="text-lg font-semibold mb-2">
-                  Update submitted successfully!
-                </p>
-                <p className="text-sm text-gray-500 mt-2">
-                  Your update has been recorded. Thank you for keeping your
-                  article accurate and up to date!
-                </p>
+                {!isDraft && (
+                  <div className="mt-6">
+                    <label className="block text-xl font-semibold mb-1">
+                      Update (max 200 words):
+                    </label>
+                    <textarea
+                      value={amendment}
+                      rows={5}
+                      className="w-full border border-black rounded-md p-2 bg-white"
+                      placeholder="Enter your update..."
+                      onChange={(e) => {
+                        const words = e.target.value
+                          .trim()
+                          .split(/\s+/)
+                          .filter(Boolean);
+                        if (words.length <= 200) setAmendment(e.target.value);
+                      }}
+                    />
+                    <p className="text-sm text-gray-500 mt-1">
+                      Word Count:{" "}
+                      {amendment.trim().split(/\s+/).filter(Boolean).length} /
+                      200
+                    </p>
+                  </div>
+                )}
+              </>
+            ) : (
+              <p className="text-gray-500">Loading editor...</p>
+            )}
+          </div>
 
-                <div className="flex justify-end mt-4">
+          <div className="flex justify-end gap-3">
+            {isDraft ? (
+              <>
+                <button
+                  className="bg-gray-400 text-white px-4 py-2 rounded-md"
+                  onClick={() => navigate("/premiumDashboard/manageArticles")}
+                >
+                  Cancel
+                </button>
+
+                <button
+                  className="bg-yellow-500 text-white px-4 py-2 rounded-md"
+                  onClick={handleSaveDraft}
+                >
+                  Update
+                </button>
+
+                {postType === "General" ? (
                   <button
-                    onClick={() => {
-                      setShowUpdateSuccess(false);
-                      navigate("/premiumDashboard/manageArticles");
-                    }}
                     className="bg-blue-600 text-white px-4 py-2 rounded-md"
+                    onClick={handlePostGeneralArticle}
                   >
-                    OK
+                    Post Draft (General)
                   </button>
-                </div>
+                ) : (
+                  <button
+                    className="bg-blue-600 text-white px-4 py-2 rounded-md"
+                    onClick={handlePostRoomArticle}
+                  >
+                    Post Draft (Room)
+                  </button>
+                )}
+              </>
+            ) : (
+              <>
+                <button
+                  className="bg-gray-400 text-white px-4 py-2 rounded-md"
+                  onClick={() => navigate("/premiumDashboard/manageArticles")}
+                >
+                  Cancel
+                </button>
+
+                <button
+                  className="bg-blue-600 text-white px-4 py-2 rounded-md"
+                  onClick={async () => {
+                    const words = amendment.trim().split(/\s+/).filter(Boolean);
+                    if (words.length === 0)
+                      return alert(
+                        "Please enter an amendment before submitting."
+                      );
+                    if (words.length > 200)
+                      return alert("Amendment must be 200 words or fewer.");
+
+                    const targetTable =
+                      postType === "General" ? "articles" : "room_articles";
+                    const targetKey =
+                      postType === "General" ? "articleid" : "postid";
+
+                    const { error } = await supabase
+                      .from(targetTable)
+                      .update({ amendment: amendment.trim() })
+                      .eq(targetKey, id);
+
+                    if (error) return alert("Failed to submit amendment.");
+                    setShowUpdateSuccess(true);
+                  }}
+                >
+                  Add Update
+                </button>
+              </>
+            )}
+          </div>
+        </div>
+
+        {showConfirm && (
+          <div className="fixed inset-0 backdrop-blur-sm bg-white/5 flex items-center justify-center z-50">
+            <div className="bg-white p-6 rounded-lg shadow-xl text-center">
+              <p className="text-lg font-semibold mb-4">Clear all fields?</p>
+              <div className="flex justify-center gap-4">
+                <button
+                  className="bg-red-500 text-white px-4 py-2 rounded-md"
+                  onClick={handleClearInputs}
+                >
+                  Confirm
+                </button>
+                <button
+                  className="bg-gray-500 text-white px-4 py-2 rounded-md"
+                  onClick={() => navigate("/premiumDashboard/manageArticles")}
+                >
+                  Cancel
+                </button>
               </div>
             </div>
-          )}
-        </main>
+          </div>
+        )}
+        {showTopicApplication && (
+          <div className="fixed inset-0 backdrop-blur-sm bg-white/10 flex items-center justify-center z-50">
+            <div className="bg-white p-6 rounded-lg shadow-xl w-[90%] max-w-md text-center">
+              <h2 className="text-xl font-semibold mb-3 text-left">
+                Topic Application
+              </h2>
+              <p className="text-gray-600 text-sm mb-4">
+                <ul className="text-gray-600 text-sm mb-4 list-disc list-inside text-left space-y-2">
+                  <li>Your requested topic will be reviewed by our admins.</li>
+                  <li>
+                    Approved if 15 or more users apply for the same topic.
+                  </li>
+                  <li>Please post under an existing topic in the meantime.</li>
+                </ul>
+              </p>
+              <input
+                type="text"
+                value={newTopicName}
+                onChange={(e) => setNewTopicName(e.target.value)}
+                placeholder="Enter your proposed topic name..."
+                className="w-full p-2 mb-4 border border-gray-300 rounded-md"
+              />
+              <div className="flex justify-end gap-3">
+                <button
+                  className="bg-blue-600 text-white px-4 py-2 rounded-md"
+                  onClick={handleSubmitTopicApplication}
+                >
+                  Apply
+                </button>
+                <button
+                  className="bg-gray-300 text-black px-4 py-2 rounded-md"
+                  onClick={() => {
+                    setNewTopicName("");
+                    setShowTopicApplication(false);
+                  }}
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {showLinkModal && (
+          <div className="fixed inset-0 flex items-center justify-center backdrop-blur-sm bg-white/10 z-50">
+            <div className="bg-white rounded-md p-6 shadow-lg w-[90%] max-w-sm">
+              <h2 className="text-lg font-semibold mb-4">Insert Link</h2>
+              <input
+                type="text"
+                value={linkUrl}
+                onChange={(e) => setLinkUrl(e.target.value)}
+                placeholder="https://example.com"
+                className="w-full p-2 border border-gray-300 rounded-md mb-4"
+              />
+              <div className="flex justify-end gap-2">
+                <button
+                  onClick={() => {
+                    if (!linkUrl.trim()) return;
+
+                    const hasSelection =
+                      editor &&
+                      editor.view.state.selection?.from !==
+                        editor.view.state.selection?.to;
+
+                    if (hasSelection) {
+                      editor
+                        .chain()
+                        .focus()
+                        .extendMarkRange("link")
+                        .setLink({ href: linkUrl })
+                        .run();
+                    } else {
+                      editor
+                        .chain()
+                        .focus()
+                        .insertContent([
+                          {
+                            type: "text",
+                            text: "Link",
+                            marks: [
+                              {
+                                type: "link",
+                                attrs: { href: linkUrl },
+                              },
+                            ],
+                          },
+                        ])
+                        .run();
+                    }
+
+                    setShowLinkModal(false);
+                    setLinkUrl("");
+                  }}
+                  className="bg-blue-600 text-white px-4 py-2 rounded-md"
+                >
+                  OK
+                </button>
+                <button
+                  onClick={() => {
+                    setShowLinkModal(false);
+                    setLinkUrl("");
+                  }}
+                  className="bg-gray-300 px-4 py-2 rounded-md"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+        {showDraftNotification && (
+          <div className="fixed inset-0 backdrop-blur-sm bg-white/5 flex items-center justify-center z-50">
+            <div
+              className="bg-white p-6 rounded-lg shadow-xl text-left"
+              style={{ maxWidth: "400px", width: "auto" }}
+            >
+              <p className="text-lg font-semibold mb-2">
+                Draft saved successfully!
+              </p>
+              <p className="text-sm text-gray-500 mt-2">
+                Your draft will expire in 7 days. Don't forget to publish it
+                before then!
+              </p>
+
+              {/* OK Button to acknowledge the notification */}
+              <div className="flex justify-end mt-4">
+                <button
+                  onClick={() => setShowDraftNotification(false)} // Close the notification
+                  className="bg-blue-600 text-white px-4 py-2 rounded-md"
+                >
+                  OK
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+        {showUpdateSuccess && (
+          <div className="fixed inset-0 backdrop-blur-sm bg-white/5 flex items-center justify-center z-50">
+            <div
+              className="bg-white p-6 rounded-lg shadow-xl text-left"
+              style={{ maxWidth: "400px", width: "auto" }}
+            >
+              <p className="text-lg font-semibold mb-2">
+                Update submitted successfully!
+              </p>
+              <p className="text-sm text-gray-500 mt-2">
+                Your update has been recorded. Thank you for keeping your
+                article accurate and up to date!
+              </p>
+
+              <div className="flex justify-end mt-4">
+                <button
+                  onClick={() => {
+                    setShowUpdateSuccess(false);
+                    navigate("/premiumDashboard/manageArticles");
+                  }}
+                  className="bg-blue-600 text-white px-4 py-2 rounded-md"
+                >
+                  OK
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </main>
     </div>
   );

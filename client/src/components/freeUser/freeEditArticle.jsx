@@ -978,6 +978,25 @@ const EditFreeArticle = () => {
                     </div>
                   )}
 
+                  {(accuracy !== null || aiFeedback) && (
+                    <div className="mt-4 p-4 border border-red-300 bg-red-50 rounded text-sm text-black">
+                      <strong>Fact Check Results:</strong>
+                      {accuracy !== null && (
+                        <p>
+                          <strong>Accuracy: </strong>
+                          {accuracy}%
+                        </p>
+                      )}
+                      <p>
+                        <strong>Feedback: </strong>
+                      </p>
+                      <div
+                        className="mt-1"
+                        dangerouslySetInnerHTML={{ __html: aiFeedback }}
+                      />
+                    </div>
+                  )}
+
                   <div
                     className="min-h-[400px] max-h-[600px] overflow-y-auto border rounded-md bg-white p-4 mt-3 focus-within:outline-none"
                     onClick={() => editor.commands.focus()}

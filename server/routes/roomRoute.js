@@ -18,7 +18,26 @@ const supabase = require("../supabaseClient"); // Import Supabase client
 // Note: You can also move these to server.js if you prefer centralized middleware.
 // router.use(bodyParser.json());
 
-// GET all rooms
+// GET rooms the user joined (not created by them)
+router.get("/joined/:userid", async (req, res) => {
+  const { userid } = req.params;
+
+  const { data, error } = await supabase
+    .from("room_members")
+    .select("roomid, rooms(*)")
+    .eq("userid", userid)
+    .is("exited_at", null);
+
+  if (error) return res.status(500).json({ error: error.message });
+
+  const joinedRooms = data
+    .map((entry) => entry.rooms)
+    .filter((room) => room.created_by !== userid); // exclude own rooms
+
+  res.status(200).json(joinedRooms); // includes room_type field
+});
+
+// GET rooms the user created
 // When mounted at /rooms, this endpoint will be accessible at GET /rooms
 router.get("/:userid", async (req, res) => {
   const { userid } = req.params;
@@ -33,7 +52,7 @@ router.get("/:userid", async (req, res) => {
 
 // 🔹 CREATE new room
 router.post("/", async (req, res) => {
-  const { name, description, room_type, created_by } = req.body;
+  const { name, description, room_type, created_by, member_limit } = req.body;
 
   if (!name || !description || !room_type || !created_by) {
     return res.status(400).json({ error: "Missing required fields" });
@@ -41,7 +60,7 @@ router.post("/", async (req, res) => {
 
   const { data, error } = await supabase
     .from("rooms")
-    .insert([{ name, description, room_type, created_by }])
+    .insert([{ name, description, room_type, created_by, member_limit: member_limit || 20, }])
     .select();
 
   if (error) return res.status(500).json({ error: error.message });
@@ -51,12 +70,16 @@ router.post("/", async (req, res) => {
 // 🔹 UPDATE room by ID
 router.put("/:roomid", async (req, res) => {
   const { roomid } = req.params;
-  const { name, description, room_type } = req.body;
+  const { name, description, room_type, member_limit } = req.body;
 
   if (!name && !description && !room_type) {
     return res.status(400).json({ error: "No fields to update" });
   }
-
+  
+  if (member_limit !== undefined) {
+    updateData.member_limit = member_limit;
+  }
+  
   const { data, error } = await supabase
     .from("rooms")
     .update({ name, description, room_type })
@@ -73,13 +96,56 @@ router.put("/:roomid", async (req, res) => {
 // 🔹 DELETE room by ID
 router.delete("/:roomid", async (req, res) => {
   const { roomid } = req.params;
-  const { error } = await supabase
-    .from("rooms")
-    .delete()
-    .eq("roomid", roomid);
+  const bucketName = "room-article-images";
 
-  if (error) return res.status(500).json({ error: error.message });
-  res.status(200).json({ message: "Room deleted" });
+  try {
+    // 1. Get all postids in the room
+    const { data: posts, error: postsError } = await supabase
+      .from("room_articles")
+      .select("postid")
+      .eq("roomid", roomid);
+
+    if (postsError) throw postsError;
+
+    const postIds = posts.map((p) => p.postid);
+
+    // 2. Get image URLs for those posts
+    if (postIds.length > 0) {
+      const { data: images, error: imagesError } = await supabase
+        .from("room_article_images")
+        .select("image_url")
+        .in("postid", postIds);
+
+      if (imagesError) throw imagesError;
+
+      const imagePaths = images.map((img) => {
+        const parts = img.image_url.split(`/object/public/${bucketName}/`);
+        return parts[1]; // extract path after bucket prefix
+      });
+
+      // 3. Delete from storage bucket
+      if (imagePaths.length > 0) {
+        const { error: storageError } = await supabase.storage
+          .from(bucketName)
+          .remove(imagePaths);
+
+        if (storageError) throw storageError;
+      }
+    }
+
+    // 4. Delete the room 
+    const { error: roomDeleteError } = await supabase
+      .from("rooms")
+      .delete()
+      .eq("roomid", roomid);
+
+    if (roomDeleteError) throw roomDeleteError;
+
+    return res.status(200).json({ message: "Room and images deleted" });
+  } catch (err) {
+    console.error("Delete failed:", err.message);
+    return res.status(500).json({ error: err.message });
+  }
 });
 
 router.post("/invite", async (req, res) => {
@@ -158,4 +224,20 @@ router.post("/decline", async (req, res) => {
   res.status(200).json({ message: "Invitation declined" });
 });
 
+router.post("/exit", async (req, res) => {
+  const { userid, roomid } = req.body;
+
+  const { error } = await supabase
+    .from("room_members")
+    .update({ exited_at: new Date().toISOString() })
+    .eq("userid", userid)
+    .eq("roomid", roomid);
+
+  if (error) return res.status(500).json({ error: error.message });
+
+  res.status(200).json({ message: "Exited room" });
+});
+
 module.exports = router;
+
+
