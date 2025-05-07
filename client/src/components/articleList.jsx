@@ -225,7 +225,7 @@ const ArticleList = ({
                     if (!isDraft) {
                       const route = isRoom
                         ? `/room-article/${article.postid}`
-                        : `/article/${encodeURIComponent(title)}`;
+                        : `/article/${article.title}`;
                       navigate(route);
                     }
                   }}
