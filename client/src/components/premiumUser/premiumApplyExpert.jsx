@@ -92,7 +92,7 @@ const PremiumApplyExpert = () => {
       userid: userRow.userid,
       topicid: selectedTopicId,
       description: position,
-      cv: cv, // ✅ NEW
+      cv: cv, //  NEW
       requirements: staticRequirements,
       status: "Pending",
       created_at: new Date().toISOString(),

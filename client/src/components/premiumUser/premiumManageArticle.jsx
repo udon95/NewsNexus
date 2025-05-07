@@ -246,7 +246,7 @@ export const PremManageArticle = () => {
 
   return (
     <div className="w-full min-h-screen text-black font-grotesk flex justify-center">
-      <main className="w-full text-xl flex flex-col max-md:flex-col max-w-4xl">
+      <main className="w-full flex flex-col max-md:flex-col max-w-4xl">
         <Manage
           onSearch={setSearchQuery}
           initialTimeFilter={timeFilter}
