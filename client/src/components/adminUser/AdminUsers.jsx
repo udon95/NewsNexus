@@ -68,19 +68,31 @@ const AdminUsers = () => {
 
   const UserList = ({ users, onUserClick }) => {
     return (
-      <div id="userList">
-        {users.map((user, index) => (
-          <div
-            key={user.userid}
-            className="ml-10 mt-8 max-w-150 bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300 cursor-pointer"
-            onClick={() => onUserClick(user)}
-          >
-            User {index + 1}: &emsp; {user.username}
-          </div>
-        ))}
+      <div className="overflow-x-auto ml-10 mt-8 max-w-4xl">
+        <table className="min-w-full bg-gray-100 rounded-2xl shadow-lg text-left">
+          <thead className="bg-gray-200">
+            <tr>
+              <th className="p-3">#</th>
+              <th className="p-3">Username</th>
+            </tr>
+          </thead>
+          <tbody>
+            {users.map((user, index) => (
+              <tr
+                key={user.userid}
+                className="cursor-pointer hover:bg-gray-300 transition-colors"
+                onClick={() => onUserClick(user)}
+              >
+                <td className="p-3">{index + 1}</td>
+                <td className="p-3">{user.username}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
     );
   };
+  
 
   const handleResolvedStatusChange = () => {
     const statusElement = document.getElementById("status");

@@ -13,23 +13,6 @@ const AdminProfile = () => {
   const [userDetails, setUserDetails] = useState(null);
 
 
-  // const updateUserEmail = async () => {
-  //   if (!newEmail) {
-  //     alert("Please enter a new email address.");
-  //     return;
-  //   }
-  //   const { error } = await supabase.auth.updateUser({ email: newEmail });
-  //   if (error) {
-  //     console.error("Error updating email:", error.message);
-  //     alert("Failed to update email.");
-  //   } else {
-  //     alert(
-  //       "Email update initiated. Please check your new email to confirm the change."
-  //     );
-  //   }
-  // };
-
-
   const updateUserEmail = async () => {
     if (!newEmail) {
       alert("Please enter a new email address.");
@@ -64,36 +47,6 @@ const AdminProfile = () => {
     }
   };
 
-  // const updatePassword = async () => {
-  //   if (!oldPass || !newPass) {
-  //     alert("Please enter both current and new passwords.");
-  //     return;
-  //   }
-
-  //   if (!user?.email) {
-  //     alert("No authenticated user found.");
-  //     return;
-  //   }
-  //   const { error: signInError } = await supabase.auth.signInWithPassword({
-  //     email: user.email,
-  //     password: oldPass,
-  //   });
-  //   if (signInError) {
-  //     console.error("Authentication error:", signInError.message);
-  //     alert("Current password is incorrect.");
-  //     return;
-  //   }
-  //   const { error: updateError } = await supabase.auth.updateUser({
-  //     password: newPass,
-  //   });
-
-  //   if (updateError) {
-  //     console.error("Error updating password:", updateError.message);
-  //     alert("Failed to update password.");
-  //   } else {
-  //     alert("Password updated successfully.");
-  //   }
-  // };
 
   const updatePassword = async () => {
     if (!oldPass || !newPass) {
