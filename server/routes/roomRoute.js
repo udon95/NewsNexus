@@ -2,22 +2,6 @@ const express = require("express");
 const router = express.Router();
 const supabase = require("../supabaseClient"); // Import Supabase client
 
-// const bodyParser = require("body-parser");
-// const { Pool } = require("pg");
-
-// Create and configure the PostgreSQL pool
-// const pool = new Pool({
-//   user: "postgres",
-//   host: "localhost",
-//   database: "roomsystem",
-//   password: "geqinxuan",
-//   port: 5432,
-// });
-
-// Middleware (if you want to use bodyParser in this file)
-// Note: You can also move these to server.js if you prefer centralized middleware.
-// router.use(bodyParser.json());
-
 // GET rooms the user joined (not created by them)
 router.get("/joined/:userid", async (req, res) => {
   const { userid } = req.params;
