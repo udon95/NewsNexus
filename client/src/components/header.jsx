@@ -7,7 +7,7 @@ import { useAuth } from "../context/AuthContext.jsx";
 const Header = () => {
   const { user, userType, handleLogout, loading } = useAuthHook();
   const navigate = useNavigate();
-  const [profileColor, setProfileColor] = useState("#ffffff");
+  const [profileColor, setProfileColor] = useState("#BFD8FF");
   const [textColor, setTextColor] = useState("black");
   const { color: contextColor } = useAuth();
 
