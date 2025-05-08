@@ -865,7 +865,8 @@ export const PremiumWriteArticle = () => {
         console.log("image", publicUrl);
       }
 
-      console.log("pending images", pendingImages);
+      console.log("uploaded images", uploadedImageUrls);
+
 
       const response = await fetch(
         "https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/api/moderate",
