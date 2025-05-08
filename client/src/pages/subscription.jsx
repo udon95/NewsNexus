@@ -197,7 +197,7 @@ const SubscriptionPage = () => {
                           </div>
                         ) : sub.tier !== "Free" ? (
                           <span className="text-black text-lg font-medium">
-                            `$${sub.default_price}`
+                            `${sub.default_price}`
                           </span>
                         ) : (
                           <span className="text-black text-lg font-medium">
