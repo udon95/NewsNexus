@@ -173,39 +173,35 @@ const SubscriptionPage = () => {
                   <SubscriptionCard
                     key={sub.id}
                     title={
-                      <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
-                        <span className="font-bold text-xl">{sub.tier}</span>
-
-                        {sub.tier !== "Free" && isPromo ? (
-                          <div className="relative w-[80px] flex flex-col items-center">
-                            {/* $4 with badge floated top-right of it */}
-                            <div className="relative">
-                              <span className="text-green-600 font-bold text-4xl ml-8.5">
-                                ${sub.promotion_price}
-                              </span>
-
-                              {/* Perfectly positioned badge */}
-                              <span className="absolute -top-4.5 right-[-60px] bg-red-100 text-red-600 border border-red-400 text-xs font-semibold px-2 py-0.5 rounded-full whitespace-nowrap">
-                                {discount}% OFF
-                              </span>
-                            </div>
-
-                            {/* $5 slashed price aligned under $4 --> To Be Considered Whether to Include or Not
-                              <div className="text-sm text-gray-500 line-through mt-1 self-start">
-                                ${sub.default_price}
-                              </div> */}
+                      sub.tier === "Free" ? (
+                        <div className="flex flex-col items-center justify-center">
+                          <span className="text-4xl font-bold text-black">$0</span>
+                          <span className="mt-2 px-3 py-0.5 bg-black text-white text-xs font-semibold rounded-full">
+                            Free
+                          </span>
+                        </div>
+                      )                      
+                      : isPromo ? (
+                        <div className="relative w-[80px] flex flex-col items-center">
+                          <div className="relative">
+                            <span className="text-green-600 font-bold text-4xl ml-8.5">
+                              ${sub.promotion_price}
+                            </span>
+                            <span className="absolute -top-4.5 right-[-60px] bg-red-100 text-red-600 border border-red-400 text-xs font-semibold px-2 py-0.5 rounded-full whitespace-nowrap">
+                              {discount}% OFF
+                            </span>
                           </div>
-                        ) : sub.tier !== "Free" ? (
-                          <span className="text-black text-lg font-medium">
-                            ${sub.default_price}
+                        </div>
+                      ) : (
+                        <div className="flex flex-col items-center justify-center">
+                          <span className="text-4xl font-bold text-black">${sub.default_price}</span>
+                          <span className="mt-2 px-3 py-0.5 bg-black text-white text-xs font-semibold rounded-full">
+                            Premium
                           </span>
-                        ) : (
-                          <span className="text-black text-lg font-medium">
-                            $0
-                          </span>
-                        )}
-                      </div>
+                        </div>
+                      )
                     }
+                    
                     content={
                       <ul className="list-disc list-inside space-y-1">
                         {sub.description ? (
