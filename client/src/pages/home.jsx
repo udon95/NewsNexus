@@ -88,7 +88,7 @@ function Home() {
         </div>
       </div>
 
-      <div className="flex justify-center w-full mt-12">
+      {/* <div className="flex justify-center w-full mt-12">
         {userType !== "Premium" && (
           <button
             onClick={handleGoToDiscussionRooms}
@@ -97,7 +97,7 @@ function Home() {
             Go To Discussion Rooms &gt;
           </button>
         )}{" "}
-      </div>
+      </div> */}
 
       <VideoComponent />
 
