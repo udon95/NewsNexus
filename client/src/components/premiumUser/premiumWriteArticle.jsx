@@ -527,12 +527,10 @@ export const PremiumWriteArticle = () => {
           .from("room-article-images")
           .getPublicUrl(filePath);
 
-        //const publicUrl = urlData?.publicUrl;
+        const publicUrl = urlData?.publicUrl;
 
         if (urlData?.publicUrl) {
-          uploadedImageUrls.push({
-            publicUrl: urlData.publicUrl,
-          });
+          uploadedImageUrls.push(publicUrl);
         }
       }
 
