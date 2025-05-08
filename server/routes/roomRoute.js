@@ -2,22 +2,6 @@ const express = require("express");
 const router = express.Router();
 const supabase = require("../supabaseClient"); // Import Supabase client
 
-// const bodyParser = require("body-parser");
-// const { Pool } = require("pg");
-
-// Create and configure the PostgreSQL pool
-// const pool = new Pool({
-//   user: "postgres",
-//   host: "localhost",
-//   database: "roomsystem",
-//   password: "geqinxuan",
-//   port: 5432,
-// });
-
-// Middleware (if you want to use bodyParser in this file)
-// Note: You can also move these to server.js if you prefer centralized middleware.
-// router.use(bodyParser.json());
-
 // GET rooms the user joined (not created by them)
 router.get("/joined/:userid", async (req, res) => {
   const { userid } = req.params;
@@ -57,12 +41,16 @@ router.post("/", async (req, res) => {
   if (!name || !description || !room_type || !created_by) {
     return res.status(400).json({ error: "Missing required fields" });
   }
+  
+  const limit =
+  typeof member_limit === "number" && member_limit > 0
+    ? Math.min(member_limit, 100)
+    : 20;
 
-  const { data, error } = await supabase
-    .from("rooms")
-    .insert([{ name, description, room_type, created_by, member_limit: member_limit || 20, }])
-    .select();
-
+const { data, error } = await supabase
+  .from("rooms")
+  .insert([{ name, description, room_type, created_by, member_limit: limit }])
+  .select();
   if (error) return res.status(500).json({ error: error.message });
   res.status(201).json({ message: "Room created", data });
 });

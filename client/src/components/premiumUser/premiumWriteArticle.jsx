@@ -488,7 +488,8 @@ export const PremiumWriteArticle = () => {
           .insert([{ articleid, image_url: url }]);
         console.log("img3", url);
       }
-
+      pendingImages.forEach((img) => URL.revokeObjectURL(img.previewUrl)); // cleanup object URLs
+      setPendingImages([]);
       setAccuracy(result.accuracy);
       setAiFeedback(result.feedback);
       alert(`Article posted successfully. Accuracy Score: ${result.accuracy}%`);
@@ -527,12 +528,10 @@ export const PremiumWriteArticle = () => {
           .from("room-article-images")
           .getPublicUrl(filePath);
 
-        //const publicUrl = urlData?.publicUrl;
+        const publicUrl = urlData?.publicUrl;
 
         if (urlData?.publicUrl) {
-          uploadedImageUrls.push({
-            publicUrl: urlData.publicUrl,
-          });
+          uploadedImageUrls.push(publicUrl);
         }
       }
 

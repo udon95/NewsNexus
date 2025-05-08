@@ -21,11 +21,9 @@ app.use(express.json());
 app.use(
   cors({
     origin: "https://van.dpyq2cohucoc7.amplifyapp.com", //For Hosted
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"], // ✅ include PUT here
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"], //  include PUT here
     allowedHeaders: ["Content-Type", "Authorization"],     // add other headers if needed
     // origin: "http://localhost:5173", // localhost frontend
-    methods: ["GET", "POST", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true, // Allow cookies & authentication headers
   })
 );
@@ -47,7 +45,7 @@ if (visionKey) {
   console.log("[Google Vision] Key file written to:", keyPath);
   console.log("[Google Vision] ENV matches:", process.env.GOOGLE_APPLICATION_CREDENTIALS === keyPath);
 } else {
-  console.error("[Google Vision] ❌ GOOGLE_VISION_KEY_JS not found in environment.");
+  console.error("[Google Vision]  GOOGLE_VISION_KEY_JS not found in environment.");
 }
 
 
@@ -63,4 +61,10 @@ app.use("/rooms", roomRoute);
 
 // Start Server
 const PORT = process.env.PORT || 5000;
+
+app.use((err, req, res, next) => {
+  console.error("Unhandled error:", err);
+  res.status(500).json({ error: "Something went wrong." });
+});
+
 app.listen(PORT, () => console.log(`Server running on ${PORT}`));

@@ -21,8 +21,6 @@ import SubscriptionStatus from "./components/payment.jsx";
 import PublicProfile from "./components/publicProfile.jsx";
 import ViewRooms from "./components/premiumUser/viewRooms.jsx";
 import RoomPage from "./components/premiumUser/roomPage.jsx";
-import EditFreeArticle from "./components/freeUser/freeEditArticle.jsx";
-import PremiumEditArticle from "./components/premiumUser/premiumEditArticle.jsx";
 import FloatingWriteButton from "./components/writeButton.jsx";
 import supabase from "./api/supabaseClient.js";
 import "./index.css";
@@ -169,23 +167,6 @@ function App() {
               }
             />
 
-            <Route
-              path="/edit/free/:id"
-              element={
-                <RequireAuth onlyFree={true}>
-                  <EditFreeArticle />
-                </RequireAuth>
-              }
-            />
-          
-            <Route
-              path="/edit/premium/:id"
-              element={
-                <RequireAuth requirePremium={true}>
-                  <PremiumEditArticle />
-                </RequireAuth>
-              }
-            />
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/reset-password" element={<ResetPassword />} />
           </Route>
