@@ -346,11 +346,17 @@ function Register() {
                   className="p-2 border rounded-lg"
                 >
                   <option value="">Select a category</option>
-                  {categories.map((cat) => (
-                    <option key={cat.id} value={cat.name}>
-                      {cat.name}
-                    </option>
-                  ))}
+                  {categories
+                    .filter(
+                      (cat) =>
+                        !dropdownValues.includes(cat.name) ||
+                        cat.name === dropdownValues[index]
+                    )
+                    .map((cat) => (
+                      <option key={cat.id} value={cat.name}>
+                        {cat.name}
+                      </option>
+                    ))}
                 </select>
               </div>
             ))}

@@ -21,17 +21,6 @@ const StarRating = ({ rating }) => {
   );
 };
 
-// Converts numeric rating (1–10) to descriptive text
-const getRatingText = (rating) => {
-  if (rating >= 1 && rating <= 2) return "Very Poor";
-  if (rating >= 3 && rating <= 4) return "Poor";
-  if (rating >= 5 && rating <= 6) return "Average";
-  if (rating >= 7 && rating <= 8) return "Good";
-  if (rating === 9) return "Very Good";
-  if (rating === 10) return "Excellent";
-  return "Not Rated";
-};
-
 const calculateAverageRating = (testimonial) => {
   const ratings = [
     testimonial.design,
