@@ -5,7 +5,7 @@ const AdminTestimonials = () => {
   const [selectedItem, setSelectedItem] = useState(null);
   const [selectedUser, setSelectedUser] = useState([]);
   const [rows, setRows] = useState([]);
-  const [displayedStatus, setDisplayedtatus] = useState(true);
+  const [displayedStatus, setDisplayedtatus] = useState("all");
   const [displayedRows, setDisplayedRows] = useState([]);
   const [users, setUsers] = useState([]);
 
@@ -72,17 +72,19 @@ const AdminTestimonials = () => {
   });
 
   useEffect(() => {
-    setDisplayedRows(
-      rows.filter((row) => row.homepage_display === displayedStatus)
-    );
+    if(displayedStatus == "all"){
+      setDisplayedRows(rows);
+    }else if(displayedStatus == "displayed"){
+      setDisplayedRows(rows.filter((row) => row.homepage_display == true));
+    } else{
+      setDisplayedRows(rows.filter((row) => row.homepage_display == false));
+    }
+
   }, [displayedStatus, rows]);
 
   const handleResolvedStatusChange = () => {
     const statusElement = document.getElementById("status");
-    setDisplayedtatus(statusElement.value === "displayed");
-    setDisplayedRows(
-      rows.filter((row) => row.homepage_display === displayedStatus)
-    );
+    setDisplayedtatus(statusElement);
   };
 
   return (
@@ -138,6 +140,7 @@ const AdminTestimonials = () => {
               className=" sm:text-xl text-left mt-8 ml-40 font-bold"
               onChange={handleResolvedStatusChange}
             >
+              <option value="all">All</option>
               <option value="displayed">Displayed</option>
               <option value="not displayed">Not displayed</option>
             </select>
