@@ -78,6 +78,22 @@ const Header = () => {
 
         <nav className="flex items-center gap-2 sm:gap-6">
           {/* Show Profile Button if User is Logged In */}
+          {!user && !loading && (
+              <>
+                <button
+                  className="px-2 py-1 bg-[#191A23] font-grotesk text-white rounded-lg hover:bg-opacity-90 w-[80px]"
+                  onClick={() => navigate("/register")}
+                >
+                  Register
+                </button>
+                <button
+                  className="px-2 py-1 bg-[#191A23] font-grotesk text-white rounded-lg hover:bg-opacity-90 w-[80px]"
+                  onClick={() => navigate("/login")}
+                >
+                  Login
+                </button>
+              </>
+            )}
           {user ? (
             <button
               className="w-12 h-12 sm:w-14 sm:h-14 bg-blue-200 rounded-lg text-blue-900 font-bold border-2 border-blue-900 flex items-center justify-center shadow-md hover:bg-blue-300 transition"
@@ -85,9 +101,10 @@ const Header = () => {
               title="Profile"
               style={{ backgroundColor: profileColor, color: textColor }}
             >
-              {user.email.charAt(0).toUpperCase()}
+              {user.username}
             </button>
           ) : (
+            
             <button
               className="px-2 py-1 bg-[#191A23] font-grotesk text-white rounded-lg hover:bg-opacity-90 w-[80px]"
               onClick={() => navigate("/login")}
