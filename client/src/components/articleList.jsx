@@ -47,7 +47,7 @@ const ArticleList = ({
     };
   
     deleteExpiredDrafts();
-  }, [articles, isDraft, isRoom]);
+  }, [articles, isDraft, isRoom]);  
 
   useEffect(() => {
     const fetchVotes = async () => {
@@ -281,7 +281,7 @@ const ArticleList = ({
                       </div>
                     )}
                     {isRoom && !isDraft && (
-                      <div className="w-full h-48 bg-gray-200 rounded-t-2xl overflow-hidden relative">
+                      <div className="w-full h-40 bg-gray-200 rounded-t-2xl overflow-hidden relative">
                         <img
                           src={roomimageUrl}
                           alt={article.title}
@@ -302,48 +302,68 @@ const ArticleList = ({
                       {article.title}
                     </p>
                     {!isDraft && !isRoom && (
-                      <div className="flex flex-wrap gap-10 absolute bottom-4 left-4 text-sm">
-                        <div className="flex items-center gap-2">
-                          <Eye />
-                          {viewCounts[article.articleid] || 0}
+                      <div className="flex justify-between items-center flex-wrap px-4 pb-2 pt-1 text-sm gap-4">
+                        <div className="flex flex-wrap gap-4">
+                          <div className="flex items-center gap-2">
+                            <Eye size={16} />
+                            {viewCounts[article.articleid] || 0}
+                          </div>
+                          <div className="flex items-center gap-2 text-green-500">
+                            <ThumbsUp size={16} />
+                            <span className="font-semibold text-black">
+                              {formatCount(voteCounts[article.articleid]?.up || 0)}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-2 text-red-500">
+                            <ThumbsDown size={16} />
+                            <span className="font-semibold text-black">
+                              {formatCount(voteCounts[article.articleid]?.down || 0)}
+                            </span>
+                          </div>
                         </div>
-                        <div className="flex items-center gap-2 text-green-500">
-                          <ThumbsUp />
-                          <span className="font-semibold text-black">
-                            {formatCount(
-                              voteCounts[article.articleid]?.up || 0
-                            )}
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-2 text-red-500">
-                          <ThumbsDown />
-                          <span className="font-semibold text-black">
-                            {formatCount(
-                              voteCounts[article.articleid]?.down || 0
-                            )}
-                          </span>
-                        </div>
+
+                        <button
+                          className="article-menu-trigger p-1 text-lg font-bold text-black hover:text-gray-600"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setOpenMenuIndex(openMenuIndex === index ? null : index);
+                          }}
+                        >
+                          <EllipsisVertical size={18} />
+                        </button>
                       </div>
                     )}
                     {isDraft && (
-                      <div className="absolute bottom-4 left-4 text-sm">
-                        Expires: {isRoom ? calculateExpiryDateRoom(article) : calculateExpiryDate(article)}
+                      <div className="flex justify-between items-center flex-wrap px-4 pb-2 pt-1 text-sm gap-2">
+                        <div className="text-black">
+                          Expires: {isRoom ? calculateExpiryDateRoom(article) : calculateExpiryDate(article)}
+                        </div>
+
+                        <button
+                          className="article-menu-trigger p-1 text-lg font-bold text-black hover:text-gray-600"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setOpenMenuIndex(openMenuIndex === index ? null : index);
+                          }}
+                        >
+                          <EllipsisVertical size={18} />
+                        </button>
                       </div>
                     )}
-
-                    {/* Three-Dot Menu Button */}
-                    <button
-                      className="article-menu-trigger absolute bottom-2 right-2 p-2 text-lg font-bold text-black hover:text-gray-600"
-                      onClick={(e) => {
-                        e.stopPropagation(); // Prevents triggering article click
-                        setOpenMenuIndex(
-                          openMenuIndex === index ? null : index
-                        );
-                      }}
-                    >
-                      <EllipsisVertical />
-                    </button>
-
+                    {isRoom && !isDraft && (
+                      <div className="flex justify-end px-4 pb-2 pt-1">
+                        <button
+                          className="article-menu-trigger p-1 text-lg font-bold text-black hover:text-gray-600"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setOpenMenuIndex(openMenuIndex === index ? null : index);
+                          }}
+                        >
+                          <EllipsisVertical size={18} />
+                        </button>
+                      </div>
+                    )}
+                  
                     {/* Dropdown Menu (Appears on Click) */}
                     {openMenuIndex === index && (
                       <div className="article-menu-dropdown absolute bottom-10 right-2 bg-white shadow-md border border-gray-300 rounded-lg min-w-[120px] z-50">
