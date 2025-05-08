@@ -145,13 +145,13 @@ const AdminTestimonials = () => {
 
           <div>
             {displayedRows.length > 0 ? (
-              <div className="overflow-x-auto ml-10 mt-8 max-w-4xl">
+              <div className="overflow-x-auto ml-10 mt-8 max-w-5xl">
                 <table className="min-w-full bg-gray-100 rounded-2xl shadow-lg text-left">
                 <thead className="bg-gray-200">
                   <tr>
                     <th className="p-3">#</th>
                     <th className="p-3">Username</th>
-                    <th className="p-3">Status</th>
+                    <th className="p-3">Displayed</th>
                     <th className="p-3">Submitted</th>
                     <th className="p-3">Design</th>
                     <th className="p-3">Factcheck</th>
@@ -171,7 +171,7 @@ const AdminTestimonials = () => {
                     >
                       <td className="p-3">{index + 1}</td>
                       <td className="p-3">{users.find((user) => user.userid === row.userid)?.username || "Unknown"}</td>
-                      <td className="p-3">{row.homepage_display}</td>
+                      <td className="p-3">{row.homepage_display? "Yes" : "No"}</td>
                       <td className="p-3">{row.submitted}</td>
                       <td className="p-3">{row.design}</td>
                       <td className="p-3">{row.factcheck}</td>
