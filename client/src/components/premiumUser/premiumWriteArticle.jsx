@@ -856,10 +856,12 @@ export const PremiumWriteArticle = () => {
 
         const publicUrl = urlData?.publicUrl;
         if (publicUrl) {
-          await supabase
-            .from("room_article_images")
-            .insert([{ postid, image_url: publicUrl }]);
-        }
+          uploadedImageUrls.push(publicUrl);
+
+        //   await supabase
+        //     .from("room_article_images")
+        //     .insert([{ postid, image_url: publicUrl }]);
+         }
       }
 
       console.log("pending images", pendingImages);
