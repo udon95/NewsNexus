@@ -9,6 +9,7 @@ const Room = () => {
   const { id: roomid } = useParams();
   const navigate = useNavigate();
   const [room, setRoom] = useState(null);
+  const [isExpertOrAdmin, setIsExpertOrAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState(null);
   const [articles, setArticles] = useState([]);
@@ -140,52 +141,109 @@ const Room = () => {
     return () => document.head.removeChild(style);
   }, []);
 
+  // const handleDeleteArticle = async (postid) => {
+  //   const confirmed = window.confirm(
+  //     "Are you sure you want to delete this article?"
+  //   );
+  //   if (!confirmed) return;
+
+  //   const { error } = await supabase
+  //     .from("room_articles")
+  //     .delete()
+  //     .eq("postid", postid);
+
+  //   if (error) {
+  //     console.error("Error deleting article:", error);
+  //     return;
+  //   }
+
+  //   setArticles((prev) => prev.filter((a) => a.postid !== postid));
+  //   setArticleMenu(null);
+  // };
+
+  //DEVI MADE CHANGES HERE
   const handleDeleteArticle = async (postid) => {
-    const confirmed = window.confirm(
-      "Are you sure you want to delete this article?"
-    );
+    const confirmed = window.confirm("Are you sure you want to delete this article?");
     if (!confirmed) return;
   
-    const bucketName = "room-article-images";
+    try {
+      // 1. Delete images from Supabase Storage
+      const { data: imageRecords, error: imageFetchError } = await supabase
+        .from("room_article_images")
+        .select("image_url")
+        .eq("postid", postid);
   
-    const { data: images, error: fetchError } = await supabase
-      .from("room_article_images")
-      .select("image_url")
-      .eq("postid", postid);
-  
-    if (fetchError) {
-      console.error("Error fetching room article images:", fetchError);
-      return;
-    }
-  
-    if (images && images.length > 0) {
-      const imagePaths = images.map((img) => {
-        const parts = img.image_url.split(`/object/public/${bucketName}/`);
-        return parts[1]; 
-      });
-  
-      const { error: storageError } = await supabase.storage
-        .from(bucketName)
-        .remove(imagePaths);
-  
-      if (storageError) {
-        console.error("Error deleting images from storage:", storageError);
+      if (imageFetchError) {
+        console.error("Error fetching images:", imageFetchError);
+        return;
       }
+  
+      const imagePathsToDelete = imageRecords
+        .map((img) => {
+          const match = img.image_url.match(/room-article-images\/(.+)$/);
+          return match ? match[1] : null;
+        })
+        .filter(Boolean);
+  
+      if (imagePathsToDelete.length > 0) {
+        const { error: storageDeleteError } = await supabase.storage
+          .from("room-article-images")
+          .remove(imagePathsToDelete);
+  
+        if (storageDeleteError) {
+          console.error("Error deleting from storage:", storageDeleteError);
+        }
+      }
+  
+      // 2. Delete related comments
+      const { error: deleteCommentsError } = await supabase
+        .from("room_comments")
+        .delete()
+        .eq("postid", postid);
+  
+      if (deleteCommentsError) {
+        console.error("Error deleting comments:", deleteCommentsError);
+      }
+  
+      // 3. Delete related community notes
+      const { error: deleteNotesError } = await supabase
+        .from("community_notes")
+        .delete()
+        .eq("target_id", postid);
+  
+      if (deleteNotesError) {
+        console.error("Error deleting community notes:", deleteNotesError);
+      }
+  
+      // 4. Delete from room_article_images table
+      const { error: deleteImageTableError } = await supabase
+        .from("room_article_images")
+        .delete()
+        .eq("postid", postid);
+  
+      if (deleteImageTableError) {
+        console.error("Error deleting image table entries:", deleteImageTableError);
+      }
+  
+      // 5. Finally delete the article
+      const { error: deleteArticleError } = await supabase
+        .from("room_articles")
+        .delete()
+        .eq("postid", postid);
+  
+      if (deleteArticleError) {
+        console.error("Error deleting article:", deleteArticleError);
+        return;
+      }
+  
+      // Update UI
+      setArticles((prev) => prev.filter((a) => a.postid !== postid));
+      setArticleMenu(null);
+  
+    } catch (err) {
+      console.error("Unexpected deletion error:", err);
     }
-  
-    const { error } = await supabase
-      .from("room_articles")
-      .delete()
-      .eq("postid", postid);
-  
-    if (error) {
-      console.error("Error deleting article:", error);
-      return;
-    }
-  
-    setArticles((prev) => prev.filter((a) => a.postid !== postid));
-    setArticleMenu(null);
-  };
+  };  
 
   const handleDeleteComment = async (commentid, postid) => {
     const confirmed = window.confirm("Delete this comment?");
@@ -246,6 +304,32 @@ const Room = () => {
     const storedUser = JSON.parse(localStorage.getItem("userProfile"));
     if (storedUser?.user?.userid) {
       setUser(storedUser.user);
+      const checkExpertOrAdminStatus = async () => {
+        const userid = storedUser.user.userid;
+      
+        // Check if user is expert
+        const { data: expertData, error: expertError } = await supabase
+          .from("expert_application")
+          .select("status")
+          .eq("userid", userid)
+          .eq("status", "Approved");
+      
+        const isExpert = expertData?.length > 0;
+      
+        // Check if user is admin
+        const { data: adminData, error: adminError } = await supabase
+          .from("admin")
+          .select("adminid")
+          .eq("adminid", userid)
+          .limit(1);
+      
+        const isAdmin = adminData?.length > 0;
+      
+        setIsExpertOrAdmin(isExpert || isAdmin);
+      };
+      
+      checkExpertOrAdminStatus();
+      
     } else {
       console.warn("No user found in localStorage.");
     }
@@ -324,7 +408,7 @@ const Room = () => {
         )
         .eq("roomid", roomid)
         .eq("status", "Published")
-        .eq("Suspended", false)
+        .eq("Suspended", false)  // Filter out suspended articles
         .order("created_at", { ascending: false });
 
       if (articlesError) {
@@ -1117,12 +1201,12 @@ const Room = () => {
                           {/* Owner sees Edit and Delete */}
                           <button
                             className="block w-full text-left p-2 hover:bg-gray-100 text-black"
-                            onClick={() =>
-                              console.log("Edit article", article.postid)
-                            }
+                            onClick={() => navigate(`/edit/premium/${article.postid}`)}
                           >
                             Edit
                           </button>
+
+
                           <button
                             className="block w-full text-left p-2 hover:bg-gray-100 text-red-500"
                             onClick={() => handleDeleteArticle(article.postid)}
@@ -1132,7 +1216,7 @@ const Room = () => {
                         </>
                       ) : (
                         <>
-                          {/* Owner sees Edit and Delete */}
+                          {isExpertOrAdmin && (
                           <button
                             className="block w-full text-left p-2 hover:bg-gray-100 text-black"
                             onClick={() =>
@@ -1142,8 +1226,10 @@ const Room = () => {
                               })
                             }
                           >
-                            + Comunity Note
+                            + Community Note
                           </button>
+                          )}
+
                           <button
                             className="block w-full text-left p-2 hover:bg-gray-100 text-red-500"
                             onClick={() =>
