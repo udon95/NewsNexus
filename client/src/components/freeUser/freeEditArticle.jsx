@@ -202,22 +202,22 @@ const EditFreeArticle = () => {
     }
   }, [editor, articleStatus]);
 
-  useEffect(() => {
-    const checkSession = async () => {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-      console.log("Session:", session);
+  // useEffect(() => {
+  //   const checkSession = async () => {
+  //     const {
+  //       data: { session },
+  //     } = await supabase.auth.getSession();
+  //     console.log("Session:", session);
 
-      if (!session?.user) {
-        console.warn("No active Supabase session!");
-      } else {
-        console.log("Supabase user is authenticated");
-      }
-    };
+  //     if (!session?.user) {
+  //       console.warn("No active Supabase session!");
+  //     } else {
+  //       console.log("Supabase user is authenticated");
+  //     }
+  //   };
 
-    checkSession();
-  }, []);
+  //   checkSession();
+  // }, []);
 
   useEffect(() => {
     const fetchMonthlyPostCount = async () => {
@@ -256,15 +256,15 @@ const EditFreeArticle = () => {
     fetchMonthlyPostCount();
   }, []);
 
-  useEffect(() => {
-    supabase.auth.onAuthStateChange((event, session) => {
-      if (event === "SIGNED_IN") {
-        console.log(" Logged in");
-      } else if (event === "SIGNED_OUT") {
-        console.log(" Logged out");
-      }
-    });
-  }, []);
+  // useEffect(() => {
+  //   supabase.auth.onAuthStateChange((event, session) => {
+  //     if (event === "SIGNED_IN") {
+  //       console.log(" Logged in");
+  //     } else if (event === "SIGNED_OUT") {
+  //       console.log(" Logged out");
+  //     }
+  //   });
+  // }, []);
 
   const MAX_WORDS = 1000;
 
@@ -285,7 +285,7 @@ const EditFreeArticle = () => {
     const uploadedImageUrls = Array.from(doc.querySelectorAll("img")).map(
       (img) => img.src
     );
-    console.log("image urls?", imageUrls);
+    console.log("image urls?", uploadedImageUrls);
 
     const topicName = topicOptions.find((t) => t.topicid === topics)?.name;
     let updatedHTML = articleContent;

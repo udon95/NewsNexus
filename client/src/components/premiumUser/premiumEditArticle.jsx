@@ -850,7 +850,7 @@ export const PremiumEditArticle = () => {
     pendingImages.forEach((img) => URL.revokeObjectURL(img.previewUrl));
     setPendingImages([]);
     setShowDraftNotification(true);
-    alert("Draft saved!");
+    // alert("Draft saved!");
     handleClearInputs();
     setIsUploading(false);
     setUploadAction(""); // DEVI ADDED THIS
