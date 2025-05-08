@@ -427,7 +427,7 @@ export const FreeWriteArticle = () => {
       const fileName = `${Date.now()}-${Math.random()
         .toString(36)
         .substring(2)}.${fileExt}`;
-      const filePath = `${supabaseUid}/${fileName}`;
+      const filePath = `user-${session.userid}/${fileName}`;
 
       const { error: uploadError } = await supabase.storage
         .from(bucket)
