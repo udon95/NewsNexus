@@ -98,7 +98,7 @@ const Header = () => {
           )}
           {user && (
             <button
-              className="h-12 px-4 sm:h-14 bg-blue-200 rounded-lg text-blue-900 font-bold border-2 border-blue-900 flex items-center justify-center shadow-md hover:bg-blue-300 transition max-w-[10rem] overflow-hidden text-ellipsis whitespace-nowrap"
+              className="h-12 px-2 sm:h-14 bg-blue-200 rounded-lg text-blue-900 font-bold border-2 border-blue-900 flex items-center justify-center shadow-md hover:bg-blue-300 transition max-w-[10rem] overflow-hidden text-ellipsis whitespace-nowrap"
               onClick={handleProfileClick}
               title="Profile"
               style={{ backgroundColor: profileColor, color: textColor }}

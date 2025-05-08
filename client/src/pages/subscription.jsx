@@ -60,7 +60,10 @@ const SubscriptionPage = () => {
             "userProfile",
             JSON.stringify(updatedUserProfile)
           );
-          sessionStorage.setItem("userProfile", JSON.stringify(updatedUserProfile))
+          sessionStorage.setItem(
+            "userProfile",
+            JSON.stringify(updatedUserProfile)
+          );
           alert("You have successfully unsubscribed.");
         } else {
           console.error("Error unsubscribing", data);
@@ -170,33 +173,38 @@ const SubscriptionPage = () => {
                   <SubscriptionCard
                     key={sub.id}
                     title={
-                      sub.tier === "Free" ? (
-                        "Free"
-                      ) : isPromo ? (
-                        <div className="relative w-[80px] flex flex-col items-center">
-                          {/* $4 with badge floated top-right of it */}
-                          <div className="relative">
-                          <span className="text-green-600 font-bold text-4xl ml-8.5">
-                              Premium
-                            </span>
-                            <span className="text-green-600 font-bold text-4xl ml-8.5">
-                              ${sub.promotion_price}
-                            </span>
+                      <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+                        <span className="font-bold text-xl">{sub.tier}</span>
 
-                            {/* Perfectly positioned badge */}
-                            <span className="absolute -top-4.5 right-[-60px] bg-red-100 text-red-600 border border-red-400 text-xs font-semibold px-2 py-0.5 rounded-full whitespace-nowrap">
-                              {discount}% OFF
-                            </span>
-                          </div>
+                        {sub.tier !== "Free" && isPromo ? (
+                          <div className="relative w-[80px] flex flex-col items-center">
+                            {/* $4 with badge floated top-right of it */}
+                            <div className="relative">
+                              <span className="text-green-600 font-bold text-4xl ml-8.5">
+                                ${sub.promotion_price}
+                              </span>
 
-                          {/* $5 slashed price aligned under $4 --> To Be Considered Whether to Include or Not
+                              {/* Perfectly positioned badge */}
+                              <span className="absolute -top-4.5 right-[-60px] bg-red-100 text-red-600 border border-red-400 text-xs font-semibold px-2 py-0.5 rounded-full whitespace-nowrap">
+                                {discount}% OFF
+                              </span>
+                            </div>
+
+                            {/* $5 slashed price aligned under $4 --> To Be Considered Whether to Include or Not
                               <div className="text-sm text-gray-500 line-through mt-1 self-start">
                                 ${sub.default_price}
                               </div> */}
-                        </div>
-                      ) : (
-                        `$${sub.default_price}`
-                      )
+                          </div>
+                        ) : sub.tier !== "Free" ? (
+                          <span className="text-black text-lg font-medium">
+                            `$${sub.default_price}`
+                          </span>
+                        ) : (
+                          <span className="text-black text-lg font-medium">
+                            $0
+                          </span>
+                        )}
+                      </div>
                     }
                     content={
                       <ul className="list-disc list-inside space-y-1">
