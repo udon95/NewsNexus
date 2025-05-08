@@ -5,9 +5,10 @@ const AdminTestimonials = () => {
   const [selectedItem, setSelectedItem] = useState(null);
   const [selectedUser, setSelectedUser] = useState([]);
   const [rows, setRows] = useState([]);
-  let count = 0;
   const [displayedStatus, setDisplayedtatus] = useState(true);
   const [displayedRows, setDisplayedRows] = useState([]);
+  const [users, setUsers] = useState([]);
+
 
   const openReport = (row) => {
     fetchUsername(row.userid);
@@ -46,7 +47,9 @@ const AdminTestimonials = () => {
 
   useEffect(() => {
     const fetchRows = async () => {
-      const { data, error } = await supabase.from("testimonial").select("*");
+      const { data, error } = await supabase
+        .from("testimonial")
+        .select("*");
       if (error) {
         console.error("Error fetching data:", error);
       } else {
@@ -54,6 +57,18 @@ const AdminTestimonials = () => {
       }
     };
     fetchRows();
+
+    const fetchUsers = async () => {
+      const { data, error } = await supabase
+        .from("users")
+        .select("*")
+      if (error) {
+        console.error("Error fetching data:", error);
+      } else {
+        setUsers(data);
+      }
+    };
+    fetchUsers();
   });
 
   useEffect(() => {
@@ -130,17 +145,44 @@ const AdminTestimonials = () => {
 
           <div>
             {displayedRows.length > 0 ? (
-              displayedRows.map((row) => (
-                <div key={row.id}>
-                  {/* Render row data here */}
-                  <div
-                    className="ml-10 mt-8 max-w-150 bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300 cursor-pointer"
+              <table className="min-w-full bg-gray-100 rounded-2xl shadow-lg text-left">
+              <thead className="bg-gray-200">
+                <tr>
+                  <th className="p-3">#</th>
+                  <th className="p-3">Username</th>
+                  <th className="p-3">Status</th>
+                  <th className="p-3">Submitted</th>
+                  <th className="p-3">Design</th>
+                  <th className="p-3">Factcheck accuracy</th>
+                  <th className="p-3">Accessibility</th>
+                  <th className="p-3">Safety</th>
+                  <th className="p-3">Pricing</th>
+                  <th className="p-3">News Quality</th>
+
+                </tr>
+              </thead>
+              <tbody>
+                {displayedRows.map((row, index) => (
+                  <tr
+                    key={row.id}
+                    className="cursor-pointer hover:bg-gray-300 transition-colors"
                     onClick={() => openReport(row)}
                   >
-                    Testimonials {++count} : &emsp; Rating - {row.rating}
-                  </div>
-                </div>
-              ))
+                    <td className="p-3">{index + 1}</td>
+                    <td className="p-3">{users.find((user) => user.userid === row.userid)?.username || "Unknown"}</td>
+                    <td className="p-3">{row.homepage_display}</td>
+                    <td className="p-3">{row.submitted}</td>
+                    <td className="p-3">{row.design}</td>
+                    <td className="p-3">{row.factcheck}</td>
+                    <td className="p-3">{row.accessible}</td>
+                    <td className="p-3">{row.safety}</td>
+                    <td className="p-3">{row.price}</td>
+                    <td className="p-3">{row.news}</td>
+
+                  </tr>
+                ))}
+              </tbody>
+            </table>
             ) : (
               <div className="ml-10 mt-8">0 results</div>
             )}
