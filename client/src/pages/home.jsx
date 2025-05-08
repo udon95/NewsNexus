@@ -55,7 +55,7 @@ function Home() {
             Navigating the Singaporean News Landscape
           </h1>
           <div className="flex justify-left gap-3 mt-4 sm:mt-4 sm:ml-10">
-            {!user && !loading && (
+            {/* {!user && !loading && (
               <>
                 <button
                   className="px-2 py-1 bg-[#191A23] font-grotesk text-white rounded-lg hover:bg-opacity-90 w-[80px]"
@@ -70,7 +70,7 @@ function Home() {
                   Login
                 </button>
               </>
-            )}
+            )} */}
           </div>
         </div>
       </div>

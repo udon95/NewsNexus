@@ -96,25 +96,18 @@ const Header = () => {
               </button>
             </>
           )}
-          {user ? (
+          {user && (
             <button
-              className="h-12 sm:w-14 sm:h-14 bg-blue-200 rounded-lg text-blue-900 font-bold border-2 border-blue-900 flex items-center justify-center shadow-md hover:bg-blue-300 transition"
+              className="h-12 px-4 sm:h-14 bg-blue-200 rounded-lg text-blue-900 font-bold border-2 border-blue-900 flex items-center justify-center shadow-md hover:bg-blue-300 transition"
               onClick={handleProfileClick}
               title="Profile"
               style={{ backgroundColor: profileColor, color: textColor }}
             >
-              {user.username}
+              {user.username || "Guest"}
             </button>
-          ) : (
-            <button
-              className="px-2 py-1 bg-[#191A23] font-grotesk text-white rounded-lg hover:bg-opacity-90 w-[80px]"
-              onClick={() => navigate("/login")}
-            >
-              Login
-            </button>
-          )}
+          )} 
 
-          {user !== null && (
+          {user && !loading && (
             <button
               onClick={handleLogout}
               className="text-red-500 font-medium hover:underline"
