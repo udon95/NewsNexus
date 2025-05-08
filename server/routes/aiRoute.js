@@ -105,19 +105,35 @@ async function moderateImages(imageUrls) {
 }
 
 const deleteImagesFromSupabase = async (imageUrls) => {
-  const bucket = "articles-images";
-  const paths = imageUrls
-    .map((url) => {
-      const parts = url.split(`${bucket}/`);
-      return parts[1]; // path after the bucket
-    })
-    .filter(Boolean);
+  const articleBucket = "articles-images";
+  const roomBucket = "room-article-images";
+  const articlePaths = [];
+  const roomPaths = [];
 
-  if (paths.length > 0) {
-    const { error } = await supabase.storage.from(bucket).remove(paths);
+  for (const url of imageUrls) {
+    if (url.includes(articleBucket)) {
+      const parts = url.split(`${articleBucket}/`);
+      if (parts[1]) articlePaths.push(parts[1]);
+    } else if (url.includes(roomBucket)) {
+      const parts = url.split(`${roomBucket}/`);
+      if (parts[1]) roomPaths.push(parts[1]);
+    }
+  }
+
+  if (articlePaths.length > 0) {
+    const { error } = await supabase.storage
+      .from(articleBucket)
+      .remove(articlePaths);
+    if (error) {
+      console.error("Failed to delete from articles-images:", error.message);
+    }
+  }
+
+  if (roomPaths.length > 0) {
+    const { error } = await supabase.storage.from(roomBucket).remove(roomPaths);
     if (error) {
       console.error(
-        "Failed to delete images after moderation block:",
+        "Failed to delete from room-article-images:",
         error.message
       );
     }

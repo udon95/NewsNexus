@@ -494,133 +494,137 @@ export const PremiumWriteArticle = () => {
       alert(`Article posted successfully. Accuracy Score: ${result.accuracy}%`);
       handleClearInputs();
       return;
-    }
-
-    // ---------------------- ROOM ARTICLE ----------------------
-
-    for (const img of pendingImages) {
-      const file = img.file;
-      if (!file?.name) continue;
-
-      const fileExt = file.name.split(".").pop();
-      const fileName = `${Date.now()}-${Math.random()
-        .toString(36)
-        .substring(2)}.${fileExt}`;
-      const filePath = `user-${session.userid}/${fileName}`;
-
-      const { error: uploadError } = await supabase.storage
-        .from("room-article-images")
-        .upload(filePath, file);
-
-      if (uploadError) {
-        console.error("Image upload failed:", uploadError);
-        alert("Image upload failed.");
-        setIsUploading(false);
-        setUploadAction(""); // DEVI ADDED THIS
-        return;
-      }
-
-      const { data: urlData } = supabase.storage
-        .from("room-article-images")
-        .getPublicUrl(filePath);
-
-      //const publicUrl = urlData?.publicUrl;
-
-      if (urlData?.publicUrl) {
-        uploadedImageUrls.push({
-          publicUrl: urlData.publicUrl,
-        });
-      }
-    }
-
-    console.log("room images", uploadedImageUrls);
-
-    const articleData = {
-      title,
-      content: updatedHTML,
-      roomid: selectedRoom,
-      userid: session.userid,
-      created_at: new Date().toISOString(),
-      status: "Published",
-    };
-
-    try {
-      const response = await fetch(
-        "https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/api/moderate",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            content: updatedHTML,
-            imageUrls: uploadedImageUrls,
-          }),
-        }
+    } else {
+      // ---------------------- ROOM ARTICLE ----------------------
+      updatedHTML = updatedHTML.replace(
+        /<img[^>]*src=["']blob:[^"']+["'][^>]*>/g,
+        ""
       );
 
-      const result = await response.json();
-      if (result.error) {
-        alert(`Article flagged: ${result.error}`);
+      for (const img of pendingImages) {
+        const file = img.file;
+        if (!file?.name) continue;
+
+        const fileExt = file.name.split(".").pop();
+        const fileName = `${Date.now()}-${Math.random()
+          .toString(36)
+          .substring(2)}.${fileExt}`;
+        const filePath = `user-${session.userid}/${fileName}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from("room-article-images")
+          .upload(filePath, file);
+
+        if (uploadError) {
+          console.error("Image upload failed:", uploadError);
+          alert("Image upload failed.");
+          setIsUploading(false);
+          setUploadAction(""); // DEVI ADDED THIS
+          return;
+        }
+
+        const { data: urlData } = supabase.storage
+          .from("room-article-images")
+          .getPublicUrl(filePath);
+
+        //const publicUrl = urlData?.publicUrl;
+
+        if (urlData?.publicUrl) {
+          uploadedImageUrls.push({
+            publicUrl: urlData.publicUrl,
+          });
+        }
+      }
+
+      console.log("room images", uploadedImageUrls);
+
+      const articleData = {
+        title,
+        content: updatedHTML,
+        roomid: selectedRoom,
+        userid: session.userid,
+        created_at: new Date().toISOString(),
+        status: "Published",
+      };
+
+      try {
+        const response = await fetch(
+          "https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/api/moderate",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              content: updatedHTML,
+              imageUrls: uploadedImageUrls,
+            }),
+          }
+        );
+
+        const result = await response.json();
+        if (result.error) {
+          alert(`Article flagged: ${result.error}`);
+          setIsUploading(false);
+          setUploadAction(""); // DEVI ADDED THIS
+          return;
+        }
+      } catch (err) {
+        alert("Failed to moderate content.");
+        console.error(err);
         setIsUploading(false);
         setUploadAction(""); // DEVI ADDED THIS
         return;
       }
-    } catch (err) {
-      alert("Failed to moderate content.");
-      console.error(err);
-      setIsUploading(false);
-      setUploadAction(""); // DEVI ADDED THIS
-      return;
-    }
 
-    const { data, error } = await supabase
-      .from("room_articles")
-      .insert([articleData])
-      .select("postid");
+      const { data, error } = await supabase
+        .from("room_articles")
+        .insert([articleData])
+        .select("postid");
 
-    if (error) {
-      alert("Failed to post room article.");
-      setIsUploading(false);
-      setUploadAction(""); // DEVI ADDED THIS
-      return;
-    }
-
-    const postid = data?.[0]?.postid;
-    if (postid) {
-      for (const url of uploadedImageUrls) {
-        await supabase
-          .from("room_article_images")
-          .insert([{ postid, image_url: url }]);
+      if (error) {
+        alert("Failed to post room article.");
+        setIsUploading(false);
+        setUploadAction(""); // DEVI ADDED THIS
+        return;
       }
-      // for (const img of pendingImages) {
-      //   const file = img.file;
-      //   if (!file?.name) continue;
 
-      //   const fileExt = file.name.split(".").pop();
-      //   const fileName = `${Date.now()}-${Math.random()
-      //     .toString(36)
-      //     .substring(2)}.${fileExt}`;
-      //   const filePath = `user-${session.userid}/${fileName}`;
+      const postid = data?.[0]?.postid;
+      if (postid) {
+        for (const url of uploadedImageUrls) {
+          await supabase
+            .from("room_article_images")
+            .insert([{ postid, image_url: url }]);
+        }
+        // for (const img of pendingImages) {
+        //   const file = img.file;
+        //   if (!file?.name) continue;
 
-      //   const { error: uploadError } = await supabase.storage
-      //     .from("room-article-images")
-      //     .upload(filePath, file);
+        //   const fileExt = file.name.split(".").pop();
+        //   const fileName = `${Date.now()}-${Math.random()
+        //     .toString(36)
+        //     .substring(2)}.${fileExt}`;
+        //   const filePath = `user-${session.userid}/${fileName}`;
 
-      //   if (uploadError) {
-      //     console.error("Room image upload failed:", uploadError);
-      //     continue;
-      //   }
+        //   const { error: uploadError } = await supabase.storage
+        //     .from("room-article-images")
+        //     .upload(filePath, file);
 
-      //   const { data: urlData } = supabase.storage
-      //     .from("room-article-images")
-      //     .getPublicUrl(filePath);
+        //   if (uploadError) {
+        //     console.error("Room image upload failed:", uploadError);
+        //     continue;
+        //   }
 
-      //   const publicUrl = urlData?.publicUrl;
-      //   if (publicUrl) {
-      //     await supabase
-      //       .from("room_article_images")
-      //       .insert([{ postid, image_url: publicUrl }]);
-      //   }
-      // }
+        //   const { data: urlData } = supabase.storage
+        //     .from("room-article-images")
+        //     .getPublicUrl(filePath);
+
+        //   const publicUrl = urlData?.publicUrl;
+        //   if (publicUrl) {
+        //     await supabase
+        //       .from("room_article_images")
+        //       .insert([{ postid, image_url: publicUrl }]);
+        //   }
+        // }
+      }
     }
 
     pendingImages.forEach((img) => URL.revokeObjectURL(img.previewUrl));
