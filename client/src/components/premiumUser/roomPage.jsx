@@ -324,6 +324,7 @@ const Room = () => {
         )
         .eq("roomid", roomid)
         .eq("status", "Published")
+        .eq("suspended", false)
         .order("created_at", { ascending: false });
 
       if (articlesError) {

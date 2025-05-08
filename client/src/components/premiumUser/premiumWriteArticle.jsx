@@ -396,13 +396,13 @@ export const PremiumWriteArticle = () => {
 
         if (publicUrl) {
           if (!firstImageUrl) firstImageUrl = publicUrl;
-          console.log("img1", firstImageUrl);
+          //console.log("img1", firstImageUrl);
           updatedHTML = updatedHTML.replaceAll(img.previewUrl, publicUrl);
           uploadedImageUrls.push(publicUrl);
         }
       }
 
-      console.log(firstImageUrl);
+      //console.log(firstImageUrl);
       console.log("imgnew", firstImageUrl);
 
       // 2. Submit to external API (make sure firstImageUrl is passed!)
@@ -439,7 +439,7 @@ export const PremiumWriteArticle = () => {
       );
 
       const result = await response.json();
-      console.log("img2", result);
+      console.log("result", result);
 
       if (!response.ok) {
         // if (result.error) {
@@ -461,7 +461,7 @@ export const PremiumWriteArticle = () => {
       }
 
       const articleid = result.article?.articleid;
-      console.log("result", result.article);
+      console.log("result article", result.article);
 
       if (articleid && firstImageUrl) {
         // 3. Update imagepath in the `articles` table after successful submission
@@ -499,30 +499,41 @@ export const PremiumWriteArticle = () => {
     let uploadedRoomImageUrls = [];
 
     for (const img of pendingImages) {
-      const imageName = `${Date.now()}-${img.file.name}`;
-      const { data: storageResult, error: uploadError } = await supabase.storage
+      const file = img.file;
+      if (!file?.name) continue;
+
+      const fileExt = file.name.split(".").pop();
+      const fileName = `${Date.now()}-${Math.random()
+        .toString(36)
+        .substring(2)}.${fileExt}`;
+      const filePath = `user-${session.userid}/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
         .from("room-article-images")
-        .upload(`user-${userId}/${imageName}`, img.file);
+        .upload(filePath, file);
 
       if (uploadError) {
-        console.error("Error uploading image:", uploadError);
+        console.error("Image upload failed:", uploadError);
         alert("Image upload failed.");
+        setIsUploading(false);
+        setUploadAction(""); // DEVI ADDED THIS
         return;
       }
 
-      const { data: publicUrlData } = supabase.storage
+      const { data: urlData } = supabase.storage
         .from("room-article-images")
-        .getPublicUrl(`user-${userId}/${imageName}`);
+        .getPublicUrl(filePath);
 
-      uploadedRoomImageUrls.push(publicUrlData.publicUrl);
+      //const publicUrl = urlData?.publicUrl;
+
+      if (urlData?.publicUrl) {
+        uploadedImageUrls.push({
+          previewUrl: img.previewUrl,
+          publicUrl: urlData.publicUrl,
+          filePath,
+        });
+      }
     }
-
-    // 2. Replace blob URLs in HTML with public URLs
-    let i = 0;
-    updatedHTML = updatedHTML.replace(
-      /<img[^>]*src=["']blob:[^"']+["'][^>]*>/g,
-      () => `<img src="${uploadedRoomImageUrls[i++]}" />`
-    );
 
     console.log("room images", uploadedRoomImageUrls);
 
@@ -767,7 +778,10 @@ export const PremiumWriteArticle = () => {
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ content: updatedHTML }),
+          body: JSON.stringify({
+            content: updatedHTML,
+            imageUrls: uploadedImageUrls,
+          }),
         }
       );
 
@@ -815,26 +829,6 @@ export const PremiumWriteArticle = () => {
         ""
       );
 
-      const { data, error } = await supabase
-        .from("room_articles")
-        .insert([
-          {
-            title,
-            content: updatedHTML,
-            roomid: selectedRoom,
-            userid: session.userid,
-            created_at: new Date().toISOString(),
-            status: "Draft",
-          },
-        ])
-        .select("postid");
-
-      if (error) {
-        console.error("Error saving draft:", error);
-        alert("Failed to save draft.");
-        return;
-      }
-
       const postid = data?.[0]?.postid;
 
       if (postid) {
@@ -868,6 +862,44 @@ export const PremiumWriteArticle = () => {
               .insert([{ postid, image_url: publicUrl }]);
           }
         }
+      }
+      const response = await fetch(
+        "https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/api/moderate",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            content: updatedHTML,
+            imageUrls: uploadedImageUrls,
+          }),
+        }
+      );
+      const result = await response.json();
+      if (result.error) {
+        alert(`Draft flagged: ${result.error}`);
+        setIsUploading(false);
+        setUploadAction("");
+        return;
+      }
+
+      const { data, error } = await supabase
+        .from("room_articles")
+        .insert([
+          {
+            title,
+            content: updatedHTML,
+            roomid: selectedRoom,
+            userid: session.userid,
+            created_at: new Date().toISOString(),
+            status: "Draft",
+          },
+        ])
+        .select("postid");
+
+      if (error) {
+        console.error("Error saving draft:", error);
+        alert("Failed to save draft.");
+        return;
       }
     }
 
