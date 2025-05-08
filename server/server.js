@@ -21,6 +21,8 @@ app.use(express.json());
 app.use(
   cors({
     origin: "https://van.dpyq2cohucoc7.amplifyapp.com", //For Hosted
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"], // ✅ include PUT here
+    allowedHeaders: ["Content-Type", "Authorization"],     // add other headers if needed
     // origin: "http://localhost:5173", // localhost frontend
     credentials: true, // Allow cookies & authentication headers
   })
