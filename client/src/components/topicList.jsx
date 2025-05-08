@@ -7,7 +7,7 @@ const TopicList = ({
 }) => {
   return (
     <div className="flex flex-col flex-grow items-center justify-center w-full max-w-[900px] mx-auto mb-1">
-      <div className="grid grid-cols-2 md:grid-cols-6 lg:grid-cols-6 gap-3 w-full">
+      <div className="grid grid-cols-3 md:grid-cols-6 lg:grid-cols-6 gap-3 w-full">
         {allTopics.map((topic) => (
           <button
             key={topic}
