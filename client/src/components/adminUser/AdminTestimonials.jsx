@@ -84,6 +84,7 @@ const AdminTestimonials = () => {
 
   const handleResolvedStatusChange = () => {
     const statusElement = document.getElementById("status");
+    console.log(statusElement);
     setDisplayedtatus(statusElement);
   };
 
