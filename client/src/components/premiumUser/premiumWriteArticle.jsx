@@ -55,6 +55,7 @@ export const PremiumWriteArticle = () => {
   const [showTopicApplication, setShowTopicApplication] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadAction, setUploadAction] = useState(""); // "post" or "draft"
+  const [pendingImages, setPendingImages] = useState([]);
 
   const [searchParams] = useSearchParams();
   const preSelectedType = searchParams.get("type"); // e.g. "room"
@@ -830,43 +831,39 @@ export const PremiumWriteArticle = () => {
       //   ""
       // );
 
-      const postid = data?.[0]?.postid;
+      for (const img of pendingImages) {
+        const file = img.file;
+        if (!file?.name) continue;
 
-      if (postid) {
-        for (const img of pendingImages) {
-          const file = img.file;
-          if (!file?.name) continue;
+        const fileExt = file.name.split(".").pop();
+        const fileName = `${Date.now()}-${Math.random()
+          .toString(36)
+          .substring(2)}.${fileExt}`;
+        const filePath = `user-${session.userid}/${fileName}`;
 
-          const fileExt = file.name.split(".").pop();
-          const fileName = `${Date.now()}-${Math.random()
-            .toString(36)
-            .substring(2)}.${fileExt}`;
-          const filePath = `user-${session.userid}/${fileName}`;
+        const { error: uploadError } = await supabase.storage
+          .from("room-article-images")
+          .upload(filePath, file);
 
-          const { error: uploadError } = await supabase.storage
-            .from("room-article-images")
-            .upload(filePath, file);
+        if (uploadError) {
+          console.error("Room draft image upload failed:", uploadError);
+          continue;
+        }
 
-          if (uploadError) {
-            console.error("Room draft image upload failed:", uploadError);
-            continue;
-          }
+        const { data: urlData } = supabase.storage
+          .from("room-article-images")
+          .getPublicUrl(filePath);
 
-          const { data: urlData } = supabase.storage
-            .from("room-article-images")
-            .getPublicUrl(filePath);
-
-          const publicUrl = urlData?.publicUrl;
-          if (publicUrl) {
-            await supabase
-              .from("room_article_images")
-              .insert([{ postid, image_url: publicUrl }]);
-          }
+        const publicUrl = urlData?.publicUrl;
+        if (publicUrl) {
+          await supabase
+            .from("room_article_images")
+            .insert([{ postid, image_url: publicUrl }]);
         }
       }
+
       console.log("pending images", pendingImages);
       console.log("image", publicUrl);
-
 
       const response = await fetch(
         "https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/api/moderate",
@@ -906,6 +903,13 @@ export const PremiumWriteArticle = () => {
         alert("Failed to save draft.");
         return;
       }
+
+      const postid = data?.[0]?.postid;
+      for (const url of uploadedImageUrls) {
+        await supabase
+          .from("room-article_images")
+          .insert([{ postid, image_url: url }]);
+      }
     }
 
     // Cleanup
@@ -917,8 +921,6 @@ export const PremiumWriteArticle = () => {
     setIsUploading(false);
     setUploadAction(""); // DEVI ADDED THIS
   };
-
-  const [pendingImages, setPendingImages] = useState([]);
 
   // const handleEditorImageUpload = (e) => {
   //   const file = e.target.files[0];
