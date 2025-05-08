@@ -75,18 +75,7 @@ function Home() {
         </div>
       </div>
       <Navbar />
-      {/* <Search onSearch={handleSearchFromHome} /> */}
-      <div className="w-full font-grotesk mt-12">
-        <h1 className="text-2xl sm:text-3xl mb-5 text-left max-w-[900px] mx-auto">
-          Topics:
-        </h1>
-        <div className="flex justify-center w-full ">
-          <FetchTopics
-            selectedTopics={selectedTopics}
-            handleTopicSelection={handleTopicSelection}
-          />
-        </div>
-      </div>
+      
 
       {/* <div className="flex justify-center w-full mt-12">
         {userType !== "Premium" && (
@@ -107,6 +96,18 @@ function Home() {
         </h1>
         <div className="flex justify-center w-full ">
           <Testimonial />
+        </div>
+      </div>
+
+      <div className="w-full font-grotesk mt-12">
+        <h1 className="text-2xl sm:text-3xl mb-5 text-left max-w-[900px] mx-auto">
+          Topics:
+        </h1>
+        <div className="flex justify-center w-full ">
+          <FetchTopics
+            selectedTopics={selectedTopics}
+            handleTopicSelection={handleTopicSelection}
+          />
         </div>
       </div>
 
