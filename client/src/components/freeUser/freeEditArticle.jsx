@@ -1083,7 +1083,7 @@ const EditFreeArticle = () => {
             </div>
 
             {userId && (
-              <p className="text-right text-sm text-black mb-1">
+              <p className="text-right text-sm text-red-600 mb-1">
                 You’ve posted {monthlyPostCount} out of 4 articles this month.
                 Update your subscription for unlimited posts..!!
               </p>
