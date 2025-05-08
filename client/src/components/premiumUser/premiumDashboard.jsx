@@ -28,7 +28,6 @@ function PremiumDashboard() {
             {/* Other Sidebar Pages */}
             <Route path="manageArticles" element={<PremManageArticle />} />
             <Route path="writeArticle" element={<PremiumWriteArticle />} />
-            <Route path="edit/:id" element={<PremiumEditArticle />} />
 
             <Route path="writeArticle/:id" element={<PremiumWriteArticle />} />
             <Route path="edit/:id" element={<PremiumEditArticle />} />

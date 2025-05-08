@@ -42,13 +42,15 @@ router.post("/", async (req, res) => {
     return res.status(400).json({ error: "Missing required fields" });
   }
   
- const limit = typeof member_limit === "number" && member_limit > 0 ? member_limit : 20;
-  
-  const { data, error } = await supabase
-    .from("rooms")
-    .insert([{ name, description, room_type, created_by, member_limit：limit }])
-    .select();
+  const limit =
+  typeof member_limit === "number" && member_limit > 0
+    ? Math.min(member_limit, 100)
+    : 20;
 
+const { data, error } = await supabase
+  .from("rooms")
+  .insert([{ name, description, room_type, created_by, member_limit: limit }])
+  .select();
   if (error) return res.status(500).json({ error: error.message });
   res.status(201).json({ message: "Room created", data });
 });
