@@ -763,6 +763,7 @@ export const PremiumWriteArticle = () => {
         const { data: urlData } = supabase.storage
           .from(bucket)
           .getPublicUrl(filePath);
+
         if (urlData?.publicUrl) {
           if (!firstImageUrl) firstImageUrl = urlData.publicUrl;
           updatedHTML = updatedHTML.replaceAll(
@@ -772,6 +773,9 @@ export const PremiumWriteArticle = () => {
           uploadedImageUrls.push(urlData.publicUrl);
         }
       }
+      console.log("uploaded image", uploadedImageUrls);
+
+      console.log("image", firstImageUrl);
 
       const response = await fetch(
         "https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/api/moderate",
@@ -821,6 +825,7 @@ export const PremiumWriteArticle = () => {
         await supabase
           .from("article_images")
           .insert([{ articleid, image_url: url }]);
+        console.log("other images", url);
       }
     } else {
       // Clean blob URLs before saving room content
