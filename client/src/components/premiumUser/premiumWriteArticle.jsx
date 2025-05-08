@@ -497,7 +497,6 @@ export const PremiumWriteArticle = () => {
     }
 
     // ---------------------- ROOM ARTICLE ----------------------
-    let uploadedRoomImageUrls = [];
 
     for (const img of pendingImages) {
       const file = img.file;
@@ -536,7 +535,7 @@ export const PremiumWriteArticle = () => {
       }
     }
 
-    console.log("room images", uploadedRoomImageUrls);
+    console.log("room images", uploadedImageUrls);
 
     const articleData = {
       title,
@@ -554,7 +553,7 @@ export const PremiumWriteArticle = () => {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            content: articleData.content,
+            content: updatedHTML,
             imageUrls: uploadedImageUrls,
           }),
         }
@@ -866,7 +865,6 @@ export const PremiumWriteArticle = () => {
       }
 
       console.log("uploaded images", uploadedImageUrls);
-
 
       const response = await fetch(
         "https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/api/moderate",
