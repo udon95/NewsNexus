@@ -90,7 +90,7 @@ const ManageRooms = () => {
 
     if (res.ok) {
       alert("Public room created");
-      setNewPublicRoom({ name: "", description: "" });
+      setNewPublicRoom({ name: "", description: "", member_limit: 20 });
       fetchRooms();
     }
   };
@@ -139,7 +139,7 @@ const ManageRooms = () => {
         );
       }
 
-      setNewPrivateRoom({ name: "", description: "", invite: "" });
+      setNewPrivateRoom({ name: "", description: "", member_limit: 20, invite: "" });
       fetchRooms();
     }
   };
