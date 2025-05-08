@@ -47,7 +47,7 @@ const AdminProfile = () => {
       });
 
       if (response.data.message) {
-        alert("Profile updated successfully!");
+        alert("Email updated successfully!\nPlease acknowledge the confirmation emails sent to the old and new email address to effect the change.");
         const storedUser = JSON.parse(localStorage.getItem("userProfile"));
         if (storedUser) {
           storedUser.user.email = newEmail;
@@ -58,7 +58,7 @@ const AdminProfile = () => {
       }
     } catch (error) {
       console.error(
-        "Error updating profile:",
+        "Error updating Email:",
         error.response?.data?.error || error.message
       );
     }
