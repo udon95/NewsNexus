@@ -309,9 +309,7 @@ export const FreeWriteArticle = () => {
         .toString(36)
         .substring(2)}.${fileExt}`;
 
-      const { data: authSession } = await supabase.auth.getSession();
-      const supabaseUid = authSession?.session?.user?.id;
-      const filePath = `${supabaseUid}/${fileName}`;
+      const filePath = `user-${session.userid}/${fileName}`;
 
       const { error: uploadError } = await supabase.storage
         .from(bucket)
