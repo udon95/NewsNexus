@@ -49,6 +49,9 @@ export const FreeWriteArticle = () => {
   const [aiFeedback, setAiFeedback] = useState("");
   const [accuracy, setAccuracy] = useState(null);
   const [postType, setPostType] = useState("General");
+  const [uploadAction, setUploadAction] = useState(""); // "post" or "draft"
+  const [isUploading, setIsUploading] = useState(false);
+  const [pendingImages, setPendingImages] = useState([]);
 
   const CustomParagraph = Paragraph.extend({
     addAttributes() {
@@ -110,6 +113,23 @@ export const FreeWriteArticle = () => {
       }),
     ],
     content: "",
+    editorProps: {
+      handlePaste(view, event, slice) {
+        const items = event.clipboardData?.items || [];
+        const hasImage = Array.from(items).some((item) =>
+          item.type.startsWith("image")
+        );
+
+        if (hasImage) {
+          alert(
+            "Pasting images is not allowed. Please use the Upload Image button."
+          );
+          return true;
+        }
+
+        return false;
+      },
+    },
     onUpdate: ({ editor }) => {
       const text = editor.getText();
       const wordsArray = text.trim().split(/\s+/).filter(Boolean);
@@ -203,16 +223,26 @@ export const FreeWriteArticle = () => {
   const MAX_WORDS = 1000;
 
   const handlePostArticle = async () => {
-    // Retrieve user from localStorage
+    setUploadAction("post");
+
+    if (isUploading) return;
+    setIsUploading(true);
     const storedUser = localStorage.getItem("userProfile");
     if (!storedUser) {
       alert("User not authenticated. Cannot upload.");
+      setIsUploading(false);
+      setUploadAction(""); // DEVI ADDED THIS
       return;
     }
 
     const parsedUser = JSON.parse(storedUser);
-    const session = parsedUser?.user; // Assuming 'user' is the session data in your stored object
-
+    const session = parsedUser?.user;
+    if (!session) {
+      alert("User not authenticated. Cannot upload.");
+      setIsUploading(false);
+      setUploadAction(""); // DEVI ADDED THIS
+      return;
+    }
     // Check if user has posted 4 or more articles this month
     const now = new Date();
     const firstDayOfMonth = new Date(
@@ -289,6 +319,8 @@ export const FreeWriteArticle = () => {
 
       if (uploadError) {
         alert("Image upload failed.");
+        setIsUploading(false);
+        setUploadAction(""); // DEVI ADDED THIS
         return;
       }
 
@@ -313,6 +345,7 @@ export const FreeWriteArticle = () => {
 
     articleData.topic = topics;
     const topicName = topicOptions.find((t) => t.topicid === topics)?.name;
+    console.log("free write uploaded images", uploadedImageUrls);
 
     if (postType === "General") {
       const response = await fetch(
@@ -335,9 +368,6 @@ export const FreeWriteArticle = () => {
       const result = await response.json();
 
       if (!response.ok) {
-        if (uploadedPaths.length > 0) {
-          await supabase.storage.from("articles-images").remove(uploadedPaths);
-        }
         if (result.feedback) {
           setAiFeedback(result.feedback);
           setAccuracy(result.accuracy || null);
@@ -347,7 +377,8 @@ export const FreeWriteArticle = () => {
         } else {
           alert(result.error || "Submission failed.");
         }
-
+        setIsUploading(false);
+        setUploadAction(""); // DEVI ADDED THIS
         //  This is important to prevent saving
         return;
       }
@@ -373,6 +404,9 @@ export const FreeWriteArticle = () => {
   };
 
   const handleSaveDraft = async () => {
+    setUploadAction("draft");
+    if (isUploading) return;
+    setIsUploading(true);
     const storedUser = localStorage.getItem("userProfile");
     if (!storedUser) return alert("User not authenticated. Cannot save draft.");
 
@@ -414,6 +448,7 @@ export const FreeWriteArticle = () => {
         uploadedImageUrls.push(urlData.publicUrl); // Track for article_images insert
       }
     }
+    console.log("free draft images", uploadedImageUrls);
 
     const articleData = {
       title,
@@ -425,11 +460,38 @@ export const FreeWriteArticle = () => {
       status: "Draft",
     };
 
+    const response = await fetch(
+      "https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/api/moderate",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          content: updatedHTML,
+          imageUrls: uploadedImageUrls,
+        }),
+      }
+    );
+
+    const result = await response.json();
+    if (result.error) {
+      alert(`Draft flagged: ${result.error}`);
+      setIsUploading(false);
+      setUploadAction("");
+      return;
+    }
+
     const { data, error } = await supabase
       .from("articles")
       .insert([articleData])
       .select("articleid");
-    if (error) return alert("Failed to save draft.");
+
+    if (error) {
+      console.error("Failed to save draft:", error);
+      alert("Failed to save draft.");
+      setIsUploading(false);
+      setUploadAction("");
+      return;
+    }
     const articleid = data?.[0]?.articleid;
     for (const imageUrl of uploadedImageUrls) {
       await supabase
@@ -438,13 +500,14 @@ export const FreeWriteArticle = () => {
     }
 
     // Trigger the pop-up notification for successful draft save
+    pendingImages.forEach((img) => URL.revokeObjectURL(img.previewUrl));
+    setPendingImages([]);
     setShowDraftNotification(true);
-
     alert("Draft saved!");
     handleClearInputs();
+    setIsUploading(false);
+    setUploadAction(""); // DEVI ADDED THIS
   };
-
-  const [pendingImages, setPendingImages] = useState([]);
 
   const handleEditorImageUpload = async (e) => {
     const file = e.target.files[0];
@@ -525,6 +588,7 @@ export const FreeWriteArticle = () => {
     setPendingImages([]);
     setAccuracy(null);
     setAiFeedback("");
+    setUploadAction(""); // <- DEVI ADDED THIS FOR THE LOAD AND POST INDICATOR
 
     // Reset Tiptap editor content (this is the key)
     if (editor) {
@@ -944,7 +1008,9 @@ export const FreeWriteArticle = () => {
               className="bg-gray-600 text-white px-4 py-2 rounded-md"
               onClick={handleSaveDraft}
             >
-              Save Draft
+              {isUploading && uploadAction === "draft"
+                ? "Saving..."
+                : "Save Draft"}
             </button>
 
             <button
@@ -956,7 +1022,7 @@ export const FreeWriteArticle = () => {
               onClick={monthlyPostCount >= 4 ? null : handlePostArticle}
               disabled={monthlyPostCount >= 4}
             >
-              Post
+              {isUploading && uploadAction === "post" ? "Posting..." : "Post"}
             </button>
           </div>
         </div>
