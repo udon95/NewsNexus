@@ -244,6 +244,7 @@ const ArticleList = ({
           <ul className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 max-w-[890px] w-full">
             {visibleArticles.map((article, index) => {
               const roomimageUrl = article.room_article_images?.[0]?.image_url;
+              const imageSrc = isRoom ? roomimageUrl : article.imagepath;
 
               return (
                 <li
@@ -262,60 +263,31 @@ const ArticleList = ({
                 >
                   {/* Article Information */}
                   <div className="flex-1 relative ">
-                    {!isRoom && !isDraft && (
-                      <div className="w-full h-40 bg-gray-200 rounded-t-2xl overflow-hidden relative">
-                        <img
-                          src={article.imagepath}
-                          alt={article.title}
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                    )}
-                    {!isRoom && isDraft && (
-                      <div className="w-full h-40 bg-gray-200 rounded-t-2xl overflow-hidden relative">
-                        <img
-                          src={article.imagepath}
-                          alt={article.title}
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                    )}
-                    {isRoom && !isDraft && (
-                      <div className="w-full h-40 bg-gray-200 rounded-t-2xl overflow-hidden relative">
-                        <img
-                          src={roomimageUrl}
-                          alt={article.title}
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                    )}
-                    {isRoom && isDraft && (
-                      <div className="w-full h-40 bg-gray-200 rounded-t-2xl overflow-hidden relative">
-                        <img
-                          src={roomimageUrl}
-                          alt={article.title}
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                    )}
+                    <div className="w-full h-40 bg-gray-200 rounded-t-2xl overflow-hidden relative">
+                      <img
+                        src={imageSrc}
+                        alt={article.title}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
                     <p className="pr-10 px-4 py-2 text-base text-left text-black overflow-hidden whitespace-nowrap text-ellipsis font-medium">
                       {article.title}
                     </p>
                     {!isDraft && !isRoom && (
                       <div className="flex justify-between items-center flex-wrap px-4 pb-2 pt-1 text-sm gap-4">
-                        <div className="flex flex-wrap gap-4">
+                        <div className="flex flex-wrap gap-10">
                           <div className="flex items-center gap-2">
-                            <Eye size={16} />
+                            <Eye />
                             {viewCounts[article.articleid] || 0}
                           </div>
                           <div className="flex items-center gap-2 text-green-500">
-                            <ThumbsUp size={16} />
+                            <ThumbsUp />
                             <span className="font-semibold text-black">
                               {formatCount(voteCounts[article.articleid]?.up || 0)}
                             </span>
                           </div>
                           <div className="flex items-center gap-2 text-red-500">
-                            <ThumbsDown size={16} />
+                            <ThumbsDown />
                             <span className="font-semibold text-black">
                               {formatCount(voteCounts[article.articleid]?.down || 0)}
                             </span>
@@ -329,13 +301,13 @@ const ArticleList = ({
                             setOpenMenuIndex(openMenuIndex === index ? null : index);
                           }}
                         >
-                          <EllipsisVertical size={18} />
+                          <EllipsisVertical />
                         </button>
                       </div>
                     )}
                     {isDraft && (
                       <div className="flex justify-between items-center flex-wrap px-4 pb-2 pt-1 text-sm gap-2">
-                        <div className="text-black">
+                        <div className="max-w-[80%] text-black overflow-hidden whitespace-nowrap text-ellipsis">
                           Expires: {isRoom ? calculateExpiryDateRoom(article) : calculateExpiryDate(article)}
                         </div>
 
@@ -346,7 +318,7 @@ const ArticleList = ({
                             setOpenMenuIndex(openMenuIndex === index ? null : index);
                           }}
                         >
-                          <EllipsisVertical size={18} />
+                          <EllipsisVertical />
                         </button>
                       </div>
                     )}
@@ -359,7 +331,7 @@ const ArticleList = ({
                             setOpenMenuIndex(openMenuIndex === index ? null : index);
                           }}
                         >
-                          <EllipsisVertical size={18} />
+                          <EllipsisVertical />
                         </button>
                       </div>
                     )}
