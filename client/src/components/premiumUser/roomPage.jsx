@@ -1201,7 +1201,7 @@ const Room = () => {
                           {/* Owner sees Edit and Delete */}
                           <button
                             className="block w-full text-left p-2 hover:bg-gray-100 text-black"
-                            onClick={() => navigate(`/edit/premium/${article.postid}`)}
+                            onClick={() => navigate(`/premiumDashboard/edit/${article.postid}`)}
                           >
                             Edit
                           </button>
