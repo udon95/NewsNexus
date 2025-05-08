@@ -65,6 +65,9 @@ export const PremiumEditArticle = () => {
   const [editorReady, setEditorReady] = useState(false);
   const [aiFeedback, setAiFeedback] = useState("");
   const [accuracy, setAccuracy] = useState(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadAction, setUploadAction] = useState(""); // "post" or "draft"
+  const [pendingImages, setPendingImages] = useState([]);
 
   const CustomParagraph = Paragraph.extend({
     addAttributes() {
@@ -87,32 +90,14 @@ export const PremiumEditArticle = () => {
     addKeyboardShortcuts() {
       return {
         Tab: () => {
-          const { state, commands } = this.editor;
-          const { from } = state.selection;
-          const node =
-            state.doc.resolve(from).nodeAfter || state.doc.resolve(from).parent;
-          const currentStyle = node.attrs?.style || "";
-          const match = currentStyle.match(/text-indent:\s?(\d+)em/);
-          const currentIndent = match ? parseInt(match[1]) : 0;
-          const nextIndent = currentIndent + 2;
-
-          commands.updateAttributes("paragraph", {
-            style: `text-indent: ${nextIndent}em`,
+          this.editor.commands.updateAttributes("paragraph", {
+            style: "text-indent: 2em",
           });
           return true;
         },
         "Shift-Tab": () => {
-          const { state, commands } = this.editor;
-          const { from } = state.selection;
-          const node =
-            state.doc.resolve(from).nodeAfter || state.doc.resolve(from).parent;
-          const currentStyle = node.attrs?.style || "";
-          const match = currentStyle.match(/text-indent:\s?(\d+)em/);
-          const currentIndent = match ? parseInt(match[1]) : 0;
-          const nextIndent = Math.max(0, currentIndent - 2);
-
-          commands.updateAttributes("paragraph", {
-            style: nextIndent === 0 ? null : `text-indent: ${nextIndent}em`,
+          this.editor.commands.updateAttributes("paragraph", {
+            style: "text-indent: 0",
           });
           return true;
         },
@@ -163,7 +148,23 @@ export const PremiumEditArticle = () => {
       }),
     ],
     content: "",
+    editorProps: {
+      handlePaste(view, event, slice) {
+        const items = event.clipboardData?.items || [];
+        const hasImage = Array.from(items).some((item) =>
+          item.type.startsWith("image")
+        );
 
+        if (hasImage) {
+          alert(
+            "Pasting images is not allowed. Please use the Upload Image button."
+          );
+          return true;
+        }
+
+        return false;
+      },
+    },
     onUpdate: ({ editor }) => {
       if (!editorReady) return;
 
@@ -236,6 +237,11 @@ export const PremiumEditArticle = () => {
   const MAX_WORDS = postType === "Room" ? 400 : 1000;
 
   const handlePostGeneralArticle = async () => {
+    setUploadAction("post");
+
+    if (isUploading) return;
+    setIsUploading(true);
+
     const storedUser = localStorage.getItem("userProfile");
     if (!storedUser) return alert("User not authenticated. Cannot upload.");
 
@@ -289,6 +295,8 @@ export const PremiumEditArticle = () => {
         uploadedImageUrls.push(urlData.publicUrl);
       }
     }
+    console.log("premium draft post iamges", uploadedImageUrls);
+
     const topicName = topicOptions.find((t) => t.topicid === topics)?.name;
     const response = await fetch(
       "https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/api/submit-article",
@@ -309,21 +317,22 @@ export const PremiumEditArticle = () => {
     const result = await response.json();
 
     if (!response.ok) {
-      if (uploadedPaths.length > 0) {
-        await supabase.storage.from("articles-images").remove(uploadedPaths);
-      }
+      // if (result.error) {
+      //   alert(result.error); // Display moderation failure
+      // }
+
       if (result.feedback) {
         setAiFeedback(result.feedback);
         setAccuracy(result.accuracy || null);
-
         alert("Article flagged by AI. Please review the highlighted sections.");
       } else {
         alert(result.error || "Submission failed.");
       }
-
-      //  This is important to prevent saving
+      setIsUploading(false);
+      setUploadAction(""); // DEVI ADDED THIS
       return;
     }
+
     // 📝 Insert new published article
     // const { data, error } = await supabase
     //   .from("articles")
@@ -375,13 +384,20 @@ export const PremiumEditArticle = () => {
       }
     }
 
+    pendingImages.forEach((img) => URL.revokeObjectURL(img.previewUrl)); // cleanup object URLs
+    setPendingImages([]);
     setAccuracy(result.accuracy);
     setAiFeedback(result.feedback);
-    alert(`Article posted! Accuracy Score: ${result.accuracy}%`);
+    alert(`Article posted successfully. Accuracy Score: ${result.accuracy}%`);
     handleClearInputs();
   };
 
   const handlePostRoomArticle = async () => {
+    setUploadAction("post");
+
+    if (isUploading) return;
+    setIsUploading(true);
+
     const storedUser = localStorage.getItem("userProfile");
     if (!storedUser) return alert("User not authenticated.");
     const session = JSON.parse(storedUser)?.user;
@@ -477,6 +493,7 @@ export const PremiumEditArticle = () => {
         uploadedImageUrls.push(urlData.publicUrl);
       }
     }
+    console.log("premium room draft images post", uploadedImageUrls);
 
     try {
       const response = await fetch(
@@ -494,13 +511,10 @@ export const PremiumEditArticle = () => {
       );
 
       const result = await response.json();
-
-      if (!response.ok || result.error) {
-        alert(
-          `Room article flagged by moderation: ${
-            result.error || "Unknown issue"
-          }`
-        );
+      if (result.error) {
+        alert(`Article flagged: ${result.error}`);
+        setIsUploading(false);
+        setUploadAction(""); // DEVI ADDED THIS
         return;
       }
     } catch (err) {
@@ -548,12 +562,19 @@ export const PremiumEditArticle = () => {
         URL.revokeObjectURL(img.previewUrl);
       }
     });
+    pendingImages.forEach((img) => URL.revokeObjectURL(img.previewUrl));
     setPendingImages([]);
-    alert("Room article posted!");
+    alert("Room article posted successfully.");
     handleClearInputs();
+    setIsUploading(false);
+    setUploadAction(""); // DEVI ADDED THIS
   };
 
   const handleSaveDraft = async () => {
+    setUploadAction("draft");
+
+    if (isUploading) return;
+    setIsUploading(true);
     const storedUser = localStorage.getItem("userProfile");
     if (!storedUser) return alert("User not authenticated. Cannot save draft.");
 
@@ -710,6 +731,7 @@ export const PremiumEditArticle = () => {
         uploadedImageUrls.push(urlData.publicUrl);
       }
     }
+    console.log("save draft general images", uploadedImageUrls);
 
     const articleData = {
       title,
@@ -735,12 +757,10 @@ export const PremiumEditArticle = () => {
         );
 
         const result = await response.json();
-        if (!response.ok || result.error) {
-          alert(
-            `Draft rejected by AI moderation: ${
-              result.error || "Unknown error"
-            }`
-          );
+        if (result.error) {
+          alert(`Draft flagged: ${result.error}`);
+          setIsUploading(false);
+          setUploadAction("");
           return;
         }
       } catch (err) {
@@ -786,12 +806,10 @@ export const PremiumEditArticle = () => {
         );
 
         const result = await response.json();
-        if (!response.ok || result.error) {
-          alert(
-            `Draft rejected by AI moderation: ${
-              result.error || "Unknown error"
-            }`
-          );
+        if (result.error) {
+          alert(`Draft flagged: ${result.error}`);
+          setIsUploading(false);
+          setUploadAction("");
           return;
         }
       } catch (err) {
@@ -829,12 +847,14 @@ export const PremiumEditArticle = () => {
       }
     });
 
+    pendingImages.forEach((img) => URL.revokeObjectURL(img.previewUrl));
     setPendingImages([]);
     setShowDraftNotification(true);
     alert("Draft saved!");
+    handleClearInputs();
+    setIsUploading(false);
+    setUploadAction(""); // DEVI ADDED THIS
   };
-
-  const [pendingImages, setPendingImages] = useState([]);
 
   const handleEditorImageUpload = (e) => {
     const file = e.target.files[0];
@@ -1560,7 +1580,9 @@ export const PremiumEditArticle = () => {
                   className="bg-yellow-500 text-white px-4 py-2 rounded-md"
                   onClick={handleSaveDraft}
                 >
-                  Update
+                  {isUploading && uploadAction === "draft"
+                    ? "Saving..."
+                    : "Save Draft"}
                 </button>
 
                 {postType === "General" ? (
@@ -1568,14 +1590,18 @@ export const PremiumEditArticle = () => {
                     className="bg-blue-600 text-white px-4 py-2 rounded-md"
                     onClick={handlePostGeneralArticle}
                   >
-                    Post Draft (General)
+                    {isUploading && uploadAction === "post"
+                      ? "Posting..."
+                      : "Post"}
                   </button>
                 ) : (
                   <button
                     className="bg-blue-600 text-white px-4 py-2 rounded-md"
                     onClick={handlePostRoomArticle}
                   >
-                    Post Draft (Room)
+                    {isUploading && uploadAction === "post"
+                      ? "Posting..."
+                      : "Post"}
                   </button>
                 )}
               </>

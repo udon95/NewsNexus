@@ -151,52 +151,16 @@ export const PremiumWriteArticle = () => {
     addKeyboardShortcuts() {
       return {
         Tab: () => {
-          const { state, commands } = this.editor;
-          const { from } = state.selection;
-          const node =
-            state.doc.resolve(from).nodeAfter || state.doc.resolve(from).parent;
-          const currentStyle = node.attrs?.style || "";
-          const match = currentStyle.match(/text-indent:\s?(\d+)em/);
-          const currentIndent = match ? parseInt(match[1]) : 0;
-          const nextIndent = currentIndent + 2;
-
-          commands.updateAttributes("paragraph", {
-            style: `text-indent: ${nextIndent}em`,
+          this.editor.commands.updateAttributes("paragraph", {
+            style: "text-indent: 2em",
           });
           return true;
         },
         "Shift-Tab": () => {
-          const { state, commands } = this.editor;
-          const { from } = state.selection;
-          const node =
-            state.doc.resolve(from).nodeAfter || state.doc.resolve(from).parent;
-          const currentStyle = node.attrs?.style || "";
-          const match = currentStyle.match(/text-indent:\s?(\d+)em/);
-          const currentIndent = match ? parseInt(match[1]) : 0;
-          const nextIndent = Math.max(0, currentIndent - 2);
-
-          commands.updateAttributes("paragraph", {
-            style: nextIndent === 0 ? "" : `text-indent: ${nextIndent}em`,
+          this.editor.commands.updateAttributes("paragraph", {
+            style: "text-indent: 0",
           });
           return true;
-        },
-        Backspace: () => {
-          const { state, commands } = this.editor;
-          const { from } = state.selection;
-          const node =
-            state.doc.resolve(from).nodeAfter || state.doc.resolve(from).parent;
-
-          const isEmpty = node.content.size === 0;
-          const currentStyle = node.attrs?.style || "";
-
-          if (isEmpty && currentStyle.includes("text-indent")) {
-            commands.updateAttributes("paragraph", {
-              style: "",
-            });
-            return true;
-          }
-
-          return false;
         },
       };
     },
@@ -328,6 +292,7 @@ export const PremiumWriteArticle = () => {
 
     if (isUploading) return;
     setIsUploading(true);
+
     const storedUser = localStorage.getItem("userProfile");
     if (!storedUser) {
       alert("User not authenticated. Cannot upload.");
@@ -628,7 +593,7 @@ export const PremiumWriteArticle = () => {
 
     pendingImages.forEach((img) => URL.revokeObjectURL(img.previewUrl));
     setPendingImages([]);
-    alert("Article posted successfully.");
+    alert("Room article posted successfully.");
     handleClearInputs();
     setIsUploading(false);
     setUploadAction(""); // DEVI ADDED THIS
