@@ -176,6 +176,9 @@ const SubscriptionPage = () => {
                         <div className="relative w-[80px] flex flex-col items-center">
                           {/* $4 with badge floated top-right of it */}
                           <div className="relative">
+                          <span className="text-green-600 font-bold text-4xl ml-8.5">
+                              Premium
+                            </span>
                             <span className="text-green-600 font-bold text-4xl ml-8.5">
                               ${sub.promotion_price}
                             </span>
