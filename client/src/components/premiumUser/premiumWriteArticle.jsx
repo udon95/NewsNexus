@@ -858,14 +858,14 @@ export const PremiumWriteArticle = () => {
         if (publicUrl) {
           uploadedImageUrls.push(publicUrl);
 
-        //   await supabase
-        //     .from("room_article_images")
-        //     .insert([{ postid, image_url: publicUrl }]);
-         }
+          //   await supabase
+          //     .from("room_article_images")
+          //     .insert([{ postid, image_url: publicUrl }]);
+        }
+        console.log("image", publicUrl);
       }
 
       console.log("pending images", pendingImages);
-      console.log("image", publicUrl);
 
       const response = await fetch(
         "https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/api/moderate",
