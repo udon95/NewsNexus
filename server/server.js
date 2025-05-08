@@ -24,6 +24,8 @@ app.use(
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"], // ✅ include PUT here
     allowedHeaders: ["Content-Type", "Authorization"],     // add other headers if needed
     // origin: "http://localhost:5173", // localhost frontend
+    methods: ["GET", "POST", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true, // Allow cookies & authentication headers
   })
 );
