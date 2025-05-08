@@ -89,12 +89,14 @@ function Home() {
       </div>
 
       <div className="flex justify-center w-full mt-12">
-        <button
-          onClick={handleGoToDiscussionRooms}
-          className="w-full max-w-[900px] bg-gray-100 text-left text-black text-3xl font-grotesk font-semibold px-6 py-3 rounded-lg shadow-md hover:bg-gray-200 transition"
-        >
-          Go To Discussion Rooms &gt;
-        </button>
+        {userType !== "Premium" && (
+          <button
+            onClick={handleGoToDiscussionRooms}
+            className="w-full max-w-[900px] bg-gray-100 text-left text-black text-3xl font-grotesk font-semibold px-6 py-3 rounded-lg shadow-md hover:bg-gray-200 transition"
+          >
+            Go To Discussion Rooms &gt;
+          </button>
+        )}{" "}
       </div>
 
       <VideoComponent />

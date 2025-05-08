@@ -541,7 +541,10 @@ export const PremiumWriteArticle = () => {
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ content: articleData.content, imageUrls:uploadedImageUrls }),
+          body: JSON.stringify({
+            content: articleData.content,
+            imageUrls: uploadedImageUrls,
+          }),
         }
       );
 

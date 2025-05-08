@@ -296,7 +296,7 @@ router.post("/submit-article", async (req, res) => {
 
     const strippedText = extractTextFromHTML(updatedHTML);
 
-    if (!title || !content || !authorId || !topicid || !topicName) {
+    if (!title || !updatedHTML || !authorId || !topicid || !topicName) {
       return res.status(400).json({ error: "Missing required fields." });
     }
 
@@ -341,7 +341,7 @@ router.post("/submit-article", async (req, res) => {
       .insert([
         {
           title,
-          text: content,
+          text: updatedHTML,
           userid: authorId,
           topicid,
           accuracy_score: factResult.accuracy,
