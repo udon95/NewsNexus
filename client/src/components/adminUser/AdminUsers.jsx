@@ -74,6 +74,8 @@ const AdminUsers = () => {
             <tr>
               <th className="p-3">#</th>
               <th className="p-3">Username</th>
+              <th className="p-3">Email</th>
+              <th className="p-3">Status</th>
             </tr>
           </thead>
           <tbody>
@@ -85,6 +87,8 @@ const AdminUsers = () => {
               >
                 <td className="p-3">{index + 1}</td>
                 <td className="p-3">{user.username}</td>
+                <td className="p-3">{user.email}</td>
+                <td className="p-3">{user.status}</td>
               </tr>
             ))}
           </tbody>
