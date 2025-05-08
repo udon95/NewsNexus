@@ -28,6 +28,7 @@ import BulletList from "@tiptap/extension-bullet-list";
 import OrderedList from "@tiptap/extension-ordered-list";
 import { Extension } from "@tiptap/core";
 import { Paragraph } from "@tiptap/extension-paragraph";
+import ListItem from "@tiptap/extension-list-item";
 
 const EditFreeArticle = () => {
   const navigate = useNavigate();
@@ -55,6 +56,9 @@ const EditFreeArticle = () => {
   const [aiFeedback, setAiFeedback] = useState("");
   const [accuracy, setAccuracy] = useState(null);
   // console.log("Auth session:", supabase.auth.getSession());
+  const [uploadAction, setUploadAction] = useState(""); // "post" or "draft"
+  const [isUploading, setIsUploading] = useState(false);
+  const [pendingImages, setPendingImages] = useState([]);
 
   const CustomParagraph = Paragraph.extend({
     addAttributes() {
@@ -112,32 +116,14 @@ const EditFreeArticle = () => {
     addKeyboardShortcuts() {
       return {
         Tab: () => {
-          const { state, commands } = this.editor;
-          const { from } = state.selection;
-          const node =
-            state.doc.resolve(from).nodeAfter || state.doc.resolve(from).parent;
-          const currentStyle = node.attrs?.style || "";
-          const match = currentStyle.match(/text-indent:\s?(\d+)em/);
-          const currentIndent = match ? parseInt(match[1]) : 0;
-          const nextIndent = currentIndent + 2;
-
-          commands.updateAttributes("paragraph", {
-            style: `text-indent: ${nextIndent}em`,
+          this.editor.commands.updateAttributes("paragraph", {
+            style: "text-indent: 2em",
           });
           return true;
         },
         "Shift-Tab": () => {
-          const { state, commands } = this.editor;
-          const { from } = state.selection;
-          const node =
-            state.doc.resolve(from).nodeAfter || state.doc.resolve(from).parent;
-          const currentStyle = node.attrs?.style || "";
-          const match = currentStyle.match(/text-indent:\s?(\d+)em/);
-          const currentIndent = match ? parseInt(match[1]) : 0;
-          const nextIndent = Math.max(0, currentIndent - 2);
-
-          commands.updateAttributes("paragraph", {
-            style: nextIndent === 0 ? null : `text-indent: ${nextIndent}em`,
+          this.editor.commands.updateAttributes("paragraph", {
+            style: "text-indent: 0",
           });
           return true;
         },
@@ -154,11 +140,12 @@ const EditFreeArticle = () => {
       CustomParagraph,
       BulletList,
       OrderedList,
+      ListItem,
       UnderlineExtension,
       TiptapLink,
       Highlight,
       Image,
-      IndentExtension, //INDENT
+      //IndentExtension, //INDENT
       Heading.configure({ levels: [1, 2, 3] }),
       TextAlign.configure({ types: ["heading", "paragraph"] }),
       Placeholder.configure({ placeholder: "Start writing your article..." }),
@@ -169,7 +156,23 @@ const EditFreeArticle = () => {
       }),
     ],
     content: "",
+    editorProps: {
+      handlePaste(view, event, slice) {
+        const items = event.clipboardData?.items || [];
+        const hasImage = Array.from(items).some((item) =>
+          item.type.startsWith("image")
+        );
 
+        if (hasImage) {
+          alert(
+            "Pasting images is not allowed. Please use the Upload Image button."
+          );
+          return true;
+        }
+
+        return false;
+      },
+    },
     onUpdate: ({ editor }) => {
       const html = editor.getHTML();
       const text = editor.getText();
@@ -279,11 +282,13 @@ const EditFreeArticle = () => {
       return alert("Please fill in all fields.");
 
     const doc = new DOMParser().parseFromString(articleContent, "text/html");
-    const imageUrls = Array.from(doc.querySelectorAll("img")).map(
+    const uploadedImageUrls = Array.from(doc.querySelectorAll("img")).map(
       (img) => img.src
     );
+    console.log("image urls?", imageUrls);
 
     const topicName = topicOptions.find((t) => t.topicid === topics)?.name;
+    let updatedHTML = articleContent;
 
     if (articleStatus === "Draft") {
       if (monthlyPostCount >= 4) {
@@ -302,12 +307,12 @@ const EditFreeArticle = () => {
           },
           body: JSON.stringify({
             title,
-            content: articleContent,
+            content: updatedHTML,
             type: "factual",
             authorId: session.userid,
             topicid: topics,
             topicName,
-            imageUrls,
+            imageUrls: uploadedImageUrls,
           }),
         }
       );
@@ -315,9 +320,6 @@ const EditFreeArticle = () => {
       const result = await response.json();
 
       if (!response.ok) {
-        if (uploadedPaths.length > 0) {
-          await supabase.storage.from("articles-images").remove(uploadedPaths);
-        }
         if (result.feedback) {
           setAiFeedback(result.feedback);
           setAccuracy(result.accuracy || null);
@@ -327,7 +329,8 @@ const EditFreeArticle = () => {
         } else {
           alert(result.error || "Submission failed.");
         }
-
+        setIsUploading(false);
+        setUploadAction(""); // DEVI ADDED THIS
         //  This is important to prevent saving
         return;
       }
@@ -447,6 +450,26 @@ const EditFreeArticle = () => {
         uploadedImageUrls.push(urlData.publicUrl);
       }
     }
+    console.log("edit save draft images", uploadedImageUrls);
+    const response = await fetch(
+      "https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/api/moderate",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          content: updatedHTML,
+          imageUrls: uploadedImageUrls,
+        }),
+      }
+    );
+
+    const result = await response.json();
+    if (result.error) {
+      alert(`Draft flagged: ${result.error}`);
+      setIsUploading(false);
+      setUploadAction("");
+      return;
+    }
 
     // FIX: Use update instead of insert
     const { error } = await supabase
@@ -473,8 +496,13 @@ const EditFreeArticle = () => {
         .insert([{ articleid: articleId, image_url: imageUrl }]);
     }
 
+    pendingImages.forEach((img) => URL.revokeObjectURL(img.previewUrl));
+    setPendingImages([]);
     setShowDraftNotification(true);
-    alert("Draft updated!");
+    alert("Draft saved!");
+    handleClearInputs();
+    setIsUploading(false);
+    setUploadAction(""); // DEVI ADDED THIS
     const words = articleContent.trim().split(/\s+/).filter(Boolean).length;
 
     if (words > MAX_WORDS) {
@@ -482,8 +510,6 @@ const EditFreeArticle = () => {
       return;
     }
   };
-
-  const [pendingImages, setPendingImages] = useState([]);
 
   const handleEditorImageUpload = async (e) => {
     console.log("Upload triggered", e.target.files[0]);
@@ -1077,14 +1103,18 @@ const EditFreeArticle = () => {
                     className="bg-yellow-500 text-white px-4 py-2 rounded-md"
                     onClick={handleSaveDraft}
                   >
-                    Update
+                    {isUploading && uploadAction === "draft"
+                      ? "Saving..."
+                      : "Save Draft"}
                   </button>
 
                   <button
                     className="bg-blue-600 text-white px-4 py-2 rounded-md"
                     onClick={handlePostArticle}
                   >
-                    Post Draft
+                    {isUploading && uploadAction === "post"
+                      ? "Posting..."
+                      : "Post"}
                   </button>
                 </>
               ) : (
