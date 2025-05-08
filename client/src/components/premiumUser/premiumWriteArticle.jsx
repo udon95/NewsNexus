@@ -825,10 +825,10 @@ export const PremiumWriteArticle = () => {
       }
     } else {
       // Clean blob URLs before saving room content
-      // updatedHTML = updatedHTML.replace(
-      //   /<img[^>]*src=["']blob:[^"']+["'][^>]*>/g,
-      //   ""
-      // );
+      updatedHTML = updatedHTML.replace(
+        /<img[^>]*src=["']blob:[^"']+["'][^>]*>/g,
+        ""
+      );
 
       for (const img of pendingImages) {
         const file = img.file;
