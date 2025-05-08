@@ -528,9 +528,7 @@ export const PremiumWriteArticle = () => {
 
       if (urlData?.publicUrl) {
         uploadedImageUrls.push({
-          previewUrl: img.previewUrl,
           publicUrl: urlData.publicUrl,
-          filePath,
         });
       }
     }
@@ -588,36 +586,41 @@ export const PremiumWriteArticle = () => {
 
     const postid = data?.[0]?.postid;
     if (postid) {
-      for (const img of pendingImages) {
-        const file = img.file;
-        if (!file?.name) continue;
-
-        const fileExt = file.name.split(".").pop();
-        const fileName = `${Date.now()}-${Math.random()
-          .toString(36)
-          .substring(2)}.${fileExt}`;
-        const filePath = `user-${session.userid}/${fileName}`;
-
-        const { error: uploadError } = await supabase.storage
-          .from("room-article-images")
-          .upload(filePath, file);
-
-        if (uploadError) {
-          console.error("Room image upload failed:", uploadError);
-          continue;
-        }
-
-        const { data: urlData } = supabase.storage
-          .from("room-article-images")
-          .getPublicUrl(filePath);
-
-        const publicUrl = urlData?.publicUrl;
-        if (publicUrl) {
-          await supabase
-            .from("room_article_images")
-            .insert([{ postid, image_url: publicUrl }]);
-        }
+      for (const url of uploadedImageUrls) {
+        await supabase
+          .from("room_article_images")
+          .insert([{ postid, image_url: url }]);
       }
+      // for (const img of pendingImages) {
+      //   const file = img.file;
+      //   if (!file?.name) continue;
+
+      //   const fileExt = file.name.split(".").pop();
+      //   const fileName = `${Date.now()}-${Math.random()
+      //     .toString(36)
+      //     .substring(2)}.${fileExt}`;
+      //   const filePath = `user-${session.userid}/${fileName}`;
+
+      //   const { error: uploadError } = await supabase.storage
+      //     .from("room-article-images")
+      //     .upload(filePath, file);
+
+      //   if (uploadError) {
+      //     console.error("Room image upload failed:", uploadError);
+      //     continue;
+      //   }
+
+      //   const { data: urlData } = supabase.storage
+      //     .from("room-article-images")
+      //     .getPublicUrl(filePath);
+
+      //   const publicUrl = urlData?.publicUrl;
+      //   if (publicUrl) {
+      //     await supabase
+      //       .from("room_article_images")
+      //       .insert([{ postid, image_url: publicUrl }]);
+      //   }
+      // }
     }
 
     pendingImages.forEach((img) => URL.revokeObjectURL(img.previewUrl));
@@ -866,23 +869,27 @@ export const PremiumWriteArticle = () => {
 
       console.log("uploaded images", uploadedImageUrls);
 
-      const response = await fetch(
-        "https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/api/moderate",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            content: updatedHTML,
-            imageUrls: uploadedImageUrls,
-          }),
+      try {
+        const response = await fetch(
+          "https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/api/moderate",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              content: updatedHTML,
+              imageUrls: uploadedImageUrls,
+            }),
+          }
+        );
+        const result = await response.json();
+        if (result.error) {
+          alert(`Draft flagged: ${result.error}`);
+          setIsUploading(false);
+          setUploadAction("");
+          return;
         }
-      );
-      const result = await response.json();
-      if (result.error) {
-        alert(`Draft flagged: ${result.error}`);
-        setIsUploading(false);
-        setUploadAction("");
-        return;
+      } catch {
+        return res.status(500).json({ error: "Something went wrong." });
       }
 
       const { data, error } = await supabase
@@ -908,7 +915,7 @@ export const PremiumWriteArticle = () => {
       const postid = data?.[0]?.postid;
       for (const url of uploadedImageUrls) {
         await supabase
-          .from("room-article_images")
+          .from("room_article_images")
           .insert([{ postid, image_url: url }]);
       }
     }
