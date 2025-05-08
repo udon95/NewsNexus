@@ -449,6 +449,28 @@ const ManageRooms = () => {
                 </select>
               </div>
 
+
+            <div>
+               <label className="block text-sm font-medium mb-1">
+            Member Limit
+           </label>
+           <input
+            type="number"
+            min={1}
+            max={100}
+            value={editRoom.member_limit}
+            onChange={(e) =>
+             setEditRoom({
+               ...editRoom,
+               member_limit: parseInt(e.target.value),
+             })
+           }
+           className="w-full px-3 py-2 border rounded-md"
+          />
+          </div>
+
+              
+
               <div className="flex justify-end gap-2 pt-2">
                 <button
                   onClick={() => setShowModal(false)}
