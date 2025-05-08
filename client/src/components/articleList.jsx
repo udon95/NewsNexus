@@ -38,9 +38,9 @@ const ArticleList = ({
         if (now >= expiryDate) {
           const id = isRoom ? article.postid : article.articleid;
           if (isRoom) {
-            await handleDeleteRoomArticle(id);
+            await handleDeleteRoomArticle(id, true);
           } else {
-            await handleDeleteArticle(id);
+            await handleDeleteArticle(id, true);
           }
         }
       }
@@ -130,11 +130,13 @@ const ArticleList = ({
     return `( ${day}/${month}/${year} )`;
   };
 
-  const handleDeleteArticle = async (articleid) => {
-    const confirmed = window.confirm(
-      "Are you sure you want to delete this article?"
-    );
-    if (!confirmed) return;
+  const handleDeleteArticle = async (articleid, skipConfirm = false) => {
+    if (!skipConfirm) {
+      const confirmed = window.confirm(
+        "Are you sure you want to delete this article?"
+      );
+      if (!confirmed) return;
+    }
   
     const bucketName = "articles-images";
   
@@ -180,11 +182,13 @@ const ArticleList = ({
     }
   };
 
-  const handleDeleteRoomArticle = async (postid) => {
-    const confirmed = window.confirm(
-      "Are you sure you want to delete this article?"
-    );
-    if (!confirmed) return;
+  const handleDeleteRoomArticle = async (postid, skipConfirm = false) => {
+    if (!skipConfirm) {
+      const confirmed = window.confirm(
+        "Are you sure you want to delete this article?"
+      );
+      if (!confirmed) return;
+    }
   
     const bucketName = "room-article-images";
   
@@ -259,7 +263,7 @@ const ArticleList = ({
                     }
                   }}
                   
-                  className="w-full h-60 border border-black rounded-2xl shadow-md cursor-pointer hover:shadow-lg transition bg-white flex flex-col"
+                  className="w-full min-h-[15rem] border border-black rounded-2xl shadow-md cursor-pointer hover:shadow-lg transition bg-white flex flex-col"
                 >
                   {/* Article Information */}
                   <div className="flex-1 relative ">
@@ -275,7 +279,7 @@ const ArticleList = ({
                     </p>
                     {!isDraft && !isRoom && (
                       <div className="flex justify-between items-center flex-wrap px-4 pb-2 pt-1 text-sm gap-4">
-                        <div className="flex flex-wrap gap-10">
+                        <div className="flex flex-wrap gap-6">
                           <div className="flex items-center gap-2">
                             <Eye />
                             {viewCounts[article.articleid] || 0}
