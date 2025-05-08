@@ -60,17 +60,25 @@ router.put("/:roomid", async (req, res) => {
   const { roomid } = req.params;
   const { name, description, room_type, member_limit } = req.body;
 
-  if (!name && !description && !room_type) {
-    return res.status(400).json({ error: "No fields to update" });
+  const updateData = {};
+  if (name !== undefined) updateData.name = name;
+  if (description !== undefined) updateData.description = description;
+  if (room_type !== undefined) updateData.room_type = room_type;
+  if (
+    member_limit !== undefined &&
+    Number.isInteger(member_limit) &&
+    member_limit > 0
+  ) {
+    updateData.member_limit = Math.min(member_limit, 100);
   }
-  
-  if (member_limit !== undefined) {
-    updateData.member_limit = member_limit;
+
+  if (Object.keys(updateData).length === 0) {
+    return res.status(400).json({ error: "No valid fields to update" });
   }
-  
+
   const { data, error } = await supabase
     .from("rooms")
-    .update({ name, description, room_type })
+    .update(updateData)
     .eq("roomid", roomid);
 
   if (error) {
@@ -80,6 +88,7 @@ router.put("/:roomid", async (req, res) => {
 
   res.status(200).json({ message: "Room updated successfully", data });
 });
+
 
 // 🔹 DELETE room by ID
 router.delete("/:roomid", async (req, res) => {

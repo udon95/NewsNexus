@@ -403,7 +403,7 @@ const ManageRooms = () => {
         </section>
 
         {showModal && (
-          <div className="fixed inset-0 bg-opacity-50 flex items-center justify-center z-50">
+          <div className="fixed inset-0 bg-black/30 backdrop-blur-sm min-h-screen flex items-center justify-center z-50">
             <div className="bg-white p-6 rounded-xl shadow-md w-full max-w-md space-y-4">
               <h2 className="text-xl font-semibold">Update Room</h2>
 
@@ -448,6 +448,28 @@ const ManageRooms = () => {
                   <option value="Private">Private</option>
                 </select>
               </div>
+
+
+            <div>
+               <label className="block text-sm font-medium mb-1">
+            Member Limit
+           </label>
+           <input
+            type="number"
+            min={1}
+            max={100}
+            value={editRoom.member_limit}
+            onChange={(e) =>
+             setEditRoom({
+               ...editRoom,
+               member_limit: parseInt(e.target.value),
+             })
+           }
+           className="w-full px-3 py-2 border rounded-md"
+          />
+          </div>
+
+              
 
               <div className="flex justify-end gap-2 pt-2">
                 <button

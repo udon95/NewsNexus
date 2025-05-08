@@ -38,16 +38,16 @@ const ArticleList = ({
         if (now >= expiryDate) {
           const id = isRoom ? article.postid : article.articleid;
           if (isRoom) {
-            await handleDeleteRoomArticle(id);
+            await handleDeleteRoomArticle(id, true);
           } else {
-            await handleDeleteArticle(id);
+            await handleDeleteArticle(id, true);
           }
         }
       }
     };
   
     deleteExpiredDrafts();
-  }, [articles, isDraft, isRoom]);
+  }, [articles, isDraft, isRoom]);  
 
   useEffect(() => {
     const fetchVotes = async () => {
@@ -130,11 +130,13 @@ const ArticleList = ({
     return `( ${day}/${month}/${year} )`;
   };
 
-  const handleDeleteArticle = async (articleid) => {
-    const confirmed = window.confirm(
-      "Are you sure you want to delete this article?"
-    );
-    if (!confirmed) return;
+  const handleDeleteArticle = async (articleid, skipConfirm = false) => {
+    if (!skipConfirm) {
+      const confirmed = window.confirm(
+        "Are you sure you want to delete this article?"
+      );
+      if (!confirmed) return;
+    }
   
     const bucketName = "articles-images";
   
@@ -180,11 +182,13 @@ const ArticleList = ({
     }
   };
 
-  const handleDeleteRoomArticle = async (postid) => {
-    const confirmed = window.confirm(
-      "Are you sure you want to delete this article?"
-    );
-    if (!confirmed) return;
+  const handleDeleteRoomArticle = async (postid, skipConfirm = false) => {
+    if (!skipConfirm) {
+      const confirmed = window.confirm(
+        "Are you sure you want to delete this article?"
+      );
+      if (!confirmed) return;
+    }
   
     const bucketName = "room-article-images";
   
@@ -244,6 +248,7 @@ const ArticleList = ({
           <ul className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 max-w-[890px] w-full">
             {visibleArticles.map((article, index) => {
               const roomimageUrl = article.room_article_images?.[0]?.image_url;
+              const imageSrc = isRoom ? roomimageUrl : article.imagepath;
 
               return (
                 <li
@@ -258,92 +263,83 @@ const ArticleList = ({
                     }
                   }}
                   
-                  className="w-full h-60 border border-black rounded-2xl shadow-md cursor-pointer hover:shadow-lg transition bg-white flex flex-col"
+                  className="w-full min-h-[15rem] border border-black rounded-2xl shadow-md cursor-pointer hover:shadow-lg transition bg-white flex flex-col"
                 >
                   {/* Article Information */}
                   <div className="flex-1 relative ">
-                    {!isRoom && !isDraft && (
-                      <div className="w-full h-40 bg-gray-200 rounded-t-2xl overflow-hidden relative">
-                        <img
-                          src={article.imagepath}
-                          alt={article.title}
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                    )}
-                    {!isRoom && isDraft && (
-                      <div className="w-full h-40 bg-gray-200 rounded-t-2xl overflow-hidden relative">
-                        <img
-                          src={article.imagepath}
-                          alt={article.title}
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                    )}
-                    {isRoom && !isDraft && (
-                      <div className="w-full h-48 bg-gray-200 rounded-t-2xl overflow-hidden relative">
-                        <img
-                          src={roomimageUrl}
-                          alt={article.title}
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                    )}
-                    {isRoom && isDraft && (
-                      <div className="w-full h-40 bg-gray-200 rounded-t-2xl overflow-hidden relative">
-                        <img
-                          src={roomimageUrl}
-                          alt={article.title}
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                    )}
+                    <div className="w-full h-40 bg-gray-200 rounded-t-2xl overflow-hidden relative">
+                      <img
+                        src={imageSrc}
+                        alt={article.title}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
                     <p className="pr-10 px-4 py-2 text-base text-left text-black overflow-hidden whitespace-nowrap text-ellipsis font-medium">
                       {article.title}
                     </p>
                     {!isDraft && !isRoom && (
-                      <div className="flex flex-wrap gap-10 absolute bottom-4 left-4 text-sm">
-                        <div className="flex items-center gap-2">
-                          <Eye />
-                          {viewCounts[article.articleid] || 0}
+                      <div className="flex justify-between items-center flex-wrap px-4 pb-2 pt-1 text-sm gap-4">
+                        <div className="flex flex-wrap gap-6">
+                          <div className="flex items-center gap-2">
+                            <Eye />
+                            {viewCounts[article.articleid] || 0}
+                          </div>
+                          <div className="flex items-center gap-2 text-green-500">
+                            <ThumbsUp />
+                            <span className="font-semibold text-black">
+                              {formatCount(voteCounts[article.articleid]?.up || 0)}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-2 text-red-500">
+                            <ThumbsDown />
+                            <span className="font-semibold text-black">
+                              {formatCount(voteCounts[article.articleid]?.down || 0)}
+                            </span>
+                          </div>
                         </div>
-                        <div className="flex items-center gap-2 text-green-500">
-                          <ThumbsUp />
-                          <span className="font-semibold text-black">
-                            {formatCount(
-                              voteCounts[article.articleid]?.up || 0
-                            )}
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-2 text-red-500">
-                          <ThumbsDown />
-                          <span className="font-semibold text-black">
-                            {formatCount(
-                              voteCounts[article.articleid]?.down || 0
-                            )}
-                          </span>
-                        </div>
+
+                        <button
+                          className="article-menu-trigger p-1 text-lg font-bold text-black hover:text-gray-600"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setOpenMenuIndex(openMenuIndex === index ? null : index);
+                          }}
+                        >
+                          <EllipsisVertical />
+                        </button>
                       </div>
                     )}
                     {isDraft && (
-                      <div className="absolute bottom-4 left-4 text-sm">
-                        Expires: {isRoom ? calculateExpiryDateRoom(article) : calculateExpiryDate(article)}
+                      <div className="flex justify-between items-center flex-wrap px-4 pb-2 pt-1 text-sm gap-2">
+                        <div className="max-w-[80%] text-black overflow-hidden whitespace-nowrap text-ellipsis">
+                          Expires: {isRoom ? calculateExpiryDateRoom(article) : calculateExpiryDate(article)}
+                        </div>
+
+                        <button
+                          className="article-menu-trigger p-1 text-lg font-bold text-black hover:text-gray-600"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setOpenMenuIndex(openMenuIndex === index ? null : index);
+                          }}
+                        >
+                          <EllipsisVertical />
+                        </button>
                       </div>
                     )}
-
-                    {/* Three-Dot Menu Button */}
-                    <button
-                      className="article-menu-trigger absolute bottom-2 right-2 p-2 text-lg font-bold text-black hover:text-gray-600"
-                      onClick={(e) => {
-                        e.stopPropagation(); // Prevents triggering article click
-                        setOpenMenuIndex(
-                          openMenuIndex === index ? null : index
-                        );
-                      }}
-                    >
-                      <EllipsisVertical />
-                    </button>
-
+                    {isRoom && !isDraft && (
+                      <div className="flex justify-end px-4 pb-2 pt-1">
+                        <button
+                          className="article-menu-trigger p-1 text-lg font-bold text-black hover:text-gray-600"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setOpenMenuIndex(openMenuIndex === index ? null : index);
+                          }}
+                        >
+                          <EllipsisVertical />
+                        </button>
+                      </div>
+                    )}
+                  
                     {/* Dropdown Menu (Appears on Click) */}
                     {openMenuIndex === index && (
                       <div className="article-menu-dropdown absolute bottom-10 right-2 bg-white shadow-md border border-gray-300 rounded-lg min-w-[120px] z-50">

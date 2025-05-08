@@ -251,12 +251,14 @@ export const FreeWriteArticle = () => {
         .substring(2)}.${fileExt}`;
       const filePath = `${session.id}/${fileName}`;
 
-      await supabase.storage
-        .from("articles-images")
-        .upload(filePath, img.file, {
-          cacheControl: "3600",
-          upsert: false,
-        });
+      //HERE
+      // await supabase.storage
+      //   .from("articles-images")
+      //   .upload(filePath, img.file, {
+      //     cacheControl: "3600",
+      //     upsert: false,
+      //   });
+      //HERE
 
       const { data: urlData } = supabase.storage
         .from("articles-images")
@@ -327,8 +329,38 @@ export const FreeWriteArticle = () => {
       status: "Draft",
     };
 
-    const { error } = await supabase.from("articles").insert([articleData]);
-    if (error) return alert("Failed to save draft.");
+    //HERE
+    const { data: inserted, error: idError } = await supabase
+      .from("articles")
+      .insert([articleData])
+      .select("articleid");
+
+    if (idError) return alert("Failed to save draft.");
+
+    const articleid = inserted?.[0]?.articleid;
+    //HERE
+
+    for (const img of pendingImages) {
+      const fileExt = img.file.name.split(".").pop();
+      const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+      const filePath = `${session.id}/${fileName}`;
+
+      const { data: urlData } = supabase.storage
+        .from("articles-images")
+        .getPublicUrl(filePath);
+
+      const imageUrl = urlData?.publicUrl;
+      if (imageUrl) {
+        await supabase
+          .from("article_images")
+          .insert([{ articleid, image_url: imageUrl }]);
+      }
+    }
+    //HERE
+
+    pendingImages.forEach(img => URL.revokeObjectURL(img.previewUrl));
+    setPendingImages([]);
+    //HERE
 
     alert("Draft saved!");
     handleClearInputs();
@@ -337,7 +369,17 @@ export const FreeWriteArticle = () => {
   const [pendingImages, setPendingImages] = useState([]);
 
   const handleEditorImageUpload = (e) => {
+    //HERE
+    if (pendingImages.length >= 1) {
+      alert("Free users can only upload one image.");
+      return;
+    }
     const file = e.target.files[0];
+    if (file.size > 50 * 1024 * 1024) {
+      alert("Image exceeds 50MB size limit.");
+      return;
+    }  
+    //HERE
     if (file) {
       const previewUrl = URL.createObjectURL(file);
       setPendingImages((prev) => [...prev, { file, previewUrl }]);
@@ -459,6 +501,45 @@ export const FreeWriteArticle = () => {
       setNewTopicName("");
     }
   };
+
+  //HERE
+  useEffect(() => {
+    if (!editor) return;
+  
+    const handlePaste = (event) => {
+      const clipboardItems = event.clipboardData?.items;
+      if (!clipboardItems) return;
+  
+      for (const item of clipboardItems) {
+        if (item.type.startsWith("image/")) {
+          event.preventDefault();
+          alert("Pasting images is disabled. Please use the Upload button.");
+          return;
+        }
+      }
+    };
+  
+    const editorElement = editor?.view?.dom;
+    if (editorElement) {
+      editorElement.addEventListener("paste", handlePaste);
+      editorElement.addEventListener("drop", (event) => {
+        const hasImage = Array.from(event.dataTransfer?.items || []).some((item) =>
+          item.type.startsWith("image/")
+        );
+        if (hasImage) {
+          event.preventDefault();
+          alert("Dragging and dropping images is disabled. Please use the Upload button.");
+        }
+      });      
+    }
+  
+    return () => {
+      if (editorElement) {
+        editorElement.removeEventListener("paste", handlePaste);
+      }
+    };
+  }, [editor]);  
+  //HERE
 
   return (
     <div className="w-full min-h-screen bg-indigo-50 text-black font-grotesk flex justify-center">

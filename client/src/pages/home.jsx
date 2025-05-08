@@ -55,7 +55,7 @@ function Home() {
             Navigating the Singaporean News Landscape
           </h1>
           <div className="flex justify-left gap-3 mt-4 sm:mt-4 sm:ml-10">
-            {!user && !loading && (
+            {/* {!user && !loading && (
               <>
                 <button
                   className="px-2 py-1 bg-[#191A23] font-grotesk text-white rounded-lg hover:bg-opacity-90 w-[80px]"
@@ -70,25 +70,14 @@ function Home() {
                   Login
                 </button>
               </>
-            )}
+            )} */}
           </div>
         </div>
       </div>
       <Navbar />
-      {/* <Search onSearch={handleSearchFromHome} /> */}
-      <div className="w-full font-grotesk mt-12">
-        <h1 className="text-2xl sm:text-3xl mb-5 text-left max-w-[900px] mx-auto">
-          Topics:
-        </h1>
-        <div className="flex justify-center w-full ">
-          <FetchTopics
-            selectedTopics={selectedTopics}
-            handleTopicSelection={handleTopicSelection}
-          />
-        </div>
-      </div>
+      
 
-      <div className="flex justify-center w-full mt-12">
+      {/* <div className="flex justify-center w-full mt-12">
         {userType !== "Premium" && (
           <button
             onClick={handleGoToDiscussionRooms}
@@ -97,7 +86,7 @@ function Home() {
             Go To Discussion Rooms &gt;
           </button>
         )}{" "}
-      </div>
+      </div> */}
 
       <VideoComponent />
 
@@ -107,6 +96,18 @@ function Home() {
         </h1>
         <div className="flex justify-center w-full ">
           <Testimonial />
+        </div>
+      </div>
+
+      <div className="w-full font-grotesk mt-12">
+        <h1 className="text-2xl sm:text-3xl mb-5 text-left max-w-[900px] mx-auto">
+          Topics:
+        </h1>
+        <div className="flex justify-center w-full ">
+          <FetchTopics
+            selectedTopics={selectedTopics}
+            handleTopicSelection={handleTopicSelection}
+          />
         </div>
       </div>
 

@@ -27,10 +27,11 @@ const FloatingWriteButton = () => {
   const hiddenPaths = [
     "/freeDashboard/writeArticle",
     "/premiumDashboard/writeArticle",
+    "/adminDashboard/*",
   ];
   const normalizedPath = currentPath.replace(/\/+$/, ""); // remove trailing slashes
 
-  if (hiddenPaths.includes(normalizedPath)) return null;
+  if (hiddenPaths.some((path) => normalizedPath.startsWith(path.replace("/*", "")))) return null;
 
   const handleClick = () => {
     if (currentPath.startsWith("/room/")) {
