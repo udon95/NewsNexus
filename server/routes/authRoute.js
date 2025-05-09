@@ -648,12 +648,11 @@ router.get("/public-profile/:username", async (req, res) => {
       .from("expert_application")
       .select("status")
       .eq("userid", userId)
-      .eq("status", "Approved"); 
 
     if (expError) {
       return res.status(500).json({ error: "Could not load expert" });
     }
-    const isExpertApproved = expertApps.length > 0;
+    // const isExpertApproved = expertApps.length > 0;
 
 
     // 2. Fetch articles written by the user
@@ -718,7 +717,7 @@ router.get("/public-profile/:username", async (req, res) => {
         usertype: typeRow.usertype, // front-end can check if usertype === "Expert" to show icon
         status: userData.status,
         created_at: userData.created_at,
-        expert_status: isExpertApproved ? "Approved" : "Pending",
+        expert_status: exp.status,
       },
       articles: articlesData || [],
       rooms: publicRooms || [],
