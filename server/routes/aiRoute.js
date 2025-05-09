@@ -384,6 +384,67 @@ router.post("/submit-article", async (req, res) => {
   }
 });
 
+router.post("/check-article", async (req, res) => {
+  try {
+    const {
+      title,
+      content: updatedHTML,
+      authorId,
+      topicid,
+      topicName,
+      imageUrls = [],
+    } = req.body;
+
+    const strippedText = extractTextFromHTML(updatedHTML);
+
+    if (!title || !updatedHTML || !authorId || !topicid || !topicName) {
+      return res.status(400).json({ error: "Missing required fields." });
+    }
+
+    const modResult = await moderateText(strippedText);
+    if (modResult?.flagged) {
+      await deleteImagesFromSupabase(imageUrls);
+
+      return res.status(400).json({
+        error: "Content flagged as inappropriate by text moderation.",
+        details: modResult,
+      });
+    }
+    const visionResult = await moderateImages(imageUrls);
+    if (visionResult.flagged.length > 0) {
+      await deleteImagesFromSupabase(imageUrls);
+
+      return res.status(400).json({
+        error: "One or more images failed moderation.",
+        flagged: visionResult.flagged,
+        details: visionResult.results,
+      });
+    }
+
+    let factResult;
+    try {
+      factResult = await factCheck(updatedHTML, topicName);
+    } catch (err) {
+      console.error("Fact-check error:", err);
+
+      return res.status(err.status || 400).json({
+        error: err.error,
+        ...(typeof err.accuracy === "number" && { accuracy: err.accuracy }),
+        ...(err.feedback && { feedback: err.feedback }),
+      });
+    }
+
+    return res.json({
+      message: "Article fact checked successfully.",
+      accuracy: factResult.accuracy,
+      feedback: factResult.feedback,
+    });
+  } catch (err) {
+    console.error("Failed submitting article error:", err);
+    return res.status(500).json({ error: "Error during submission." });
+  }
+});
+
 router.post("/moderate", async (req, res) => {
   const { content, imageUrls = [] } = req.body;
   if (!content) return res.status(400).json({ error: "No content provided." });
