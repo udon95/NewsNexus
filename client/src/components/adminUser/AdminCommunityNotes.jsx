@@ -181,6 +181,7 @@ const AdminCommunityNotes = () => {
                     <th className="p-3">#</th>
                     <th className="p-3">User</th>
                     <th className="p-3">Note</th>
+                    <th className="p-3">Displayed</th>
                     <th className="p-3">Toggle display</th>
                   </tr>
                 </thead>
@@ -192,8 +193,9 @@ const AdminCommunityNotes = () => {
                     >
                       <td className="p-3">{index + 1}</td>
                       <td className="p-3">{row.username}</td>
-                      <td className="p-3">{row.note}
-                      <button
+                      <td className="p-3">{row.note}</td>
+                      <td className="p-3">{row.Status == "Approved" ? "Yes" : "No"}</td>
+                      <td className="p-3"><button
                       type="button"
                       className="px-6 py-3 bg-[#3F414C] flex items-center justify-center ml-10 mt-5 text-white rounded-lg hover:bg-opacity-90 cursor-pointer"
                       onClick={() => setDisplayNotes(row)}
