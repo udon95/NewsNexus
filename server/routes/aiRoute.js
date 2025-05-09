@@ -165,7 +165,7 @@ ${content}
 Answer:
 `;
 
-async function factCheck(content, topicName) {
+async function factCheck(content, topicName, userFeedback = null) {
   const catRes = await fetch("https://api.openai.com/v1/chat/completions", {
     method: "POST",
     headers: {
@@ -216,6 +216,13 @@ async function factCheck(content, topicName) {
                       - Wrap only the false or misleading text in <mark> tags.
                       - Immediately after each <mark> section, on a new line preceded by a <br> tag, provide an explanation in parentheses that details why the text is inaccurate.
 
+                      ${
+                        userFeedback
+                          ? `The user has provided feedback on previous fact checking results: "${userFeedback}". 
+                      Please carefully consider this feedback when making your assessment.`
+                          : ""
+                      }
+                      
                       In addition, analyze the overall factual correctness of the article and assign a numerical accuracy score between 0 and 100, where 100 means the article is completely accurate and 0 means it is entirely inaccurate.
 
                       You must return _only_ a single JSON object, no arrays, no markdown, no code fences, no extra text.
@@ -270,13 +277,21 @@ async function factCheck(content, topicName) {
                      For any inaccuracies, describe the issues. 
                      Then, provide an overall factual accuracy score as a number between 0 and 100.
                      If some parts are ambiguous but overall the article is largely accurate, note this in your score.
+                     ${
+                       userFeedback
+                         ? `The user has provided feedback on previous fact checking results: "${userFeedback}". 
+                      Please carefully consider this feedback when making your assessment.`
+                         : ""
+                     }
                      Return your response only in a valid JSON object in this exact structure:
                     {"accuracy": <0 - 100>, "feedback": "The article contains false claims. 
                     Article: <original article HTML with <mark> around the inaccuracies>" 
                     \n Explanation: <explanation/correction of the inaccuracies highlighted>}
                     
                     Article: 
-                    ${content}`,
+                    ${content} 
+                    ${userFeedback ? `User Feedback:\n${userFeedback}` : ""}
+`,
           },
           { role: "user", content },
         ],
@@ -299,6 +314,46 @@ async function factCheck(content, topicName) {
   return result;
 }
 
+router.post("/check-article", async (req, res) => {
+  try {
+    const { content: articleHTML, topicName, userFeedback } = req.body;
+
+    const strippedText = extractTextFromHTML(articleHTML);
+
+    if (!articleHTML || !topicName) {
+      return res.status(400).json({ error: "Missing required fields." });
+    }
+
+    // First do text moderation
+    const modResult = await moderateText(strippedText);
+    if (modResult?.flagged) {
+      return res.status(400).json({
+        error: "Content flagged as inappropriate by text moderation.",
+        details: modResult,
+      });
+    }
+
+    // Then do fact checking
+    try {
+      const factResult = await factCheck(articleHTML, topicName, userFeedback);
+      return res.json({
+        accuracy: factResult.accuracy,
+        feedback: factResult.feedback,
+      });
+    } catch (err) {
+      console.error("Fact-check error:", err);
+      return res.status(err.status || 400).json({
+        error: err.error,
+        ...(typeof err.accuracy === "number" && { accuracy: err.accuracy }),
+        ...(err.feedback && { feedback: err.feedback }),
+      });
+    }
+  } catch (err) {
+    console.error("Failed checking article:", err);
+    return res.status(500).json({ error: "Error during fact check." });
+  }
+});
+
 router.post("/submit-article", async (req, res) => {
   try {
     const {
@@ -308,6 +363,8 @@ router.post("/submit-article", async (req, res) => {
       topicid,
       topicName,
       imageUrls = [],
+      userFeedback,
+      refactCheck,
     } = req.body;
 
     const strippedText = extractTextFromHTML(updatedHTML);
@@ -337,16 +394,23 @@ router.post("/submit-article", async (req, res) => {
     }
 
     let factResult;
-    try {
-      factResult = await factCheck(updatedHTML, topicName);
-    } catch (err) {
-      console.error("Fact-check error:", err);
+    if (!refactCheck) {
+      try {
+        factResult = await factCheck(updatedHTML, topicName, userFeedback);
+      } catch (err) {
+        console.error("Fact-check error:", err);
 
-      return res.status(err.status || 400).json({
-        error: err.error,
-        ...(typeof err.accuracy === "number" && { accuracy: err.accuracy }),
-        ...(err.feedback && { feedback: err.feedback }),
-      });
+        return res.status(err.status || 400).json({
+          error: err.error,
+          ...(typeof err.accuracy === "number" && { accuracy: err.accuracy }),
+          ...(err.feedback && { feedback: err.feedback }),
+        });
+      }
+    } else {
+      factResult = {
+        accuracy: req.body.accuracy || 80, // Fallback to 80 if not provided
+        feedback: req.body.feedback || "",
+      };
     }
 
     const imagepath = imageUrls.length > 0 ? imageUrls[0] : null;
