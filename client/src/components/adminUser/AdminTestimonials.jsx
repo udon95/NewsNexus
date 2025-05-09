@@ -148,7 +148,7 @@ const AdminTestimonials = () => {
 
           <div>
             {displayedRows.length > 0 ? (
-              <div className="overflow-x-auto ml-10 mt-8 max-w-5xl">
+              <div className="overflow-x-auto ml-10 mt-8 max-w-7xl">
                 <table className="min-w-full bg-gray-100 rounded-2xl shadow-lg text-left">
                 <thead className="bg-gray-200">
                   <tr>
