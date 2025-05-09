@@ -89,32 +89,23 @@ const exploreSearchBar = ({
             ▼
           </div>
         </div>
-
-        {/* Time Filter Dropdown */}
-        <div className="relative" ref={dropdownRef}>
-          <button
-            className="bg-[#191A23] px-4 py-3 rounded-lg flex items-center justify-center shadow-lg text-white min-w-[100px]"
-            onClick={() => setShowTimeDropdown((prev) => !prev)}
+        
+        {/* Time Filter */}
+        <div className="relative">
+          <select
+            value={timeFilter}
+            onChange={(e) => handleTimeSelect(e.target.value)}
+            className="bg-[#191A23] text-white px-4 py-3 rounded-lg shadow-lg appearance-none min-w-[150px]"
           >
-            <span className="truncate mr-2">{timeFilter}</span>
+            {TIME_FILTERS.map((filter) => (
+              <option key={filter} value={filter}>
+                {filter}
+              </option>
+            ))}
+          </select>
+          <div className="absolute inset-y-0 right-3 flex items-center pointer-events-none text-white">
             ▼
-          </button>
-
-          {showTimeDropdown && (
-            <div className="absolute right-0 mt-2 bg-white border rounded-md shadow-md z-10 w-40">
-              {TIME_FILTERS.map((filter) => (
-                <div
-                  key={filter}
-                  className={`p-2 cursor-pointer hover:bg-gray-100 ${
-                    filter === timeFilter ? "font-bold" : ""
-                  }`}
-                  onClick={() => handleTimeSelect(filter)}
-                >
-                  {filter}
-                </div>
-              ))}
-            </div>
-          )}
+          </div>
         </div>
 
         {/* Clear Button */}
