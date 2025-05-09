@@ -4,6 +4,7 @@ import { BadgeCheck, ArrowLeft } from "lucide-react";
 import Navbar from "./navbar.jsx";
 import api from "../api/axios.jsx";
 import NewsCard from "./newsCard.jsx";
+import ArticleList from "./articleList.jsx";
 
 const PublicProfile = () => {
   const { username } = useParams();
@@ -31,13 +32,22 @@ const PublicProfile = () => {
     <div className="min-h-screen min-w-screen flex flex-col bg-white">
       <Navbar />
       <div className="flex-grow container mx-auto px-4 sm:px-8 max-w-4xl font-grotesk py-8 ">
-        <div className="bg-gray-200 p-6 rounded-lg shadow mb-2">
+        <div className="bg-gray-200 p-6 rounded-lg shadow mb-2 max-w-[900px]">
           <h2 className="text-2xl font-semibold">
             {profileData.user.username}
+            <p className="text-sm text-gray-700 mt-1">
+              Joined on:{" "}
+              {new Date(profileData.user.created_at).toLocaleDateString()}
+            </p>
+            <p className="text-sm text-gray-700">
+              Articles: {profileData.totalArticles} | Total Likes:{" "}
+              {profileData.totalLikes} | Total Views: {profileData.totalViews}
+            </p>
 
-            {profileData.user.usertype === "Expert" && (
+            {profileData.user.expert_status === "Approved" && (
               <BadgeCheck className="inline-block ml-2 text-blue-500" />
             )}
+
             {profileData.user.usertype === "Premium" && (
               <span className="ml-2 px-2 py-1 text-sm bg-yellow-400 text-black rounded-full">
                 Premium
@@ -72,14 +82,30 @@ const PublicProfile = () => {
 
             <div className="w-full max-w-[900px] mx-auto">
               <div className="space-y-6">
-                {profileData.articles.map((article) => (
-                  <NewsCard
-                    key={article.articleid}
-                    articleid={article.articleid}
-                    title={article.title}
-                    imageUrl={article.imagepath}
-                  />
-                ))}
+                <ArticleList
+                  title="Articles:"
+                  articles={profileData.articles}
+                  isDraft={false}
+                  isFree={true}
+                  isRoom={false}
+                  isPremium={false}
+                  onArticleClick={() => {}}
+                  onDeleteSuccess={() => {}}
+                  articleData={{
+                    viewCounts: Object.fromEntries(
+                      profileData.articles.map((a) => [
+                        a.articleid,
+                        a.view_count,
+                      ])
+                    ),
+                    likeCounts: Object.fromEntries(
+                      profileData.articles.map((a) => [
+                        a.articleid,
+                        a.total_votes,
+                      ])
+                    ),
+                  }}
+                />
               </div>
             </div>
           </div>

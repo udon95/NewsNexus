@@ -97,14 +97,30 @@ const Header = () => {
             </>
           )}
           {user && (
-            <button
-              className="h-12 px-2 sm:h-14 bg-blue-200 rounded-lg text-blue-900 font-bold border-2 border-blue-900 flex items-center justify-center shadow-md hover:bg-blue-300 transition max-w-[10rem] overflow-hidden text-ellipsis whitespace-nowrap"
+
+            <div
+              className="flex flex-col items-center cursor-pointer"
               onClick={handleProfileClick}
               title="Profile"
-              style={{ backgroundColor: profileColor, color: textColor }}
             >
+            <div
+              className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl flex items-center justify-center border-2 shadow-md text-lg font-bold"
+              style={{
+                  backgroundColor: profileColor,
+                  color: textColor,
+                  borderColor: textColor,
+              }}
+            >
+              {user.username?.[0]?.toUpperCase() || "?"}
+            </div>
+            <span
+              className="text-xs mt-1 font-medium text-center w-full max-w-[5rem] overflow-hidden text-ellipsis whitespace-nowrap"
+              style={{ color: textColor }}
+            >              
               {user.username || "Guest"}
-            </button>
+            </span>
+          </div>
+
           )} 
 
           {user && !loading && (
