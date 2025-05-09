@@ -12,8 +12,22 @@ export const PremManageArticle = () => {
   const [roomdraftArticles, setroomDraftArticles] = useState([]);
   const [viewCounts, setViewCounts] = useState({});
   const [likeCounts, setLikeCounts] = useState({});
+  const [topics, setTopics] = useState([]);
   const storedUser = JSON.parse(localStorage.getItem("userProfile"));
   const userId = storedUser?.user?.userid;
+
+  useEffect(() => {
+    const fetchTopics = async () => {
+      const { data, error } = await supabase
+        .from("topic_categories")
+        .select("topicid, name");
+
+      if (!error && data) {
+        setTopics(data);
+      }
+    };
+    fetchTopics();
+  }, []);
 
   useEffect(() => {
     const fetchpostedArticles = async () => {
@@ -174,6 +188,7 @@ export const PremManageArticle = () => {
   const [articleType, setArticleType] = useState("all"); // "all", "posted", "draft"
   const [searchQuery, setSearchQuery] = useState(""); // Search query state
   const [timeFilter, setTimeFilter] = useState("All Time");
+  const [selectedTopicId, setSelectedTopicId] = useState("");
 
   const handleTimeFilterChange = (value) => {
     setTimeFilter(value);
@@ -210,18 +225,12 @@ export const PremManageArticle = () => {
       });
     }
 
+    if (selectedTopicId) {
+      filtered = filtered.filter((article) => article.topicid === selectedTopicId);
+    }
+
     return filtered;
   };
-
-  // Handle article click event
-  const handleArticleClick = (article) => {
-    const id = article.articleid || article.postid;
-    navigate(`/premiumDashboard/edit/${id}`);
-  };
-
-  // const handleRoomArticleClick = (article) => {
-  //   navigate(`/room/${article.roomid}`);
-  // };
 
   const handleDeleteArticle = (articleid) => {
     setPostedArticles((prev) => prev.filter((a) => a.articleid !== articleid));
@@ -254,6 +263,9 @@ export const PremManageArticle = () => {
           articleType={articleType}
           onArticleTypeChange={setArticleType}
           isPremium={true}
+          topics={topics}
+          selectedTopicId={selectedTopicId}
+          onTopicChange={setSelectedTopicId}
         />
 
         {/* Filtered Article Lists */}
@@ -264,7 +276,6 @@ export const PremManageArticle = () => {
             isDraft={false}
             isPremium={true}
             isRoom={false}
-            onArticleClick={handleArticleClick}
             onDeleteSuccess={handleDeleteArticle}
             articleData={{ viewCounts, likeCounts }}
           />
@@ -276,7 +287,6 @@ export const PremManageArticle = () => {
             isDraft={false}
             isPremium={true}
             isRoom={true}
-            onArticleClick={handleArticleClick}
             onDeleteSuccess={handleDeleteRoomArticle}
           />
         )}
@@ -288,7 +298,6 @@ export const PremManageArticle = () => {
             isPremium={true}
             isRoom={false}
             onDeleteSuccess={handleDeleteDraft}
-            onArticleClick={handleArticleClick}
           />
         )}
         {(articleType === "all" || articleType === "draft") && (
@@ -298,8 +307,7 @@ export const PremManageArticle = () => {
             isDraft={true}
             isPremium={true}
             isRoom={true}
-            onDeleteSuccess={handleDeleteRoomDraft}
-            onArticleClick={handleArticleClick}
+            onDeleteSuccess={handleDeleteRoomDraft}            
           />
         )}
       </main>
