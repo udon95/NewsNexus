@@ -14,18 +14,6 @@ const AdminUserDetails = () => {
   const [premiumUserList, setPremiumUserList] = useState([]);
   const [expertUserList, setExpertUserList] = useState([]);
 
-  const updateUserEmail = async () => {
-    const email = document.getElementById("emailInput").value;
-    const { data, error } = await supabase
-      .from("users")
-      .update({ email: email })
-      .eq("userid", userDetails.userid);
-    if (error) {
-      console.error("Error fetching data:", error);
-    } else {
-      alert("Email updated");
-    }
-  };
 
   const changeUserStatus = async () => {
     const newStatus =
@@ -122,9 +110,10 @@ const AdminUserDetails = () => {
           <div className="text-2xl sm:text-3xl text-left mt-8 ml-10 font-bold">
             User details:
           </div>
-
+          <div className="flex ">
           <div className="ml-10 mt-8 min-w-[500px] bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300">
             Username:&emsp;{userDetails.username}
+          </div>
           </div>
           <div className="flex ">
             <input
