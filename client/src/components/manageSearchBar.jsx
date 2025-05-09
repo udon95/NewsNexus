@@ -70,11 +70,11 @@ const ManageBar = ({
         )}
 
         {/* Article Type Filter */}
-        <div className="relative">
+        <div className="relative inline-block min-w-fit max-w-full overflow-hidden">
           <select
             value={articleType}
             onChange={(e) => onArticleTypeChange(e.target.value)}
-            className="bg-[#191A23] py-3 pl-4 pr-10 rounded-lg shadow-lg text-white appearance-none capitalize whitespace-nowrap w-fit max-w-full"
+            className="bg-[#191A23] py-3 pl-4 pr-10 rounded-lg shadow-lg text-white appearance-none capitalize whitespace-nowrap w-auto"
           >
             <option value="all">All</option>
             <option value="article">Article</option>
@@ -87,11 +87,11 @@ const ManageBar = ({
         </div>
 
         {/* Time Filter */}
-        <div className="relative">
+        <div className="relative inline-block min-w-fit max-w-full overflow-hidden">
           <select
             value={timeFilter}
             onChange={(e) => handleTimeSelect(e.target.value)}
-            className="bg-[#191A23] py-3 pl-4 pr-10 rounded-lg shadow-lg text-white appearance-none whitespace-nowrap w-fit max-w-full"
+            className="bg-[#191A23] py-3 pl-4 pr-10 rounded-lg shadow-lg text-white appearance-none whitespace-nowrap w-auto"
           >
             {TIME_FILTERS.map((filter) => (
               <option key={filter} value={filter}>
@@ -106,11 +106,11 @@ const ManageBar = ({
 
         {/* Topic Filter */}
         {topics?.length > 0 && (
-          <div className="relative">
+          <div className="relative inline-block min-w-fit max-w-full overflow-hidden">
             <select
               value={selectedTopicId}
               onChange={(e) => onTopicChange(e.target.value)}
-              className="bg-[#191A23] py-3 pl-4 pr-10 rounded-lg shadow-lg text-white appearance-none whitespace-nowrap w-fit max-w-full"
+              className="bg-[#191A23] py-3 pl-4 pr-10 rounded-lg shadow-lg text-white appearance-none whitespace-nowrap w-auto"
             >
               <option value="">All Topics</option>
               {topics.map((topic) => (
