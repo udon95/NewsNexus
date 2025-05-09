@@ -120,7 +120,8 @@ const AdminCommunityNotes = () => {
   const setDisplayNotes = async (row) => {
     const { data, error } = await supabase
       .from("community_notes")
-      .update({ Status: "Pending" });
+      .update({ Status: "Pending" })
+      .eq("target_id", row.target_id);
     if (error) {
       console.error("Error fetching data:", error);
     }
@@ -200,7 +201,7 @@ const AdminCommunityNotes = () => {
                       className="px-6 py-3 bg-[#3F414C] flex items-center justify-center text-white rounded-lg hover:bg-opacity-90 cursor-pointer"
                       onClick={() => setDisplayNotes(row)}
                     >
-                      {row.Status == "Approved" ? "Displayed" : "Select"}
+                      {row.Status == "Approved" ? "Remove" : "Display"}
                     </button>
                       </td>
                     </tr>
