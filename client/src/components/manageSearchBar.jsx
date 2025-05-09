@@ -11,7 +11,10 @@ const ManageBar = ({
     onTimeFilterChange, 
     articleType = "all", 
     onArticleTypeChange,
-    isPremium = false
+    isPremium = false,
+    topics = [],
+    selectedTopicId = "",
+    onTopicChange
    }) => {
   const [query, setQuery] = useState(initialQuery);
   const [showDropdown, setShowDropdown] = useState(false);
@@ -144,7 +147,29 @@ const ManageBar = ({
               ))}
             </div>
           )}
-        </div>     
+        </div>
+
+        {/* Topic Filter Dropdown */}
+          {topics?.length > 0 && (
+            <div className="relative">
+              <select
+                value={selectedTopicId}
+                onChange={(e) => onTopicChange(e.target.value)}
+                className="bg-[#191A23] px-4 py-3 rounded-lg shadow-lg text-white pr-8 appearance-none"
+              >
+                <option value="">All Topics</option>
+                {topics.map((topic) => (
+                  <option key={topic.topicid} value={topic.topicid}>
+                    {topic.name}
+                  </option>
+                ))}
+              </select>
+              <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
+                <ArrowDropDownIcon className="text-white" />
+              </div>
+            </div>
+          )}
+
       </div>
     </div>
   );
