@@ -1,21 +1,21 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { Search as SearchIcon } from "lucide-react";
-import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
+import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 
 const TIME_FILTERS = ["All Time", "Year", "Month", "Week", "Today"];
 
-const ManageBar = ({ 
-    onSearch, 
-    initialQuery = "", 
-    initialTimeFilter = "", 
-    onTimeFilterChange, 
-    articleType = "all", 
-    onArticleTypeChange,
-    isPremium = false,
-    topics = [],
-    selectedTopicId = "",
-    onTopicChange
-   }) => {
+const ManageBar = ({
+  onSearch,
+  initialQuery = "",
+  initialTimeFilter = "",
+  onTimeFilterChange,
+  articleType = "all",
+  onArticleTypeChange,
+  isPremium = false,
+  topics = [],
+  selectedTopicId = "",
+  onTopicChange,
+}) => {
   const [query, setQuery] = useState(initialQuery);
   const [timeFilter, setTimeFilter] = useState(initialTimeFilter);
 
@@ -44,6 +44,7 @@ const ManageBar = ({
   return (
     <div className="flex flex-col items-center mt-10">
       <div className="flex items-center space-x-3 w-full max-w-[850px] px-3 relative">
+        {/* Search Input */}
         <input
           type="text"
           placeholder="Search..."
@@ -68,12 +69,12 @@ const ManageBar = ({
           </button>
         )}
 
-        {/* Article Type Filter Dropdown */}
-        <div className="relative">
+        {/* Article Type Filter */}
+        <div className="relative inline-block min-w-fit max-w-full overflow-hidden">
           <select
             value={articleType}
             onChange={(e) => onArticleTypeChange(e.target.value)}
-            className="bg-[#191A23] py-3 pl-4 pr-10 rounded-lg shadow-lg text-white appearance-none capitalize whitespace-nowrap"
+            className="bg-[#191A23] py-3 pl-4 pr-10 rounded-lg shadow-lg text-white appearance-none capitalize whitespace-nowrap w-auto"
           >
             <option value="all">All</option>
             <option value="article">Article</option>
@@ -85,12 +86,12 @@ const ManageBar = ({
           </div>
         </div>
 
-        {/* Time Filter Dropdown */}
-        <div className="relative">
+        {/* Time Filter */}
+        <div className="relative inline-block min-w-fit max-w-full overflow-hidden">
           <select
             value={timeFilter}
             onChange={(e) => handleTimeSelect(e.target.value)}
-            className="bg-[#191A23] py-3 pl-4 pr-10 rounded-lg shadow-lg text-white appearance-none whitespace-nowrap"
+            className="bg-[#191A23] py-3 pl-4 pr-10 rounded-lg shadow-lg text-white appearance-none whitespace-nowrap w-auto"
           >
             {TIME_FILTERS.map((filter) => (
               <option key={filter} value={filter}>
@@ -103,27 +104,26 @@ const ManageBar = ({
           </div>
         </div>
 
-        {/* Topic Filter Dropdown */}
-          {topics?.length > 0 && (
-            <div className="relative">
-              <select
-                value={selectedTopicId}
-                onChange={(e) => onTopicChange(e.target.value)}
-                className="bg-[#191A23] py-3 pl-4 pr-10 rounded-lg shadow-lg text-white appearance-none whitespace-nowrap"
-              >
-                <option value="">All Topics</option>
-                {topics.map((topic) => (
-                  <option key={topic.topicid} value={topic.topicid}>
-                    {topic.name}
-                  </option>
-                ))}
-              </select>
-              <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
-                <ArrowDropDownIcon className="text-white" />
-              </div>
+        {/* Topic Filter */}
+        {topics?.length > 0 && (
+          <div className="relative inline-block min-w-fit max-w-full overflow-hidden">
+            <select
+              value={selectedTopicId}
+              onChange={(e) => onTopicChange(e.target.value)}
+              className="bg-[#191A23] py-3 pl-4 pr-10 rounded-lg shadow-lg text-white appearance-none whitespace-nowrap w-auto"
+            >
+              <option value="">All Topics</option>
+              {topics.map((topic) => (
+                <option key={topic.topicid} value={topic.topicid}>
+                  {topic.name}
+                </option>
+              ))}
+            </select>
+            <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
+              <ArrowDropDownIcon className="text-white" />
             </div>
-          )}
-
+          </div>
+        )}
       </div>
     </div>
   );
