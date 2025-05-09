@@ -73,11 +73,11 @@ const AdminTestimonials = () => {
 
   useEffect(() => {
     if(displayedStatus == "all"){
-      setDisplayedRows(rows.sort((a, b) => new Date(b.created_at) - new Date(a.created_at)));
+      setDisplayedRows(rows.sort((a, b) => new Date(b.submitted) - new Date(a.submitted)));
     }else if(displayedStatus == "displayed"){
-      setDisplayedRows(rows.filter((row) => row.homepage_display == true).sort((a, b) => new Date(b.created_at) - new Date(a.created_at)));
+      setDisplayedRows(rows.filter((row) => row.homepage_display == true).sort((a, b) => new Date(b.submitted) - new Date(a.submitted)));
     } else{
-      setDisplayedRows(rows.filter((row) => row.homepage_display == false).sort((a, b) => new Date(b.created_at) - new Date(a.created_at)));
+      setDisplayedRows(rows.filter((row) => row.homepage_display == false).sort((a, b) => new Date(b.submitted) - new Date(a.submitted)));
     }
 
   }, [displayedStatus, rows]);
@@ -154,12 +154,12 @@ const AdminTestimonials = () => {
                   <tr>
                     <th className="p-3">#</th>
                     <th className="p-3">Username</th>
-                    <th className="p-3">Feedback</th>
+                    <th className="p-3">Feedback text</th>
                     <th className="p-3">Design</th>
-                    <th className="p-3">Factcheck</th>
                     <th className="p-3">Access</th>
                     <th className="p-3">Safety</th>
                     <th className="p-3">Pricing</th>
+                    <th className="p-3">Factcheck</th>
                     <th className="p-3">News Quality</th>
                     <th className="p-3">Submitted</th>
                     <th className="p-3">Displayed</th>
@@ -177,10 +177,10 @@ const AdminTestimonials = () => {
                       <td className="p-3">{users.find((user) => user.userid === row.userid)?.username || "Unknown"}</td>
                       <td className="p-3">{row.areas_to_improve}</td>
                       <td className="p-3">{row.design}</td>
-                      <td className="p-3">{row.factcheck}</td>
                       <td className="p-3">{row.accessible}</td>
                       <td className="p-3">{row.safety}</td>
                       <td className="p-3">{row.price}</td>
+                      <td className="p-3">{row.factcheck}</td>
                       <td className="p-3">{row.news}</td>
                       <td className="p-3">{row.submitted}</td>
                       <td className="p-3">{row.homepage_display? "Yes" : "No"}</td>
