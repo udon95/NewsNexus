@@ -134,8 +134,33 @@ const setApplicantWithTopic = (application) => {
           <div className="text-2xl sm:text-3xl text-left mt-8 ml-10 font-bold">
             Expert applications:
           </div>
-          <div className="flex flex-col items-start w-full mx-10 ">
+          <div className="overflow-x-auto ml-10 mt-8 max-w-5xl">
+              <table className="min-w-full bg-gray-100 rounded-2xl shadow-lg text-left">
+              <thead className="bg-gray-200">
+                <tr>
+                  <th className="p-3">#</th>
+                  <th className="p-3">Title</th>
+                  <th className="p-3">Suspended</th>
+                </tr>
+              </thead>
+              <tbody>
+                {applications.map((application, index) => (
+                  <tr
+                    key={application.username}
+                    className="cursor-pointer hover:bg-gray-300 transition-colors"
+                    onClick={() => setApplicantWithTopic(application)}
+                  >
+                    <td className="p-3">{index + 1}</td>
+                    <td className="p-3">{application.username}</td>
+                    <td className="p-3">{topics.find((topic) => topic.topicid == application.topicid).name}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          {/* <div className="flex flex-col items-start w-full mx-10 ">
             {applications.map((application) => (
+              
               <div
                 key={application.username}
                 className=" mt-8 min-w-150 bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300 cursor-pointer"
@@ -144,7 +169,7 @@ const setApplicantWithTopic = (application) => {
                 {application.username}
               </div>
             ))}
-          </div>
+          </div> */}
         </div>
       </div>
     </div>

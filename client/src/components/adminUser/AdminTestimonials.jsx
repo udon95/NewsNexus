@@ -73,11 +73,11 @@ const AdminTestimonials = () => {
 
   useEffect(() => {
     if(displayedStatus == "all"){
-      setDisplayedRows(rows);
+      setDisplayedRows(rows.sort((a, b) => new Date(b.created_at) - new Date(a.created_at)));
     }else if(displayedStatus == "displayed"){
-      setDisplayedRows(rows.filter((row) => row.homepage_display == true));
+      setDisplayedRows(rows.filter((row) => row.homepage_display == true).sort((a, b) => new Date(b.created_at) - new Date(a.created_at)));
     } else{
-      setDisplayedRows(rows.filter((row) => row.homepage_display == false));
+      setDisplayedRows(rows.filter((row) => row.homepage_display == false).sort((a, b) => new Date(b.created_at) - new Date(a.created_at)));
     }
 
   }, [displayedStatus, rows]);
@@ -148,7 +148,7 @@ const AdminTestimonials = () => {
 
           <div>
             {displayedRows.length > 0 ? (
-              <div className="overflow-x-auto ml-10 mt-8 max-w-7xl">
+              <div className="overflow-x-auto ml-10 mt-8 max-w-9xl">
                 <table className="min-w-full bg-gray-100 rounded-2xl shadow-lg text-left">
                 <thead className="bg-gray-200">
                   <tr>
