@@ -92,7 +92,7 @@ const AdminCommentReports = () => {
     setDisplayedRows(
       rows.filter((row) => row.resolved === resolvedStatus)
         .filter((row) =>
-          comments.some((comment) => comment.commentid === row.target_id && comment.Suspended === false)
+          comments.some((comment) => comment.commentid === row.target_id && comment.Suspended === resolvedStatus)
         )
     );
   }, [resolvedStatus, rows]);
@@ -100,7 +100,6 @@ const AdminCommentReports = () => {
   const handleResolvedStatusChange = () => {
     const statusElement = document.getElementById("status");
     setResolvedStatus(statusElement.value === "resolved");
-    setDisplayedRows(rows.filter((row) => row.resolved === resolvedStatus));
   };
 
   return (
