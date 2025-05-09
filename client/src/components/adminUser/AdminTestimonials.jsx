@@ -91,45 +91,6 @@ const AdminTestimonials = () => {
     <div className="w-screen min-h-screen flex flex-col overflow-auto">
       <div className="flex">
         <div className="flex-1 font-grotesk">
-          {/* {selectedItem ? (
-            <div>
-              <div className="text-2xl sm:text-3xl text-left mt-8 ml-10 mb-5 font-bold">
-                Testimonial Details:
-              </div>
-              <div className="ml-10 mt-5 max-w-[500px] bg-gray-100 rounded-2xl p-3 break-words text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300">
-                Username : &emsp;{selectedUser ? selectedUser.username : ""}
-              </div>
-              <div className="ml-10 mt-5 max-w-[500px] bg-gray-100 rounded-2xl p-3 break-words text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300 cursor-pointer">
-                Rating : &emsp;{selectedItem ? selectedItem.rating : ""}
-              </div>
-              <div className="ml-10 mt-5 max-w-[500px] bg-gray-100 rounded-2xl p-3 break-words text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300">
-                Shared Experience : <br />
-                {selectedItem ? selectedItem.share_experience : ""}
-              </div>
-              <div className="ml-10 mt-5 max-w-[500px] bg-gray-100 rounded-2xl p-3 break-words text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300">
-                Areas of Improvement : <br />
-                {selectedItem ? selectedItem.areas_to_improve : ""}
-              </div>
-              <div className="flex">
-                <button
-                  type="button"
-                  className="px-6 py-3 bg-[#3F414C] flex ml-10 mt-7 text-white rounded-lg hover:bg-opacity-90 cursor-pointer"
-                  onClick={() =>
-                    setDisplay(
-                      selectedItem.id,
-                      selectedItem.homepage_display ? false : true
-                    )
-                  }
-                >
-                  {selectedItem.homepage_display
-                    ? "Takedown testimonial"
-                    : "Display testimonial"}
-                </button>
-              </div>
-            </div>
-          ) : (
-            <div></div>
-          )} */}
           <div className="flex">
             <div className="text-2xl sm:text-3xl text-left mt-8 ml-10 font-bold">
               User Testimonials:
@@ -148,7 +109,7 @@ const AdminTestimonials = () => {
 
           <div>
             {displayedRows.length > 0 ? (
-              <div className="overflow-x-auto ml-10 mt-8 max-w-7xl">
+              <div className="overflow-x-auto ml-10 mt-8 max-w-[1400px]">
                 <table className="min-w-full bg-gray-100 rounded-2xl shadow-lg text-left">
                 <thead className="bg-gray-200">
                   <tr>
@@ -187,9 +148,9 @@ const AdminTestimonials = () => {
                       <td className="p-3">{                
                         <button
                           type="button"
-                          className="px-6 py-3 bg-[#3F414C] flex ml-10 mt-7 text-white rounded-lg hover:bg-opacity-90 cursor-pointer"
-                          onClick={() =>
-                            setDisplay(
+                          className={`px-6 py-3 flex ml-10 mt-7 text-white rounded-lg hover:bg-opacity-90 cursor-pointer ${
+                            row.homepage_display ? 'bg-red-600' : 'bg-[#3F414C]'}`}                          
+                            onClick={() =>setDisplay(
                               row.id,
                               row.homepage_display ? false : true
                             )

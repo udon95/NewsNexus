@@ -6,9 +6,10 @@ const AdminCommentReports = () => {
   const [rows, setRows] = useState([]);
   const targetType = "comment";
   const [comment, setComment] = useState(null);
-  let count = 0;
   const [resolvedStatus, setResolvedStatus] = useState(false);
   const [displayedRows, setDisplayedRows] = useState([]);
+  const [comments, setComments] = useState([]);
+
 
   const openReport = (row) => {
     fetchComment(row.target_id);
@@ -71,10 +72,29 @@ const AdminCommentReports = () => {
       }
     };
     fetchRows();
+
+    const fetchComments = async () => {
+      const { data, error } = await supabase
+        .from("article_comments")
+        .select("*");
+      if (error) {
+        console.error("Error fetching data:", error);
+      } else {
+        setComments(data);
+        console.log(data);
+      }
+    };
+    fetchComments();
+
   }, [targetType]);
 
   useEffect(() => {
-    setDisplayedRows(rows.filter((row) => row.resolved === resolvedStatus));
+    setDisplayedRows(
+      rows.filter((row) => row.resolved === resolvedStatus)
+        .filter((row) =>
+          comments.some((comment) => comment.commentid === row.target_id && comment.Suspended === false)
+        )
+    );
   }, [resolvedStatus, rows]);
 
   const handleResolvedStatusChange = () => {
@@ -152,16 +172,43 @@ const AdminCommentReports = () => {
           </div>
           <div>
             {displayedRows.length > 0 ? (
-              displayedRows.map((row) => (
-                <div key={row.id}>
-                  <div
-                    className="ml-10 mt-8 max-w-150 bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300 cursor-pointer"
+              <div className="overflow-x-auto ml-10 mt-8 max-w-5xl">
+              <table className="min-w-full bg-gray-100 rounded-2xl shadow-lg text-left">
+              <thead className="bg-gray-200">
+                <tr>
+                  <th className="p-3">#</th>
+                  <th className="p-3">Reason</th>
+                  <th className="p-3">Comment</th>
+                </tr>
+              </thead>
+              <tbody>
+                {displayedRows.map((row, index) => (
+                  <tr
+                    key={row.id}
+                    className="cursor-pointer hover:bg-gray-300 transition-colors"
                     onClick={() => openReport(row)}
                   >
-                    Report {++count} : &emsp;{row.reason}
-                  </div>
-                </div>
-              ))
+                    <td className="p-3">{index + 1}</td>
+                    <td className="p-3">{row.reason}</td>
+                    <td className="p-3">{comments.find((com) => com.commentid === row.target_id)?.content || "Unknown"}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+
+              // displayedRows.map((row) => (
+              //   <div key={row.id}>
+              //     <div
+              //       className="ml-10 mt-8 max-w-150 bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300 cursor-pointer"
+              //       onClick={() => openReport(row)}
+              //     >
+              //       Report {++count} : &emsp;{row.reason}
+              //     </div>
+              //   </div>
+              // ))
             ) : (
               <div className="ml-10 mt-8">0 results</div>
             )}
