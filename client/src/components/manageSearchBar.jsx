@@ -70,7 +70,7 @@ const ManageBar = ({
         )}
 
         {/* Article Type Filter */}
-        <div className="relative inline-block min-w-[4rem] max-w-[14rem] w-fit">
+        <div className="relative inline-block w-fit max-w-full">
           <select
             value={articleType}
             onChange={(e) => onArticleTypeChange(e.target.value)}
@@ -87,7 +87,7 @@ const ManageBar = ({
         </div>
 
         {/* Time Filter */}
-        <div className="relative inline-block min-w-[4rem] max-w-[14rem] w-fit">
+        <div className="relative inline-block w-fit max-w-full">
           <select
             value={timeFilter}
             onChange={(e) => handleTimeSelect(e.target.value)}
@@ -106,7 +106,7 @@ const ManageBar = ({
 
         {/* Topic Filter */}
         {topics?.length > 0 && (
-          <div className="relative inline-block min-w-[4rem] max-w-[14rem] w-fit">
+          <div className="relative inline-block w-fit max-w-full">
             <select
               value={selectedTopicId}
               onChange={(e) => onTopicChange(e.target.value)}
