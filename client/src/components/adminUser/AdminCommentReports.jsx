@@ -96,7 +96,7 @@ const AdminCommentReports = () => {
         )
     );
     console.log(displayedRows);
-  }, [resolvedStatus, comments]);
+  }, [resolvedStatus, comments, rows]);
 
   const handleResolvedStatusChange = () => {
     const statusElement = document.getElementById("status");
