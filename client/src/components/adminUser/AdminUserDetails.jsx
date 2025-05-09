@@ -45,7 +45,7 @@ const AdminUserDetails = () => {
   };
 
   const openArticle = (row) => {
-    navigate("/article/" + row.title);
+    navigate(`/article/${encodeURIComponent(row.title)}`);
   };
 
   useEffect(() => {
@@ -124,27 +124,17 @@ const AdminUserDetails = () => {
           </div>
 
           <div className="ml-10 mt-8 min-w-[500px] bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300">
-            User ID:&emsp;{userDetails.userid}
+            Username:&emsp;{userDetails.username}
           </div>
           <div className="flex ">
             <input
               className="ml-10 mt-8 min-w-[500px] bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300"
-              placeholder={"Email:  " + userDetails.email}
+              value={"Email:  " + userDetails.email}
               id="emailInput"
+              readOnly
             />
-            <button
-              type="button"
-              className="px-6 py-3 bg-[#3F414C] flex ml-5 mt-8 text-white rounded-lg hover:bg-opacity-90 cursor-pointer"
-              onClick={updateUserEmail}
-            >
-              Update
-            </button>
           </div>
-          <input
-            className="ml-10 mt-8 min-w-[500px] bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300"
-            value={"Username:  " + userDetails.username}
-            readOnly
-          />
+
           <input
             className="ml-10 mt-8 min-w-[500px] bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300"
             value={"Account status:\t" + userDetails.status}
@@ -201,21 +191,32 @@ const AdminUserDetails = () => {
           </div>
 
           {userArticles != null ? (
-            <div>
-              {userArticles.map((row) => (
-                <div key={row.articleid}>
-                  {/* Render row data here */}
-                  <div
-                    className="ml-10 mt-8 max-w-150 bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300 cursor-pointer"
+            <div className="overflow-x-auto ml-10 mt-8 max-w-5xl">
+              <table className="min-w-full bg-gray-100 rounded-2xl shadow-lg text-left">
+              <thead className="bg-gray-200">
+                <tr>
+                  <th className="p-3">#</th>
+                  <th className="p-3">Title</th>
+                  <th className="p-3">Suspended</th>
+                </tr>
+              </thead>
+              <tbody>
+                {userArticles.map((row, index) => (
+                  <tr
+                    key={row.articleid}
+                    className="cursor-pointer hover:bg-gray-300 transition-colors"
                     onClick={() => openArticle(row)}
                   >
-                    Report {++count} : {row.title}
-                  </div>
-                </div>
-              ))}
-            </div>
+                    <td className="p-3">{index + 1}</td>
+                    <td className="p-3">{row.title}</td>
+                    <td className="p-3">{row.Suspended? "Yes" : "No"}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
           ) : (
-            <div></div>
+            <div className="ml-10 mt-8">0 results</div>
           )}
         </div>
       </div>
