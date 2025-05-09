@@ -4,6 +4,7 @@ import { BadgeCheck, ArrowLeft } from "lucide-react";
 import Navbar from "./navbar.jsx";
 import api from "../api/axios.jsx";
 import NewsCard from "./newsCard.jsx";
+import ArticleList from "./articleList.jsx";
 
 const PublicProfile = () => {
   const { username } = useParams();

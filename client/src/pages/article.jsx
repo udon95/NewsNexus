@@ -360,7 +360,7 @@ const Article = () => {
             </h1>
             <div className="flex items-center text-sm text-gray-600 mb-3 w-full gap-2">
               <Link
-                to={`/public-profile/${encodeURIComponent(authorName)}`}
+                to={`/public/${encodeURIComponent(authorName)}`}
                 className="underline hover:text-blue-600"
               >
                 {authorName}
