@@ -142,10 +142,10 @@ const CommentsSection = ({ articleId }) => {
             <div className="w-full bg-white p-4 rounded-lg shadow-md border border-gray-200">
               <div className="flex justify-between items-start">
                 <div className="flex items-start">
-                  <div className="w-10 h-10 bg-blue-500 text-white flex items-center justify-center font-bold rounded-lg mr-3">
-                    {comment.username?.charAt(0).toUpperCase()}
+                  <div className="w-10 h-10 bg-blue-500 text-white flex-shrink-0 flex items-center justify-center font-bold rounded-lg mr-3">
+                      {comment.username?.charAt(0).toUpperCase()}
                   </div>
-                  <div>
+                  <div className="flex-1 min-w-0">
                     <p className="text-lg font-bold text-blue-900">
                       @{comment.username}
                     </p>
