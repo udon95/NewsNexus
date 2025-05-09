@@ -152,7 +152,8 @@ const setApplicantWithTopic = (application) => {
                   >
                     <td className="p-3">{index + 1}</td>
                     <td className="p-3">{application.username}</td>
-                    <td className="p-3">{topics.find((topic) => topic.topicid == application.topicid).name}</td>
+                    <td className="p-3">  {topics.find((topic) => topic.topicid === application.topicid)?.name || "Unknown"}
+                    </td>
                   </tr>
                 ))}
               </tbody>
