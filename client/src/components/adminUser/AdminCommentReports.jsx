@@ -95,6 +95,7 @@ const AdminCommentReports = () => {
           comments.some((comment) => comment.commentid === row.target_id && comment.Suspended === resolvedStatus)
         )
     );
+    console.log(displayedRows);
   }, [resolvedStatus, rows]);
 
   const handleResolvedStatusChange = () => {
