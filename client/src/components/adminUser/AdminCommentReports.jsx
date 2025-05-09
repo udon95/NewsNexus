@@ -33,13 +33,13 @@ const AdminCommentReports = () => {
     }
   };
 
-  const suspendComment = async (target_id, bool) => {
-    console.log(target_id);
+  const suspendComment = async (report, bool) => {
+    console.log(report);
 
     const { data, error } = await supabase
       .from("article_comments")
       .update({ Suspended: bool })
-      .eq("commentid", target_id);
+      .eq("commentid", report.target_id);
 
     if (error) {
       console.error("Error fetching data:", error);
@@ -50,7 +50,7 @@ const AdminCommentReports = () => {
           resolved: true,
           resolution: bool ? "Comment suspended" : "No further action",
         })
-        .eq("target_id", target_id)
+        .eq("id", report.id)
         .single();
       if (error) {
         console.error("Error fetching data:", error);
@@ -143,7 +143,7 @@ const AdminCommentReports = () => {
                     type="button"
                     className="px-6 py-3 bg-[#3F414C] flex ml-5 mt-7 text-white rounded-lg hover:bg-opacity-90 cursor-pointer"
                     onClick={() =>
-                      suspendComment(selectedItem.target_id, false)
+                      suspendComment(selectedItem, false)
                     }
                   >
                     Reject report
