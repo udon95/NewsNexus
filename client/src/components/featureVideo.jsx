@@ -55,11 +55,10 @@ const VideoComponent = () => {
 
   return (
     <div className="flex justify-center w-full mt-10 font-grotesk">
-      <div className="relative w-full max-w-[900px] bg-gray-300 shadow-md">
+      <div className="relative w-full max-w-[900px] bg-gray-300 shadow-md rounded-xl overflow-hidden">
         {/* Text Overlay */}
         <p
-          className="absolute top-3 left-4 text-black font-bold text-3xl rounded-[20px] font-grotesk z-10 bg-white  "
-          style={{ color: textColor }}
+          className="absolute top-3 left-4 px-4 py-1 bg-black text-white font-bold text-2xl rounded-full border-2 border-white z-10"
         >
           Features:
         </p>
