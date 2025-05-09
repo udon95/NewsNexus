@@ -126,7 +126,7 @@ function App() {
             <Route path="/latest" element={<Latest />} />
             <Route path="/article/:articleName" element={<Article />} />
             <Route
-              path="/public/:username"
+              path="/profile/:username"
               element={<PublicProfile />}
             />
             <Route path="/rooms" element={<ViewRooms />} />

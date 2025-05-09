@@ -648,12 +648,13 @@ router.get("/public-profile/:username", async (req, res) => {
       .from("expert_application")
       .select("status")
       .eq("userid", userId)
-      .single();
+      .eq("status", "Approved"); 
 
     if (expError) {
-      // you can either default it or treat it as not‑found
       return res.status(500).json({ error: "Could not load expert" });
     }
+    const isExpertApproved = expertApps.length > 0;
+
 
     // 2. Fetch articles written by the user
     const { data: articlesData, error: articlesError } = await supabase
@@ -717,7 +718,7 @@ router.get("/public-profile/:username", async (req, res) => {
         usertype: typeRow.usertype, // front-end can check if usertype === "Expert" to show icon
         status: userData.status,
         created_at: userData.created_at,
-        expert_status: exp?.status || "Pending",
+        expert_status: isExpertApproved ? "Approved" : "Pending",
       },
       articles: articlesData || [],
       rooms: publicRooms || [],
