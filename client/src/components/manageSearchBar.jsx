@@ -11,27 +11,13 @@ const ManageBar = ({
     onTimeFilterChange, 
     articleType = "all", 
     onArticleTypeChange,
-    isPremium = false
+    isPremium = false,
+    topics = [],
+    selectedTopicId = "",
+    onTopicChange
    }) => {
   const [query, setQuery] = useState(initialQuery);
-  const [showDropdown, setShowDropdown] = useState(false);
   const [timeFilter, setTimeFilter] = useState(initialTimeFilter);
-  const dropdownRef = useRef();
-  const [showTypeDropdown, setShowTypeDropdown] = useState(false);
-  const typeDropdownRef = useRef();
-
-  useEffect(() => {
-    const handleOutsideClick = (e) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
-        setShowDropdown(false);
-      }
-      if (typeDropdownRef.current && !typeDropdownRef.current.contains(e.target)) {
-        setShowTypeDropdown(false);
-      }
-    };
-    document.addEventListener("mousedown", handleOutsideClick);
-    return () => document.removeEventListener("mousedown", handleOutsideClick);
-  }, []);
 
   useEffect(() => {
     setQuery(initialQuery);
@@ -53,7 +39,6 @@ const ManageBar = ({
   const handleTimeSelect = (filter) => {
     setTimeFilter(filter);
     onTimeFilterChange(filter);
-    setShowDropdown(false);
   };
 
   return (
@@ -84,67 +69,61 @@ const ManageBar = ({
         )}
 
         {/* Article Type Filter Dropdown */}
-        <div className="relative" ref={typeDropdownRef}>
-          <button
-            className="bg-[#191A23] px-4 py-3 rounded-lg flex items-center justify-between shadow-lg text-white"
-            onClick={() => setShowTypeDropdown((prev) => !prev)}
+        <div className="relative">
+          <select
+            value={articleType}
+            onChange={(e) => onArticleTypeChange(e.target.value)}
+            className="bg-[#191A23] py-3 pl-4 pr-10 rounded-lg shadow-lg text-white appearance-none capitalize whitespace-nowrap"
           >
-            <span className="truncate capitalize mr-2">
-              {articleType === "all" ? "All" : articleType}
-            </span>
-            <ArrowDropDownIcon className="w-4 h-4" />
-          </button>
-
-
-          {showTypeDropdown && (
-            <div className="absolute right-0 mt-2 bg-white border rounded-md shadow-md z-10 w-40">
-              {["all", "article", ...(isPremium ? ["room article"] : []), "draft"].map((type) => (
-                <div
-                  key={type}
-                  className={`p-2 cursor-pointer hover:bg-gray-100 ${
-                    articleType === type ? "font-bold" : ""
-                  }`}
-                  onClick={() => {
-                    onArticleTypeChange(type);
-                    setShowTypeDropdown(false);
-                  }}
-                >
-                  {type === "all"
-                    ? "All"
-                    : type === "article"
-                    ? "Article"
-                    : type === "room article"
-                    ? "Room Article"
-                    : "Draft"}
-                </div>
-              ))}
-            </div>
-          )}
+            <option value="all">All</option>
+            <option value="article">Article</option>
+            {isPremium && <option value="room article">Room Article</option>}
+            <option value="draft">Draft</option>
+          </select>
+          <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
+            <ArrowDropDownIcon className="text-white" />
+          </div>
         </div>
 
-        <div className="relative" ref={dropdownRef}>
-          <button
-            className="bg-[#191A23] px-4 py-3 rounded-lg flex items-center justify-between shadow-lg text-white"
-            onClick={() => setShowDropdown((prev) => !prev)}
+        {/* Time Filter Dropdown */}
+        <div className="relative">
+          <select
+            value={timeFilter}
+            onChange={(e) => handleTimeSelect(e.target.value)}
+            className="bg-[#191A23] py-3 pl-4 pr-10 rounded-lg shadow-lg text-white appearance-none whitespace-nowrap"
           >
-            <span className="truncate mr-2">{timeFilter}</span>
-            <ArrowDropDownIcon className="w-4 h-4" />
-          </button>
+            {TIME_FILTERS.map((filter) => (
+              <option key={filter} value={filter}>
+                {filter}
+              </option>
+            ))}
+          </select>
+          <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
+            <ArrowDropDownIcon className="text-white" />
+          </div>
+        </div>
 
-          {showDropdown && (
-            <div className="absolute right-0 mt-2 bg-white border rounded-md shadow-md z-10 w-40">
-              {TIME_FILTERS.map((filter) => (
-                <div
-                  key={filter}
-                  className={`p-2 cursor-pointer hover:bg-gray-100 ${filter === timeFilter ? "font-bold" : ""}`}
-                  onClick={() => handleTimeSelect(filter)}
-                >
-                  {filter}
-                </div>
-              ))}
+        {/* Topic Filter Dropdown */}
+          {topics?.length > 0 && (
+            <div className="relative">
+              <select
+                value={selectedTopicId}
+                onChange={(e) => onTopicChange(e.target.value)}
+                className="bg-[#191A23] py-3 pl-4 pr-10 rounded-lg shadow-lg text-white appearance-none whitespace-nowrap"
+              >
+                <option value="">All Topics</option>
+                {topics.map((topic) => (
+                  <option key={topic.topicid} value={topic.topicid}>
+                    {topic.name}
+                  </option>
+                ))}
+              </select>
+              <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
+                <ArrowDropDownIcon className="text-white" />
+              </div>
             </div>
           )}
-        </div>     
+
       </div>
     </div>
   );

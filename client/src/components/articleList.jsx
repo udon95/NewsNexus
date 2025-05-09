@@ -7,10 +7,8 @@ const ArticleList = ({
   title,
   articles,
   isDraft,
-  isFree,
   isPremium,
   isRoom,
-  onArticleClick,
   onDeleteSuccess,
   articleData = { viewCounts: {} },
 }) => {

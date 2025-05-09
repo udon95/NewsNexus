@@ -10,11 +10,22 @@ export const FreeManageMyArticles = () => {
   const [draftArticles, setDraftArticles] = useState([]);
   const [viewCounts, setViewCounts] = useState({});
   const [likeCounts, setLikeCounts] = useState({});
-  const [showDropdown, setShowDropdown] = useState(false);
-  const [showArticleTypeDropdown, setShowArticleTypeDropdown] = useState(false);
   const [topics, setTopics] = useState([]);
   const storedUser = JSON.parse(localStorage.getItem("userProfile"));
   const userId = storedUser?.user?.userid;
+
+  useEffect(() => {
+    const fetchTopics = async () => {
+      const { data, error } = await supabase
+        .from("topic_categories")
+        .select("topicid, name");
+
+      if (!error && data) {
+        setTopics(data);
+      }
+    };
+    fetchTopics();
+  }, []);
 
   useEffect(() => {
     const fetchpostedArticles = async () => {
@@ -104,6 +115,7 @@ export const FreeManageMyArticles = () => {
   const [articleType, setArticleType] = useState("all"); // "all", "posted", "draft"
   const [searchQuery, setSearchQuery] = useState(""); // Search query state
   const [timeFilter, setTimeFilter] = useState("All Time");
+  const [selectedTopicId, setSelectedTopicId] = useState("");
 
   const handleTimeFilterChange = (value) => {
     setTimeFilter(value);
@@ -140,12 +152,11 @@ export const FreeManageMyArticles = () => {
       });
     }
 
-    return filtered;
-  };
+    if (selectedTopicId) {
+      filtered = filtered.filter((article) => article.topicid === selectedTopicId);
+    }
 
-  // Handle article click event
-  const handleArticleClick = (article) => {
-    navigate(`/freeDashboard/edit/${article.articleid}`);
+    return filtered;
   };
 
   const handleDeletePosted = (articleid) => {
@@ -169,6 +180,9 @@ export const FreeManageMyArticles = () => {
           articleType={articleType}
           onArticleTypeChange={setArticleType}
           isPremium={false}
+          topics={topics}
+          selectedTopicId={selectedTopicId}
+          onTopicChange={setSelectedTopicId}
         />
 
         {/* Filtered Article Lists */}
@@ -177,10 +191,8 @@ export const FreeManageMyArticles = () => {
             title="My Posted Articles:"
             articles={posted}
             isDraft={false}
-            isFree={true}
             isRoom={false}
             isPremium={false}
-            onArticleClick={handleArticleClick}
             onDeleteSuccess={handleDeletePosted}
             articleData={{ viewCounts, likeCounts }}
           />
@@ -190,10 +202,8 @@ export const FreeManageMyArticles = () => {
             title="My Drafts:"
             articles={drafts}
             isDraft={true}
-            isFree={true}
             isRoom={false}
             isPremium={false}
-            onArticleClick={handleArticleClick}
             onDeleteSuccess={handleDeleteDraft}
           />
         )}
