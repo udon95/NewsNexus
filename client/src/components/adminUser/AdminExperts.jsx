@@ -139,8 +139,8 @@ const setApplicantWithTopic = (application) => {
               <thead className="bg-gray-200">
                 <tr>
                   <th className="p-3">#</th>
-                  <th className="p-3">Title</th>
-                  <th className="p-3">Suspended</th>
+                  <th className="p-3">User</th>
+                  <th className="p-3">Category</th>
                 </tr>
               </thead>
               <tbody>

@@ -88,10 +88,9 @@ const AdminCommunityNotes = () => {
     const statusElement = document.getElementById("status").value;
     setDisplayedArticlesList(
       articles.filter((article) =>
-        statusElement == "Approved"
-          ? approvedNotes.some((note) => note.target_id === article.articleid)
-          : pendingNotes.some((note) => note.target_id === article.articleid) &&
-            !approvedNotes.some((note) => note.target_id === article.articleid)
+          statusElement == "Approved" ? approvedNotes.some((note) => note.target_id === article.articleid)
+            : pendingNotes.some((note) => note.target_id === article.articleid) &&
+              !approvedNotes.some((note) => note.target_id === article.articleid)
       )
     );
   };
@@ -121,11 +120,18 @@ const AdminCommunityNotes = () => {
   const setDisplayNotes = async (row) => {
     const { data, error } = await supabase
       .from("community_notes")
+      .update({ Status: "Pending" });
+    if (error) {
+      console.error("Error fetching data:", error);
+    }
+
+    const { data1, error1 } = await supabase
+      .from("community_notes")
       .update({ Status: row.Status == "Pending" ? "Approved" : "Pending" })
       .eq("id", row.id)
       .single();
-    if (error) {
-      console.error("Error fetching data:", error);
+    if (error1) {
+      console.error("Error fetching data:", error1);
     } else {
       alert(
         row.Status == "Pending"
@@ -168,21 +174,54 @@ const AdminCommunityNotes = () => {
                 <div></div>
               )}
               {selectedArticleNotes.length > 0 ? (
-                selectedArticleNotes.map((row) => (
-                  <div className="flex" key={row.id}>
-                    <div className="ml-10 mt-5 max-w-150 bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300">
-                      {row.username} : <br />
-                      {row.note}
-                    </div>
-                    <button
+                <div className="overflow-x-auto ml-10 mt-8 max-w-5xl">
+                <table className="min-w-full bg-gray-100 rounded-2xl shadow-lg text-left">
+                <thead className="bg-gray-200">
+                  <tr>
+                    <th className="p-3">#</th>
+                    <th className="p-3">User</th>
+                    <th className="p-3">Note</th>
+                    <th className="p-3">Toggle display</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {selectedArticleNotes.map((row, index) => (
+                    <tr
+                      key={row.id}
+                      className="cursor-pointer hover:bg-gray-300 transition-colors"
+                    >
+                      <td className="p-3">{index + 1}</td>
+                      <td className="p-3">{row.username}</td>
+                      <td className="p-3">{row.note}
+                      <button
                       type="button"
                       className="px-6 py-3 bg-[#3F414C] flex items-center justify-center ml-10 mt-5 text-white rounded-lg hover:bg-opacity-90 cursor-pointer"
                       onClick={() => setDisplayNotes(row)}
                     >
                       {row.Status == "Approved" ? "Displayed" : "Select"}
                     </button>
-                  </div>
-                ))
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+                
+                // selectedArticleNotes.map((row) => (
+                //   <div className="flex" key={row.id}>
+                //     <div className="ml-10 mt-5 max-w-150 bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300">
+                //       {row.username} : <br />
+                //       {row.note}
+                //     </div>
+                //     <button
+                //       type="button"
+                //       className="px-6 py-3 bg-[#3F414C] flex items-center justify-center ml-10 mt-5 text-white rounded-lg hover:bg-opacity-90 cursor-pointer"
+                //       onClick={() => setDisplayNotes(row)}
+                //     >
+                //       {row.Status == "Approved" ? "Displayed" : "Select"}
+                //     </button>
+                //   </div>
+                // ))
               ) : (
                 <div></div>
               )}
@@ -208,16 +247,40 @@ const AdminCommunityNotes = () => {
 
           <div>
             {displayedArticleList.length > 0 ? (
-              displayedArticleList.map((row) => (
-                <div key={row.articleid}>
-                  <div
-                    className="ml-10 mt-8 max-w-150 bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300 cursor-pointer"
-                    onClick={() => openNote(row)}
-                  >
-                    Article {++count} : &emsp;{row.title}
-                  </div>
-                </div>
-              ))
+              <div className="overflow-x-auto ml-10 mt-8 max-w-5xl">
+                <table className="min-w-full bg-gray-100 rounded-2xl shadow-lg text-left">
+                  <thead className="bg-gray-200">
+                    <tr>
+                      <th className="p-3">#</th>
+                      <th className="p-3">Title</th>
+                      
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {displayedArticleList.map((row, index) => (
+                      <tr
+                        key={row.articleid}
+                        className="cursor-pointer hover:bg-gray-300 transition-colors"
+                        onClick={() => openNote(row)}
+                      >
+                        <td className="p-3">{index + 1}</td>
+                        <td className="p-3">{row.title}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              // displayedArticleList.map((row) => (
+              //   <div key={row.articleid}>
+              //     <div
+              //       className="ml-10 mt-8 max-w-150 bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300 cursor-pointer"
+              //       onClick={() => openNote(row)}
+              //     >
+              //       Article {++count} : &emsp;{row.title}
+              //     </div>
+              //   </div>
+              // ))
             ) : (
               <div className="ml-10 mt-8">0 results</div>
             )}

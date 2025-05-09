@@ -148,21 +148,21 @@ const AdminTestimonials = () => {
 
           <div>
             {displayedRows.length > 0 ? (
-              <div className="overflow-x-auto ml-10 mt-8 max-w-9xl">
+              <div className="overflow-x-auto ml-10 mt-8 max-w-8xl">
                 <table className="min-w-full bg-gray-100 rounded-2xl shadow-lg text-left">
                 <thead className="bg-gray-200">
                   <tr>
                     <th className="p-3">#</th>
                     <th className="p-3">Username</th>
-                    <th className="p-3">Displayed</th>
+                    <th className="p-3">Feedback</th>
                     <th className="p-3">Design</th>
                     <th className="p-3">Factcheck</th>
                     <th className="p-3">Access</th>
                     <th className="p-3">Safety</th>
                     <th className="p-3">Pricing</th>
                     <th className="p-3">News Quality</th>
-                    <th className="p-3">Feedback</th>
                     <th className="p-3">Submitted</th>
+                    <th className="p-3">Displayed</th>
                     <th className="p-3">Toggle display</th>
                   </tr>
                 </thead>
@@ -175,15 +175,15 @@ const AdminTestimonials = () => {
                     >
                       <td className="p-3">{index + 1}</td>
                       <td className="p-3">{users.find((user) => user.userid === row.userid)?.username || "Unknown"}</td>
-                      <td className="p-3">{row.homepage_display? "Yes" : "No"}</td>
+                      <td className="p-3">{row.areas_to_improve}</td>
                       <td className="p-3">{row.design}</td>
                       <td className="p-3">{row.factcheck}</td>
                       <td className="p-3">{row.accessible}</td>
                       <td className="p-3">{row.safety}</td>
                       <td className="p-3">{row.price}</td>
                       <td className="p-3">{row.news}</td>
-                      <td className="p-3">{row.areas_to_improve}</td>
                       <td className="p-3">{row.submitted}</td>
+                      <td className="p-3">{row.homepage_display? "Yes" : "No"}</td>
                       <td className="p-3">{                
                         <button
                           type="button"
