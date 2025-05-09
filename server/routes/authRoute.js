@@ -457,7 +457,7 @@ router.put("/update-admin-password", async (req, res) => {
   const { userId, oldPassword, newPassword } = req.body;
 
   // Validate presence of fields
-  if (!userId || !oldPassword || !newPassword ) {
+  if (!userId || !oldPassword || !newPassword) {
     return res.status(400).json({ error: "Missing required fields" });
   }
 
@@ -618,11 +618,12 @@ router.post("/verify-old-password", async (req, res) => {
 
 router.get("/public-profile/:username", async (req, res) => {
   const { username } = req.params;
+
   try {
     // 1. Fetch basic user details (e.g. username)
     const { data: userData, error: userError } = await supabase
       .from("users")
-      .select(`userid, username, status`)
+      .select(`userid, username, status, created_at`)
       .eq("username", username)
       .single();
 
@@ -630,10 +631,12 @@ router.get("/public-profile/:username", async (req, res) => {
       return res.status(404).json({ error: "User not found" });
     }
 
+    const userId = userData.userid;
+
     const { data: typeRow, error: typeError } = await supabase
       .from("usertype")
       .select("usertype")
-      .eq("userid", userData.userid)
+      .eq("userid", userId)
       .single();
 
     if (typeError) {
@@ -641,19 +644,36 @@ router.get("/public-profile/:username", async (req, res) => {
       return res.status(500).json({ error: "Could not load usertype" });
     }
 
-    const userId = userData.userid;
+    const { data: exp, error: expError } = await supabase
+      .from("expert_application")
+      .select("status")
+      .eq("userid", userId)
+      .single();
+
+    if (expError) {
+      // you can either default it or treat it as not‑found
+      return res.status(500).json({ error: "Could not load expert" });
+    }
 
     // 2. Fetch articles written by the user
     const { data: articlesData, error: articlesError } = await supabase
       .from("articles")
       .select(
-        "articleid, userid, title, imagepath, text, rating, time, status, topicid"
+        "articleid, userid, title, imagepath, rating, time, status, topicid, total_votes, view_count, accuracy_score"
       )
       .eq("userid", userId);
 
     if (articlesError) {
       return res.status(500).json({ error: "Failed to fetch articles" });
     }
+
+    let totalLikes = 0;
+    let totalViews = 0;
+
+    articlesData?.forEach((a) => {
+      totalLikes += a.total_votes || 0;
+      totalViews += a.view_count || 0;
+    });
 
     // 3. Fetch list of public rooms the user has joined
     let publicRooms = [];
@@ -696,9 +716,14 @@ router.get("/public-profile/:username", async (req, res) => {
         username: userData.username,
         usertype: typeRow.usertype, // front-end can check if usertype === "Expert" to show icon
         status: userData.status,
+        created_at: userData.created_at,
+        expert_status: exp?.status || "Pending",
       },
       articles: articlesData || [],
       rooms: publicRooms || [],
+      totalArticles: articlesData.length,
+      totalLikes,
+      totalViews,
     });
   } catch (err) {
     console.error("Error fetching public profile:", err);
