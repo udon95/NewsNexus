@@ -197,7 +197,7 @@ const AdminCommunityNotes = () => {
                       <td className="p-3">{row.Status == "Approved" ? "Yes" : "No"}</td>
                       <td className="p-3"><button
                       type="button"
-                      className="bg-[#3F414C] flex items-center justify-center ml-10 mt-5 text-white rounded-lg hover:bg-opacity-90 cursor-pointer"
+                      className="px-6 py-3 bg-[#3F414C] flex items-center justify-center text-white rounded-lg hover:bg-opacity-90 cursor-pointer"
                       onClick={() => setDisplayNotes(row)}
                     >
                       {row.Status == "Approved" ? "Displayed" : "Select"}
