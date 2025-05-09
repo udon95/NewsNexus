@@ -152,22 +152,30 @@ const CommentsSection = ({ articleId }) => {
                     <p className="text-sm text-gray-500 mb-2">
                       {new Date(comment.created_at).toLocaleDateString("en-GB")}
                     </p>
-                    <p
-                      className={`text-gray-700 whitespace-pre-wrap break-words transition-all duration-300 ease-in-out overflow-hidden ${
-                        expandedComments[comment.commentid]
-                          ? "max-h-full"
-                          : "max-h-[3.3em]"
-                      }`}
-                      style={{
-                        display: "-webkit-box",
-                        WebkitLineClamp: expandedComments[comment.commentid]
-                          ? "unset"
-                          : 2,
-                        WebkitBoxOrient: "vertical",
-                      }}
-                    >
-                      {comment.content}
-                    </p>
+                   <p
+                    className={`text-gray-700 whitespace-pre-wrap break-words transition-all duration-300 ease-in-out overflow-hidden ${
+                      expandedComments[comment.commentid]
+                        ? "max-h-full"
+                        : "max-h-[3.3em]"
+                    }`}
+                    style={{
+                      display: "-webkit-box",
+                      WebkitLineClamp: expandedComments[comment.commentid] ? "unset" : 2,
+                      WebkitBoxOrient: "vertical",
+                      wordBreak: "break-word",
+                      overflowWrap: "break-word",
+                    }}
+                  >
+                    {comment.content.split(/(@\w+)/g).map((part, index) =>
+                      part.startsWith("@") ? (
+                        <strong key={index} className="text-blue-900 font-bold">
+                          {part}
+                        </strong>
+                      ) : (
+                        <span key={index}>{part}</span>
+                      )
+                    )}
+                  </p>
                     {comment.content.length > 100 && (
                       <span
                         onClick={() => toggleContent(comment.commentid)}
