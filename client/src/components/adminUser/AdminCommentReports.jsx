@@ -93,7 +93,7 @@ const AdminCommentReports = () => {
       rows.filter((row) => row.resolved === resolvedStatus)
         .filter((row) =>
           comments.some((comment) => 
-            comment.commentid === row.target_id && comment.Suspended === resolvedStatus)
+            comment.commentid === row.target_id && (resolvedStatus ? true : comment.Suspended === false))
         )
     );
     console.log(displayedRows);
