@@ -97,31 +97,26 @@ const Header = () => {
             </>
           )}
           {user && (
-
             <div
               className="flex flex-col items-center cursor-pointer"
               onClick={handleProfileClick}
               title="Profile"
             >
-            <div
-              className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl flex items-center justify-center border-2 shadow-md text-lg font-bold"
-              style={{
+              <div
+                className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl flex items-center justify-center border-2 shadow-md text-lg font-bold"
+                style={{
                   backgroundColor: profileColor,
                   color: textColor,
                   borderColor: textColor,
-              }}
-            >
-              {user.username?.[0]?.toUpperCase() || "?"}
+                }}
+              >
+                {user.username?.[0]?.toUpperCase() || "?"}
+              </div>
+              <span className="text-xs mt-1 font-medium text-center text-black w-full max-w-[5rem] overflow-hidden text-ellipsis whitespace-nowrap">
+                {user.username || "Guest"}
+              </span>
             </div>
-            <span
-              className="text-xs mt-1 font-medium text-center w-full max-w-[5rem] overflow-hidden text-ellipsis whitespace-nowrap"
-              style={{ color: textColor }}
-            >              
-              {user.username || "Guest"}
-            </span>
-          </div>
-
-          )} 
+          )}
 
           {user && !loading && (
             <button
