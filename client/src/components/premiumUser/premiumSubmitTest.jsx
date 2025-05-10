@@ -48,8 +48,8 @@ export const PremiumSubmitTest = () => {
     }
 
     const allAnswered = feedbackQuestions.every((q) => answers[q.column]);
-    if (!allAnswered || areas.trim() === "") {
-      alert("Please fill in all required fields.");
+    if (!allAnswered) {
+      alert("Please rate all questions before submitting.");
       return;
     }
 
