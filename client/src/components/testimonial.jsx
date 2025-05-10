@@ -32,7 +32,7 @@ const calculateAverageRating = (testimonial) => {
   ].filter((val) => val !== null);
 
   if (ratings.length === 0) return null;
-  const sum = ratings.reduce((acc, curr) => acc + curr, 0);
+  const sum = ratings.reduce((acc, curr) => acc  curr, 0);
   return sum / ratings.length;
 };
 
@@ -60,22 +60,29 @@ const TestimonialSlider = () => {
 
   useEffect(() => {
     const fetchTestimonials = async () => {
-      try {
-        const { data, error } = await supabase
-          .from("testimonial")
-          .select("*, users:userid (username), usertype(usertype)")
-          .eq("homepage_display", true);
+     const { data, error } = await supabase
+      .from("testimonial")
+      .select(`
+        *,
+        users:userid (
+          username
+        ),
+        usertype:userid (
+          usertype
+        )
+      `)
+      .eq("homepage_display", true);
 
-        if (error) throw error;
-        setTestimonials(data);
-        setLoading(false);
-      } catch (error) {
-        console.error("Error fetching testimonials");
-        setLoading(false);
-      }
-    };
-    fetchTestimonials();
-  }, []);
+      if (error) {
+       console.error("Error fetching testimonials:", error);
+       setLoading(false);
+       return;
+     }
+     setTestimonials(data);
+     setLoading(false);
+   };
+   fetchTestimonials();
+ }, []);
 
   if (loading) {
     return <div>Loading ...</div>;
@@ -103,6 +110,7 @@ const TestimonialSlider = () => {
         className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden "
       >
         {filteredTestimonials.map((testimonial, index) => (
+
           <SwiperSlide key={index} className="p-6">
             {/* User Profile Info */}
             <div className="flex items-center border-b pb-3 ">
@@ -115,7 +123,7 @@ const TestimonialSlider = () => {
               <div className="ml-4 ">
                 <p className="font-bold">{testimonial.users.username}</p>
                 <p className="font-bold">
-                  {testimonial.users.usertype.usertype} User
+                  {testimonial.usertype.usertype} User
                 </p>
 
                 {calculateAverageRating(testimonial) !== null && (
