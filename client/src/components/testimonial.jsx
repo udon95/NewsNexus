@@ -32,7 +32,7 @@ const calculateAverageRating = (testimonial) => {
   ].filter((val) => val !== null);
 
   if (ratings.length === 0) return null;
-  const sum = ratings.reduce((acc, curr) => acc  curr, 0);
+  const sum = ratings.reduce((acc, curr) => acc + curr, 0);
   return sum / ratings.length;
 };
 
