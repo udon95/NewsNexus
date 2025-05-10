@@ -29,6 +29,13 @@ import { Extension } from "@tiptap/core";
 import { Paragraph } from "@tiptap/extension-paragraph";
 import { useSearchParams } from "react-router-dom";
 import ListItem from "@tiptap/extension-list-item";
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+} from "@mui/material";
 
 export const PremiumWriteArticle = () => {
   const [title, setTitle] = useState("");
@@ -49,14 +56,15 @@ export const PremiumWriteArticle = () => {
   const [showLinkModal, setShowLinkModal] = useState(false);
   const [linkUrl, setLinkUrl] = useState("");
   const [roomArticleType, setRoomArticleType] = useState("factual"); // only for Room
-  const [aiFeedback, setAiFeedback] = useState("");
-  const [accuracy, setAccuracy] = useState(null);
   const [showDraftNotification, setShowDraftNotification] = useState(false);
   const [showTopicApplication, setShowTopicApplication] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadAction, setUploadAction] = useState(""); // "post" or "draft"
   const [pendingImages, setPendingImages] = useState([]);
 
+  const [aiFeedback, setAiFeedback] = useState("");
+  const [accuracy, setAccuracy] = useState(null);
+  const [openSuccess, setOpenSuccess] = useState(false);
   const [searchParams] = useSearchParams();
   const preSelectedType = searchParams.get("type"); // e.g. "room"
   const preSelectedRoomId = searchParams.get("roomid");
@@ -455,10 +463,12 @@ export const PremiumWriteArticle = () => {
       }
       pendingImages.forEach((img) => URL.revokeObjectURL(img.previewUrl)); // cleanup object URLs
       setPendingImages([]);
+      handleClearInputs();
+
       setAccuracy(result.accuracy);
       setAiFeedback(result.feedback);
-      alert(`Article posted successfully. Accuracy Score: ${result.accuracy}%`);
-      handleClearInputs();
+      //alert(`Article posted successfully. Accuracy Score: ${result.accuracy}%`);
+      setOpenSuccess(true);
       return;
     } else {
       // ---------------------- ROOM ARTICLE ----------------------
@@ -1591,6 +1601,23 @@ export const PremiumWriteArticle = () => {
             </div>
           </div>
         )}
+
+        <Dialog
+          open={openSuccess}
+          onClose={() => setOpenSuccess(false)}
+          aria-labelledby="success-dialog-title"
+        >
+          <DialogTitle id="success-dialog-title">Article Posted!</DialogTitle>
+          <DialogContent>
+            <p>
+              Your AI Fact-Check accuracy was <strong>{accuracy}%</strong>.
+            </p>
+            <p>{aiFeedback}</p>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setOpenSuccess(false)}>OK</Button>
+          </DialogActions>
+        </Dialog>
 
         {showTopicApplication && (
           <div className="fixed inset-0 backdrop-blur-sm bg-white/10 flex items-center justify-center z-50">
