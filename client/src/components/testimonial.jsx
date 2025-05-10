@@ -174,7 +174,6 @@ const TestimonialSlider = () => {
 
                 {avg != null && (
                   <>
-                    <StarRating rating={Math.round(avg)} />
                     <p className="text-sm text-gray-500 italic">
                       {avg.toFixed(1)} / 10.0
                     </p>
