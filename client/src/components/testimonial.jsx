@@ -84,12 +84,7 @@ const TestimonialSlider = () => {
       // 1) Fetch testimonials with usernames
       const { data: tData, error: tErr } = await supabase
         .from("testimonial")
-        .select(
-          `
-        *,
-        users:userid ( username )
-      `
-        )
+        .select(`*, users:userid ( username )`)
         .eq("homepage_display", true);
 
       if (tErr) {
@@ -128,6 +123,7 @@ const TestimonialSlider = () => {
 
     fetchTestimonials();
   }, []);
+  console.log("testimonial", testimonials);
 
   if (loading) {
     return <div>Loading ...</div>;
@@ -156,36 +152,38 @@ const TestimonialSlider = () => {
       >
         {filteredTestimonials.map((t, index) => {
           const avg = calculateAverageRating(t);
-          <SwiperSlide key={index} className="p-6">
-            {/* User Profile Info */}
-            <div className="flex items-center border-b pb-3 ">
-              {/* Profile Letter */}
-              <div className="w-10 h-10 rounded-full bg-gray-500 font-grotesk text-white flex items-center justify-center text-lg font-bold">
-                {t.users.username.charAt(0) || "Anon."}
+          return (
+            <SwiperSlide key={index} className="p-6">
+              {/* User Profile Info */}
+              <div className="flex items-center border-b pb-3 ">
+                {/* Profile Letter */}
+                <div className="w-10 h-10 rounded-full bg-gray-500 font-grotesk text-white flex items-center justify-center text-lg font-bold">
+                  {t.users.username.charAt(0) || "Anon."}
+                </div>
+
+                {/* Name and Rating */}
+                <div className="ml-4 ">
+                  <p className="font-bold">{t.users.username}</p>
+
+                  <p className="text-sm italic text-gray-600">
+                    {t.usertype} User
+                  </p>
+
+                  {avg != null && (
+                    <>
+                      <p className="text-sm text-gray-500 italic">
+                        {avg.toFixed(1)} / 10.0
+                      </p>
+                    </>
+                  )}
+                </div>
               </div>
 
-              {/* Name and Rating */}
-              <div className="ml-4 ">
-                <p className="font-bold">{t.users.username}</p>
-
-                <p className="text-sm italic text-gray-600">
-                  {t.usertype} User
-                </p>
-
-                {avg != null && (
-                  <>
-                    <p className="text-sm text-gray-500 italic">
-                      {avg.toFixed(1)} / 10.0
-                    </p>
-                  </>
-                )}
-              </div>
-            </div>
-
-            <p className="text-lg text-black mt-4 font-grotesk ">
-              {getOverallSentiment(t)}
-            </p>
-          </SwiperSlide>;
+              <p className="text-lg text-black mt-4 font-grotesk ">
+                {getOverallSentiment(t)}
+              </p>
+            </SwiperSlide>
+          );
         })}
       </Swiper>
     </div>
