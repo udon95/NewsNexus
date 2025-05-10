@@ -191,7 +191,7 @@ const AdminArticleReports = () => {
                 <tr>
                   <th className="p-3">#</th>
                   <th className="p-3">Reason</th>
-                  <th className="p-3">Comment</th>
+                  <th className="p-3">Title</th>
                 </tr>
               </thead>
               <tbody>
@@ -203,7 +203,7 @@ const AdminArticleReports = () => {
                   >
                     <td className="p-3">{index + 1}</td>
                     <td className="p-3">{row.reason}</td>
-                    <td className="p-3">{articles.find((art) => art.articleid === row.target_id)?.content || "Unknown"}
+                    <td className="p-3">{articles.find((art) => art.articleid === row.target_id)?.title || "Unknown"}
                     </td>
                   </tr>
                 ))}
