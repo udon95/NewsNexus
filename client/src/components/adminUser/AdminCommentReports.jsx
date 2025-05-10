@@ -92,7 +92,8 @@ const AdminCommentReports = () => {
     setDisplayedRows(
       rows.filter((row) => row.resolved === resolvedStatus)
         .filter((row) =>
-          comments.some((comment) => comment.commentid === row.target_id && comment.Suspended === resolvedStatus)
+          comments.some((comment) => 
+            comment.commentid === row.target_id && comment.Suspended === resolvedStatus)
         )
     );
     console.log(displayedRows);
@@ -130,7 +131,7 @@ const AdminCommentReports = () => {
                   type="button"
                   className="px-6 py-3 bg-[#3F414C] flex ml-10 mt-7 text-white rounded-lg hover:bg-opacity-90 cursor-pointer"
                   onClick={() =>
-                    suspendComment(selectedItem.target_id, !comment.Suspended)
+                    suspendComment(selectedItem, !comment.Suspended)
                   }
                 >
                   {comment && comment.Suspended == true

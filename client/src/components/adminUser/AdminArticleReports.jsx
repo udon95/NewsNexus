@@ -41,7 +41,7 @@ const AdminArticleReports = () => {
   };
 
   const suspendArticle = async (report, bool) => {
-    console.log(target_id);
+    console.log(report);
 
     const { data, error } = await supabase
       .from("articles")
@@ -142,7 +142,7 @@ const AdminArticleReports = () => {
                   type="button"
                   className="px-6 py-3 bg-[#3F414C] flex ml-10 mt-7 text-white rounded-lg hover:bg-opacity-90 cursor-pointer"
                   onClick={() =>
-                    suspendArticle(selectedItem.target_id, !article.Suspended)
+                    suspendArticle(selectedItem, !article.Suspended)
                   }
                 >
                   {article && article.Suspended == true
@@ -155,7 +155,7 @@ const AdminArticleReports = () => {
                     type="button"
                     className="px-6 py-3 bg-[#3F414C] flex ml-5 mt-7 text-white rounded-lg hover:bg-opacity-90 cursor-pointer"
                     onClick={() =>
-                      suspendArticle(selectedItem.target_id, false)
+                      suspendArticle(selectedItem, false)
                     }
                   >
                     Reject report
