@@ -403,7 +403,7 @@ function Register() {
                       <h3 className="text-xl font-semibold mb-4">
                         Privacy Policy
                       </h3>
-                      <PrivacyPolicy />
+                      <Privacy />
                     </div>
                   </div>
                 )}
@@ -473,44 +473,6 @@ function Register() {
             >
               Submit
             </button>
-          </div>
-        )}
-
-        {showGuidelinesModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
-            <div className="bg-white w-11/12 max-w-2xl p-6 rounded-lg relative">
-              <button
-                onClick={() => setShowGuidelinesModal(false)}
-                className="absolute top-3 right-3 text-gray-500 hover:text-gray-800"
-              >
-                ✕
-              </button>
-              <h3 className="text-xl font-semibold mb-4">
-                Platform Guidelines
-              </h3>
-              <div className="overflow-y-auto max-h-[70vh]">
-                {/* TODO: paste or fetch your guidelines HTML/text here */}
-                <p>Your full platform guidelines content…</p>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {showPrivacyModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
-            <div className="bg-white w-11/12 max-w-2xl p-6 rounded-lg relative">
-              <button
-                onClick={() => setShowPrivacyModal(false)}
-                className="absolute top-3 right-3 text-gray-500 hover:text-gray-800"
-              >
-                ✕
-              </button>
-              <h3 className="text-xl font-semibold mb-4">Privacy Policy</h3>
-              <div className="overflow-y-auto max-h-[70vh]">
-                {/* TODO: paste or fetch your privacy policy HTML/text here */}
-                <p>Your full privacy policy content…</p>
-              </div>
-            </div>
           </div>
         )}
       </main>
