@@ -6,29 +6,29 @@ import { Pagination, Autoplay } from "swiper/modules";
 import supabase from "../api/supabaseClient";
 
 // Function to generate star rating
-const StarRating = ({ rating }) => {
-  return (
-    <div className="flex">
-      {[...Array(4)].map((_, index) => (
-        <span
-          key={index}
-          className={index < rating ? "text-yellow-400" : "text-gray-300"}
-        >
-          ★
-        </span>
-      ))}
-    </div>
-  );
-};
+// const StarRating = ({ rating }) => {
+//   return (
+//     <div className="flex">
+//       {[...Array(4)].map((_, index) => (
+//         <span
+//           key={index}
+//           className={index < rating ? "text-yellow-400" : "text-gray-300"}
+//         >
+//           ★
+//         </span>
+//       ))}
+//     </div>
+//   );
+// };
 
-const calculateAverageRating = (testimonial) => {
+const calculateAverageRating = (t) => {
   const ratings = [
-    testimonial.design,
-    testimonial.factcheck,
-    testimonial.accessible,
-    testimonial.safety,
-    testimonial.price,
-    testimonial.news,
+    t.design,
+    t.factcheck,
+    t.accessible,
+    t.safety,
+    t.price,
+    t.news,
   ].filter((val) => val !== null);
 
   if (ratings.length === 0) return null;
@@ -78,61 +78,62 @@ const TestimonialSlider = () => {
   // }, []);
 
   useEffect(() => {
-  const fetchTestimonials = async () => {
-    setLoading(true);
+    const fetchTestimonials = async () => {
+      setLoading(true);
 
-    // 1) Fetch testimonials with usernames
-    const { data: tData, error: tErr } = await supabase
-      .from("testimonial")
-      .select(`
+      // 1) Fetch testimonials with usernames
+      const { data: tData, error: tErr } = await supabase
+        .from("testimonial")
+        .select(
+          `
         *,
         users:userid ( username )
-      `)
-      .eq("homepage_display", true);
+      `
+        )
+        .eq("homepage_display", true);
 
-    if (tErr) {
-      console.error("Error fetching testimonials:", tErr);
+      if (tErr) {
+        console.error("Error fetching testimonials:", tErr);
+        setLoading(false);
+        return;
+      }
+
+      // 2) Pull all the userids out
+      const userIds = tData.map((t) => t.userid);
+
+      // 3) Fetch the profiles (usertype) for those userIds
+      const { data: pData, error: pErr } = await supabase
+        .from("usertype") // or “user_profile” if that’s your table name
+        .select("userid, usertype")
+        .in("userid", userIds);
+
+      if (pErr) {
+        console.error("Error fetching usertypes:", pErr);
+        setLoading(false);
+        return;
+      }
+
+      // 4) Merge them together into one flat object
+      const merged = tData.map((t) => {
+        const profile = pData.find((p) => p.userid === t.userid);
+        return {
+          ...t,
+          usertype: profile?.usertype ?? "Free", // default if missing
+        };
+      });
+
+      setTestimonials(merged);
       setLoading(false);
-      return;
-    }
+    };
 
-    // 2) Pull all the userids out
-    const userIds = tData.map((t) => t.userid);
-
-    // 3) Fetch the profiles (usertype) for those userIds
-    const { data: pData, error: pErr } = await supabase
-      .from("usertype")               // or “user_profile” if that’s your table name
-      .select("userid, usertype")
-      .in("userid", userIds);
-
-    if (pErr) {
-      console.error("Error fetching usertypes:", pErr);
-      setLoading(false);
-      return;
-    }
-
-    // 4) Merge them together into one flat object
-    const merged = tData.map((t) => {
-      const profile = pData.find((p) => p.userid === t.userid);
-      return {
-        ...t,
-        usertype: profile?.usertype ?? "Free"   // default if missing
-      };
-    });
-
-    setTestimonials(merged);
-    setLoading(false);
-  };
-
-  fetchTestimonials();
-}, []);
+    fetchTestimonials();
+  }, []);
 
   if (loading) {
     return <div>Loading ...</div>;
   }
 
-    const filteredTestimonials = testimonials
-
+  const filteredTestimonials = testimonials;
 
   if (filteredTestimonials.length === 0)
     return (
@@ -153,26 +154,28 @@ const TestimonialSlider = () => {
         loop={true}
         className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden "
       >
-        {filteredTestimonials.map((testimonial, index) => (
+        {filteredTestimonials.map((t, index) => (
           <SwiperSlide key={index} className="p-6">
             {/* User Profile Info */}
             <div className="flex items-center border-b pb-3 ">
               {/* Profile Letter */}
               <div className="w-10 h-10 rounded-full bg-gray-500 font-grotesk text-white flex items-center justify-center text-lg font-bold">
-                {testimonial.users.username.charAt(0) || "Anon."}
+                {t.users.username.charAt(0) || "Anon."}
               </div>
 
               {/* Name and Rating */}
               <div className="ml-4 ">
-                <p className="font-bold">{testimonial.users.username}</p>
+                <p className="font-bold">{t.users.username}</p>
 
-                {calculateAverageRating(testimonial) !== null && (
+                <p className="text-sm italic text-gray-600">
+                  {t.usertype} User
+                </p>
+
+                {avg != null && (
                   <>
-                    <StarRating
-                      rating={Math.round(calculateAverageRating(testimonial))}
-                    />
+                    <StarRating rating={Math.round(avg)} />
                     <p className="text-sm text-gray-500 italic">
-                      {calculateAverageRating(testimonial).toFixed(1)} / 10.0
+                      {avg.toFixed(1)} / 10.0
                     </p>
                   </>
                 )}
