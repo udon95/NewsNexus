@@ -7,11 +7,11 @@ const AdminRoomArticleReports = () => {
   const [rows, setRows] = useState([]);
   const targetType = "room article";
   const [link, setLink] = useState([]);
-  let count = 0;
   const navigate = useNavigate();
   const [resolvedStatus, setResolvedStatus] = useState(false);
   const [displayedRows, setDisplayedRows] = useState([]);
   const [article, setArticle] = useState(null);
+  const [articles, setArticles] = useState([]);
 
   const openReport = (row) => {
     fetchArticleLink(row.target_id);
@@ -79,16 +79,35 @@ const AdminRoomArticleReports = () => {
       }
     };
     fetchRows();
+
+    const fetchArticles = async () => {
+      const { data, error } = await supabase
+        .from("room_articles")
+        .select("*");
+      if (error) {
+        console.error("Error fetching data:", error);
+      } else {
+        setArticles(data);
+        console.log(data);
+      }
+    };
+    fetchArticles();
   }, [targetType]);
 
   useEffect(() => {
-    setDisplayedRows(rows.filter((row) => row.resolved === resolvedStatus));
-  }, [resolvedStatus, rows]);
+    setDisplayedRows(
+      rows.filter((row) => row.resolved === resolvedStatus)
+        .filter((row) =>
+          articles.some((art) => 
+            art.articleid === row.target_id && (resolvedStatus ? true : art.Suspended === false))
+        )
+    );
+    console.log(displayedRows);
+  }, [resolvedStatus, articles, rows]);
 
   const handleResolvedStatusChange = () => {
     const statusElement = document.getElementById("status");
     setResolvedStatus(statusElement.value === "resolved");
-    setDisplayedRows(rows.filter((row) => row.resolved === resolvedStatus));
   };
 
   return (
@@ -165,16 +184,42 @@ const AdminRoomArticleReports = () => {
 
           <div>
             {displayedRows.length > 0 ? (
-              displayedRows.map((row) => (
-                <div key={row.id}>
-                  <div
-                    className="ml-10 mt-8 max-w-150 bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300 cursor-pointer"
+              <div className="overflow-x-auto ml-10 mt-8 max-w-5xl">
+              <table className="min-w-full bg-gray-100 rounded-2xl shadow-lg text-left">
+              <thead className="bg-gray-200">
+                <tr>
+                  <th className="p-3">#</th>
+                  <th className="p-3">Reason</th>
+                  <th className="p-3">Title</th>
+                </tr>
+              </thead>
+              <tbody>
+                {displayedRows.map((row, index) => (
+                  <tr
+                    key={row.id}
+                    className="cursor-pointer hover:bg-gray-300 transition-colors"
                     onClick={() => openReport(row)}
                   >
-                    Report {++count} : &emsp;{row.reason}
-                  </div>
-                </div>
-              ))
+                    <td className="p-3">{index + 1}</td>
+                    <td className="p-3">{row.reason}</td>
+                    <td className="p-3">{articles.find((art) => art.articleid === row.target_id)?.title || "Unknown"}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+              // displayedRows.map((row) => (
+              //   <div key={row.id}>
+              //     <div
+              //       className="ml-10 mt-8 max-w-150 bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300 cursor-pointer"
+              //       onClick={() => openReport(row)}
+              //     >
+              //       Report {++count} : &emsp;{row.reason}
+              //     </div>
+              //   </div>
+              // ))
             ) : (
               <div className="ml-10 mt-8">0 results</div>
             )}
