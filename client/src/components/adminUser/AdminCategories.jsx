@@ -40,12 +40,15 @@ const AdminCategories = () => {
   useEffect(() => {
     const grouped = Object.entries(
       suggestedTopics.reduce((acc, item) => {
-        acc[item.topic_name] = (acc[item.topic_name] || 0) + 1;
+        acc[item.topic_name.toLowerCase()] = (acc[item.topic_name.toLowerCase()] || 0) + 1;
         return acc;
       }, {})
     ).map(([topic_name, count]) => ({ topic_name, count }));
 
-    setTopicCount(grouped.filter((suggestion) => topics.some((topic) => !(topic.name === suggestion.topic_name))));
+    const existingTopics = topics.map((t) => t.name);
+    const filtered = grouped.filter((s) => existingTopics.includes(s.topic_name));  
+
+    setTopicCount(filtered);
   }, [suggestedTopics]);
 
   useEffect(() => {
@@ -147,7 +150,7 @@ const AdminCategories = () => {
                     <td className="p-3">{topic.topic_name}</td>
                     <td className="p-3">{topic.count}</td>
                     <td className="p-3">{                
-                      <button className="px-6 py-3 bg-[#3F414C] ml-5 mt-7 text-white rounded-lg hover:bg-opacity-90 cursor-pointer"
+                      <button className="px-6 py-3 bg-[#3F414C] text-white rounded-lg hover:bg-opacity-90 cursor-pointer"
                         onClick={() => createTopicFromSuggestion(topic)}>
                         Add
                       </button>}
