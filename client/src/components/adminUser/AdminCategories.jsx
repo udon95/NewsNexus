@@ -46,7 +46,7 @@ const AdminCategories = () => {
     ).map(([topic_name, count]) => ({ topic_name, count }));
 
     const existingTopics = topics.map((t) => t.name);
-    const filtered = grouped.filter((s) => existingTopics.includes(s.topic_name));  
+    const filtered = grouped.filter((s) => !(existingTopics.includes(s.topic_name)));  
 
     setTopicCount(filtered);
   }, [suggestedTopics]);

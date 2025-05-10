@@ -29,6 +29,9 @@ export const AdminSidebar = () => {
 
         {/* Sidebar Links */}
         <div className="flex flex-col gap-4 mt-2 text-lg font-grotesk">
+          <a href="/adminDashboard/AdminProfile" className="tracking-wide">
+            Profile &gt;
+          </a>
           <a href="/adminDashboard/AdminGuidelines" className="tracking-wide">
             Guidelines &gt;
           </a>
@@ -37,9 +40,6 @@ export const AdminSidebar = () => {
           </a>
           <a href="/adminDashboard/AdminCategories" className="tracking-wide">
             Categories &gt;
-          </a>
-          <a href="/adminDashboard/AdminProfile" className="tracking-wide">
-            Profile &gt;
           </a>
           <a href="/adminDashboard/AdminSubscription" className="tracking-wide">
             Subscription &gt;
@@ -59,17 +59,11 @@ export const AdminSidebar = () => {
           <a href="/adminDashboard/AdminCommunityNotes" className="tracking-wide" >
             Community Notes &gt;
           </a>
-          <a
-            href="/adminDashboard/AdminCommentReports"
-            className="tracking-wide"
-          >
-            Comment Reports &gt;
-          </a>
-          <a
-            href="/adminDashboard/AdminArticleReports"
-            className="tracking-wide"
-          >
+          <a href="/adminDashboard/AdminArticleReports"className="tracking-wide">
             Article Reports &gt;
+          </a>
+          <a href="/adminDashboard/AdminCommentReports"className="tracking-wide">
+            Comment Reports &gt;
           </a>
           <a href="/adminDashboard/AdminRoomArticleReports" className="tracking-wide" >
             Room Article Reports &gt;
