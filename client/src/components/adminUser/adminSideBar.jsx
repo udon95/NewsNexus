@@ -19,7 +19,7 @@ export const AdminSidebar = () => {
         className={`fixed md:relative md:top-0 top-18 left-0 h-full bg-blue-200 text-blue-900 shadow-xl p-6
         transform transition-transform duration-300 ease-in-out z-50 
         ${isOpen ? "translate-x-0" : "-translate-x-full"} md:translate-x-0 
-        w-full max-w-[210px] md:max-w-[280px]`}
+        w-full max-w-[210px] md:max-w-[290px]`}
       >
         {/* Close Button */}
         <button

@@ -45,7 +45,7 @@ const AdminCategories = () => {
       }, {})
     ).map(([topic_name, count]) => ({ topic_name, count }));
 
-    setTopicCount(grouped);
+    setTopicCount(grouped.filter((suggestion) => topics.some((topic) => !(topic.name === suggestion.topic_name))));
   }, [suggestedTopics]);
 
   useEffect(() => {
@@ -65,6 +65,8 @@ const AdminCategories = () => {
   };
 
   const createTopicFromSuggestion = async (topic) => {
+    const normalizedName = topic.topic_name.charAt(0).toUpperCase() + topic.topic_name.slice(1).toLowerCase();
+  
     const { data: updateData, error: updateError } = await supabase
       .from("topic_applications")
       .update({ status: "Approved" })
@@ -74,19 +76,17 @@ const AdminCategories = () => {
       console.error("Error updating application:", updateError);
       return;
     }
-
+  
     const { data: insertData, error: insertError } = await supabase
       .from("topic_categories")
-      .insert([{ name: topic.topic_name }])
+      .insert([{ name: normalizedName }])
       .select();
     if (insertError) {
       console.error("Error inserting topic:", insertError);
       return;
     }
-
-    console.log(topic.topic_name);
-    console.log("Matching row:", updateData);
-    alert("Added topic: " + topic.topic_name);
+  
+    alert("Added topic: " + normalizedName);
     window.location.reload();
   };
 
@@ -126,19 +126,51 @@ const AdminCategories = () => {
             User Suggested Categories:
           </div>
           {topicCount.length > 0 ? (
-            topicCount.map((topic) => (
-              <div className="flex" key={topic.topic_name}>
-                <div className="ml-10 mt-5 min-w-100 bg-gray-100 rounded-2xl p-3 text-lg shadow-lg">
-                  {topic.topic_name}: &emsp;{topic.count} Suggestions
-                </div>
-                <button
-                  className="px-6 py-3 bg-[#3F414C] ml-5 mt-7 text-white rounded-lg hover:bg-opacity-90 cursor-pointer"
-                  onClick={() => createTopicFromSuggestion(topic)}
-                >
-                  Add
-                </button>
-              </div>
-            ))
+              <div className="overflow-x-auto ml-10 mt-8 max-w-5xl">
+              <table className="min-w-full bg-gray-100 rounded-2xl shadow-lg text-left">
+              <thead className="bg-gray-200">
+                <tr>
+                  <th className="p-3">#</th>
+                  <th className="p-3">Category</th>
+                  <th className="p-3">Suggestions</th>
+                  <th className="p-3"></th>
+                </tr>
+              </thead>
+              <tbody>
+                {topicCount.map((topic, index) => (
+                  <tr
+                    key={topic.topic_name}
+                    className="cursor-pointer hover:bg-gray-300 transition-colors"
+                    onClick={() => openReport(row)}
+                  >
+                    <td className="p-3">{index + 1}</td>
+                    <td className="p-3">{topic.topic_name}</td>
+                    <td className="p-3">{topic.count}</td>
+                    <td className="p-3">{                
+                      <button className="px-6 py-3 bg-[#3F414C] ml-5 mt-7 text-white rounded-lg hover:bg-opacity-90 cursor-pointer"
+                        onClick={() => createTopicFromSuggestion(topic)}>
+                        Add
+                      </button>}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+            // topicCount.map((topic) => (
+            //   <div className="flex" key={topic.topic_name}>
+            //     <div className="ml-10 mt-5 min-w-100 bg-gray-100 rounded-2xl p-3 text-lg shadow-lg">
+            //       {topic.topic_name}: &emsp;{topic.count} Suggestions
+            //     </div>
+            //     <button
+            //       className="px-6 py-3 bg-[#3F414C] ml-5 mt-7 text-white rounded-lg hover:bg-opacity-90 cursor-pointer"
+            //       onClick={() => createTopicFromSuggestion(topic)}
+            //     >
+            //       Add
+            //     </button>
+            //   </div>
+            // ))
           ) : (
             <div className="ml-10 mt-8">0 Results</div>
           )}
