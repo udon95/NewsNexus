@@ -63,7 +63,7 @@ const TestimonialSlider = () => {
       try {
         const { data, error } = await supabase
           .from("testimonial")
-          .select("*, users:userid (username), usertype:userid(usertype)")
+          .select("*, users:userid (username), usertype(usertype)")
           .eq("homepage_display", true);
 
         if (error) throw error;
@@ -124,7 +124,6 @@ const TestimonialSlider = () => {
                       rating={Math.round(calculateAverageRating(testimonial))}
                     />
                     <p className="text-sm text-gray-500 italic">
-                     
                       {avg !== null && <p>{avg.toFixed(1)} / 10.0</p>}
                     </p>
                   </>
