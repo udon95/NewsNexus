@@ -32,8 +32,8 @@ const calculateAverageRating = (testimonial) => {
   ].filter((val) => val !== null);
 
   if (ratings.length === 0) return null;
-  const avg = ratings.reduce((sum, val) => sum + val, 0) / ratings.length;
-  return avg;
+  const sum = ratings.reduce((acc, curr) => acc + curr, 0);
+  return sum / ratings.length;
 };
 
 // Calculates average of non-null ratings and maps to sentiment
@@ -63,7 +63,7 @@ const TestimonialSlider = () => {
       try {
         const { data, error } = await supabase
           .from("testimonial")
-          .select("*, users:userid (username)")
+          .select("*, users:userid (username), usertype:userid(usertype)")
           .eq("homepage_display", true);
 
         if (error) throw error;
@@ -114,7 +114,9 @@ const TestimonialSlider = () => {
               {/* Name and Rating */}
               <div className="ml-4 ">
                 <p className="font-bold">{testimonial.users.username}</p>
-                <p className="font-bold">{testimonial.users.usertype}</p>
+                <p className="font-bold">
+                  {testimonial.usertype.usertype} User
+                </p>
 
                 {calculateAverageRating(testimonial) !== null && (
                   <>
@@ -122,7 +124,8 @@ const TestimonialSlider = () => {
                       rating={Math.round(calculateAverageRating(testimonial))}
                     />
                     <p className="text-sm text-gray-500 italic">
-                      {calculateAverageRating(testimonial).toFixed(1)} / 10.0
+                     
+                      {avg !== null && <p>{avg.toFixed(1)} / 10.0</p>}
                     </p>
                   </>
                 )}
