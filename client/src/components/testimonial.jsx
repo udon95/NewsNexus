@@ -32,8 +32,8 @@ const calculateAverageRating = (testimonial) => {
   ].filter((val) => val !== null);
 
   if (ratings.length === 0) return null;
-  const sum = ratings.reduce((acc, curr) => acc + curr, 0);
-  return sum / ratings.length;
+  const avg = ratings.reduce((sum, val) => sum + val, 0) / ratings.length;
+  return avg;
 };
 
 // Calculates average of non-null ratings and maps to sentiment
@@ -58,39 +58,81 @@ const TestimonialSlider = () => {
   const [testimonials, setTestimonials] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchTestimonials = async () => {
-      const { data, error } = await supabase
-        .from("testimonial")
-        .select(
-          `
-         *,
-    users:userid (              
-      username,                 
-      usertype:userid (         
-        usertype                
-      )
-    )
-  `
-        )
-        .eq("homepage_display", true);
+  // useEffect(() => {
+  //   const fetchTestimonials = async () => {
+  //     try {
+  //       const { data, error } = await supabase
+  //         .from("testimonial")
+  //         .select("*, users:userid (username)")
+  //         .eq("homepage_display", true);
 
-      if (error) {
-        console.error("Error fetching testimonials:", error);
-        setLoading(false);
-        return;
-      }
-      setTestimonials(data);
+  //       if (error) throw error;
+  //       setTestimonials(data);
+  //       setLoading(false);
+  //     } catch (error) {
+  //       console.error("Error fetching testimonials");
+  //       setLoading(false);
+  //     }
+  //   };
+  //   fetchTestimonials();
+  // }, []);
+
+  useEffect(() => {
+  const fetchTestimonials = async () => {
+    setLoading(true);
+
+    // 1) Fetch testimonials with usernames
+    const { data: tData, error: tErr } = await supabase
+      .from("testimonial")
+      .select(`
+        *,
+        users:userid ( username )
+      `)
+      .eq("homepage_display", true);
+
+    if (tErr) {
+      console.error("Error fetching testimonials:", tErr);
       setLoading(false);
-    };
-    fetchTestimonials();
-  }, []);
+      return;
+    }
+
+    // 2) Pull all the userids out
+    const userIds = tData.map((t) => t.userid);
+
+    // 3) Fetch the profiles (usertype) for those userIds
+    const { data: pData, error: pErr } = await supabase
+      .from("usertype")               // or “user_profile” if that’s your table name
+      .select("userid, usertype")
+      .in("userid", userIds);
+
+    if (pErr) {
+      console.error("Error fetching usertypes:", pErr);
+      setLoading(false);
+      return;
+    }
+
+    // 4) Merge them together into one flat object
+    const merged = tData.map((t) => {
+      const profile = pData.find((p) => p.userid === t.userid);
+      return {
+        ...t,
+        usertype: profile?.usertype ?? "Free"   // default if missing
+      };
+    });
+
+    setTestimonials(merged);
+    setLoading(false);
+  };
+
+  fetchTestimonials();
+}, []);
 
   if (loading) {
     return <div>Loading ...</div>;
   }
 
-  const filteredTestimonials = testimonials;
+    const filteredTestimonials = testimonials
+
 
   if (filteredTestimonials.length === 0)
     return (
@@ -123,9 +165,6 @@ const TestimonialSlider = () => {
               {/* Name and Rating */}
               <div className="ml-4 ">
                 <p className="font-bold">{testimonial.users.username}</p>
-                <p className="font-bold">
-                  {testimonial.usertype.usertype} User
-                </p>
 
                 {calculateAverageRating(testimonial) !== null && (
                   <>
@@ -133,7 +172,7 @@ const TestimonialSlider = () => {
                       rating={Math.round(calculateAverageRating(testimonial))}
                     />
                     <p className="text-sm text-gray-500 italic">
-                      {avg !== null && <p>{avg.toFixed(1)} / 10.0</p>}
+                      {calculateAverageRating(testimonial).toFixed(1)} / 10.0
                     </p>
                   </>
                 )}
