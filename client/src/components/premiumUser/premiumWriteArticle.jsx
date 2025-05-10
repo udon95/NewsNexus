@@ -1399,7 +1399,7 @@ export const PremiumWriteArticle = () => {
                     />
                   </div>
                 )}
-                <Box mb={2}>
+                <Box mb={1} mt={1}>
                   <Typography
                     variant="body2"
                     color="textSecondary"
