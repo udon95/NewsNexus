@@ -170,8 +170,51 @@ const AdminFeatures = () => {
             <div></div>
           )}
 
-          {featureVideos.map((video) => (
-            <div key={video.id} className="flex items-center ml-10 mt-8">
+          {/* {featureVideos.map((video) => ( */}
+
+              <div className="overflow-x-auto ml-10 mt-8 max-w-5xl">
+              <table className="min-w-full bg-gray-100 rounded-2xl shadow-lg text-left">
+              <thead className="bg-gray-200">
+                <tr>
+                  <th className="p-3">#</th>
+                  <th className="p-3">Video </th>
+                  <th className="p-3"></th>
+                  <th className="p-3"></th>
+                </tr>
+              </thead>
+              <tbody>
+                {featureVideos.map((video, index) => (
+                  <tr
+                    key={video.id}
+                    className="cursor-pointer hover:bg-gray-300 transition-colors"
+                  >
+                    <td className="p-3">{index + 1}</td>
+                    <td className="p-3">{video.name}</td>
+                    <td className="p-3">{              
+                      <button
+                        type="button"
+                        className="px-6 py-3 ml-5 bg-[#3F414C] text-white rounded-lg hover:bg-opacity-90 cursor-pointer"
+                        onClick={() => changeVideoData(video)}
+                      >
+                        View
+                      </button>}</td>
+                    <td className="p-3">{                
+                      <button
+                        type="button"
+                        className="px-6 py-3 ml-5 bg-[#3F414C] text-white rounded-lg hover:bg-opacity-90 cursor-pointer"
+                        onClick={() => handleSetDisplayed(video)}
+                      >
+                        {video.displayed ? "Displayed" : "Set as Displayed"}
+                      </button>}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+              </table>
+              </div>
+
+
+            {/* <div key={video.id} className="flex items-center ml-10 mt-8">
               <div className="min-w-150 bg-gray-100 rounded-2xl p-3 text-lg shadow-lg  ">
                 {video.name}
               </div>
@@ -189,8 +232,7 @@ const AdminFeatures = () => {
               >
                 {video.displayed ? "Displayed" : "Set as Displayed"}
               </button>
-            </div>
-          ))}
+            </div> */}
         </div>
       </div>
     </div>

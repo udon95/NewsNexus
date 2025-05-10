@@ -47,8 +47,12 @@ const AdminCategories = () => {
 
     const existingTopics = topics.map((t) => t.name.toLowerCase());
     let filtered = grouped.filter((s) => !(existingTopics.includes(s.topic_name)));  
-    filtered = filtered.map((suggestion) => suggestion.topic_name.charAt(0).toUpperCase() + suggestion.topic_name.slice(1).toLowerCase()) ;
-
+    filtered = filtered
+    .map((suggestion) => ({
+      topic_name: suggestion.topic_name.charAt(0).toUpperCase() + suggestion.topic_name.slice(1).toLowerCase(),
+      count: suggestion.count,
+    })).sort((a, b) => b.count - a.count);
+  
     console.log(existingTopics);
     console.log(filtered);
 
@@ -148,7 +152,6 @@ const AdminCategories = () => {
                   <tr
                     key={topic.topic_name}
                     className="cursor-pointer hover:bg-gray-300 transition-colors"
-                    onClick={() => openReport(row)}
                   >
                     <td className="p-3">{index + 1}</td>
                     <td className="p-3">{topic.topic_name}</td>
