@@ -1619,6 +1619,7 @@ export const PremiumWriteArticle = () => {
             setOpenSuccess(false);
             setAccuracy(null);
             setAiFeedback("");
+            handleClearInputs();
           }}
           aria-labelledby="success-dialog-title"
         >
