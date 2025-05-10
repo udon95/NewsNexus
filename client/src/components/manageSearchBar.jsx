@@ -43,7 +43,7 @@ const ManageBar = ({
 
   return (
     <div className="flex flex-col items-center mt-10">
-      <div className="flex flex-wrap gap-3 w-full max-w-[850px] px-3 relative">
+      <div className="flex items-center space-x-3 w-full max-w-[850px] px-3 relative">
         {/* Search Input */}
         <input
           type="text"
