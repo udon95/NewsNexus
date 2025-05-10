@@ -100,7 +100,8 @@ const AdminArticleReports = () => {
     setDisplayedRows(
       rows.filter((row) => row.resolved === resolvedStatus)
         .filter((row) =>
-          articles.some((art) => art.articleid === row.target_id && art.Suspended === resolvedStatus)
+          articles.some((art) => 
+            art.articleid === row.target_id && (resolvedStatus ? true : art.Suspended === false))
         )
     );
     console.log(displayedRows);
