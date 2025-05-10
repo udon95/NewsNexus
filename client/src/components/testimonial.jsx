@@ -154,7 +154,8 @@ const TestimonialSlider = () => {
         loop={true}
         className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden "
       >
-        {filteredTestimonials.map((t, index) => (
+        {filteredTestimonials.map((t, index) => {
+          const avg = calculateAverageRating(t);
           <SwiperSlide key={index} className="p-6">
             {/* User Profile Info */}
             <div className="flex items-center border-b pb-3 ">
@@ -185,8 +186,8 @@ const TestimonialSlider = () => {
             <p className="text-lg text-black mt-4 font-grotesk ">
               {getOverallSentiment(t)}
             </p>
-          </SwiperSlide>
-        ))}
+          </SwiperSlide>;
+        })}
       </Swiper>
     </div>
   );
