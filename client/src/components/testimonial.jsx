@@ -63,16 +63,7 @@ const TestimonialSlider = () => {
       try {
         const { data, error } = await supabase
           .from("testimonial")
-          .select(`
-          *,
-          users (
-            username,
-            usertype (
-              usertype,
-              color
-            )
-          )
-        `)
+          .select(`*, users (username, usertype(usertype))`)
           .eq("homepage_display", true);
 
         if (error) throw error;
