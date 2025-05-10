@@ -191,7 +191,7 @@ const AdminFeatures = () => {
                   >
                     <td className="p-3">{index + 1}</td>
                     <td className="p-3">{video.name}</td>
-                    <td className="p-3">{video.displayed}</td>
+                    <td className="p-3">{video.displayed ? "Yes" : "No"}</td>
                     <td className="p-3">{              
                       <button
                         type="button"
