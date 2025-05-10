@@ -46,13 +46,14 @@ const AdminCategories = () => {
     ).map(([topic_name, count]) => ({ topic_name, count }));
 
     const existingTopics = topics.map((t) => t.name.toLowerCase());
-    const filtered = grouped.filter((s) => !(existingTopics.includes(s.topic_name)));  
+    let filtered = grouped.filter((s) => !(existingTopics.includes(s.topic_name)));  
+    filtered = filtered.map((suggestion) => suggestion.topic_name.charAt(0).toUpperCase() + suggestion.topic_name.slice(1).toLowerCase()) ;
 
     console.log(existingTopics);
     console.log(filtered);
 
     setTopicCount(filtered);
-  }, [suggestedTopics]);
+  }, [suggestedTopics, topics]);
 
   useEffect(() => {
     console.log(topicCount);
