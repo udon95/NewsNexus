@@ -40,13 +40,13 @@ const AdminRoomArticleReports = () => {
     navigate(link);
   };
 
-  const suspendArticle = async (target_id, bool) => {
-    console.log(target_id);
+  const suspendArticle = async (report, bool) => {
+    console.log(report);
 
     const { data, error } = await supabase
       .from("room_articles")
       .update({ Suspended: bool })
-      .eq("postid", target_id);
+      .eq("postid", report.target_id);
 
     if (error) {
       console.error("Error fetching data:", error);
@@ -57,7 +57,7 @@ const AdminRoomArticleReports = () => {
           resolved: true,
           resolution: bool ? "Article suspended" : "No further action",
         })
-        .eq("target_id", target_id)
+        .eq("id", report.id)
         .single();
       if (error) {
         console.error("Error fetching data:", error);
@@ -99,7 +99,7 @@ const AdminRoomArticleReports = () => {
       rows.filter((row) => row.resolved === resolvedStatus)
         .filter((row) =>
           articles.some((art) => 
-            art.articleid === row.target_id && (resolvedStatus ? true : art.Suspended === false))
+            art.postid === row.target_id && (resolvedStatus ? true : art.Suspended === false))
         )
     );
     console.log(displayedRows);
