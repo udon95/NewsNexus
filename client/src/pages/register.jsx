@@ -373,33 +373,43 @@ function Register() {
                 </div>
 
                 {showGuidelinesModal && (
-                  <div className="fixed inset-0 bg-opacity-50 z-50 flex items-center justify-center">
+                  <div
+                    style={{ backdropFilter: "blur(4px)" }}
+                    className="fixed inset-0 bg-opacity-50 z-50 flex items-center justify-center"
+                  >
                     <div className="bg-white w-11/12 max-w-4xl p-6 rounded-lg relative overflow-y-auto max-h-[90vh]">
                       <button
                         onClick={() => setShowGuidelinesModal(false)}
-                        className="absolute top-3 right-3 text-gray-500 hover:text-gray-800"
+                        className="absolute top-4 right-4 text-gray-500 hover:text-gray-800 z-10"
                         aria-label="Close guidelines"
                       >
                         ✕
                       </button>
 
-                      <Guidelines hideNavbar/>
+                      <div className="overflow-y-auto max-h-[90vh] p-6">
+                        <Guidelines hideNavbar />
+                      </div>
                     </div>
                   </div>
                 )}
 
                 {showPrivacyModal && (
-                  <div className="fixed inset-0 bg-opacity-50 z-50 flex items-center justify-center">
+                  <div
+                    style={{ backdropFilter: "blur(4px)" }}
+                    className="fixed inset-0 bg-opacity-50 z-50 flex items-center justify-center"
+                  >
                     <div className="bg-white w-11/12 max-w-4xl p-6 rounded-lg relative overflow-y-auto max-h-[90vh]">
                       <button
                         onClick={() => setShowPrivacyModal(false)}
-                        className="absolute top-3 right-3 text-gray-500 hover:text-gray-800"
-                        aria-label="Close privacy policy"
+                        className="absolute top-4 right-4 text-gray-500 hover:text-gray-800 z-10"
+                        aria-label="Close privacy polices"
                       >
                         ✕
                       </button>
 
-                      <Privacy hideNavbar/>
+                      <div className="overflow-y-auto max-h-[90vh] p-6">
+                        <Privacy hideNavbar />
+                      </div>
                     </div>
                   </div>
                 )}
