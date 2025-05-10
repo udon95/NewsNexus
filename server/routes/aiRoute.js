@@ -144,6 +144,7 @@ const generateCategoryPrompt = (content, category) => `
 You are a category validation assistant.
 
 Determine if the following article content is relevant to the category "${category}".
+Even if the content could fit into several different categories, if the chosen category is one of them, answer "yes".
 
 Relevance includes people, places, events, policies, or topics that originate from or strongly affect the category.
 
@@ -157,6 +158,12 @@ EXAMPLE 2
 Category: Technology  
 Article: “Baking sourdough with wild yeast, tips on kneading dough…”  
 Answer: No
+
+EXAMPLE 3
+Category: Culinary  
+Article:
+“When is a restaurant like a handbag? A private dining room reservation … used.”  
+Answer: Yes
 
 NOW EVALUATE
 Category: ${category} 
