@@ -54,6 +54,7 @@ export const FreeManageMyArticles = () => {
           time,
           view_count,
           total_votes,
+          topicid,
           imagepath
         `
         )

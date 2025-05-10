@@ -56,6 +56,7 @@ export const PremManageArticle = () => {
           time,
           view_count,
           total_votes,
+          topicid,
           imagepath
         `
         )
