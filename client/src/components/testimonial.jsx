@@ -115,7 +115,7 @@ const TestimonialSlider = () => {
               <div className="ml-4 ">
                 <p className="font-bold">{testimonial.users.username}</p>
                 <p className="font-bold">
-                  {testimonial.usertype.usertype} User
+                  {testimonial.users.usertype.usertype} User
                 </p>
 
                 {calculateAverageRating(testimonial) !== null && (
