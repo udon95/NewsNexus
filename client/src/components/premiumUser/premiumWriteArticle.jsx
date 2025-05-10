@@ -35,6 +35,8 @@ import {
   DialogContent,
   DialogActions,
   Button,
+  Box,
+  Typography,
 } from "@mui/material";
 
 export const PremiumWriteArticle = () => {
@@ -1382,7 +1384,7 @@ export const PremiumWriteArticle = () => {
                 {(accuracy !== null || aiFeedback) && (
                   <div className="mt-4 p-4 border border-red-300 bg-red-50 rounded text-sm text-black">
                     <strong>Fact Check Results:</strong>
-                    {accuracy !== null && (
+                    {accuracy !== null && accuracy < 75 && (
                       <p>
                         <strong>Accuracy: </strong>
                         {accuracy}%
@@ -1397,7 +1399,16 @@ export const PremiumWriteArticle = () => {
                     />
                   </div>
                 )}
-
+                <Box mb={2}>
+                  <Typography
+                    variant="body2"
+                    color="textSecondary"
+                    sx={{ fontStyle: "italic" }}
+                  >
+                    Note: AI fact-check feedback is provided for guidance only
+                    and may be inaccurate. Please verify facts independently.
+                  </Typography>
+                </Box>
                 <div
                   className="min-h-[400px] max-h-[600px] overflow-y-auto border rounded-md bg-white p-4 mt-3 focus-within:outline-none"
                   onClick={() => editor.commands.focus()}
@@ -1604,7 +1615,11 @@ export const PremiumWriteArticle = () => {
 
         <Dialog
           open={openSuccess}
-          onClose={() => setOpenSuccess(false)}
+          onClose={() => {
+            setOpenSuccess(false);
+            setAccuracy(null);
+            setAiFeedback("");
+          }}
           aria-labelledby="success-dialog-title"
         >
           <DialogTitle id="success-dialog-title">Article Posted!</DialogTitle>
