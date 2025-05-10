@@ -60,29 +60,31 @@ const TestimonialSlider = () => {
 
   useEffect(() => {
     const fetchTestimonials = async () => {
-     const { data, error } = await supabase
-      .from("testimonial")
-      .select(`
+      const { data, error } = await supabase
+        .from("testimonial")
+        .select(
+          `
         *,
-        users:userid (
+        users:testimonial_userid_fkey (
           username
         ),
-        usertype:userid (
+        usertype:usertype_userid_fkey (
           usertype
         )
-      `)
-      .eq("homepage_display", true);
+      `
+        )
+        .eq("homepage_display", true);
 
       if (error) {
-       console.error("Error fetching testimonials:", error);
-       setLoading(false);
-       return;
-     }
-     setTestimonials(data);
-     setLoading(false);
-   };
-   fetchTestimonials();
- }, []);
+        console.error("Error fetching testimonials:", error);
+        setLoading(false);
+        return;
+      }
+      setTestimonials(data);
+      setLoading(false);
+    };
+    fetchTestimonials();
+  }, []);
 
   if (loading) {
     return <div>Loading ...</div>;
@@ -110,7 +112,6 @@ const TestimonialSlider = () => {
         className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden "
       >
         {filteredTestimonials.map((testimonial, index) => (
-
           <SwiperSlide key={index} className="p-6">
             {/* User Profile Info */}
             <div className="flex items-center border-b pb-3 ">
