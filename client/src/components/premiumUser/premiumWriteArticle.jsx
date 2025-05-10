@@ -392,7 +392,7 @@ export const PremiumWriteArticle = () => {
         //     authorId: session.userid,
         //     topicid: topics,
         //     topicName,
-        //     imagepath: firstImageUrl, // ✅ Critical part
+        //     imagepath: firstImageUrl, // Critical part
         //   }),
         // }
         "https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/api/submit-article",
