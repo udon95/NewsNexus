@@ -63,7 +63,16 @@ const TestimonialSlider = () => {
       try {
         const { data, error } = await supabase
           .from("testimonial")
-          .select("*, users:userid (username)")
+          .select(`
+          *,
+          users (
+            username,
+            usertype (
+              usertype,
+              color
+            )
+          )
+        `)
           .eq("homepage_display", true);
 
         if (error) throw error;
@@ -114,6 +123,7 @@ const TestimonialSlider = () => {
               {/* Name and Rating */}
               <div className="ml-4 ">
                 <p className="font-bold">{testimonial.users.username}</p>
+                <p className="font-bold">{testimonial.users.usertype}</p>
 
                 {calculateAverageRating(testimonial) !== null && (
                   <>
