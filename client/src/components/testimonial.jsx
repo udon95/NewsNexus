@@ -6,20 +6,20 @@ import { Pagination, Autoplay } from "swiper/modules";
 import supabase from "../api/supabaseClient";
 
 // Function to generate star rating
-// const StarRating = ({ rating }) => {
-//   return (
-//     <div className="flex">
-//       {[...Array(4)].map((_, index) => (
-//         <span
-//           key={index}
-//           className={index < rating ? "text-yellow-400" : "text-gray-300"}
-//         >
-//           ★
-//         </span>
-//       ))}
-//     </div>
-//   );
-// };
+const StarRating = ({ rating }) => {
+  return (
+    <div className="flex">
+      {[...Array(4)].map((_, index) => (
+        <span
+          key={index}
+          className={index < rating ? "text-yellow-400" : "text-gray-300"}
+        >
+          ★
+        </span>
+      ))}
+    </div>
+  );
+};
 
 const calculateAverageRating = (t) => {
   const ratings = [
