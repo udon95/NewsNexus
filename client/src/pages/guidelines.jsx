@@ -3,7 +3,7 @@ import "../index.css";
 import Navbar from "../components/navbar.jsx";
 import supabase from "../api/supabaseClient";
 
-function Guidelines() {
+function Guidelines({hideNavbar = false}) {
   const [guidelines, setGuidelines] = useState("");
   const [dates, setDates] = useState({ effective: "", updated: "" });
 
@@ -31,7 +31,7 @@ function Guidelines() {
 
   return (
     <div className="w-full min-w-screen min-h-screen flex flex-col bg-white">
-      <Navbar />
+      {!hideNavbar && <Navbar />}
       <main className="flex flex-col items-start w-full px-4 sm:px-8 py-10 mx-auto max-w-5xl">
         <h1 className="font-grotesk text-4xl sm:text-5xl font-semibold text-black text-left">
           NewsNexus Platform Guidelines:

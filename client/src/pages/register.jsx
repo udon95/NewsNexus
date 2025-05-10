@@ -6,6 +6,8 @@ import PasswordInput from "../components/showPW.jsx";
 import "../index.css";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import Guidelines from "./guidelines.jsx";
+import Privacy from "./privacy.jsx";
 
 function Register() {
   const [step, setStep] = useState(1);
@@ -28,6 +30,8 @@ function Register() {
 
   const [acceptedGuidelines, setAcceptedGuidelines] = useState(false);
   const [acceptedPrivacy, setAcceptedPrivacy] = useState(false);
+  const [showGuidelinesModal, setShowGuidelinesModal] = useState(false);
+  const [showPrivacyModal, setShowPrivacyModal] = useState(false);
 
   useEffect(() => {
     const validateForm = () => {
@@ -325,15 +329,15 @@ function Register() {
                     />
                     <label htmlFor="guidelines" className="text-base">
                       I agree to the&nbsp;
-                      <a
-                        href="/guidelines"
-                        target="_blank"
-                        className="underline text-blue-500"
-                      >
-                        Platform Guidelines
-                      </a>
-                      .
                     </label>
+                    <button
+                      type="button"
+                      onClick={() => setShowGuidelinesModal(true)}
+                      className="underline text-blue-500"
+                    >
+                      Platform Guidelines
+                    </button>
+                    .
                   </div>
                   {errors.acceptedGuidelines && (
                     <p className="text-red-500 text-sm">
@@ -351,15 +355,15 @@ function Register() {
                     />
                     <label htmlFor="privacy" className="text-base">
                       I agree to the&nbsp;
-                      <a
-                        href="/privacy"
-                        target="_blank"
-                        className="underline text-blue-500"
-                      >
-                        Privacy Policy
-                      </a>
-                      .
                     </label>
+                    <button
+                      type="button"
+                      onClick={() => setShowPrivacyModal(true)}
+                      className="underline text-blue-500"
+                    >
+                      Privacy Policy
+                    </button>
+                    .
                   </div>
                   {errors.acceptedPrivacy && (
                     <p className="text-red-500 text-sm">
@@ -367,6 +371,48 @@ function Register() {
                     </p>
                   )}
                 </div>
+
+                {showGuidelinesModal && (
+                  <div
+                    style={{ backdropFilter: "blur(4px)" }}
+                    className="fixed inset-0 bg-opacity-50 z-50 flex items-center justify-center"
+                  >
+                    <div className="bg-white w-11/12 max-w-2xl rounded-lg relative">
+                      <button
+                        onClick={() => setShowGuidelinesModal(false)}
+                        className="absolute top-4 right-4 text-gray-500 hover:text-gray-800 z-10"
+                        aria-label="Close guidelines"
+                      >
+                        ✕
+                      </button>
+
+                      <div className="overflow-y-auto max-h-[90vh] p-6">
+                        <Guidelines hideNavbar />
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {showPrivacyModal && (
+                  <div
+                    style={{ backdropFilter: "blur(4px)" }}
+                    className="fixed inset-0 bg-opacity-50 z-50 flex items-center justify-center"
+                  >
+                    <div className="bg-white w-11/12 max-w-2xl rounded-lg relative">
+                      <button
+                        onClick={() => setShowPrivacyModal(false)}
+                        className="absolute top-4 right-4 text-gray-500 hover:text-gray-800 z-10"
+                        aria-label="Close privacy polices"
+                      >
+                        ✕
+                      </button>
+
+                      <div className="overflow-y-auto max-h-[90vh] p-6">
+                        <Privacy hideNavbar />
+                      </div>
+                    </div>
+                  </div>
+                )}
 
                 <div className="flex justify-end gap-3 mt-4 sm:mt-4">
                   <button
@@ -399,7 +445,6 @@ function Register() {
             <h2 className="text-xl mb-4">
               (Choose 6. Starting from Most Interested)
             </h2>
-            {/* <div className="grid grid-cols-1 gap-4"> */}
             {Array.from({ length: 6 }).map((_, index) => (
               <div key={index} className="flex flex-row mb-4">
                 <label className="mt-1 mr-2 font-grotesk text-2xl">
@@ -425,7 +470,6 @@ function Register() {
                 </select>
               </div>
             ))}
-            {/* </div> */}
             <button
               type="button"
               onClick={() => handleFinalSubmit(selectedTopics)}
@@ -435,14 +479,6 @@ function Register() {
             </button>
           </div>
         )}
-
-        {/* <button
-          type="button"
-          onClick={resendConfirmationEmail}
-          className="mt-4 text-sm underline"
-        >
-          Resend confirmation email
-        </button> */}
       </main>
     </div>
   );
