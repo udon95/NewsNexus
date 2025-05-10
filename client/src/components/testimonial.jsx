@@ -183,7 +183,7 @@ const TestimonialSlider = () => {
             </div>
 
             <p className="text-lg text-black mt-4 font-grotesk ">
-              {getOverallSentiment(testimonial)}
+              {getOverallSentiment(t)}
             </p>
           </SwiperSlide>
         ))}
