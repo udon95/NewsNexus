@@ -199,7 +199,7 @@ const AdminCommunityNotes = () => {
                       <td className="p-3"><button
                       type="button"
                       className={`px-6 py-3 bg-[#3F414C] flex items-center justify-center text-white rounded-lg hover:bg-opacity-90 cursor-pointer ${
-                            row.Status ? 'bg-red-600' : 'bg-[#3F414C]'}`}
+                            !row.Status ? 'bg-red-600' : 'bg-[#3F414C]'}`}
                       onClick={() => setDisplayNotes(row)}
                     >
                       {row.Status == "Approved" ? "Remove" : "Display"}

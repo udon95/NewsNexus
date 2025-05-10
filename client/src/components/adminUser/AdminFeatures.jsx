@@ -178,6 +178,7 @@ const AdminFeatures = () => {
                 <tr>
                   <th className="p-3">#</th>
                   <th className="p-3">Video </th>
+                  <th className="p-3">Displayed </th>
                   <th className="p-3"></th>
                   <th className="p-3"></th>
                 </tr>
@@ -190,6 +191,7 @@ const AdminFeatures = () => {
                   >
                     <td className="p-3">{index + 1}</td>
                     <td className="p-3">{video.name}</td>
+                    <td className="p-3">{video.displayed}</td>
                     <td className="p-3">{              
                       <button
                         type="button"
@@ -201,10 +203,11 @@ const AdminFeatures = () => {
                     <td className="p-3">{                
                       <button
                         type="button"
-                        className="px-6 py-3 ml-5 bg-[#3F414C] text-white rounded-lg hover:bg-opacity-90 cursor-pointer"
+                        className={`px-6 py-3 ml-5 bg-[#3F414C] text-white rounded-lg hover:bg-opacity-90 cursor-pointer ${
+                          video.displayed ? 'bg-red-600' : 'bg-[#3F414C]'}`}
                         onClick={() => handleSetDisplayed(video)}
                       >
-                        {video.displayed ? "Displayed" : "Set as Displayed"}
+                        {video.displayed ? "Remove" : "Display"}
                       </button>}
                     </td>
                   </tr>
