@@ -81,10 +81,7 @@ const TestimonialSlider = () => {
     return <div>Loading ...</div>;
   }
 
-  const filteredTestimonials = testimonials.filter((t) => {
-    const avg = calculateAverageRating(t);
-    return avg === null || avg >= 7;
-  });
+  const filteredTestimonials = testimonials;
 
   if (filteredTestimonials.length === 0)
     return (
