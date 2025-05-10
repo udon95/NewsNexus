@@ -6,6 +6,8 @@ import PasswordInput from "../components/showPW.jsx";
 import "../index.css";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import Guidelines from "./guidelines.jsx";
+import Privacy from "./privacy.jsx";
 
 function Register() {
   const [step, setStep] = useState(1);
@@ -28,6 +30,8 @@ function Register() {
 
   const [acceptedGuidelines, setAcceptedGuidelines] = useState(false);
   const [acceptedPrivacy, setAcceptedPrivacy] = useState(false);
+  const [showGuidelinesModal, setShowGuidelinesModal] = useState(false);
+  const [showPrivacyModal, setShowPrivacyModal] = useState(false);
 
   useEffect(() => {
     const validateForm = () => {
@@ -325,15 +329,15 @@ function Register() {
                     />
                     <label htmlFor="guidelines" className="text-base">
                       I agree to the&nbsp;
-                      <a
-                        href="/guidelines"
-                        target="_blank"
-                        className="underline text-blue-500"
-                      >
-                        Platform Guidelines
-                      </a>
-                      .
                     </label>
+                    <button
+                      type="button"
+                      onClick={() => setShowGuidelinesModal(true)}
+                      className="underline text-blue-500"
+                    >
+                      Platform Guidelines
+                    </button>
+                    .
                   </div>
                   {errors.acceptedGuidelines && (
                     <p className="text-red-500 text-sm">
@@ -351,15 +355,15 @@ function Register() {
                     />
                     <label htmlFor="privacy" className="text-base">
                       I agree to the&nbsp;
-                      <a
-                        href="/privacy"
-                        target="_blank"
-                        className="underline text-blue-500"
-                      >
-                        Privacy Policy
-                      </a>
-                      .
                     </label>
+                    <button
+                      type="button"
+                      onClick={() => setShowPrivacyModal(true)}
+                      className="underline text-blue-500"
+                    >
+                      Privacy Policy
+                    </button>
+                    .
                   </div>
                   {errors.acceptedPrivacy && (
                     <p className="text-red-500 text-sm">
@@ -367,6 +371,42 @@ function Register() {
                     </p>
                   )}
                 </div>
+
+                {showGuidelinesModal && (
+                  <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+                    <div className="bg-white w-11/12 max-w-2xl p-6 rounded-lg relative overflow-y-auto max-h-[90vh]">
+                      <button
+                        onClick={() => setShowGuidelinesModal(false)}
+                        className="absolute top-3 right-3 text-gray-500 hover:text-gray-800"
+                        aria-label="Close guidelines"
+                      >
+                        ✕
+                      </button>
+                      <h3 className="text-xl font-semibold mb-4">
+                        Platform Guidelines
+                      </h3>
+                      <Guidelines />
+                    </div>
+                  </div>
+                )}
+
+                {showPrivacyModal && (
+                  <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+                    <div className="bg-white w-11/12 max-w-2xl p-6 rounded-lg relative overflow-y-auto max-h-[90vh]">
+                      <button
+                        onClick={() => setShowPrivacyModal(false)}
+                        className="absolute top-3 right-3 text-gray-500 hover:text-gray-800"
+                        aria-label="Close privacy policy"
+                      >
+                        ✕
+                      </button>
+                      <h3 className="text-xl font-semibold mb-4">
+                        Privacy Policy
+                      </h3>
+                      <PrivacyPolicy />
+                    </div>
+                  </div>
+                )}
 
                 <div className="flex justify-end gap-3 mt-4 sm:mt-4">
                   <button
@@ -436,13 +476,43 @@ function Register() {
           </div>
         )}
 
-        {/* <button
-          type="button"
-          onClick={resendConfirmationEmail}
-          className="mt-4 text-sm underline"
-        >
-          Resend confirmation email
-        </button> */}
+        {showGuidelinesModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+            <div className="bg-white w-11/12 max-w-2xl p-6 rounded-lg relative">
+              <button
+                onClick={() => setShowGuidelinesModal(false)}
+                className="absolute top-3 right-3 text-gray-500 hover:text-gray-800"
+              >
+                ✕
+              </button>
+              <h3 className="text-xl font-semibold mb-4">
+                Platform Guidelines
+              </h3>
+              <div className="overflow-y-auto max-h-[70vh]">
+                {/* TODO: paste or fetch your guidelines HTML/text here */}
+                <p>Your full platform guidelines content…</p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {showPrivacyModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+            <div className="bg-white w-11/12 max-w-2xl p-6 rounded-lg relative">
+              <button
+                onClick={() => setShowPrivacyModal(false)}
+                className="absolute top-3 right-3 text-gray-500 hover:text-gray-800"
+              >
+                ✕
+              </button>
+              <h3 className="text-xl font-semibold mb-4">Privacy Policy</h3>
+              <div className="overflow-y-auto max-h-[70vh]">
+                {/* TODO: paste or fetch your privacy policy HTML/text here */}
+                <p>Your full privacy policy content…</p>
+              </div>
+            </div>
+          </div>
+        )}
       </main>
     </div>
   );
