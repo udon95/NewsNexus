@@ -64,14 +64,14 @@ const TestimonialSlider = () => {
         .from("testimonial")
         .select(
           `
-        *,
-        users:testimonial_userid_fkey (
-          username
-        ),
-        usertype:usertype_userid_fkey (
-          usertype
-        )
-      `
+         *,
+    users:userid (              
+      username,                 
+      usertype:userid (         
+        usertype                
+      )
+    )
+  `
         )
         .eq("homepage_display", true);
 
