@@ -373,8 +373,8 @@ function Register() {
                 </div>
 
                 {showGuidelinesModal && (
-                  <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
-                    <div className="bg-white w-11/12 max-w-2xl p-6 rounded-lg relative overflow-y-auto max-h-[90vh]">
+                  <div className="fixed inset-0 bg-opacity-50 z-50 flex items-center justify-center">
+                    <div className="bg-white w-11/12 max-w-4xl p-6 rounded-lg relative overflow-y-auto max-h-[90vh]">
                       <button
                         onClick={() => setShowGuidelinesModal(false)}
                         className="absolute top-3 right-3 text-gray-500 hover:text-gray-800"
@@ -382,17 +382,15 @@ function Register() {
                       >
                         ✕
                       </button>
-                      <h3 className="text-xl font-semibold mb-4">
-                        Platform Guidelines
-                      </h3>
-                      <Guidelines />
+
+                      <Guidelines hideNavbar/>
                     </div>
                   </div>
                 )}
 
                 {showPrivacyModal && (
-                  <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
-                    <div className="bg-white w-11/12 max-w-2xl p-6 rounded-lg relative overflow-y-auto max-h-[90vh]">
+                  <div className="fixed inset-0 bg-opacity-50 z-50 flex items-center justify-center">
+                    <div className="bg-white w-11/12 max-w-4xl p-6 rounded-lg relative overflow-y-auto max-h-[90vh]">
                       <button
                         onClick={() => setShowPrivacyModal(false)}
                         className="absolute top-3 right-3 text-gray-500 hover:text-gray-800"
@@ -400,10 +398,8 @@ function Register() {
                       >
                         ✕
                       </button>
-                      <h3 className="text-xl font-semibold mb-4">
-                        Privacy Policy
-                      </h3>
-                      <Privacy />
+
+                      <Privacy hideNavbar/>
                     </div>
                   </div>
                 )}
@@ -439,7 +435,6 @@ function Register() {
             <h2 className="text-xl mb-4">
               (Choose 6. Starting from Most Interested)
             </h2>
-            {/* <div className="grid grid-cols-1 gap-4"> */}
             {Array.from({ length: 6 }).map((_, index) => (
               <div key={index} className="flex flex-row mb-4">
                 <label className="mt-1 mr-2 font-grotesk text-2xl">
@@ -465,7 +460,6 @@ function Register() {
                 </select>
               </div>
             ))}
-            {/* </div> */}
             <button
               type="button"
               onClick={() => handleFinalSubmit(selectedTopics)}
