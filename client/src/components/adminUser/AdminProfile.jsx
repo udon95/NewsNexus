@@ -87,7 +87,7 @@ const AdminProfile = () => {
 
   useEffect(() => {
     const fetchAdmin = async () => {
-      const { data, error } = await supabase.from("admin").select("*").single();
+      const { data, error } = await supabase.from("admin").select("*").eq("username", "?").single();
       if (error) {
         console.error("Error fetching admin data:", error);
       } else {
@@ -96,6 +96,7 @@ const AdminProfile = () => {
     };
     if (user) {
       fetchAdmin();
+      console.log(user);
     }
   }, [user]);
   
