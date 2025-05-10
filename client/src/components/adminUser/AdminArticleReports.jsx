@@ -75,6 +75,7 @@ const AdminArticleReports = () => {
       if (error) {
         console.error("Error fetching data:", error);
       } else {
+        console.log(data);
         setRows(data);
       }
     };
@@ -99,7 +100,7 @@ const AdminArticleReports = () => {
     setDisplayedRows(
       rows.filter((row) => row.resolved === resolvedStatus)
         .filter((row) =>
-          articles.some((art) => art.commentid === row.target_id && art.Suspended === resolvedStatus)
+          articles.some((art) => art.articleid === row.target_id && art.Suspended === resolvedStatus)
         )
     );
     console.log(displayedRows);
