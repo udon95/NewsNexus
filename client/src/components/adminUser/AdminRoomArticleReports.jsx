@@ -202,7 +202,7 @@ const AdminRoomArticleReports = () => {
                   >
                     <td className="p-3">{index + 1}</td>
                     <td className="p-3">{row.reason}</td>
-                    <td className="p-3">{articles.find((art) => art.articleid === row.target_id)?.title || "Unknown"}
+                    <td className="p-3">{articles.find((art) => art.postid === row.target_id)?.title || "Unknown"}
                     </td>
                   </tr>
                 ))}
