@@ -165,9 +165,15 @@ const TestimonialSlider = () => {
                 <div className="ml-4 ">
                   <p className="font-bold">{t.users.username}</p>
 
-                  <p className="text-sm italic text-gray-600">
+                  <span
+                    className={`inline-block px-2 py-1 text-xs font-semibold rounded-full ${
+                      t.usertype === "Premium"
+                        ? "bg-blue-500 text-white"
+                        : "bg-gray-300 text-gray-800"
+                    }`}
+                  >
                     {t.usertype} User
-                  </p>
+                  </span>
 
                   {avg != null && (
                     <>
