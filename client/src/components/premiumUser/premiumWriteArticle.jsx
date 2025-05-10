@@ -29,6 +29,15 @@ import { Extension } from "@tiptap/core";
 import { Paragraph } from "@tiptap/extension-paragraph";
 import { useSearchParams } from "react-router-dom";
 import ListItem from "@tiptap/extension-list-item";
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+  Box,
+  Typography,
+} from "@mui/material";
 
 export const PremiumWriteArticle = () => {
   const [title, setTitle] = useState("");
@@ -49,14 +58,15 @@ export const PremiumWriteArticle = () => {
   const [showLinkModal, setShowLinkModal] = useState(false);
   const [linkUrl, setLinkUrl] = useState("");
   const [roomArticleType, setRoomArticleType] = useState("factual"); // only for Room
-  const [aiFeedback, setAiFeedback] = useState("");
-  const [accuracy, setAccuracy] = useState(null);
   const [showDraftNotification, setShowDraftNotification] = useState(false);
   const [showTopicApplication, setShowTopicApplication] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadAction, setUploadAction] = useState(""); // "post" or "draft"
   const [pendingImages, setPendingImages] = useState([]);
 
+  const [aiFeedback, setAiFeedback] = useState("");
+  const [accuracy, setAccuracy] = useState(null);
+  const [openSuccess, setOpenSuccess] = useState(false);
   const [searchParams] = useSearchParams();
   const preSelectedType = searchParams.get("type"); // e.g. "room"
   const preSelectedRoomId = searchParams.get("roomid");
@@ -384,7 +394,7 @@ export const PremiumWriteArticle = () => {
         //     authorId: session.userid,
         //     topicid: topics,
         //     topicName,
-        //     imagepath: firstImageUrl, // ✅ Critical part
+        //     imagepath: firstImageUrl, // Critical part
         //   }),
         // }
         "https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/api/submit-article",
@@ -455,10 +465,12 @@ export const PremiumWriteArticle = () => {
       }
       pendingImages.forEach((img) => URL.revokeObjectURL(img.previewUrl)); // cleanup object URLs
       setPendingImages([]);
+      handleClearInputs();
+
       setAccuracy(result.accuracy);
       setAiFeedback(result.feedback);
-      alert(`Article posted successfully. Accuracy Score: ${result.accuracy}%`);
-      handleClearInputs();
+      //alert(`Article posted successfully. Accuracy Score: ${result.accuracy}%`);
+      setOpenSuccess(true);
       return;
     } else {
       // ---------------------- ROOM ARTICLE ----------------------
@@ -1372,7 +1384,7 @@ export const PremiumWriteArticle = () => {
                 {(accuracy !== null || aiFeedback) && (
                   <div className="mt-4 p-4 border border-red-300 bg-red-50 rounded text-sm text-black">
                     <strong>Fact Check Results:</strong>
-                    {accuracy !== null && (
+                    {accuracy !== null && accuracy < 75 && (
                       <p>
                         <strong>Accuracy: </strong>
                         {accuracy}%
@@ -1387,7 +1399,16 @@ export const PremiumWriteArticle = () => {
                     />
                   </div>
                 )}
-
+                <Box mb={1} mt={1}>
+                  <Typography
+                    variant="body2"
+                    color="textSecondary"
+                    sx={{ fontStyle: "italic" }}
+                  >
+                    Note: AI fact-check feedback is provided for guidance only
+                    and may be inaccurate. Please verify facts independently.
+                  </Typography>
+                </Box>
                 <div
                   className="min-h-[400px] max-h-[600px] overflow-y-auto border rounded-md bg-white p-4 mt-3 focus-within:outline-none"
                   onClick={() => editor.commands.focus()}
@@ -1591,6 +1612,27 @@ export const PremiumWriteArticle = () => {
             </div>
           </div>
         )}
+
+        <Dialog
+          open={openSuccess}
+          onClose={() => {
+            setOpenSuccess(false);
+            setAccuracy(null);
+            setAiFeedback("");
+          }}
+          aria-labelledby="success-dialog-title"
+        >
+          <DialogTitle id="success-dialog-title">Article Posted!</DialogTitle>
+          <DialogContent>
+            <p>
+              Your AI Fact-Check accuracy was <strong>{accuracy}%</strong>.
+            </p>
+            <p>{aiFeedback}</p>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setOpenSuccess(false)}>OK</Button>
+          </DialogActions>
+        </Dialog>
 
         {showTopicApplication && (
           <div className="fixed inset-0 backdrop-blur-sm bg-white/10 flex items-center justify-center z-50">

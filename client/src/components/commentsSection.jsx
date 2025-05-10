@@ -40,6 +40,32 @@ const CommentsSection = ({ articleId }) => {
   const handlePostComment = async () => {
     if (!newComment.trim() || !user) return;
 
+    try {
+      const response = await fetch(
+        "https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/api/moderate",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            content: newComment,
+            imageUrls: [],
+          }),
+        }
+      );
+
+      const result = await response.json();
+      if (result.error) {
+        alert(`Comment flagged: ${result.error}`);
+
+        return;
+      }
+    } catch (err) {
+      alert("Failed to moderate comment.");
+      console.error(err);
+
+      return;
+    }
+
     const { error } = await supabase.from("article_comments").insert([
       {
         articleid: articleId,
@@ -143,7 +169,7 @@ const CommentsSection = ({ articleId }) => {
               <div className="flex justify-between items-start">
                 <div className="flex items-start">
                   <div className="w-10 h-10 bg-blue-500 text-white flex-shrink-0 flex items-center justify-center font-bold rounded-lg mr-3">
-                      {comment.username?.charAt(0).toUpperCase()}
+                    {comment.username?.charAt(0).toUpperCase()}
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-lg font-bold text-blue-900">
@@ -152,30 +178,35 @@ const CommentsSection = ({ articleId }) => {
                     <p className="text-sm text-gray-500 mb-2">
                       {new Date(comment.created_at).toLocaleDateString("en-GB")}
                     </p>
-                   <p
-                    className={`text-gray-700 whitespace-pre-wrap break-words transition-all duration-300 ease-in-out overflow-hidden ${
-                      expandedComments[comment.commentid]
-                        ? "max-h-full"
-                        : "max-h-[3.3em]"
-                    }`}
-                    style={{
-                      display: "-webkit-box",
-                      WebkitLineClamp: expandedComments[comment.commentid] ? "unset" : 2,
-                      WebkitBoxOrient: "vertical",
-                      wordBreak: "break-word",
-                      overflowWrap: "break-word",
-                    }}
-                  >
-                    {comment.content.split(/(@\w+)/g).map((part, index) =>
-                      part.startsWith("@") ? (
-                        <strong key={index} className="text-blue-900 font-bold">
-                          {part}
-                        </strong>
-                      ) : (
-                        <span key={index}>{part}</span>
-                      )
-                    )}
-                  </p>
+                    <p
+                      className={`text-gray-700 whitespace-pre-wrap break-words transition-all duration-300 ease-in-out overflow-hidden ${
+                        expandedComments[comment.commentid]
+                          ? "max-h-full"
+                          : "max-h-[3.3em]"
+                      }`}
+                      style={{
+                        display: "-webkit-box",
+                        WebkitLineClamp: expandedComments[comment.commentid]
+                          ? "unset"
+                          : 2,
+                        WebkitBoxOrient: "vertical",
+                        wordBreak: "break-word",
+                        overflowWrap: "break-word",
+                      }}
+                    >
+                      {comment.content.split(/(@\w+)/g).map((part, index) =>
+                        part.startsWith("@") ? (
+                          <strong
+                            key={index}
+                            className="text-blue-900 font-bold"
+                          >
+                            {part}
+                          </strong>
+                        ) : (
+                          <span key={index}>{part}</span>
+                        )
+                      )}
+                    </p>
                     {comment.content.length > 100 && (
                       <span
                         onClick={() => toggleContent(comment.commentid)}

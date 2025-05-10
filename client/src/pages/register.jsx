@@ -26,6 +26,9 @@ function Register() {
   const [categories, setCategories] = useState([]);
   const [dropdownValues, setDropdownValues] = useState(Array(6).fill(""));
 
+  const [acceptedGuidelines, setAcceptedGuidelines] = useState(false);
+  const [acceptedPrivacy, setAcceptedPrivacy] = useState(false);
+
   useEffect(() => {
     const validateForm = () => {
       const newErrors = {};
@@ -55,12 +58,18 @@ function Register() {
 
       if (!userData.gender) newErrors.gender = "Please select a gender.";
 
+      if (!acceptedGuidelines)
+        newErrors.acceptedGuidelines =
+          "You must agree to the platform guidelines.";
+      if (!acceptedPrivacy)
+        newErrors.acceptedPrivacy = "You must agree to the privacy policy.";
+
       setErrors(newErrors);
       setIsValid(Object.keys(newErrors).length === 0); // If no errors, form is valid
     };
 
     validateForm();
-  }, [userData]);
+  }, [userData, acceptedGuidelines, acceptedPrivacy]);
 
   useEffect(() => {
     async function fetchCategories() {
@@ -159,6 +168,9 @@ function Register() {
             <h2 className="text-3xl sm:text-5xl font-bold text-gray-900 mb-10 mt-0 font-grotesk">
               Register
             </h2>
+            <p className="text-sm text-gray-600 mb-4">
+              You are registering as a <strong>Free User</strong>.
+            </p>
 
             {/* Step 1: User Information */}
             <form className="space-y-6 sm:space-y-5">
@@ -300,6 +312,59 @@ function Register() {
                     <div className="absolute top-[-30px] left-1/2 -translate-x-1/2 bg-red-500 text-white text-xs p-2 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                       {errors.gender}
                     </div>
+                  )}
+                </div>
+                <div className="mb-6">
+                  <div className="flex items-center">
+                    <input
+                      type="checkbox"
+                      id="guidelines"
+                      checked={acceptedGuidelines}
+                      onChange={() => setAcceptedGuidelines((v) => !v)}
+                      className="mr-2"
+                    />
+                    <label htmlFor="guidelines" className="text-base">
+                      I agree to the&nbsp;
+                      <a
+                        href="/guidelines"
+                        target="_blank"
+                        className="underline text-blue-500"
+                      >
+                        Platform Guidelines
+                      </a>
+                      .
+                    </label>
+                  </div>
+                  {errors.acceptedGuidelines && (
+                    <p className="text-red-500 text-sm">
+                      {errors.acceptedGuidelines}
+                    </p>
+                  )}
+
+                  <div className="flex items-center mt-2">
+                    <input
+                      type="checkbox"
+                      id="privacy"
+                      checked={acceptedPrivacy}
+                      onChange={() => setAcceptedPrivacy((v) => !v)}
+                      className="mr-2"
+                    />
+                    <label htmlFor="privacy" className="text-base">
+                      I agree to the&nbsp;
+                      <a
+                        href="/privacy"
+                        target="_blank"
+                        className="underline text-blue-500"
+                      >
+                        Privacy Policy
+                      </a>
+                      .
+                    </label>
+                  </div>
+                  {errors.acceptedPrivacy && (
+                    <p className="text-red-500 text-sm">
+                      {errors.acceptedPrivacy}
+                    </p>
                   )}
                 </div>
 
