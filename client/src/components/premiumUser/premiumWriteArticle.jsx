@@ -1624,10 +1624,19 @@ export const PremiumWriteArticle = () => {
         >
           <DialogTitle id="success-dialog-title">Article Posted!</DialogTitle>
           <DialogContent>
+            <strong>Fact Check Results:</strong>
             <p>
-              Your AI Fact-Check accuracy was <strong>{accuracy}%</strong>.
+              <strong>Accuracy: </strong>
+              {accuracy}%
             </p>
-            <p>{aiFeedback}</p>
+
+            <p>
+              <strong>Feedback: </strong>
+            </p>
+            <div
+              className="mt-1"
+              dangerouslySetInnerHTML={{ __html: aiFeedback }}
+            />
           </DialogContent>
           <DialogActions>
             <Button

@@ -60,7 +60,7 @@ async function moderateText(content) {
     });
 
     const data = await response.json();
-    console.log("Moderation results:", JSON.stringify(data, null, 2));
+    //console.log("Moderation results:", JSON.stringify(data, null, 2));
 
     const flagged = data.results[0].flagged;
     return {
@@ -238,6 +238,7 @@ async function factCheck(content, topicName) {
         ],
       }),
     });
+    console.log("data to perplexity", content);
     const pxData = await pxRes.json();
 
     const raw = pxData.choices?.[0]?.message?.content;
