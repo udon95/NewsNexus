@@ -1381,25 +1381,23 @@ export const PremiumWriteArticle = () => {
                   </button>
                 </div>
 
-                {(accuracy !== null || aiFeedback) &&
-                  accuracy <
-                    75(
-                      <div className="mt-4 p-4 border border-red-300 bg-red-50 rounded text-sm text-black">
-                        <strong>Fact Check Results:</strong>
-                        <p>
-                          <strong>Accuracy: </strong>
-                          {accuracy}%
-                        </p>
+                {accuracy !== null && aiFeedback !== null && accuracy < 75 && (
+                  <div className="mt-4 p-4 border border-red-300 bg-red-50 rounded text-sm text-black">
+                    <strong>Fact Check Results:</strong>
+                    <p>
+                      <strong>Accuracy: </strong>
+                      {accuracy}%
+                    </p>
 
-                        <p>
-                          <strong>Feedback: </strong>
-                        </p>
-                        <div
-                          className="mt-1"
-                          dangerouslySetInnerHTML={{ __html: aiFeedback }}
-                        />
-                      </div>
-                    )}
+                    <p>
+                      <strong>Feedback: </strong>
+                    </p>
+                    <div
+                      className="mt-1"
+                      dangerouslySetInnerHTML={{ __html: aiFeedback }}
+                    />
+                  </div>
+                )}
                 <Box mb={1} mt={1}>
                   <Typography
                     variant="body2"
