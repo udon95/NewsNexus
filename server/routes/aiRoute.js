@@ -347,6 +347,7 @@ router.post("/submit-article", async (req, res) => {
     let factResult;
     try {
       factResult = await factCheck(strippedText, topicName);
+      console.log("stripped text", strippedText);
     } catch (err) {
       console.error("Fact-check error:", err);
 
