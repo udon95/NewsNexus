@@ -6,6 +6,7 @@ const { ImageAnnotatorClient } = require("@google-cloud/vision");
 
 router.use(express.json());
 const { JSDOM } = require("jsdom");
+const { RolesAnywhere } = require("aws-sdk");
 
 const supabase = createClient(
   process.env.SUPABASE_URL,
@@ -264,15 +265,38 @@ async function factCheck(content, topicName) {
     // console.log("Raw response from Perplexity:", raw);
     let parsed = null;
     try {
-      parsed = JSON.parse(cleanResponse);
+      wwww;
+      parsed = JSON.parse(raw);
     } catch (err) {
       console.error("Error parsing JSON response:", err.message);
       throw new Error("Failed to parse Perplexity response as JSON.");
     }
 
-    if (!parsed) {
-      throw new Error("Perplexity did not return a valid response.");
+    if (
+      !parsed ||
+      !parsed.choices ||
+      !parsed.choices[0] ||
+      !parsed.choices[0].message
+    ) {
+      throw new Error(
+        "Perplexity response does not contain the expected structure."
+      );
     }
+    const feedback = parsed.choices[0].message.content || "";
+    const accuracyMatch = feedback.match(/"accuracy":\s*(\d+)/); // Look for accuracy in the feedback
+
+    let accuracy = accuracyMatch ? parseInt(accuracyMatch[1], 10) : null;
+
+    if (accuracy === null) {
+      console.warn("Accuracy field not found in the response.");
+    }
+
+    // Now process the response
+    console.log("Parsed Perplexity response:", parsed);
+    result = {
+      accuracy: accuracy || 0, // Default to 0 if accuracy is not found
+      feedback: feedback,
+    };
   } catch (perpErr) {
     console.warn(
       "Perplexity fail to determine, falling back to ChatGPT:",
