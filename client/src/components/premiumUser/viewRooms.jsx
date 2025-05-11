@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import supabase from "../../api/supabaseClient";
 import Search from "../search.jsx";
 import Navbar from "../navbar.jsx";
+import FloatingRoomStats from "../floatingRommStats.jsx";
 import useAuthHook from "../../hooks/useAuth.jsx";
 
 const ViewRoomsPage = () => {
@@ -246,6 +247,9 @@ const ViewRoomsPage = () => {
   return (
     <div className="relative min-h-screen w-screen flex flex-col bg-white">
       <Navbar />
+
+      {user && <FloatingRoomStats user={user} />}
+
       <div className="w-full flex justify-center mt-6 mb-6">
         <div className="w-full max-w-[900px] px-4">
           <Search
