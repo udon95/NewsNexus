@@ -12,7 +12,7 @@ const ForgotPassword = () => {
     e.preventDefault();
 
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: "http://localhost:5173/reset-password", //  Change this to your reset password page
+      redirectTo: "https://van.dpyq2cohucoc7.amplifyapp.com/reset-password", 
     });
 
     if (error) {

@@ -13,10 +13,9 @@ const Layout = () => {
       <footer className="w-full h-16 bg-[#7FB0FE] text-sm sm:text-base text-[#00317F] font-bold flex items-center justify-left px-20">
         <p>&copy; 2025 NewsNexus. All Rights Reserved. &nbsp; &nbsp; &nbsp;</p>
         <a href="/privacy" className="underline">
-          {" "}
           Privacy Policy
         </a>
-        <span>&nbsp; &nbsp; | &nbsp; &nbsp;</span> 
+        <span>&nbsp; &nbsp; | &nbsp; &nbsp;</span>
         <a href="/guidelines" className="underline">
           Platform Guidelines
         </a>
