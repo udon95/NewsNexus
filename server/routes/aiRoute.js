@@ -241,21 +241,38 @@ async function factCheck(content, topicName) {
     console.log("data to perplexity", content);
     const pxData = await pxRes.json();
 
-    const raw = pxData.choices?.[0]?.message?.content;
+    const choices = pxData.choices?.[0]?.message?.content;
+    console.log("Status code from Perplexity:", pxRes.status); // Check status code
 
+    // If the status code is not 2xx, throw an error
+    if (!pxRes.ok) {
+      const errorText = await pxRes.text(); // Get the error message if response is not okay
+      console.error("Error response from Perplexity:", errorText);
+      throw new Error(`Perplexity request failed with status ${pxRes.status}`);
+    }
     if (/i['’]?m not sure|unknown|cannot verify/i.test(raw)) {
       throw new Error("Perplexity unsure");
     }
-    let start = raw.indexOf("{");
-    let end = raw.lastIndexOf("}");
-    if (start === -1 || end === -1) {
-      throw new Error(
-        "—couldn't find JSON braces in the model output!—\n" + raw
-      );
+    // let start = raw.indexOf("{");
+    // let end = raw.lastIndexOf("}");
+    // if (start === -1 || end === -1) {
+    //   throw new Error(
+    //     "—couldn't find JSON braces in the model output!—\n" + raw
+    //   );
+    // }
+    const raw = await pxRes.text(); // Get raw response as text first
+    console.log("Raw response from Perplexity:", raw);
+    let parsed = null;
+    try {
+      parsed = JSON.parse(choices);
+    } catch (err) {
+      console.error("Error parsing JSON response:", err.message);
+      throw new Error("Failed to parse Perplexity response as JSON.");
     }
 
-    const parsed = raw.substring(start, end + 1);
-    result = JSON.parse(parsed);
+    if (!parsed) {
+      throw new Error("Perplexity did not return a valid response.");
+    }
   } catch (perpErr) {
     console.warn(
       "Perplexity fail to determine, falling back to ChatGPT:",
@@ -319,7 +336,7 @@ router.post("/submit-article", async (req, res) => {
     } = req.body;
 
     const strippedText = extractTextFromHTML(updatedHTML);
-    
+
     if (!title || !updatedHTML || !authorId || !topicid || !topicName) {
       return res.status(400).json({ error: "Missing required fields." });
     }

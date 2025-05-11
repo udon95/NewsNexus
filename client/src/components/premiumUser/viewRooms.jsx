@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import supabase from "../../api/supabaseClient";
 import Search from "../search.jsx";
 import Navbar from "../navbar.jsx";
-import FloatingRoomStats from "../floatingRommStats.jsx";
+import FloatingRoomStats from "../floatingRoomStats.jsx";
 import useAuthHook from "../../hooks/useAuth.jsx";
 
 const ViewRoomsPage = () => {
