@@ -9,24 +9,51 @@ const ResetPassword = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
+  useEffect(() => {
+    supabase.auth
+      .getSessionFromUrl({ storeSession: false })
+      .then(({ error }) => {
+        if (error) setError(error.message);
+      });
+  }, []);
+
   const handleResetPassword = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError("");
     setMessage("");
-    const { data, error } = await supabase.auth.updateUser({ password });
 
-    if (error) {
-      setError(error.message);
-    } else {
-      setMessage("Password updated successfully!");
-      // Automatically redirect to login after a brief pause
-      setTimeout(() => {
-        navigate("/login");
-      }, 2000);
+    // Update password in Supabase Auth (session held in memory only)
+    const { data, error } = await supabase.auth.updateUser({ password });
+    if (authError) {
+      setError(`Auth update failed: ${authError.message}`);
+      setLoading(false);
+      return;
     }
 
+    // Update in your users table
+    const { data: userData, error: userError } = await supabase.auth.getUser();
+    if (userError || !userData.user) {
+      setError(userError ? userError.message : "Could not retrieve user");
+      setLoading(false);
+      return;
+    }
+    const { error: tableError } = await supabase
+      .from("users")
+      .update({ password })
+      .eq("auth_id", userData.user.id);
+    if (tableError) {
+      setError(`Table update failed: ${tableError.message}`);
+      setLoading(false);
+      return;
+    }
+
+    // Clean up: ensure no tokens are stored
+    await supabase.auth.signOut();
+
+    setMessage("Password updated successfully! Redirecting to login...");
     setLoading(false);
+    setTimeout(() => navigate("/login"), 2000);
   };
 
   return (
