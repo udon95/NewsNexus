@@ -42,16 +42,17 @@ const NewsCard = ({ articleid, title, imageUrl }) => {
 
   return (
     <div
-      className="relative bg-white rounded-2xl shadow-lg border border-gray-300 overflow-hidden w-full max-w-[900px] mx-auto cursor-pointer hover:shadow-xl transition"
-      onClick={handleCardClick}
+  className="relative bg-white rounded-2xl shadow-lg border border-gray-300 overflow-hidden w-full cursor-pointer hover:shadow-xl transition"
+    onClick={handleCardClick}
     >
       {/* Image */}
-      <div className="relative w-full h-[200px]">
-        <img
-          src={imageUrl || "test.png"}
-          alt={title}
-          className="w-full h-full object-cover"
-        />
+      <div className="relative w-full h-[200px] overflow-hidden">
+  <img
+    src={imageUrl || "test.png"}
+    alt={title}
+    className="w-full h-[200px] object-cover"
+  />
+
 
         {/* Votes Box */}
         <div className="absolute top-2 left-2 bg-gray-200 p-2 rounded-lg flex flex-col items-center shadow-md">
