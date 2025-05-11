@@ -131,21 +131,17 @@ const AdminUserDetails = () => {
 
           <input
             className="ml-10 mt-8 min-w-[500px] bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300"
-            value={"User Type:  "+
-              (premiumUserList.some((user) => user.userid === userDetails.userid)
-                ? "Premium User"
-                : "Free User"
+            value={(premiumUserList.some((user) => user.userid === userDetails.userid)
+                ? "User Type:  Premium User"
+                : "User Type:  Free User"
                )}
             readOnly
           />
           <input
             className="ml-10 mt-8 min-w-[500px] bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300"
-            value={"Expert User:  "+
-              (expertUserList.some(
-                (user) => user.username === userDetails.username
-              )
-                ? "Yes"
-                : "No"
+            value={(expertUserList.some((user) => user.username === userDetails.username)
+                ? "Expert User:  Yes"
+                : "Expert User:  No"
                )}
             readOnly
           />
