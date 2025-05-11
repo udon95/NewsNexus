@@ -352,7 +352,7 @@ const Article = () => {
       onMouseUp={handleTextSelection}
     >
       <Navbar />
-      <main className="flex flex-col items-center w-full px-4 sm:px-8 py-6 mx-auto max-w-[750px]">
+      <main className="flex flex-col items-center w-full px-4 sm:px-8 py-6 mx-auto max-w-[800px]">
         {articleData && !showPaywall ? (
           <>
             <h1 className="text-3xl sm:text-4xl font-bold text-black mb-2 text-left w-full">
