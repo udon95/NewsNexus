@@ -4,6 +4,8 @@ import supabase from "../../api/supabaseClient";
 import Navbar from "../navbar";
 import { MoreVertical, CornerDownLeft } from "lucide-react"; // Import 3-dot icon + comment icon
 import useAuthHook from "../../hooks/useAuth.jsx";
+import FloatingRoomContribution from "../floatingRoomContribution";
+
 
 const Room = () => {
   const { id: roomid } = useParams();
@@ -1077,6 +1079,8 @@ const Room = () => {
   return (
     <div className="relative min-h-screen w-screen flex flex-col bg-gray-100">
       <Navbar />
+      <FloatingRoomContribution roomid={roomid} />
+
       <div className="w-full max-w-4xl mx-auto p-6">
         <div className="flex justify-between items-center mb-1">
         <h1 className="text-4xl font-bold">
