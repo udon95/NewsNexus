@@ -24,7 +24,9 @@ const ResetPassword = () => {
     setMessage("");
 
     // Update password in Supabase Auth (session held in memory only)
-    const { data, error } = await supabase.auth.updateUser({ password });
+    const { data: authData, error: authError } = await supabase.auth.updateUser(
+      { password }
+    );
     if (authError) {
       setError(`Auth update failed: ${authError.message}`);
       setLoading(false);
