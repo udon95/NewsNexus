@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import {
   Plus,
   Bold,
@@ -24,9 +24,17 @@ import Placeholder from "@tiptap/extension-placeholder";
 import Heading from "@tiptap/extension-heading";
 import BulletList from "@tiptap/extension-bullet-list";
 import OrderedList from "@tiptap/extension-ordered-list";
-import { Extension } from "@tiptap/core";
 import { Paragraph } from "@tiptap/extension-paragraph";
 import ListItem from "@tiptap/extension-list-item";
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+  Box,
+  Typography,
+} from "@mui/material";
 
 export const FreeWriteArticle = () => {
   const [title, setTitle] = useState("");
@@ -39,15 +47,16 @@ export const FreeWriteArticle = () => {
   const [showTopicsDropdown, setShowTopicsDropdown] = useState(false);
   const storedUser = JSON.parse(localStorage.getItem("userProfile"));
   const userId = storedUser?.user?.userid;
-  const editorRef = useRef(null);
   const [showTopicApplication, setShowTopicApplication] = useState(false);
   const [newTopicName, setNewTopicName] = useState("");
   const [showLinkModal, setShowLinkModal] = useState(false);
   const [linkUrl, setLinkUrl] = useState("");
   const [showDraftNotification, setShowDraftNotification] = useState(false);
   const [monthlyPostCount, setMonthlyPostCount] = useState(0);
+
   const [aiFeedback, setAiFeedback] = useState("");
   const [accuracy, setAccuracy] = useState(null);
+  const [openSuccess, setOpenSuccess] = useState(false);
   const [postType, setPostType] = useState("General");
   const [uploadAction, setUploadAction] = useState(""); // "post" or "draft"
   const [isUploading, setIsUploading] = useState(false);
@@ -69,25 +78,25 @@ export const FreeWriteArticle = () => {
     },
   });
 
-  const IndentExtension = Extension.create({
-    name: "custom-indent",
-    addKeyboardShortcuts() {
-      return {
-        Tab: () => {
-          this.editor.commands.updateAttributes("paragraph", {
-            style: "text-indent: 2em",
-          });
-          return true;
-        },
-        "Shift-Tab": () => {
-          this.editor.commands.updateAttributes("paragraph", {
-            style: "text-indent: 0",
-          });
-          return true;
-        },
-      };
-    },
-  });
+  // const IndentExtension = Extension.create({
+  //   name: "custom-indent",
+  //   addKeyboardShortcuts() {
+  //     return {
+  //       Tab: () => {
+  //         this.editor.commands.updateAttributes("paragraph", {
+  //           style: "text-indent: 2em",
+  //         });
+  //         return true;
+  //       },
+  //       "Shift-Tab": () => {
+  //         this.editor.commands.updateAttributes("paragraph", {
+  //           style: "text-indent: 0",
+  //         });
+  //         return true;
+  //       },
+  //     };
+  //   },
+  // });
 
   const editor = useEditor({
     extensions: [
@@ -343,7 +352,7 @@ export const FreeWriteArticle = () => {
 
     articleData.topic = topics;
     const topicName = topicOptions.find((t) => t.topicid === topics)?.name;
-    console.log("free write uploaded images", uploadedImageUrls);
+    //console.log("free write uploaded images", uploadedImageUrls);
 
     if (postType === "General") {
       const response = await fetch(
@@ -381,22 +390,14 @@ export const FreeWriteArticle = () => {
         return;
       }
 
-      // const articleid = data?.[0]?.articleid;
-
-      // // Save multiple images to article_images
-      // for (const url of uploadedImageUrls) {
-      //   await supabase
-      //     .from("article_images")
-      //     .insert([{ articleid, image_url: url }]);
-      // }
-
       pendingImages.forEach((img) => URL.revokeObjectURL(img.previewUrl)); // cleanup object URLs
       setPendingImages([]);
+      handleClearInputs();
 
       setAccuracy(result.accuracy);
       setAiFeedback(result.feedback);
-      alert(`Article posted successfully. Accuracy Score: ${result.accuracy}%`);
-      handleClearInputs();
+      //alert(`Article posted successfully. Accuracy Score: ${result.accuracy}%`);
+      setOpenSuccess(true);
       return;
     }
   };
@@ -941,7 +942,7 @@ export const FreeWriteArticle = () => {
                   </button>
                 </div>
 
-                {(accuracy !== null || aiFeedback) && (
+                {accuracy !== null && aiFeedback !== null && accuracy < 75 && (
                   <div className="mt-4 p-4 border border-red-300 bg-red-50 rounded text-sm text-black">
                     <strong>Fact Check Results:</strong>
                     {accuracy !== null && (
@@ -959,6 +960,16 @@ export const FreeWriteArticle = () => {
                     />
                   </div>
                 )}
+                <Box mb={1} mt={1}>
+                  <Typography
+                    variant="body2"
+                    color="textSecondary"
+                    sx={{ fontStyle: "italic" }}
+                  >
+                    Note: AI fact-check feedback is provided for guidance only
+                    and may be inaccurate. Please verify facts independently.
+                  </Typography>
+                </Box>
 
                 <div
                   className="min-h-[400px] max-h-[600px] overflow-y-auto border rounded-md bg-white p-4 mt-3 focus-within:outline-none"
@@ -1181,6 +1192,42 @@ export const FreeWriteArticle = () => {
             </div>
           </div>
         )}
+
+        <Dialog
+          open={openSuccess}
+          onClose={() => {
+            setOpenSuccess(false);
+            handleClearInputs();
+          }}
+          aria-labelledby="success-dialog-title"
+        >
+          <DialogTitle id="success-dialog-title">Article Posted!</DialogTitle>
+          <DialogContent>
+            <strong>Fact Check Results:</strong>
+            <p>
+              <strong>Accuracy: </strong>
+              {accuracy}%
+            </p>
+
+            <p>
+              <strong>Feedback: </strong>
+            </p>
+            <div
+              className="mt-1"
+              dangerouslySetInnerHTML={{ __html: aiFeedback }}
+            />
+          </DialogContent>
+          <DialogActions>
+            <Button
+              onClick={() => {
+                setOpenSuccess(false);
+                handleClearInputs();
+              }}
+            >
+              OK
+            </Button>
+          </DialogActions>
+        </Dialog>
       </main>
     </div>
   );

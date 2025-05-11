@@ -29,6 +29,32 @@ const PremManageProfile = () => {
 
   const [categories, setCategories] = useState([]);
   const [dropdownValues, setDropdownValues] = useState(Array(6).fill(""));
+  const [userType, setUserType] = useState("");
+
+  useEffect(() => {
+    const fetchUserType = async () => {
+      const { data: exp, error: expError } = await supabase
+        .from("expert_application")
+        .select("status")
+        .eq("userid", userDetails?.userid)
+        .single();
+
+      if (expError) {
+        console.error("Error fetching expert status", expError);
+        return;
+      }
+
+      if (exp && exp.status === "approved") {
+        setUserType("Premium Expert");
+      } else {
+        setUserType(userDetails?.usertype?.usertype || "Free");
+      }
+    };
+
+    if (userDetails) {
+      fetchUserType();
+    }
+  }, [userDetails]);
 
   //load user profile
   useEffect(() => {
@@ -428,6 +454,15 @@ const PremManageProfile = () => {
             <option value="Female">Female</option>
             <option value="Other">Prefer Not To Say</option>
           </select>
+          
+          <div className="mb-1">User Type:</div>
+          <input
+            type="text"
+            value={userType} 
+            readOnly
+            className="w-full p-2 border rounded-lg mb-2 bg-gray-200"
+          />
+
           <div className="mb-1">Choose Profile Color:</div>
           <HexColorPicker
             color={profileColor}
@@ -451,9 +486,7 @@ const PremManageProfile = () => {
         </div>
 
         {/* Password Change */}
-        <h1 className="text-3xl font-bold mb-2 mt-6">
-          Manage Password:
-        </h1>
+        <h1 className="text-3xl font-bold mb-2 mt-6">Manage Password:</h1>
         <div className="p-4 bg-white shadow-md rounded-lg ">
           <PasswordInput
             name="password"

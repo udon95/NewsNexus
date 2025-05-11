@@ -8,15 +8,13 @@ router.post("/login", async (req, res) => {
   const { email, password } = req.body;
 
   // Authenticate user with Supabase
-  const { data: authData, error: authError } =
-    await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+  const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+    email,
+    password,
+  });
 
   if (authError) return res.status(401).json({ error: authError.message });
-  if (!authData.user)
-    return res.status(401).json({ error: "Authentication failed" });
+  if (!authData.user) return res.status(401).json({ error: "Authentication failed" });
 
   const userId = authData.user.id;
 
@@ -57,81 +55,203 @@ router.post("/login", async (req, res) => {
             username: adminProfile.username,
             status: "Active",
           },
-          role: "Admin",
-
+          role: "Admin", // Admin Role
           session: authData.session, // Supabase session
         });
       } else {
         return res.status(404).json({ error: "User details not found" });
       }
     }
-    if (userProfile) {
-      const isMatch = await bcrypt.compare(password, userProfile.password);
-      if (!isMatch)
-        return res.status(400).json({ error: "Invalid credentials" });
 
-      // Fetch user interests separately
-      const { data: interestData, error: interestError } = await supabase
-        .from("topicinterest")
-        .select("interesttype")
-        .eq("userid", userProfile.userid)
-        .single();
-
-      if (interestError) {
-        console.error("Interest fetch error:", interestError?.message);
-      }
-
-      // Extract interests (ensure it doesn't break if null)
-      const interests = interestData?.interesttype || "";
-      // Return full user details
-      return res.json({
-        message: "Login Successful",
-        user: {
-          userid: userProfile.userid,
-          email: userProfile.email,
-          username: userProfile.username,
-          password: userProfile.password,
-          status: userProfile.status,
-          auth_id: userProfile.auth_id,
-        },
-        profile: userProfile.profile || {}, // Ensure no null values
-        role: userProfile.usertype?.usertype || "Unknown",
-        color: userProfile.usertype?.color || "Unknown",
-        interests,
-        session: authData.session, // Supabase session data
-      });
-    }
-    let { data: adminProfile, error: adminError } = await supabase
-      .from("admin")
-      .select("adminid, email, username, password") // No auth_id in admin
-      .eq("email", email) // Admins are matched via email
+    // Fetch expert application status
+    const { data: exp, error: expError } = await supabase
+      .from("expert_application")
+      .select("status")
+      .eq("userid", userId)
       .single();
 
-    if (adminProfile) {
-      //  Validate Admin Password
-      const isMatch = await bcrypt.compare(password, adminProfile.password);
-      if (!isMatch)
-        return res.status(400).json({ error: "Invalid credentials" });
-
-      //  Return Admin Profile
-      return res.json({
-        message: "Admin Login Successful",
-        user: {
-          userid: adminProfile.adminid,
-          email: adminProfile.email,
-          username: adminProfile.username,
-          status: "Active",
-        },
-        role: "Admin",
-        session: authData.session, // Supabase session
-      });
+    if (expError) {
+      return res.status(500).json({ error: "Could not load expert" });
     }
-    // return res.json({ message: "Login successful" });
+
+    // Determine the user type based on expert status
+    let userType = userProfile.usertype?.usertype || "Free"; 
+    if (exp && exp.status === "Approved") {
+      userType = "Premium Expert"; 
+    } else if (userProfile.usertype?.usertype === "Premium") {
+      userType = "Premium"; 
+    }
+
+    // Validate password
+    const isMatch = await bcrypt.compare(password, userProfile.password);
+    if (!isMatch) return res.status(400).json({ error: "Invalid credentials" });
+
+    // Fetch user interests separately
+    const { data: interestData, error: interestError } = await supabase
+      .from("topicinterest")
+      .select("interesttype")
+      .eq("userid", userProfile.userid)
+      .single();
+
+    if (interestError) {
+      console.error("Interest fetch error:", interestError?.message);
+    }
+
+    // Extract interests (ensure it doesn't break if null)
+    const interests = interestData?.interesttype || "";
+
+    // Return full user details with updated user type
+    return res.json({
+      message: "Login Successful",
+      user: {
+        userid: userProfile.userid,
+        email: userProfile.email,
+        username: userProfile.username,
+        password: userProfile.password,
+        status: userProfile.status,
+        auth_id: userProfile.auth_id,
+      },
+      profile: userProfile.profile || {}, // Ensure no null values
+      role: userType, 
+      color: userProfile.usertype?.color || "Unknown",
+      interests,
+      session: authData.session, // Supabase session data
+    });
   } catch (error) {
     console.error("Unexpected error during login:", error);
     res.status(500).json({ error: "Failed to log in and fetch user data" });
   }
 });
+
+
+// router.post("/login", async (req, res) => {
+//   const { email, password } = req.body;
+
+//   // Authenticate user with Supabase
+//   const { data: authData, error: authError } =
+//     await supabase.auth.signInWithPassword({
+//       email,
+//       password,
+//     });
+
+//   if (authError) return res.status(401).json({ error: authError.message });
+//   if (!authData.user)
+//     return res.status(401).json({ error: "Authentication failed" });
+
+//   const userId = authData.user.id;
+
+//   try {
+//     // Fetch user details, profile, and role in ONE query
+//     let { data: userProfile, error: profileError } = await supabase
+//       .from("users")
+//       .select(
+//         `
+//         userid, email, username, password, status, auth_id,
+//         profile:profile(uuserid, gender, dob),
+//         usertype:usertype(usertype, color)
+//       `
+//       )
+//       .eq("auth_id", userId) // Match Supabase auth_id
+//       .single();
+
+//     if (profileError || !userProfile) {
+//       // If not found in users table, check if it's an admin
+//       let { data: adminProfile, error: adminError } = await supabase
+//         .from("admin")
+//         .select("adminid, email, username, password")
+//         .eq("email", email) // Admins are matched via email
+//         .single();
+
+//       if (adminProfile) {
+//         // Validate Admin Password
+//         const isMatch = await bcrypt.compare(password, adminProfile.password);
+//         if (!isMatch)
+//           return res.status(400).json({ error: "Invalid credentials" });
+
+//         // Return Admin Profile
+//         return res.json({
+//           message: "Admin Login Successful",
+//           user: {
+//             userid: adminProfile.adminid,
+//             email: adminProfile.email,
+//             username: adminProfile.username,
+//             status: "Active",
+//           },
+//           role: "Admin",
+
+//           session: authData.session, // Supabase session
+//         });
+//       } else {
+//         return res.status(404).json({ error: "User details not found" });
+//       }
+//     }
+//     if (userProfile) {
+//       const isMatch = await bcrypt.compare(password, userProfile.password);
+//       if (!isMatch)
+//         return res.status(400).json({ error: "Invalid credentials" });
+
+//       // Fetch user interests separately
+//       const { data: interestData, error: interestError } = await supabase
+//         .from("topicinterest")
+//         .select("interesttype")
+//         .eq("userid", userProfile.userid)
+//         .single();
+
+//       if (interestError) {
+//         console.error("Interest fetch error:", interestError?.message);
+//       }
+
+//       // Extract interests (ensure it doesn't break if null)
+//       const interests = interestData?.interesttype || "";
+//       // Return full user details
+//       return res.json({
+//         message: "Login Successful",
+//         user: {
+//           userid: userProfile.userid,
+//           email: userProfile.email,
+//           username: userProfile.username,
+//           password: userProfile.password,
+//           status: userProfile.status,
+//           auth_id: userProfile.auth_id,
+//         },
+//         profile: userProfile.profile || {}, // Ensure no null values
+//         role: userProfile.usertype?.usertype || "Unknown",
+//         color: userProfile.usertype?.color || "Unknown",
+//         interests,
+//         session: authData.session, // Supabase session data
+//       });
+//     }
+//     let { data: adminProfile, error: adminError } = await supabase
+//       .from("admin")
+//       .select("adminid, email, username, password") // No auth_id in admin
+//       .eq("email", email) // Admins are matched via email
+//       .single();
+
+//     if (adminProfile) {
+//       //  Validate Admin Password
+//       const isMatch = await bcrypt.compare(password, adminProfile.password);
+//       if (!isMatch)
+//         return res.status(400).json({ error: "Invalid credentials" });
+
+//       //  Return Admin Profile
+//       return res.json({
+//         message: "Admin Login Successful",
+//         user: {
+//           userid: adminProfile.adminid,
+//           email: adminProfile.email,
+//           username: adminProfile.username,
+//           status: "Active",
+//         },
+//         role: "Admin",
+//         session: authData.session, // Supabase session
+//       });
+//     }
+//     // return res.json({ message: "Login successful" });
+//   } catch (error) {
+//     console.error("Unexpected error during login:", error);
+//     res.status(500).json({ error: "Failed to log in and fetch user data" });
+//   }
+// });
 
 //  User Registration
 router.post("/register", async (req, res) => {
