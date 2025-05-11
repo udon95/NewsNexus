@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import supabase from "../api/supabaseClient";
 
+
 const FloatingRoomStats = ({ user }) => {
   const [stats, setStats] = useState({
     publicRooms: 0,
@@ -9,11 +10,13 @@ const FloatingRoomStats = ({ user }) => {
     roomDrafts: 0,
   });
 
+
   useEffect(() => {
     const fetchStats = async () => {
       const storedUser = JSON.parse(localStorage.getItem("userProfile"));
       const userId = storedUser?.user?.userid;
       if (!userId) return;
+
 
       try {
         const [pubRooms, privRooms, posted, drafts] = await Promise.all([
@@ -21,17 +24,19 @@ const FloatingRoomStats = ({ user }) => {
             .from("room_members")
             .select("roomid", { count: "exact", head: true })
             .eq("userid", userId)
-            .in("roomid", 
+            .in("roomid",
               (await supabase.from("rooms").select("roomid").eq("room_type", "Public")).data.map(r => r.roomid)
             ),
+
 
           supabase
             .from("room_members")
             .select("roomid", { count: "exact", head: true })
             .eq("userid", userId)
-            .in("roomid", 
+            .in("roomid",
               (await supabase.from("rooms").select("roomid").eq("room_type", "Private")).data.map(r => r.roomid)
             ),
+
 
           supabase
             .from("room_articles")
@@ -39,12 +44,14 @@ const FloatingRoomStats = ({ user }) => {
             .eq("userid", userId)
             .eq("status", "Published"),
 
+
           supabase
             .from("room_articles")
             .select("*", { count: "exact", head: true })
             .eq("userid", userId)
             .eq("status", "Draft"),
         ]);
+
 
         setStats({
           publicRooms: pubRooms?.count || 0,
@@ -57,13 +64,15 @@ const FloatingRoomStats = ({ user }) => {
       }
     };
 
+
     fetchStats();
     const interval = setInterval(fetchStats, 15000);
     return () => clearInterval(interval);
   }, []);
 
+
   return (
-    <div className="absolute top-[220px] left-20 z-40 flex flex-col items-start gap-3">
+    <div className={`mt-[65px] z-40 flex flex-col items-start gap-3`}>
       <div className="text-sm font-bold text-[#00317F] mb-2 -ml-1">
         Room Activity
       </div>
@@ -96,5 +105,6 @@ const FloatingRoomStats = ({ user }) => {
     </div>
   );
 };
+
 
 export default FloatingRoomStats;
