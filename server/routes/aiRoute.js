@@ -432,7 +432,7 @@ router.post("/check-article", async (req, res) => {
 
     let factResult;
     try {
-      factResult = await factCheck(updatedHTML, topicName);
+      factResult = await factCheck(strippedText, topicName);
     } catch (err) {
       console.error("Fact-check error:", err);
 
