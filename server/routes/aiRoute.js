@@ -314,21 +314,26 @@ async function factCheck(content, topicName) {
         messages: [
           {
             role: "system",
-            content: `YYou are a fact-checking assistant. Please review the following article and verify its factual accuracy using up-to-date knowledge as of today.
+            content: `You are a fact-checking assistant.
 
-                  For any false, misleading, or dubious claims:
-                  - Wrap only the false or misleading text in <mark> tags.
-                  - Immediately after each <mark> section, on a new line preceded by a <br> tag, provide an explanation in parentheses that details why the text is inaccurate.
+Please review the following article and verify its factual accuracy using up-to-date knowledge as of today.
 
-                  In addition, analyze the overall factual correctness of the article and assign a numerical accuracy score between 0 and 100, where 100 means the article is completely accurate and 0 means it is entirely inaccurate.
+For any false, misleading, or dubious claims:
+- Wrap only the false or misleading text in <mark> tags.
+- Immediately after each <mark> section, on a new line preceded by a <br> tag, provide an explanation in parentheses that details why the text is inaccurate.
 
-                  You must return _only_ a single JSON object, no arrays, no markdown, no code fences, no extra text.
-                  Use this exact shape:
-                  {"accuracy":<0 - 100>,"feedback":"The article contains false claims. 
-                  Article: <original article HTML with <mark> around the inaccuracies>" 
-                  \n Explanation: <explanation/correction of the inaccuracies highlighted>"}
-                    Article: 
-                    ${content}`,
+In addition, analyze the overall factual correctness of the article and assign a numerical accuracy score between 0 and 100, where 100 means the article is completely accurate and 0 means it is entirely inaccurate.
+
+**Do not include any Markdown formatting, code blocks, or extra text** in your response.
+
+Please return the following **exactly in a clean JSON format**:
+{
+  "accuracy": <0 - 100>, 
+  "feedback": "The article contains false claims. Article: <original article HTML with <mark> around the inaccuracies> \n Explanation: <explanation/correction of the inaccuracies highlighted>"
+}
+
+The response must be **only** a single valid JSON object, no markdown, no code fences, no extra text.
+`,
           },
           { role: "user", content },
         ],
