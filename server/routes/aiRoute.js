@@ -238,21 +238,21 @@ async function factCheck(content, topicName) {
         ],
       }),
     });
-    console.log("data to perplexity", content);
-    const pxData = await pxRes.json();
-
-    const choices = pxData.choices?.[0]?.message?.content;
     console.log("Status code from Perplexity:", pxRes.status); // Check status code
+    const raw = await pxRes.text(); // Get raw response text first
+    console.log("Raw response from Perplexity:", raw);
+    // const choices = pxData.choices?.[0]?.message?.content;
+    // console.log("Status code from Perplexity:", pxRes.status); // Check status code
 
     // If the status code is not 2xx, throw an error
-    if (!pxRes.ok) {
-      const errorText = await pxRes.text(); // Get the error message if response is not okay
-      console.error("Error response from Perplexity:", errorText);
-      throw new Error(`Perplexity request failed with status ${pxRes.status}`);
-    }
-    if (/i['’]?m not sure|unknown|cannot verify/i.test(raw)) {
-      throw new Error("Perplexity unsure");
-    }
+    // if (!pxRes.ok) {
+    //   const errorText = await pxRes.text(); // Get the error message if response is not okay
+    //   console.error("Error response from Perplexity:", errorText);
+    //   throw new Error(`Perplexity request failed with status ${pxRes.status}`);
+    // }
+    // if (/i['’]?m not sure|unknown|cannot verify/i.test(raw)) {
+    //   throw new Error("Perplexity unsure");
+    // }
     // let start = raw.indexOf("{");
     // let end = raw.lastIndexOf("}");
     // if (start === -1 || end === -1) {
@@ -260,11 +260,10 @@ async function factCheck(content, topicName) {
     //     "—couldn't find JSON braces in the model output!—\n" + raw
     //   );
     // }
-    const raw = await pxRes.text(); // Get raw response as text first
-    console.log("Raw response from Perplexity:", raw);
+    // console.log("Raw response from Perplexity:", raw);
     let parsed = null;
     try {
-      parsed = JSON.parse(choices);
+      parsed = JSON.parse(raw);
     } catch (err) {
       console.error("Error parsing JSON response:", err.message);
       throw new Error("Failed to parse Perplexity response as JSON.");
@@ -290,18 +289,19 @@ async function factCheck(content, topicName) {
         messages: [
           {
             role: "system",
-            content: `You are a fact-checking assistant. Please review the following article and verify its factual accuracy using up-to-date knowledge as of today.
-            
-                     Review the following article and highlight any **false or misleading** statements.
-                     For any inaccuracies, describe the issues. 
+            content: `YYou are a fact-checking assistant. Please review the following article and verify its factual accuracy using up-to-date knowledge as of today.
 
-                     Then, provide an overall factual accuracy score as a number between 0 and 100.
-                     If some parts are ambiguous but overall the article is largely accurate, note this in your score.
-                     Return your response only in a valid JSON object in this exact structure:
-                    {"accuracy": <0 - 100>, "feedback": "The article contains false claims. 
-                    Article: <original article HTML with <mark> around the inaccuracies>" 
-                    \n Explanation: <explanation/correction of the inaccuracies highlighted>}
-                    
+                  For any false, misleading, or dubious claims:
+                  - Wrap only the false or misleading text in <mark> tags.
+                  - Immediately after each <mark> section, on a new line preceded by a <br> tag, provide an explanation in parentheses that details why the text is inaccurate.
+
+                  In addition, analyze the overall factual correctness of the article and assign a numerical accuracy score between 0 and 100, where 100 means the article is completely accurate and 0 means it is entirely inaccurate.
+
+                  You must return _only_ a single JSON object, no arrays, no markdown, no code fences, no extra text.
+                  Use this exact shape:
+                  {"accuracy":<0 - 100>,"feedback":"The article contains false claims. 
+                  Article: <original article HTML with <mark> around the inaccuracies>" 
+                  \n Explanation: <explanation/correction of the inaccuracies highlighted>"}
                     Article: 
                     ${content}`,
           },
