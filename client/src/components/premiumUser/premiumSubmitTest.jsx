@@ -103,7 +103,7 @@ export const PremiumSubmitTest = () => {
   //                   className={`w-10 h-10 text-base font-semibold rounded-md border transition ${
   //                     isSelected
   //                     ? "bg-indigo-600 text-white border-indigo-600"
-  //                     : "bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200"
+  //                     : "bg-black text-white border-gray-300 hover:bg-gray-200"
   //                 }`}
   //                 onClick={() => handleAnswer(idx, value)}
   //               >
