@@ -243,6 +243,7 @@ async function factCheck(content, topicName) {
     console.log("Raw response from Perplexity:", raw);
     // const choices = pxData.choices?.[0]?.message?.content;
     // console.log("Status code from Perplexity:", pxRes.status); // Check status code
+    let cleanResponse = raw.replace(/```json\n|\n```/g, ""); // Strip the markdown block (```json...```)
 
     // If the status code is not 2xx, throw an error
     // if (!pxRes.ok) {
@@ -263,7 +264,7 @@ async function factCheck(content, topicName) {
     // console.log("Raw response from Perplexity:", raw);
     let parsed = null;
     try {
-      parsed = JSON.parse(raw);
+      parsed = JSON.parse(cleanResponse);
     } catch (err) {
       console.error("Error parsing JSON response:", err.message);
       throw new Error("Failed to parse Perplexity response as JSON.");
