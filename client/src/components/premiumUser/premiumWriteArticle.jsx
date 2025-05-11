@@ -156,25 +156,25 @@ export const PremiumWriteArticle = () => {
     },
   });
 
-  const IndentExtension = Extension.create({
-    name: "custom-indent",
-    addKeyboardShortcuts() {
-      return {
-        Tab: () => {
-          this.editor.commands.updateAttributes("paragraph", {
-            style: "text-indent: 2em",
-          });
-          return true;
-        },
-        "Shift-Tab": () => {
-          this.editor.commands.updateAttributes("paragraph", {
-            style: "text-indent: 0",
-          });
-          return true;
-        },
-      };
-    },
-  });
+  // const IndentExtension = Extension.create({
+  //   name: "custom-indent",
+  //   addKeyboardShortcuts() {
+  //     return {
+  //       Tab: () => {
+  //         this.editor.commands.updateAttributes("paragraph", {
+  //           style: "text-indent: 2em",
+  //         });
+  //         return true;
+  //       },
+  //       "Shift-Tab": () => {
+  //         this.editor.commands.updateAttributes("paragraph", {
+  //           style: "text-indent: 0",
+  //         });
+  //         return true;
+  //       },
+  //     };
+  //   },
+  // });
 
   const editor = useEditor({
     extensions: [
@@ -267,34 +267,6 @@ export const PremiumWriteArticle = () => {
     }
   }, [postType]);
 
-  // useEffect(() => {
-  //   if (!editor) return;
-
-  //   const handlePaste = (event) => {
-  //     const clipboardItems = event.clipboardData?.items;
-  //     if (!clipboardItems) return;
-
-  //     for (const item of clipboardItems) {
-  //       if (item.type.startsWith("image/")) {
-  //         event.preventDefault(); // Block image paste
-  //         alert("Pasting images is disabled. Please use the Upload button.");
-  //         return;
-  //       }
-  //     }
-  //   };
-
-  //   const editorElement = editor?.view?.dom;
-  //   if (editorElement) {
-  //     editorElement.addEventListener("paste", handlePaste);
-  //   }
-
-  //   return () => {
-  //     if (editorElement) {
-  //       editorElement.removeEventListener("paste", handlePaste);
-  //     }
-  //   };
-  // }, [editor]);
-
   const MAX_WORDS = postType === "Room" ? 400 : 1000;
 
   const handlePostArticle = async () => {
@@ -378,25 +350,10 @@ export const PremiumWriteArticle = () => {
         }
       }
 
-      //console.log(firstImageUrl);
-      console.log("imgnew", firstImageUrl);
+      //console.log("imgnew", firstImageUrl);
 
       // 2. Submit to external API (make sure firstImageUrl is passed!)
       const response = await fetch(
-        // "https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/api/submit-article",
-        // {
-        //   method: "POST",
-        //   headers: { "Content-Type": "application/json" },
-        //   body: JSON.stringify({
-        //     title,
-        //     content: updatedHTML,
-        //     type: "factual",
-        //     authorId: session.userid,
-        //     topicid: topics,
-        //     topicName,
-        //     imagepath: firstImageUrl, // Critical part
-        //   }),
-        // }
         "https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/api/submit-article",
         {
           method: "POST",
@@ -408,20 +365,15 @@ export const PremiumWriteArticle = () => {
             authorId: session.userid,
             topicid: topics,
             topicName,
-            // imagepath: firstImageUrl, // Optional: keep for backward compatibility
-            imageUrls: uploadedImageUrls, // NEW: sends array of image URLs
+            imageUrls: uploadedImageUrls,
           }),
         }
       );
 
       const result = await response.json();
-      console.log("result", result);
+      //console.log("result", result);
 
       if (!response.ok) {
-        // if (result.error) {
-        //   alert(result.error); // Display moderation failure
-        // }
-
         if (result.feedback) {
           setAiFeedback(result.feedback);
           setAccuracy(result.accuracy || null);
@@ -437,7 +389,7 @@ export const PremiumWriteArticle = () => {
       }
 
       const articleid = result.article?.articleid;
-      console.log("result article", result.article);
+      //console.log("result article", result.article);
 
       if (articleid && firstImageUrl) {
         // 3. Update imagepath in the `articles` table after successful submission
@@ -454,14 +406,14 @@ export const PremiumWriteArticle = () => {
           return;
         }
 
-        console.log("Image path updated for article:", articleid);
+        //console.log("Image path updated for article:", articleid);
       }
 
       for (const url of uploadedImageUrls) {
         await supabase
           .from("article_images")
           .insert([{ articleid, image_url: url }]);
-        console.log("img3", url);
+        //console.log("img3", url);
       }
       pendingImages.forEach((img) => URL.revokeObjectURL(img.previewUrl)); // cleanup object URLs
       setPendingImages([]);
@@ -1101,8 +1053,8 @@ export const PremiumWriteArticle = () => {
   };
 
   return (
-    <div className="w-full min-h-screen bg-indigo-50 text-black font-grotesk flex justify-center">
-      <main className="w-full max-w-4xl p-10 flex flex-col gap-6">
+    <div className="w-full min-h-screen flex flex-col items-center bg-indigo-50"> {/* DEVI MADE CHANGES HERE */}
+      <div className="w-full max-w-5xl px-4 py-10"> {/* DEVI MADE CHANGES HERE */}
         <h1 className="text-3xl font-bold mb-1">Publish Your Articles :</h1>
 
         <div className="flex flex-col gap-5 w-full">
@@ -1381,15 +1333,14 @@ export const PremiumWriteArticle = () => {
                   </button>
                 </div>
 
-                {(accuracy !== null || aiFeedback) && (
+                {accuracy !== null && aiFeedback !== null && accuracy < 75 && (
                   <div className="mt-4 p-4 border border-red-300 bg-red-50 rounded text-sm text-black">
                     <strong>Fact Check Results:</strong>
-                    {accuracy !== null && accuracy < 75 && (
-                      <p>
-                        <strong>Accuracy: </strong>
-                        {accuracy}%
-                      </p>
-                    )}
+                    <p>
+                      <strong>Accuracy: </strong>
+                      {accuracy}%
+                    </p>
+
                     <p>
                       <strong>Feedback: </strong>
                     </p>
@@ -1415,7 +1366,7 @@ export const PremiumWriteArticle = () => {
                 >
                   <EditorContent
                     editor={editor}
-                    className="min-h-[200px] w-full outline-none p-2 text-base leading-relaxed"
+                    className="min-h-[500px] w-full outline-none p-2 text-base leading-relaxed" //{/*DEVI MADE CHANGES HERE*/}
                     style={{ lineHeight: "1.75" }}
                     onKeyDown={(e) => {
                       if (e.key === "Tab" || (e.key === "Tab" && e.shiftKey)) {
@@ -1617,20 +1568,35 @@ export const PremiumWriteArticle = () => {
           open={openSuccess}
           onClose={() => {
             setOpenSuccess(false);
-            setAccuracy(null);
-            setAiFeedback("");
+            handleClearInputs();
           }}
           aria-labelledby="success-dialog-title"
         >
           <DialogTitle id="success-dialog-title">Article Posted!</DialogTitle>
           <DialogContent>
+            <strong>Fact Check Results:</strong>
             <p>
-              Your AI Fact-Check accuracy was <strong>{accuracy}%</strong>.
+              <strong>Accuracy: </strong>
+              {accuracy}%
             </p>
-            <p>{aiFeedback}</p>
+
+            <p>
+              <strong>Feedback: </strong>
+            </p>
+            <div
+              className="mt-1"
+              dangerouslySetInnerHTML={{ __html: aiFeedback }}
+            />
           </DialogContent>
           <DialogActions>
-            <Button onClick={() => setOpenSuccess(false)}>OK</Button>
+            <Button
+              onClick={() => {
+                setOpenSuccess(false);
+                handleClearInputs();
+              }}
+            >
+              OK
+            </Button>
           </DialogActions>
         </Dialog>
 
@@ -1676,7 +1642,7 @@ export const PremiumWriteArticle = () => {
             </div>
           </div>
         )}
-      </main>
+      </div> {/*DEVI CHANGED FROM MAIN TO DIV*/}
     </div>
   );
 };

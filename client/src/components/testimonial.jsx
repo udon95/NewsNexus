@@ -21,19 +21,19 @@ const StarRating = ({ rating }) => {
   );
 };
 
-const calculateAverageRating = (testimonial) => {
+const calculateAverageRating = (t) => {
   const ratings = [
-    testimonial.design,
-    testimonial.factcheck,
-    testimonial.accessible,
-    testimonial.safety,
-    testimonial.price,
-    testimonial.news,
+    t.design,
+    t.factcheck,
+    t.accessible,
+    t.safety,
+    t.price,
+    t.news,
   ].filter((val) => val !== null);
 
   if (ratings.length === 0) return null;
-  const sum = ratings.reduce((acc, curr) => acc + curr, 0);
-  return sum / ratings.length;
+  const avg = ratings.reduce((sum, val) => sum + val, 0) / ratings.length;
+  return avg;
 };
 
 // Calculates average of non-null ratings and maps to sentiment
@@ -58,24 +58,72 @@ const TestimonialSlider = () => {
   const [testimonials, setTestimonials] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  // useEffect(() => {
+  //   const fetchTestimonials = async () => {
+  //     try {
+  //       const { data, error } = await supabase
+  //         .from("testimonial")
+  //         .select("*, users:userid (username)")
+  //         .eq("homepage_display", true);
+
+  //       if (error) throw error;
+  //       setTestimonials(data);
+  //       setLoading(false);
+  //     } catch (error) {
+  //       console.error("Error fetching testimonials");
+  //       setLoading(false);
+  //     }
+  //   };
+  //   fetchTestimonials();
+  // }, []);
+
   useEffect(() => {
     const fetchTestimonials = async () => {
-      try {
-        const { data, error } = await supabase
-          .from("testimonial")
-          .select("*, users:userid (username), usertype:userid(usertype)")
-          .eq("homepage_display", true);
+      setLoading(true);
 
-        if (error) throw error;
-        setTestimonials(data);
+      // 1) Fetch testimonials with usernames
+      const { data: tData, error: tErr } = await supabase
+        .from("testimonial")
+        .select(`*, users:userid ( username )`)
+        .eq("homepage_display", true);
+
+      if (tErr) {
+        console.error("Error fetching testimonials:", tErr);
         setLoading(false);
-      } catch (error) {
-        console.error("Error fetching testimonials");
-        setLoading(false);
+        return;
       }
+
+      // 2) Pull all the userids out
+      const userIds = tData.map((t) => t.userid);
+
+      // 3) Fetch the profiles (usertype) for those userIds
+      const { data: pData, error: pErr } = await supabase
+        .from("usertype") // or “user_profile” if that’s your table name
+        .select("userid, usertype")
+        .in("userid", userIds);
+
+      if (pErr) {
+        console.error("Error fetching usertypes:", pErr);
+        setLoading(false);
+        return;
+      }
+
+      // 4) Merge them together into one flat object
+      const merged = tData.map((t) => {
+        const profile = pData.find((p) => p.userid === t.userid);
+        return {
+          ...t,
+          usertype: profile?.usertype ?? "Free", // default if missing
+        };
+      });
+
+      setTestimonials(merged);
+      setLoading(false);
     };
+
     fetchTestimonials();
   }, []);
+  console.log("testimonial", testimonials);
 
   if (loading) {
     return <div>Loading ...</div>;
@@ -91,7 +139,7 @@ const TestimonialSlider = () => {
     );
 
   return (
-    <div className="w-full max-w-[900px] mx-auto font-grotesk">
+    <div className="w-full max-w-[1000px] mx-auto px-4 font-grotesk">
       {/* <h2 className="text-3xl font-bold  mb-4">Testimonials :</h2> */}
 
       {/* Swiper Component */}
@@ -102,41 +150,47 @@ const TestimonialSlider = () => {
         loop={true}
         className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden "
       >
-        {filteredTestimonials.map((testimonial, index) => (
-          <SwiperSlide key={index} className="p-6">
-            {/* User Profile Info */}
-            <div className="flex items-center border-b pb-3 ">
-              {/* Profile Letter */}
-              <div className="w-10 h-10 rounded-full bg-gray-500 font-grotesk text-white flex items-center justify-center text-lg font-bold">
-                {testimonial.users.username.charAt(0) || "Anon."}
+        {filteredTestimonials.map((t, index) => {
+          const avg = calculateAverageRating(t);
+          return (
+            <SwiperSlide key={index} className="p-6">
+              {/* User Profile Info */}
+              <div className="flex items-center border-b pb-3 ">
+                {/* Profile Letter */}
+                <div className="w-10 h-10 rounded-full bg-gray-500 font-grotesk text-white flex items-center justify-center text-lg font-bold">
+                  {t.users.username.charAt(0) || "Anon."}
+                </div>
+
+                {/* Name and Rating */}
+                <div className="ml-4 ">
+                  <p className="font-bold">{t.users.username}</p>
+
+                  <span
+                    className={`inline-block px-2 py-1 text-xs font-semibold rounded-full ${
+                      t.usertype === "Premium"
+                        ? "bg-blue-500 text-white"
+                        : "bg-gray-300 text-gray-800"
+                    }`}
+                  >
+                    {t.usertype} User
+                  </span>
+
+                  {avg != null && (
+                    <>
+                      <p className="text-sm text-gray-500 italic">
+                        {avg.toFixed(1)} / 10.0
+                      </p>
+                    </>
+                  )}
+                </div>
               </div>
 
-              {/* Name and Rating */}
-              <div className="ml-4 ">
-                <p className="font-bold">{testimonial.users.username}</p>
-                <p className="font-bold">
-                  {testimonial.usertype.usertype} User
-                </p>
-
-                {calculateAverageRating(testimonial) !== null && (
-                  <>
-                    <StarRating
-                      rating={Math.round(calculateAverageRating(testimonial))}
-                    />
-                    <p className="text-sm text-gray-500 italic">
-                     
-                      {avg !== null && <p>{avg.toFixed(1)} / 10.0</p>}
-                    </p>
-                  </>
-                )}
-              </div>
-            </div>
-
-            <p className="text-lg text-black mt-4 font-grotesk ">
-              {getOverallSentiment(testimonial)}
-            </p>
-          </SwiperSlide>
-        ))}
+              <p className="text-lg text-black mt-4 font-grotesk ">
+                {getOverallSentiment(t)}
+              </p>
+            </SwiperSlide>
+          );
+        })}
       </Swiper>
     </div>
   );

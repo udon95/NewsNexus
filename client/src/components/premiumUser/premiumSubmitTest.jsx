@@ -77,6 +77,73 @@ export const PremiumSubmitTest = () => {
   };
 
   return (
+        //DEVI'S IMPROVED VERSION
+  //   <div className="w-full min-h-screen bg-indigo-50 text-black font-grotesk flex justify-center">
+
+  //   <main className="w-full max-w-5xl px-12 py-10 bg-white rounded-xl shadow-md mx-auto mt-8 mb-8">
+  //   <h1 className="text-3xl font-extrabold mb-6 text-center text-gray-900">
+  //     Share Your Experience
+  //   </h1>
+
+  //   {/* <div className="space-y-6"> */}
+  //   <div className="space-y-8">
+  //     {feedbackQuestions.map((question, idx) => (
+  //       <div key={question.column} className="bg-gray-50 rounded-xl shadow p-6">
+  //       <h2 className="text-lg font-bold mb-4">{question.text}</h2>
+  //       <div className="flex items-center justify-between gap-4 flex-wrap">
+  //         <span className="text-sm text-gray-500">Poor</span>
+  //         <div className="flex gap-1 flex-wrap justify-center flex-1">
+  //           {[...Array(10)].map((_, i) => {
+  //             const value = i + 1;
+  //             const isSelected = answers[question.column] === value;
+  //             return (
+  //               <button
+  //                 key={`${question.column}-${value}`}
+  //                 // className={`w-8 h-8 text-sm rounded-md border transition ${
+  //                   className={`w-10 h-10 text-base font-semibold rounded-md border transition ${
+  //                     isSelected
+  //                     ? "bg-indigo-600 text-white border-indigo-600"
+  //                     : "bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200"
+  //                 }`}
+  //                 onClick={() => handleAnswer(idx, value)}
+  //               >
+  //                 {value}
+  //               </button>
+  //             );
+  //           })}
+  //         </div>
+  //         <span className="text-sm text-gray-500">Excellent</span>
+  //       </div>
+  //       </div>
+  //     ))}
+
+  //     {/* <div className="bg-white rounded-lg shadow-sm p-4"> */}
+  //     <div className="bg-gray-50 rounded-xl shadow p-6">
+  //     <label className="block text-base font-semibold mb-1">
+  //         Areas of Improvement <span className="text-gray-400">(Optional)</span>
+  //       </label>
+  //       <textarea
+  //         value={areas}
+  //         onChange={(e) => setAreas(e.target.value)}
+  //         className="w-full min-h-[120px] p-3 border border-gray-300 rounded-md bg-white focus:ring-2 focus:ring-indigo-400 focus:outline-none transition text-base"
+  //         placeholder="Let us know what we could improve..."
+  //       />
+  //     </div>
+
+  //     <div className="flex justify-end mt-2">
+  //       <button
+  //         onClick={handleSubmitTest}
+  //         disabled={isLoading}
+  //         className="bg-black hover:bg-gray-800 text-white text-base font-semibold px-6 py-2 rounded-lg shadow disabled:opacity-50 disabled:cursor-not-allowed transition"
+  //       >
+  //         {isLoading ? "Submitting..." : "Submit Feedback"}
+  //       </button>
+  //     </div>
+  //   </div>
+  // </main>
+
+  // </div>
+
     <div className="w-full min-h-screen bg-indigo-50 text-black font-grotesk flex justify-center">
       <main className="w-full max-w-4xl p-10 max-md:flex-col gap-6">
         <div className="flex flex-col w-full">

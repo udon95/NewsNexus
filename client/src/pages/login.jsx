@@ -89,13 +89,13 @@ function LoginPage() {
               >
                 Register
               </button>
-              <button
+              {/* <button
                 type="button"
                 className="sm:w-auto px-6 py-2 bg-[#3F414C] text-white rounded-lg hover:bg-opacity-90 cursor-pointer"
                 onClick={() => navigate("/forgot-password")}
               >
                 Reset Password
-              </button>
+              </button> */}
               <button
                 type="submit"
                 className="  px-6 py-2 bg-[#3F414C] text-white rounded-lg hover:bg-opacity-90 cursor-pointer"

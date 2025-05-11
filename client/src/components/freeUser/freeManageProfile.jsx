@@ -25,6 +25,29 @@ const FreeManageProfile = () => {
 
   const [categories, setCategories] = useState([]);
   const [dropdownValues, setDropdownValues] = useState(Array(6).fill(""));
+  const [userType, setUserType] = useState("");
+  const [expertTopics, setExpertTopics] = useState([]);
+
+  useEffect(() => {
+    const fetchExpertTopics = async () => {
+      const { data: expertData, error: expertError } = await supabase
+        .from("expert_application")
+        .select("topicid, status")
+        .eq("userid", userDetails.userid)
+        .eq("status", "Approved");
+
+      if (expertError) {
+        console.error("Error fetching expert topics:", expertError);
+        return;
+      }
+
+      setExpertTopics(expertData);
+    };
+
+    if (userDetails) {
+      fetchExpertTopics();
+    }
+  }, [userDetails]);
 
   useEffect(() => {
     const fetchUserProfile = async () => {
@@ -369,6 +392,14 @@ const FreeManageProfile = () => {
               <option value="Other">Prefer Not To Say</option>
             </select>
           </div>
+
+          <div className="mb-1">User Type:</div>
+          <input
+            type="text"
+            value={userType} // Display userType here
+            readOnly
+            className="w-full p-2 border rounded-lg mb-2 bg-gray-200"
+          />
           <button
             onClick={updateProfile}
             className="bg-[#3f414c] text-[white] cursor-pointer text-sm flex justify-end self-end w-fit ml-auto mr-0 mt-5 px-5 py-2.5 rounded-xl border-[none]"

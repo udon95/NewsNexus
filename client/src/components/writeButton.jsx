@@ -1,5 +1,5 @@
 import { useNavigate, useLocation, useParams } from "react-router-dom";
-import { Plus } from "lucide-react";
+import { Pencil  } from "lucide-react";
 import { React, useEffect } from "react";
 
 const FloatingWriteButton = () => {
@@ -27,11 +27,8 @@ const FloatingWriteButton = () => {
   const hiddenPaths = [
     "/freeDashboard/writeArticle",
     "/premiumDashboard/writeArticle",
-    "/adminDashboard/*",
   ];
-  const normalizedPath = currentPath.replace(/\/+$/, ""); // remove trailing slashes
-
-  if (hiddenPaths.some((path) => normalizedPath.startsWith(path.replace("/*", "")))) return null;
+  if (hiddenPaths.includes(currentPath)) return null;
 
   const handleClick = () => {
     if (currentPath.startsWith("/room/")) {
@@ -54,10 +51,10 @@ const FloatingWriteButton = () => {
   return (
     <button
       onClick={handleClick}
-      className="fixed bottom-6 right-6 bg-blue-600 hover:bg-blue-700 text-white p-4 rounded-full shadow-lg z-50 transition duration-300"
-      aria-label="Write Article"
+      className="fixed bottom-8 right-14 flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-full shadow-lg z-50 transition duration-300"
     >
-      <Plus size={24} />
+      <Pencil size={18} />
+      <span className="font-semibold text-sm">Publish</span>
     </button>
   );
 };

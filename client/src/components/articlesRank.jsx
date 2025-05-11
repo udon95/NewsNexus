@@ -55,7 +55,7 @@ const ArticlesRank = ({
         return;
       }
 
-      // ✅ Expert filter
+      // Expert filter
       const { data: expertApps, error: expertError } = await supabase
         .from("expert_application")
         .select("userid, topicid")

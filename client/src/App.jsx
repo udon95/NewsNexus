@@ -121,7 +121,7 @@ function App() {
               path="/subscription-status/:status"
               element={<SubscriptionStatus />}
             />
-            <Route path="/test" element={<TestWrite />} />
+            {/* <Route path="/test" element={<TestWrite />} /> */}
 
             <Route path="/explore" element={<Explore />} />
             <Route path="/guidelines" element={<Guidelines />} />

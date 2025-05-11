@@ -9,6 +9,9 @@ import downArrow from "../assets/DownArrow.svg";
 import useAuthHook from "../hooks/useAuth.jsx";
 import FetchTopics from "../components/fetchTopics.jsx";
 import VideoComponent from "../components/featureVideo.jsx";
+import ComparisonTable from "../components/comparisonTable.jsx";
+import ProgressOverlay from "../components/progressOverlay.jsx";
+import FloatingUserStats from "../components/floatingUserStats";
 
 function Home() {
   const navigate = useNavigate();
@@ -25,7 +28,6 @@ function Home() {
       // navigate("/login");
       return;
     }
-
     navigate("/rooms");
   };
 
@@ -35,9 +37,9 @@ function Home() {
 
   return (
     <div className="w-full min-w-screen min-h-screen flex flex-col bg-white">
-      <div className="      w-full h-[300px] bg-[#7FB0FE]">
-        <div
-          className="
+      <div className="w-full h-[300px] bg-[#7FB0FE]">
+      <div
+        className="
           max-w-screen-xl
           mx-auto
           px-14
@@ -45,15 +47,30 @@ function Home() {
           md:px-8
           lg:px-12
           h-full
+          relative
           flex
           flex-col
-          items-start
           justify-center
-          "
-        >
-          <h1 className="sm:ml-10 text-black text-4xl w-[300px] font-bold font-grotesk">
-            Navigating the Singaporean News Landscape
-          </h1>
+        "
+      >
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 items-center h-full gap-4">
+            {/* LEFT SIDE: Title + Subtitle stacked */}
+            <div>
+            <h1 className="text-black text-4xl font-bold font-grotesk w-[300px]">
+              Navigating the Singaporean News Landscape
+            </h1>
+            <p className="mt-4 text-sm font-medium" style={{ color: "#00317F" }}>
+              Join us in building a smarter, fact-powered news space.
+              </p>
+            </div>
+
+            {/* RIGHT SIDE: Counter overlay remains aligned right */}
+            <div className="sm:justify-self-end w-full sm:w-auto flex justify-center sm:justify-end">
+              <ProgressOverlay />
+            </div>
+          </div>
+
           <div className="flex justify-left gap-3 mt-4 sm:mt-4 sm:ml-10">
             {/* {!user && !loading && (
               <>
@@ -75,6 +92,8 @@ function Home() {
         </div>
       </div>
       <Navbar />
+      {user && <FloatingUserStats user={user} />}
+
       
 
       {/* <div className="flex justify-center w-full mt-12">
@@ -89,36 +108,43 @@ function Home() {
       </div> */}
 
       <VideoComponent />
+      <ComparisonTable />
 
-      <div className="w-full font-grotesk mt-12">
-        <h1 className="text-2xl sm:text-3xl mb-5 text-left max-w-[900px] mx-auto">
-          Testimonials:
-        </h1>
-        <div className="flex justify-center w-full ">
+        {/* Testimonials header aligned */}
+        <div className="w-full max-w-[1000px] mx-auto font-grotesk mt-12 px-4">
+          <h1 className="text-2xl sm:text-3xl font-bold mb-5 text-left">Testimonials:</h1>
+        </div>
+
+        {/* Testimonials content full-width like video */}
+        <div className="w-full max-w-[1100px] mx-auto px-4 mb-12">
           <Testimonial />
         </div>
-      </div>
 
-      <div className="w-full font-grotesk mt-12">
-        <h1 className="text-2xl sm:text-3xl mb-5 text-left max-w-[900px] mx-auto">
-          Topics:
-        </h1>
-        <div className="flex justify-center w-full ">
+        {/* Topics header aligned */}
+        <div className="w-full max-w-[1000px] mx-auto font-grotesk px-4">
+          <h1 className="text-2xl sm:text-3xl font-bold mb-5 text-left">Topics:</h1>
+        </div>
+
+        {/* Topics pills content full-width like video */}
+        <div className="w-full max-w-[1100px] mx-auto px-4">
           <FetchTopics
             selectedTopics={selectedTopics}
             handleTopicSelection={handleTopicSelection}
           />
         </div>
-      </div>
 
-      <div className="w-full font-grotesk mt-12">
-        <h1 className="text-2xl sm:text-3xl mb-5 text-left max-w-[900px] mx-auto">
-          Latest News:
-        </h1>
-        <div className="flex justify-center w-full ">
+        {/* "Latest News:" header matches alignment with other sections */}
+        <div className="w-full max-w-[1000px] mx-auto font-grotesk mt-12 px-4">
+          <h1 className="text-2xl sm:text-3xl font-bold mb-5 text-left">Latest News:</h1>
+        </div>
+
+        {/* Cards stretch like the video width */}
+        <div className="w-full max-w-[1030px] mx-auto px-4">
           <LatestNews displayLimit={3} />
         </div>
-      </div>
+
+
+
 
       <div className="flex justify-center mt-12 mb-5">
         <button

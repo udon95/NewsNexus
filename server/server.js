@@ -6,7 +6,7 @@ const subscriptionRoutes = require("./routes/subscriptionRoute");
 const aiRoute = require("./routes/aiRoute");
 const translateRoute = require("./routes/translateRoute");
 const roomRoute = require("./routes/roomRoute");
-const { createClient } = require("@supabase/supabase-js");
+//const { createClient } = require("@supabase/supabase-js");
 
 // Use fetch correctly depending on Node.js version
 let fetch;
@@ -28,10 +28,10 @@ app.use(
   })
 );
 
-const supabase = createClient(
-  process.env.SUPABASE_URL,
-  process.env.SUPABASE_ANON_KEY
-);
+// const supabase = createClient(
+//   process.env.SUPABASE_URL,
+//   process.env.SUPABASE_ANON_KEY
+// );
 
 const fs = require("fs");
 const visionKey = process.env.GOOGLE_VISION_KEY_JSON;

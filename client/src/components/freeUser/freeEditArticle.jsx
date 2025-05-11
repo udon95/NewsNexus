@@ -29,6 +29,15 @@ import OrderedList from "@tiptap/extension-ordered-list";
 import { Extension } from "@tiptap/core";
 import { Paragraph } from "@tiptap/extension-paragraph";
 import ListItem from "@tiptap/extension-list-item";
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+  Box,
+  Typography,
+} from "@mui/material";
 
 const EditFreeArticle = () => {
   const navigate = useNavigate();
@@ -349,11 +358,12 @@ const EditFreeArticle = () => {
 
       pendingImages.forEach((img) => URL.revokeObjectURL(img.previewUrl)); // cleanup object URLs
       setPendingImages([]);
+      handleClearInputs();
 
       setAccuracy(result.accuracy);
       setAiFeedback(result.feedback);
-      alert(`Article posted successfully. Accuracy Score: ${result.accuracy}%`);
-      handleClearInputs();
+      //alert(`Article posted successfully. Accuracy Score: ${result.accuracy}%`);
+      setOpenSuccess(true);
     } else if (articleStatus === "Published") {
       // --- If it's published, only insert amendment ---
       if (!amendment.trim()) return alert("Please enter your update.");
@@ -1004,7 +1014,7 @@ const EditFreeArticle = () => {
                     </div>
                   )}
 
-                  {(accuracy !== null || aiFeedback) && (
+                {accuracy !== null && aiFeedback !== null && accuracy < 75 && (
                     <div className="mt-4 p-4 border border-red-300 bg-red-50 rounded text-sm text-black">
                       <strong>Fact Check Results:</strong>
                       {accuracy !== null && (
@@ -1291,6 +1301,41 @@ const EditFreeArticle = () => {
               </div>
             </div>
           )}
+          <Dialog
+          open={openSuccess}
+          onClose={() => {
+            setOpenSuccess(false);
+            handleClearInputs();
+          }}
+          aria-labelledby="success-dialog-title"
+        >
+          <DialogTitle id="success-dialog-title">Article Posted!</DialogTitle>
+          <DialogContent>
+            <strong>Fact Check Results:</strong>
+            <p>
+              <strong>Accuracy: </strong>
+              {accuracy}%
+            </p>
+
+            <p>
+              <strong>Feedback: </strong>
+            </p>
+            <div
+              className="mt-1"
+              dangerouslySetInnerHTML={{ __html: aiFeedback }}
+            />
+          </DialogContent>
+          <DialogActions>
+            <Button
+              onClick={() => {
+                setOpenSuccess(false);
+                handleClearInputs();
+              }}
+            >
+              OK
+            </Button>
+          </DialogActions>
+        </Dialog>
           {showUpdateSuccess && (
             <div className="fixed inset-0 backdrop-blur-sm bg-white/5 flex items-center justify-center z-50">
               <div
