@@ -7,7 +7,7 @@ const PremiumApplyExpert = () => {
   const [position, setPosition] = useState("");
   const [topics, setTopics] = useState([]);
   const [selectedTopicId, setSelectedTopicId] = useState("");
-  const [cv, setCv] = useState(""); // ✅ NEW
+  const [cv, setCv] = useState(""); 
   const [errorMessage, setErrorMessage] = useState("");
 
   const { user } = useAuthHook();

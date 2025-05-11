@@ -65,7 +65,7 @@ const PublicProfile = () => {
           <div className="w-full max-w-5xl p-6 font-grotesk bg-gray-200">
             <h1 className="text-4xl mb-8 font-grotesk text-left">Articles:</h1>
 
-            {/* <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6 w-full">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6 w-full">
               <ul>
                 {profileData.articles.map((article) => (
                   <li key={article.articleid} className="mb-2">
@@ -78,9 +78,9 @@ const PublicProfile = () => {
                   </li>
                 ))}
               </ul>
-            </div> */}
+            </div>
 
-            <div className="w-full max-w-[900px] mx-auto">
+            {/* <div className="w-full max-w-[900px] mx-auto">
               <div className="space-y-6">
                 <ArticleList
                   title="Articles:"
@@ -107,8 +107,9 @@ const PublicProfile = () => {
                   }}
                 />
               </div>
-            </div>
+            </div> */}
           </div>
+
           <div className="w-full max-w-5xl p-6 font-grotesk bg-gray-200">
             <h1 className="text-4xl mb-8 font-grotesk text-left">
               Public Rooms Joined:

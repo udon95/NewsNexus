@@ -26,29 +26,26 @@ const FreeManageProfile = () => {
   const [categories, setCategories] = useState([]);
   const [dropdownValues, setDropdownValues] = useState(Array(6).fill(""));
   const [userType, setUserType] = useState("");
+  const [expertTopics, setExpertTopics] = useState([]);
 
   useEffect(() => {
-    const fetchUserType = async () => {
-      const { data: exp, error: expError } = await supabase
+    const fetchExpertTopics = async () => {
+      const { data: expertData, error: expertError } = await supabase
         .from("expert_application")
-        .select("status")
-        .eq("userid", userDetails?.userid)
-        .single();
+        .select("topicid, status")
+        .eq("userid", userDetails.userid)
+        .eq("status", "Approved");
 
-      if (expError) {
-        console.error("Error fetching expert status", expError);
+      if (expertError) {
+        console.error("Error fetching expert topics:", expertError);
         return;
       }
 
-      if (exp && exp.status === "approved") {
-        setUserType("premium expert");
-      } else {
-        setUserType(userDetails?.usertype?.usertype || "free");
-      }
+      setExpertTopics(expertData);
     };
 
     if (userDetails) {
-      fetchUserType();
+      fetchExpertTopics();
     }
   }, [userDetails]);
 
