@@ -6,21 +6,27 @@ const ResetPassword = () => {
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleResetPassword = async (e) => {
     e.preventDefault();
-
-    const { error } = await supabase.auth.updateUser({ password });
+    setLoading(true);
+    setError("");
+    setMessage("");
+    const { data, error } = await supabase.auth.updateUser({ password });
 
     if (error) {
       setError(error.message);
-      setMessage("");
     } else {
-      setMessage(" Password updated successfully!");
-      setError("");
-      setTimeout(() => navigate("/login"), 2000);
+      setMessage("Password updated successfully!");
+      // Automatically redirect to login after a brief pause
+      setTimeout(() => {
+        navigate("/login");
+      }, 2000);
     }
+
+    setLoading(false);
   };
 
   return (
@@ -40,9 +46,12 @@ const ResetPassword = () => {
           />
           <button
             type="submit"
-            className="w-full bg-blue-500 text-white p-2 rounded-lg"
+            disabled={loading}
+            className={`w-full p-2 rounded-lg text-white ${
+              loading ? "bg-gray-400" : "bg-blue-500"
+            }`}
           >
-            Update Password
+            {loading ? "Updating..." : "Update Password"}
           </button>
         </form>
       </div>
