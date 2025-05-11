@@ -319,7 +319,8 @@ router.post("/submit-article", async (req, res) => {
     } = req.body;
 
     const strippedText = extractTextFromHTML(updatedHTML);
-
+    console.log("stripped text", strippedText);
+    console.log("updated html", updatedHTML);
     if (!title || !updatedHTML || !authorId || !topicid || !topicName) {
       return res.status(400).json({ error: "Missing required fields." });
     }
@@ -346,7 +347,7 @@ router.post("/submit-article", async (req, res) => {
 
     let factResult;
     try {
-      factResult = await factCheck(updatedHTML, topicName);
+      factResult = await factCheck(strippedText, topicName);
     } catch (err) {
       console.error("Fact-check error:", err);
 
