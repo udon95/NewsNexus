@@ -209,7 +209,7 @@ router.post("/register", async (req, res) => {
 
     await supabase
       .from("usertype")
-      .insert([{ userid: userId, usertype: "Free", color: "#ffffff" }]);
+      .insert([{ userid: userId, usertype: "Free", color: "#bfd8ff" }]);
 
     return res.json({ user: authData.user });
   } catch (error) {

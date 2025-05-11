@@ -290,9 +290,11 @@ async function factCheck(content, topicName) {
         messages: [
           {
             role: "system",
-            content: `You are a fact-checking assistant.
+            content: `You are a fact-checking assistant. Please review the following article and verify its factual accuracy using up-to-date knowledge as of today.
+            
                      Review the following article and highlight any **false or misleading** statements.
                      For any inaccuracies, describe the issues. 
+
                      Then, provide an overall factual accuracy score as a number between 0 and 100.
                      If some parts are ambiguous but overall the article is largely accurate, note this in your score.
                      Return your response only in a valid JSON object in this exact structure:
