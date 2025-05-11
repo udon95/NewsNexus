@@ -176,7 +176,7 @@ const SubscriptionPage = () => {
                       sub.tier === "Free" ? (
                         <div className="flex flex-col items-center justify-center">
                           <span className="text-4xl font-bold text-black">$0</span>
-                          <span className="mt-2 px-3 py-0.5 bg-black text-white text-xs font-semibold rounded-full">
+                          <span className="mt-2 px-3 py-0.5 bg-black text-white text-sm font-semibold rounded-full">
                             Free
                           </span>
                         </div>
@@ -195,7 +195,7 @@ const SubscriptionPage = () => {
                       ) : (
                         <div className="flex flex-col items-center justify-center">
                           <span className="text-4xl font-bold text-black">${sub.default_price}</span>
-                          <span className="mt-2 px-3 py-0.5 bg-black text-white text-xs font-semibold rounded-full">
+                          <span className="mt-2 px-3 py-0.5 bg-black text-white text-sm font-semibold rounded-full">
                             Premium
                           </span>
                         </div>
