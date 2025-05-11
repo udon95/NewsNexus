@@ -1053,8 +1053,8 @@ export const PremiumWriteArticle = () => {
   };
 
   return (
-    <div className="w-full min-h-screen bg-indigo-50 text-black font-grotesk flex justify-center">
-      <main className="w-full max-w-4xl p-10 flex flex-col gap-6">
+    <div className="w-full min-h-screen flex flex-col items-center bg-indigo-50"> {/* DEVI MADE CHANGES HERE */}
+      <div className="w-full max-w-5xl px-4 py-10"> {/* DEVI MADE CHANGES HERE */}
         <h1 className="text-3xl font-bold mb-1">Publish Your Articles :</h1>
 
         <div className="flex flex-col gap-5 w-full">
@@ -1366,7 +1366,7 @@ export const PremiumWriteArticle = () => {
                 >
                   <EditorContent
                     editor={editor}
-                    className="min-h-[200px] w-full outline-none p-2 text-base leading-relaxed"
+                    className="min-h-[500px] w-full outline-none p-2 text-base leading-relaxed" //{/*DEVI MADE CHANGES HERE*/}
                     style={{ lineHeight: "1.75" }}
                     onKeyDown={(e) => {
                       if (e.key === "Tab" || (e.key === "Tab" && e.shiftKey)) {
@@ -1642,7 +1642,7 @@ export const PremiumWriteArticle = () => {
             </div>
           </div>
         )}
-      </main>
+      </div> {/*DEVI CHANGED FROM MAIN TO DIV*/}
     </div>
   );
 };
