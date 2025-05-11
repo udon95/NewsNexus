@@ -19,15 +19,18 @@ import {
 } from "lucide-react";
 import TranslateButton from "../components/translate.jsx";
 
+
 const Article = () => {
   const articleRef = useRef(null);
   const { userType, user } = useAuthHook();
   const { articleName } = useParams();
   const navigate = useNavigate();
 
+
   const [articleData, setArticleData] = useState(null);
   const [readArticlesCount, setReadArticlesCount] = useState(0);
   const [showPaywall, setShowPaywall] = useState(false);
+
 
   const [isSpeaking, setIsSpeaking] = useState(false);
   const speechRef = useRef(null);
@@ -41,24 +44,30 @@ const Article = () => {
   const buttonRef = useRef(null);
   const [loading, setLoading] = useState(false);
 
+
   const [showNote, setShowNote] = useState(false);
   const [noteText, setNoteText] = useState("");
   const [reportTarget, setReportTarget] = useState(null);
   const [selectedReason, setSelectedReason] = useState("");
   const [notes, setNotes] = useState([]);
 
+
   const [isExpertArticle, setIsExpertArticle] = useState(false);
+
+
 
 
   const handleTextSelection = () => {
     const selection = window.getSelection();
     const text = selection.toString().trim();
 
+
     if (!text) {
       setSelectedText("");
       return;
     }
     setSelectedText(text);
+
 
     const rect = selection.getRangeAt(0).getBoundingClientRect();
     setButtonPosition({
@@ -67,9 +76,11 @@ const Article = () => {
     });
   };
 
+
   // Function to fetch word definition
   const fetchDefinition = async () => {
     if (!selectedText) return;
+
 
     setLoading(true);
     try {
@@ -78,11 +89,13 @@ const Article = () => {
       );
       const data = await response.json();
 
+
       if (Array.isArray(data) && data.length > 0) {
         setDefinition(data[0].meanings[0].definitions[0].definition);
       } else {
         setDefinition("No definition found.");
       }
+
 
       setShowDictionary(true);
     } catch (error) {
@@ -92,6 +105,7 @@ const Article = () => {
     }
   };
 
+
   const handleTTS = async () => {
     if (isSpeaking && speechRef.current) {
       speechRef.current.pause();
@@ -99,13 +113,16 @@ const Article = () => {
       return;
     }
 
+
     if (!articleRef.current) {
       alert("No article content found.");
       return;
     }
 
+
     try {
       const text = articleRef.current.innerText;
+
 
       const response = await fetch(
         "https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/translate/text-to-speech",
@@ -119,17 +136,21 @@ const Article = () => {
         }
       );
 
+
       if (!response.ok) {
         throw new Error("TTS request failed: " + response.status);
       }
+
 
       const arrayBuffer = await response.arrayBuffer();
       const blob = new Blob([arrayBuffer], { type: "audio/mpeg" });
       const audioUrl = URL.createObjectURL(blob);
 
+
       const audio = new Audio(audioUrl);
       audio.volume = 0.5;
       speechRef.current = audio;
+
 
       setIsSpeaking(true);
       audio.onended = () => setIsSpeaking(false);
@@ -139,14 +160,17 @@ const Article = () => {
     }
   };
 
+
   const handleTranslate = async (targetLang) => {
     if (!articleRef.current) {
       alert("Article content not available.");
       return;
     }
 
+
     setSelectedLanguage(targetLang);
     const textToTranslate = originalText;
+
 
     try {
       const response = await fetch(
@@ -168,6 +192,7 @@ const Article = () => {
     }
   };
 
+
   useEffect(() => {
     if (translatedText && isSpeaking) {
       speechRef.current.pause();
@@ -176,6 +201,7 @@ const Article = () => {
     }
   }, [translatedText]);
 
+
   useEffect(() => {
     return () => {
       if (speechRef.current) {
@@ -183,6 +209,7 @@ const Article = () => {
       }
     };
   }, []);
+
 
   const handleShareClick = () => {
     const shareLink = window.location.href;
@@ -196,6 +223,7 @@ const Article = () => {
         .then(() => alert("Link copied to clipboard!"));
     }
   };
+
 
   const handleSubmitNote = async () => {
     if (!noteText.trim()) return;
@@ -216,6 +244,7 @@ const Article = () => {
       alert("Community Note submitted.");
     }
   };
+
 
   const handleSubmitReport = async () => {
     if (!selectedReason || !reportTarget) return;
@@ -238,69 +267,83 @@ const Article = () => {
     }
   };
 
-  useEffect(() => {
-    const fetchArticle = async () => {
-      const { data, error } = await supabase
-        .from("articles")
-        .select(
-          `articleid, title, text, imagepath, time, view_count, 
-          rating, status, userid, topicid, amendment, users (userid, username)`
-        )
-        .eq("title", articleName)
-        .single();
 
-      if (!error) {
-        setArticleData(data);
-        setOriginalText(data.text);
-        
-        if (data?.userid && data?.topicid) {
-          const { data: match } = await supabase
-            .from("expert_application")
-            .select("username")
-            .eq("userid", data.userid)
-            .eq("topicid", data.topicid)
-            .eq("status", "Approved")
-            .single();
-          setIsExpertArticle(!!match);
-        }
-        
+  const hasRecordedRef = useRef(false);
 
 
-        const { data: noteData } = await supabase
-          .from("community_notes")
-          .select("*")
-          .eq("target_id", data.articleid)
-          .eq("Status", "Approved");
+useEffect(() => {
+  const fetchArticle = async () => {
+    const { data, error } = await supabase
+      .from("articles")
+      .select(`articleid, title, text, imagepath, time, view_count,
+        rating, status, userid, topicid, amendment, users (userid, username)`)
+      .eq("title", articleName)
+      .single();
 
-        setNotes(noteData || []);
 
-        if (data?.articleid) {
-          const { data: currentView } = await supabase
-            .from("articles")
-            .select("view_count")
-            .eq("articleid", data.articleid)
-            .single();
+    if (!error && data?.articleid) {
+      setArticleData(data);
+      setOriginalText(data.text);
 
-          const updatedCount = (currentView?.view_count || 0) + 1;
-          await supabase
-            .from("articles")
-            .update({ view_count: updatedCount })
-            .eq("articleid", data.articleid);
 
-          if (user) {
-            await supabase.from("reading_history").insert([
-              {
-                articleid: data.articleid,
-                userid: user.userid,
-                read_date: new Date().toISOString(),
-              },
-            ]);
-          }
-        }
+      // Optional: check for expert status
+      if (data?.userid && data?.topicid) {
+        const { data: match } = await supabase
+          .from("expert_application")
+          .select("username")
+          .eq("userid", data.userid)
+          .eq("topicid", data.topicid)
+          .eq("status", "Approved")
+          .single();
+        setIsExpertArticle(!!match);
       }
-    };
+
+
+      // Load notes
+      const { data: noteData } = await supabase
+        .from("community_notes")
+        .select("*")
+        .eq("target_id", data.articleid)
+        .eq("Status", "Approved");
+      setNotes(noteData || []);
+
+
+      // View count
+      const { data: currentView } = await supabase
+        .from("articles")
+        .select("view_count")
+        .eq("articleid", data.articleid)
+        .single();
+      const updatedCount = (currentView?.view_count || 0) + 1;
+      await supabase
+        .from("articles")
+        .update({ view_count: updatedCount })
+        .eq("articleid", data.articleid);
+
+
+      // Only insert read history once
+      if (user && !hasRecordedRef.current) {
+        hasRecordedRef.current = true;
+        console.log("reading", data.articleid);
+        await supabase.from("reading_history").insert([
+          {
+            articleid: data.articleid,
+            userid: user.userid,
+            read_date: new Date().toISOString(),
+          },
+        ]);
+      }
+    }
+  };
+
+
+  if (articleName && user) {
     fetchArticle();
-  }, [articleName, user]);
+  }
+}, [articleName, user]);
+
+
+
 
   useEffect(() => {
     const fetchReadingHistory = async () => {
@@ -330,11 +373,14 @@ const Article = () => {
     fetchReadingHistory();
   }, [user]);
 
+
   useEffect(() => {
     if (!articleData) return;
 
+
     const isGuest = !user;
     const isFreeUser = user && userType === "Free";
+
 
     if (
       (isFreeUser && readArticlesCount > 10) ||
@@ -343,6 +389,7 @@ const Article = () => {
       setShowPaywall(true);
     }
   }, [user, userType, articleData, readArticlesCount]);
+
 
   const authorName = articleData?.users?.username ?? "Unknown Author";
 
