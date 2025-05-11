@@ -319,8 +319,7 @@ router.post("/submit-article", async (req, res) => {
     } = req.body;
 
     const strippedText = extractTextFromHTML(updatedHTML);
-    console.log("stripped text", strippedText);
-    console.log("updated html", updatedHTML);
+    
     if (!title || !updatedHTML || !authorId || !topicid || !topicName) {
       return res.status(400).json({ error: "Missing required fields." });
     }

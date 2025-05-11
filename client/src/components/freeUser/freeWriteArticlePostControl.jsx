@@ -371,9 +371,10 @@ export const FreeWriteArticle = () => {
           }),
         }
       );
-
+      const resulttext = await response.text();
+      console.log("response text", resulttext);
       const result = await response.json();
-
+      console.log("response json", result);
       if (!response.ok) {
         if (result.feedback) {
           setAiFeedback(result.feedback);
