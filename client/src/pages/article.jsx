@@ -492,7 +492,7 @@ const Article = () => {
             {selectedText && userType === "Premium" && (
               <button
                 ref={buttonRef}
-                onClick={fetchDefinition(selectedText)}
+                onClick={() => fetchDefinition(selectedText)}
                 className="absolute bg-blue-500 text-white px-3 py-1 rounded-lg flex items-center space-x-2 shadow-md"
                 style={{
                   left: `${buttonPosition.x}px`,
