@@ -243,8 +243,7 @@ async function factCheck(content, topicName) {
     });
     console.log("Status code from Perplexity:", pxRes.status); // Check status code
     const raw = await pxRes.text(); // Get raw response text first
-    console.log("Raw response from Perplexity:", raw);
-
+    //console.log("Raw response from Perplexity:", raw);
     // const choices = pxData.choices?.[0]?.message?.content;
     // console.log("Status code from Perplexity:", pxRes.status); // Check status code
     //let cleanResponse = raw.replace(/```json\n|\n```/g, ""); // Strip the markdown block (```json...```)
@@ -266,13 +265,10 @@ async function factCheck(content, topicName) {
     //   );
     // }
     // console.log("Raw response from Perplexity:", raw);
-    const test = await pxRes.json();
-    console.log("test json", test);
-
     let parsed = null;
     try {
       parsed = JSON.parse(raw);
-      //console.log("parsed from perplexity", parsed);
+      //console.log("parsed  from perplexity", parsed);
     } catch (err) {
       console.error("Error parsing JSON response:", err.message);
       throw new Error("Failed to parse Perplexity response as JSON.");
@@ -288,45 +284,34 @@ async function factCheck(content, topicName) {
         "Perplexity response does not contain the expected structure."
       );
     }
+    let feedback = parsed.choices[0].message.content || "";
+    //const accuracyMatch = feedback.match(/"accuracy":\s*(\d+)/); // Look for accuracy in the feedback
 
-    const feedback = pxData.choices[0]?.message?.content || "";
-    if (!feedback) {
-      throw new Error("No content found in the Perplexity response.");
-    }
-    // const accuracyMatch = content.match(/"accuracy":\s*(\d+)/);
-    // let accuracy = 0;
+    //let accuracy = accuracyMatch ? parseInt(accuracyMatch[1], 10) : null;
+    let accuracy = parsed.accuracy;
+    console.log("parsed choice 0", feedback);
 
-    // if (accuracyMatch) {
-    //   accuracy = parseInt(accuracyMatch[1], 10);
-    // }
-    // const feedbackStartIndex = content.indexOf('"feedback":');
-    // let feedback = content;
-
-    // if (feedbackStartIndex !== -1) {
-    //   feedback = content.slice(feedbackStartIndex + 11).trim();
-    // }
-
-    // feedback = feedback.replace(/\\n/g, "\n").replace(/\\"/g, '"');
-
-    if (feedback.toLowerCase().includes("fictional")) {
+    if (accuracy === null) {
+      console.warn("Accuracy field not found in the response.");
       accuracy = 1;
     }
-    const result = {
-      accuracy: accuracy,
-      feedback: feedback,
-    };
-
-    console.log("Fact-check result:", result);
-    const threshold = 75;
-    if (accuracy < threshold) {
-      throw {
-        status: 400,
-        error: "Article failed fact-checking.",
-        ...result,
+    if (feedback.toLowerCase().includes("fictional")) {
+      accuracy = 1; // Set accuracy to 0 if "fictional" is mentioned
+    }
+    try {
+      const feedback = JSON.parse(feedback);
+      //console.log("Parsed Perplexity response:", parsed);
+      result = {
+        accuracy: accuracy,
+        feedback: feedback,
+      };
+    } catch (err) {
+      console.error("Error cleaning feedback:", err.message);
+      result = {
+        accuracy: accuracy,
+        feedback: feedback, // Default to raw feedback if it's not valid JSON
       };
     }
-
-    return result;
   } catch (perpErr) {
     console.warn(
       "Perplexity fail to determine, falling back to ChatGPT:",
@@ -373,20 +358,20 @@ async function factCheck(content, topicName) {
     });
     const gptData = await gptRes.json();
     const parsed = JSON.parse(gptData.choices[0].message.content);
-    const result = parsed;
-
-    console.log("Fact check result from chatgpt", result);
-    const threshold = 75;
-
-    if (typeof result.accuracy !== "number" || result.accuracy < threshold) {
-      throw {
-        status: 400,
-        error: "Article failed fact-checking.",
-        ...result,
-      };
-    }
-    return result;
+    result = parsed;
   }
+
+  //console.log("parsed result:", result);
+  const threshold = 75;
+
+  if (typeof result.accuracy !== "number" || result.accuracy < threshold) {
+    throw {
+      status: 400,
+      error: "Article failed fact-checking.",
+      ...result,
+    };
+  }
+  return result;
 }
 
 router.post("/submit-article", async (req, res) => {
