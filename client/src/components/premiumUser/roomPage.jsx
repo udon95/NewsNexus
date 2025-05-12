@@ -1215,7 +1215,7 @@ const Room = () => {
               className="px-6 py-2 rounded-full text-lg font-semibold bg-gray-400 text-white cursor-not-allowed"
               disabled
             >
-              Creator
+              My Room 🔒
             </button>
           ) : (
             <>
