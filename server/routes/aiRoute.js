@@ -306,7 +306,7 @@ async function factCheck(content, topicName) {
     // If 'message' is an object, inspect its contents
     console.log("Message object:", messageContent); // Debugging the content
     const cleanedContent = messageContent.replace(/^```json\n|\n```$/g, ""); // Remove surrounding backticks and line breaks
-
+    console.log("cleaned content", cleanedContent);
     let feedback = "";
     let accuracy = null;
 
@@ -360,6 +360,9 @@ async function factCheck(content, topicName) {
                     - Immediately after each <mark> section, on a new line preceded by a <br> tag, provide an explanation in parentheses that details why the text is inaccurate.
 
                     In addition, analyze the overall factual correctness of the article and assign a numerical accuracy score between 0 and 100, where 100 means the article is completely accurate and 0 means it is entirely inaccurate.
+                    **If this article is fictional or based on fabricated events, set accuracy to 1.**
+                    **If the content refers to recent events and ChatGPT cannot verify it, reduce the accuracy score.**
+                    Please provide the analysis accordingly.
 
                     You must return only a single JSON object, no arrays, no markdown, no code fences, no extra text.
                     Use this exact shape:
@@ -368,12 +371,10 @@ async function factCheck(content, topicName) {
                     Article: <original article HTML with <mark> around the inaccuracies>" 
                     \n Explanation: <explanation/correction of the inaccuracies highlighted>"}
                     The response must be **only** a single valid JSON object, no markdown, no code fences, no extra text.
-
+                    
                     Article: 
                     ${content}
-                    **If this article is fictional or based on fabricated events, set accuracy to 1.**
-                    **If the content refers to recent events and ChatGPT cannot verify it, reduce the accuracy score.**
-                    Please provide the analysis accordingly.`,
+                    `,
           },
           { role: "user", content },
         ],
