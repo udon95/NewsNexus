@@ -25,9 +25,10 @@ router.post("/", async (req, res) => {
     return res.status(200).json({ translatedText: result.TranslatedText });
   } catch (error) {
     console.error("Translation error:", error);
-    return res
-      .status(500)
-      .json({ error: "An error occurred during translation.", stack: error.stack });
+    return res.status(500).json({
+      error: "An error occurred during translation.",
+      stack: error.stack,
+    });
   }
 });
 
@@ -68,39 +69,60 @@ router.post("/text-to-speech", async (req, res) => {
         error: "TTS is not supported via AWS Polly for the selected language.",
       });
     }
+    const MAX = 3000;
+    const segments = [];
+    for (let i = 0; i < fullText.length; i += MAX) {
+      segments.push(fullText.slice(i, i + MAX));
+    }
+    const buffers = [];
+    for (const segment of segments) {
+      const params = {
+        Text: segment,
+        OutputFormat: "mp3",
+        VoiceId: voiceId,
+        LanguageCode: languageCode,
+      };
+      const { AudioStream } = await polly.synthesizeSpeech(params).promise();
+      buffers.push(AudioStream);
+    }
 
-    const params = {
-      Text: text,
-      OutputFormat: "mp3",
-      VoiceId: voiceId,
-      LanguageCode: languageCode,
-    };
-
-    polly.synthesizeSpeech(params, (err, data) => {
-      if (err) {
-        console.error("AWS Polly error:", err);
-        return res
-          .status(500)
-          .json({ error: "An error occurred during TTS synthesis." });
-      }
-      if (data && data.AudioStream instanceof Buffer) {
-        res.set({
-          "Content-Type": "audio/mpeg",
-          "Content-Length": data.AudioStream.length,
-        });
-        return res.send(data.AudioStream);
-      } else {
-        return res.status(500).json({ error: "Audio stream is empty." });
-      }
+    // concatenate all mp3 buffers into one
+    const finalAudio = Buffer.concat(buffers);
+    res.set({
+      "Content-Type": "audio/mpeg",
+      "Content-Length": finalAudio.length,
     });
+    return res.send(finalAudio);
+    // const params = {
+    //   Text: text,
+    //   OutputFormat: "mp3",
+    //   VoiceId: voiceId,
+    //   LanguageCode: languageCode,
+    // };
+
+    // polly.synthesizeSpeech(params, (err, data) => {
+    //   if (err) {
+    //     console.error("AWS Polly error:", err);
+    //     return res
+    //       .status(500)
+    //       .json({ error: "An error occurred during TTS synthesis." });
+    //   }
+    //   if (data && data.AudioStream instanceof Buffer) {
+    //     res.set({
+    //       "Content-Type": "audio/mpeg",
+    //       "Content-Length": data.AudioStream.length,
+    //     });
+    //     return res.send(data.AudioStream);
+    //   } else {
+    //     return res.status(500).json({ error: "Audio stream is empty." });
+    //   }
+    // });
   } catch (error) {
-    console.error("Synthesize speech error:", error);
+    console.error("TTS error:", error);
     return res
       .status(500)
       .json({ error: "An error occurred during the TTS process." });
   }
 });
-
-// You can also keep your existing article logic here
 
 module.exports = router;

@@ -49,11 +49,6 @@ const Article = () => {
 
   const [isExpertArticle, setIsExpertArticle] = useState(false);
 
-  useEffect(() => {
-    console.log("🔥 auth hook userType:", userType);
-    console.log("🔥 full user object:", user);
-  }, [userType, user]);
-
   const handleTextSelection = () => {
     const selection = window.getSelection();
     const text = selection.toString().trim();
@@ -63,6 +58,7 @@ const Article = () => {
       return;
     }
     setSelectedText(text);
+    console.log("selected text", text);
 
     const rect = selection.getRangeAt(0).getBoundingClientRect();
     setButtonPosition({
@@ -300,7 +296,7 @@ const Article = () => {
         // Only insert read history once
         if (user && !hasRecordedRef.current) {
           hasRecordedRef.current = true;
-          console.log("reading", data.articleid);
+          //console.log("reading", data.articleid);
           await supabase.from("reading_history").insert([
             {
               articleid: data.articleid,
