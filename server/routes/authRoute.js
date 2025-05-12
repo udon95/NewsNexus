@@ -70,6 +70,37 @@ router.post("/login", async (req, res) => {
       if (!isMatch)
         return res.status(400).json({ error: "Invalid credentials" });
 
+      const { data: expertData, error: expertError } = await supabase
+        .from("expert_application")
+        .select("topicid, status")
+        .eq("userid", userProfile.userid)
+        .eq("status", "Approved");
+
+      if (expertError) {
+        console.error("Error fetching expert topics:", expertError);
+      }
+
+      const expertTopics = [];
+
+      // Fetch topic names for each approved expert topic
+      if (expertData && expertData.length > 0) {
+        for (const topic of expertData) {
+          const { data: topicData, error: topicError } = await supabase
+            .from("topic_categories")
+            .select("name")
+            .eq("topicid", topic.topicid)
+            .single();
+
+          if (topicError) {
+            console.error("Error fetching topic name:", topicError);
+          } else {
+            expertTopics.push({
+              topicid: topic.topicid,
+              topicName: topicData?.name || "Unknown",
+            });
+          }
+        }
+      }
       // Fetch user interests separately
       const { data: interestData, error: interestError } = await supabase
         .from("topicinterest")
@@ -94,6 +125,7 @@ router.post("/login", async (req, res) => {
           status: userProfile.status,
           auth_id: userProfile.auth_id,
         },
+        expertTopics,
         profile: userProfile.profile || {}, // Ensure no null values
         role: userProfile.usertype?.usertype || "Unknown",
         color: userProfile.usertype?.color || "Unknown",

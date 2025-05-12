@@ -233,17 +233,18 @@ async function factCheck(content, topicName) {
                       The response must be **only** a single valid JSON object, no markdown, no code fences, no extra text.
 
                       Article:
-                      ${content}
+                      ${responseText}
                       **If this article is fictional or based on fabricated events, set accuracy to 0.**
                       `,
           },
-          { role: "user", content },
+          { role: "user", content: responseText },
         ],
       }),
     });
     console.log("Status code from Perplexity:", pxRes.status); // Check status code
     const raw = await pxRes.text(); // Get raw response text first
     console.log("Raw response from Perplexity:", raw);
+
     // const choices = pxData.choices?.[0]?.message?.content;
     // console.log("Status code from Perplexity:", pxRes.status); // Check status code
     //let cleanResponse = raw.replace(/```json\n|\n```/g, ""); // Strip the markdown block (```json...```)
@@ -265,11 +266,13 @@ async function factCheck(content, topicName) {
     //   );
     // }
     // console.log("Raw response from Perplexity:", raw);
+    const test = await pxRes.json();
+    console.log("test json", test);
 
     let parsed = null;
     try {
       parsed = JSON.parse(raw);
-      //console.log("parsed  from perplexity", parsed);
+      //console.log("parsed from perplexity", parsed);
     } catch (err) {
       console.error("Error parsing JSON response:", err.message);
       throw new Error("Failed to parse Perplexity response as JSON.");
@@ -285,45 +288,45 @@ async function factCheck(content, topicName) {
         "Perplexity response does not contain the expected structure."
       );
     }
-    let content = parsed.choices[0].message.content || "";
-    if (!content) {
+
+    const responseText = parsed.choices[0]?.message?.content || "";
+    if (!responseText) {
       throw new Error("No content found in the Perplexity response.");
     }
-    const accuracyMatch = content.match(/"accuracy":\s*(\d+)/);
+    const accuracyMatch = responseText.match(/"accuracy":\s*(\d+)/);
     let accuracy = 0;
 
     if (accuracyMatch) {
       accuracy = parseInt(accuracyMatch[1], 10);
-
-      const feedbackStartIndex = content.indexOf('"feedback":');
-      let feedback = content;
-
-      if (feedbackStartIndex !== -1) {
-        feedback = content.slice(feedbackStartIndex + 11).trim();
-      }
-
-      feedback = feedback.replace(/\\n/g, "\n").replace(/\\"/g, '"');
-
-      if (feedback.toLowerCase().includes("fictional")) {
-        accuracy = 0;
-      }
-      const result = {
-        accuracy: accuracy,
-        feedback: feedback,
-      };
-
-      console.log("Fact-check result:", result);
-      const threshold = 75;
-      if (accuracy < threshold) {
-        throw {
-          status: 400,
-          error: "Article failed fact-checking.",
-          ...result,
-        };
-      }
-
-      return result;
     }
+    const feedbackStartIndex = responseText.indexOf('"feedback":');
+    let feedback = responseText;
+
+    if (feedbackStartIndex !== -1) {
+      feedback = responseText.slice(feedbackStartIndex + 11).trim();
+    }
+
+    feedback = feedback.replace(/\\n/g, "\n").replace(/\\"/g, '"');
+
+    if (feedback.toLowerCase().includes("fictional")) {
+      accuracy = 0;
+    }
+    const result = {
+      accuracy: accuracy,
+      feedback: feedback,
+    };
+
+    console.log("Fact-check result:", result);
+    const threshold = 75;
+    if (accuracy < threshold) {
+      throw {
+        status: 400,
+        error: "Article failed fact-checking.",
+        ...result,
+      };
+    }
+
+    return result;
   } catch (perpErr) {
     console.warn(
       "Perplexity fail to determine, falling back to ChatGPT:",
@@ -358,21 +361,21 @@ async function factCheck(content, topicName) {
                     The response must be **only** a single valid JSON object, no markdown, no code fences, no extra text.
 
                     Article: 
-                    ${content}
+                    ${responseText}
                     **If this article is fictional or based on fabricated events, set accuracy to 1.**
                     **If the content refers to recent events and ChatGPT cannot verify it, reduce the accuracy score.**
                     Please provide the analysis accordingly.`,
           },
-          { role: "user", content },
+          { role: "user", content: responseText },
         ],
         temperature: 0.2,
       }),
     });
     const gptData = await gptRes.json();
     const parsed = JSON.parse(gptData.choices[0].message.content);
-    result = parsed;
+    const result = parsed;
 
-    //console.log("parsed result:", result);
+    console.log("Fact check result from chatgpt", result);
     const threshold = 75;
 
     if (typeof result.accuracy !== "number" || result.accuracy < threshold) {

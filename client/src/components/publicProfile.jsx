@@ -17,7 +17,7 @@ const PublicProfile = () => {
       try {
         const response = await api.get(`/auth/public-profile/${username}`);
         setProfileData(response.data);
-        console.log("profile", response.data);
+        // console.log("profile", response.data);
       } catch (err) {
         setError(err.response?.data?.error || "Error fetching user data");
       }
