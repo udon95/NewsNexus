@@ -115,7 +115,7 @@ const Article = () => {
       const locale = selectedLanguage === "en"
       ? "en-US"
       : selectedLanguage;
-      console.log("selected lang", selectedLanguage);
+      console.log("selected lang", locale);
 
       const response = await fetch(
         "https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/translate/text-to-speech",
