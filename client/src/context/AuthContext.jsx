@@ -13,6 +13,7 @@ export const AuthProvider = ({ children }) => {
   const [interests, setInterests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState(null);
+  const [expertTopics, setExpertTopics] = useState(null);
 
   useEffect(() => {
     const loadUserFromStorage = async () => {
@@ -28,6 +29,7 @@ export const AuthProvider = ({ children }) => {
           setColor(parsedUser.color);
           setInterests(parsedUser.interests || []); //  Load interests correctly
           setProfile(parsedUser.profile || null);
+          setExpertTopics(parsedUser.expertTopics || []);
           // console.log(" Loaded user from localStorage:", parsedUser);
         }
         const { data: sessionData, error } = await supabase.auth.getSession();
@@ -118,7 +120,8 @@ export const AuthProvider = ({ children }) => {
         email,
         password,
       });
-      const { user, role, interests, profile, color } = response.data;
+      const { user, role, interests, profile, color, expertTopics } =
+        response.data;
       setUser(user);
       setUserType(role);
       setProfile(profile);
@@ -137,10 +140,11 @@ export const AuthProvider = ({ children }) => {
             ? interests.split(", ").map((topic) => topic.trim())
             : [],
           profile,
+          expertTopics,
         })
       );
 
-      return { user, userType: role, color, interests, profile };
+      return { user, userType: role, color, interests, profile, expertTopics };
     } catch (error) {
       throw new Error(error.response?.data?.error || "Login failed");
     }
@@ -157,7 +161,7 @@ export const AuthProvider = ({ children }) => {
       .single();
 
     if (error) {
-      console.error("❌ Error fetching updated role:", error);
+      console.error(" Error fetching updated role:", error);
       return;
     }
 

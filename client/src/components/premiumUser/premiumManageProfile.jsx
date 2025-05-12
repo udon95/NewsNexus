@@ -66,7 +66,7 @@ const PremManageProfile = () => {
 
           setUserDetails(data.user);
           setUserType(data?.role || "Free");
-          console.log("User Expert Topics:", userProfile.expertTopics);
+          console.log("User Expert Topics:", data.expertTopics);
 
           if (data.color) {
             setProfileColor(data.color);
@@ -511,6 +511,7 @@ const PremManageProfile = () => {
                   <option value="Other">Prefer Not To Say</option>
                 </select>
               </div>
+
               <div>
                 <label className="block mb-1 text-sm font-medium">
                   Subscription Type
@@ -521,6 +522,23 @@ const PremManageProfile = () => {
                   readOnly
                   className="w-full p-2 border rounded-lg bg-gray-100 text-gray-800"
                 />
+              </div>
+              <div>
+                <label className="block mb-1 text-sm font-medium">
+                  Expert In
+                </label>
+                <ul>
+                  {expertTopics.length > 0 ? (
+                    expertTopics.map((topic, index) => (
+                      <li key={index}>
+                        {topic.topicName || "Unknown Topic"} (Topic ID:{" "}
+                        {topic.topicid})
+                      </li>
+                    ))
+                  ) : (
+                    <p>No expert topics</p>
+                  )}
+                </ul>
               </div>
             </div>
 
