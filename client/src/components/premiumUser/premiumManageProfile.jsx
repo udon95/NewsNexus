@@ -31,6 +31,7 @@ const PremManageProfile = () => {
   const [categories, setCategories] = useState([]);
   const [dropdownValues, setDropdownValues] = useState(Array(6).fill(""));
   const [userType, setUserType] = useState("");
+  const [loading, setLoading] = useState(true);
 
   // useEffect(() => {
   //   const fetchUserType = async () => {
@@ -67,8 +68,6 @@ const PremManageProfile = () => {
 
           setUserDetails(data.user);
           setUserType(data?.role || "Free");
-          console.log("User Expert Topics:", data.expertTopics);
-          setExpertTopics(data.expertTopics);
 
           if (data.color) {
             setProfileColor(data.color);
@@ -89,10 +88,41 @@ const PremManageProfile = () => {
             return updated;
           });
         }
+        const { data: expertData, error: expertError } = await supabase
+          .from("expert_application")
+          .select("topicid, status")
+          .eq("userid", storedUser?.user?.userid) // Replace with user ID from localStorage or context
+          .eq("status", "Approved");
+
+        if (expertError) {
+          console.error("Error fetching expert topics:", expertError);
+        } else {
+          // Fetch topic names based on topicid
+          const topicNames = [];
+          for (const expert of expertData) {
+            const { data: topicData, error: topicError } = await supabase
+              .from("topic_categories")
+              .select("name")
+              .eq("topicid", expert.topicid)
+              .single(); // Get the topic name for the topicid
+
+            if (topicError) {
+              console.error("Error fetching topic name:", topicError);
+            } else {
+              topicNames.push({
+                topicid: expert.topicid,
+                topicName: topicData?.name || "Unknown",
+              });
+            }
+          }
+
+          setExpertTopics(topicNames);
+        }
       } catch (err) {
         console.error("Profile fetch error:", err.message);
         setError(err.message);
       }
+      setLoading(false);
     };
 
     fetchUserProfile();
@@ -120,24 +150,50 @@ const PremManageProfile = () => {
   }, [dropdownValues]);
 
   // handle dropdown selection
+  // const handleDropdownChange = (index, e) => {
+  //   const newValue = e.target.value;
+  //   const alreadySelected = dropdownValues.includes(newValue);
+
+  //   const selectedCount = dropdownValues.filter((val) => val !== "").length;
+  //   if (selectedCount >= 6 && newValue !== "" && !dropdownValues.includes("")) {
+  //     alert("You can only select up to 6 interests.");
+  //     return;
+  //   }
+
+  //   if (newValue && alreadySelected) {
+  //     alert("You’ve already selected this topic.");
+  //     return;
+  //   }
+
+  //   const newValues = [...dropdownValues];
+  //   newValues[index] = newValue;
+  //   setDropdownValues(newValues);
+  // };
   const handleDropdownChange = (index, e) => {
     const newValue = e.target.value;
-    const alreadySelected = dropdownValues.includes(newValue);
+    const alreadySelectedElsewhere =
+      dropdownValues.includes(newValue) &&
+      dropdownValues.indexOf(newValue) !== index;
+    const nonBlankCount = dropdownValues.filter((val) => val !== "").length;
 
-    const selectedCount = dropdownValues.filter((val) => val !== "").length;
-    if (selectedCount >= 6 && newValue !== "" && !dropdownValues.includes("")) {
+    // Allow the change if it's clearing a selection or if the total non-blank count is less than 6
+    // OR if the new value is the same as the current value (no change)
+    if (
+      newValue === "" ||
+      nonBlankCount < 6 ||
+      newValue === dropdownValues[index]
+    ) {
+      if (newValue && alreadySelectedElsewhere) {
+        alert("You’ve already selected this topic.");
+        return;
+      }
+
+      const newValues = [...dropdownValues];
+      newValues[index] = newValue;
+      setDropdownValues(newValues);
+    } else {
       alert("You can only select up to 6 interests.");
-      return;
     }
-
-    if (newValue && alreadySelected) {
-      alert("You’ve already selected this topic.");
-      return;
-    }
-
-    const newValues = [...dropdownValues];
-    newValues[index] = newValue;
-    setDropdownValues(newValues);
   };
 
   // check birthdate valid
@@ -295,7 +351,7 @@ const PremManageProfile = () => {
 
   // update interests
   const updateInterests = async () => {
-    if (selectedTopics.length > 6) {
+    if (selectedTopics.length >= 6) {
       alert("You can only select up to 6 interests.");
       return;
     }
