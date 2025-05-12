@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import NewsCard from "./newsCard";
 import supabase from "../api/supabaseClient";
 
-
 const LatestNews = ({
   searchQuery = "",
   topic = "",
@@ -10,7 +9,6 @@ const LatestNews = ({
   timeFilter = "Latest",
 }) => {
   const [latestArticles, setLatestArticles] = useState([]);
-
 
   useEffect(() => {
     const fetchLatestArticles = async () => {
@@ -21,20 +19,17 @@ const LatestNews = ({
         .order("time", { ascending: false })
         .limit(20);
 
-
       if (Array.isArray(topic) && topic.length > 0) {
         query = query.in("topicid", topic);
       } else if (typeof topic === "string" && topic) {
         query = query.eq("topicid", topic);
       }
 
-
       if (searchQuery.trim()) {
         query = query.or(
           `title.ilike.%${searchQuery}%,text.ilike.%${searchQuery}%`
         );
       }
-
 
       const now = new Date();
       let cutoff;
@@ -48,11 +43,9 @@ const LatestNews = ({
         cutoff = new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000);
       }
 
-
       if (cutoff) {
         query = query.gte("time", cutoff.toISOString());
       }
-
 
       const { data: articles, error } = await query;
       if (error) {
@@ -60,19 +53,16 @@ const LatestNews = ({
         return;
       }
 
-
-      // ✅ Filter out expert-authored articles
+      //  Filter out expert-authored articles
       const { data: expertApps, error: expertError } = await supabase
         .from("expert_application")
         .select("userid, topicid")
         .eq("status", "Approved");
 
-
       if (expertError) {
         console.error("Error fetching expert applications:", expertError);
         return;
       }
-
 
       const filtered = articles.filter(
         (a) =>
@@ -81,23 +71,19 @@ const LatestNews = ({
           )
       );
 
-
       setLatestArticles(filtered);
     };
 
-
     fetchLatestArticles();
   }, [searchQuery, topic, timeFilter]);
-
 
   const articlesToDisplay = displayLimit
     ? latestArticles.slice(0, displayLimit)
     : latestArticles;
 
-
   return (
-<div className="w-full max-w-[2000px] mx-auto">
-  <div className="space-y-6">
+    <div className="w-full max-w-[2000px] mx-auto">
+      <div className="space-y-6">
         {articlesToDisplay.length === 0 ? (
           <div className="text-center text-gray-500 font-medium mt-6">
             No latest articles available.
@@ -116,6 +102,5 @@ const LatestNews = ({
     </div>
   );
 };
-
 
 export default LatestNews;

@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import supabase from "../api/supabaseClient";
 
-
 const ArticlesRank = ({
   searchQuery = "",
   topic = "",
@@ -10,7 +9,6 @@ const ArticlesRank = ({
 }) => {
   const [articles, setArticles] = useState([]);
   const navigate = useNavigate();
-
 
   useEffect(() => {
     const fetchRankedArticles = async () => {
@@ -21,13 +19,11 @@ const ArticlesRank = ({
         )
         .eq("status", "Published");
 
-
       if (Array.isArray(topic) && topic.length > 0) {
         query = query.in("topicid", topic);
       } else if (typeof topic === "string" && topic) {
         query = query.eq("topicid", topic);
       }
-
 
       if (searchQuery.trim()) {
         query = query.or(
@@ -35,10 +31,8 @@ const ArticlesRank = ({
         );
       }
 
-
       const now = new Date();
       let cutoff;
-
 
       if (selectedTime === "Today") {
         cutoff = new Date(now.setHours(0, 0, 0, 0));
@@ -50,33 +44,27 @@ const ArticlesRank = ({
         cutoff = new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000);
       }
 
-
       if (cutoff) {
         query = query.gte("time", cutoff.toISOString());
       }
 
-
       const { data, error } = await query;
-
 
       if (error) {
         console.error("Error fetching ranked articles:", error);
         return;
       }
 
-
-      // ✅ Expert filter
+      //  Expert filter
       const { data: expertApps, error: expertError } = await supabase
         .from("expert_application")
         .select("userid, topicid")
         .eq("status", "Approved");
 
-
       if (expertError) {
         console.error("Error fetching expert applications:", expertError);
         return;
       }
-
 
       const nonExpertArticles = data.filter(
         (a) =>
@@ -84,7 +72,6 @@ const ArticlesRank = ({
             (e) => e.userid === a.userid && e.topicid === a.topicid
           )
       );
-
 
       const ranked = nonExpertArticles
         .map((article) => ({
@@ -97,19 +84,15 @@ const ArticlesRank = ({
         .sort((a, b) => b.ranking_score - a.ranking_score)
         .slice(0, 3);
 
-
       setArticles(ranked);
     };
-
 
     fetchRankedArticles();
   }, [searchQuery, topic, selectedTime]);
 
-
   const handleCardClick = (title) => {
     navigate(`/article/${encodeURIComponent(title)}`);
   };
-
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 max-w-[1100px] w-full">
@@ -149,6 +132,5 @@ const ArticlesRank = ({
     </div>
   );
 };
-
 
 export default ArticlesRank;

@@ -296,7 +296,7 @@ The response must be **only** a single valid JSON object, no markdown, no code f
     }
 
     // Now process the response
-    console.log("Parsed Perplexity response:", parsed);
+    //console.log("Parsed Perplexity response:", parsed);
     result = {
       accuracy: accuracy || 0, // Default to 0 if accuracy is not found
       feedback: feedback,
