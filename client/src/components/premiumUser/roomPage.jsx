@@ -1210,13 +1210,20 @@ const Room = () => {
                : "Not Found"}
            </h1>
            <div className="flex gap-3">
+
           {isCreator ? (
+
+            <div className="flex items-center gap-3">
             <button
               className="px-6 py-2 rounded-full text-lg font-semibold bg-gray-400 text-white cursor-not-allowed"
               disabled
             >
-              My Room 🔒
+              My Room
             </button>
+            <span className="bg-black text-white text-xs font-semibold px-3 py-1 rounded-full border border-gray-300">
+              {room?.room_type?.toUpperCase()}
+            </span>
+          </div>  
           ) : (
             <>
               <button
@@ -1224,8 +1231,8 @@ const Room = () => {
                   !isMember || isUpdating
                     ? "bg-gray-300 text-gray-500 cursor-not-allowed"
                     : "bg-blue-500 text-white hover:bg-blue-600"
-                  }`}
-                  onClick={handleExitRoom}
+                }`}
+                onClick={handleExitRoom}
                 disabled={!isMember || isUpdating}
               >
                 Exit
@@ -1238,12 +1245,13 @@ const Room = () => {
                     : "bg-green-500 text-white hover:bg-green-600"
                 }`}
                   onClick={handleJoinRoom}
-                disabled={isMember || isUpdating}
+                  disabled={isMember || isUpdating}
               >
                 {isMember ? "Joined" : "Join"}
-              </button>
+            </button>
             </>
           )}
+
         </div>
 
         </div>
