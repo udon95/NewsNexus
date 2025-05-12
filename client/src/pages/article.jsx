@@ -112,6 +112,9 @@ const Article = () => {
 
     try {
       const text = articleRef.current.innerText;
+      const locale = selectedLanguage === "en"
+      ? "en-US"
+      : selectedLanguage;
       console.log("selected lang", selectedLanguage);
 
       const response = await fetch(
@@ -121,7 +124,7 @@ const Article = () => {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             text: text,
-            targetLang: selectedLanguage,
+            targetLang: locale,
           }),
         }
       );
