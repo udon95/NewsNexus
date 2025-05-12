@@ -103,7 +103,7 @@ const ManageRooms = () => {
           ...newPrivateRoom,
           room_type: "Private",
           created_by: userId,
-          member_limit: newPublicRoom.member_limit || 20,
+          member_limit: newPrivateRoom.member_limit || 20,
         }),
       }
     );
