@@ -314,7 +314,7 @@ async function factCheck(content, topicName) {
     try {
       // Parse the content of the message, which is a JSON string
       const contentData = JSON.parse(cleanedContent);
-      console.log("content data".contentData);
+      console.log("content data", contentData);
       // Extract accuracy and feedback from the parsed content
       accuracy = contentData?.accuracy || null;
       feedback = contentData?.feedback || "";
@@ -380,9 +380,9 @@ async function factCheck(content, topicName) {
         temperature: 0.2,
       }),
     });
-    console.log("Status code from Perplexity:", gptRes.status); // Check status code
+    console.log("Status code from Chatgpt:", gptRes.status); // Check status code
     if (!gptRes.ok) {
-      throw new Error(`Perplexity API error with status ${gptRes.status}`);
+      throw new Error(`Chatgpt API error with status ${gptRes.status}`);
     }
     const gptData = await gptRes.json();
     //console.log("gptData", gptData);
@@ -400,7 +400,7 @@ async function factCheck(content, topicName) {
   //console.log("parsed result:", result);
   const threshold = 75;
 
-  if (typeof result.accuracy !== "number" || result.accuracy < threshold) {
+  if (result.accuracy < threshold) {
     throw {
       status: 400,
       error: "Article failed fact-checking.",
