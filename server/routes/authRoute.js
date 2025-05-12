@@ -656,7 +656,15 @@ router.get("/public-profile/:username", async (req, res) => {
     }
 
     const expertTopicIds = expertApps?.map((ea) => ea.topicid) ?? [];
+    const { data: expertTopics, error: topicsError } = await supabase
+      .from("topic_categories")
+      .select("topicid, name")
+      .in("topicid", expertTopicIds);
 
+    if (topicsError) {
+      console.error("couldn't load expert topic names:", topicsError);
+      // handle error...
+    }
     // 2. Fetch articles written by the user
     const { data: articlesData, error: articlesError } = await supabase
       .from("articles")
@@ -716,7 +724,7 @@ router.get("/public-profile/:username", async (req, res) => {
         status: userData.status,
         created_at: userData.created_at,
       },
-      expertTopicIds,
+      expertTopic,
       articles: articlesData || [],
       rooms: publicRooms || [],
       totalArticles: articlesData.length,

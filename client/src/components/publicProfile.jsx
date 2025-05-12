@@ -54,10 +54,17 @@ const PublicProfile = () => {
               Joined on:{" "}
               {new Date(profileData.user.created_at).toLocaleDateString()}
             </p>
+
             <p className="text-sm text-gray-700">
               Articles: {profileData.totalArticles} | Total Likes:{" "}
               {profileData.totalLikes} | Total Views: {profileData.totalViews}
             </p>
+            {profileData.expertTopics?.length > 0 && (
+              <p className="text-sm text-gray-700 mt-1">
+                Expert in:{" "}
+                {profileData.expertTopics.map((t) => t.name).join(", ")}
+              </p>
+            )}
           </h2>
         </div>
 
