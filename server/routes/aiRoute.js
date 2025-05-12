@@ -297,9 +297,17 @@ async function factCheck(content, topicName) {
 
     // Extract only the required fields
     //const content = parsed?.choices?.[0]?.message?.content || "";
-    const messageContent = parsed?.choices?.[0]?.message?.content || "";
-    const accuracy = parsed?.accuracy || null;
-    const feedback = parsed?.feedback || "";
+    const messageContent = parsed?.choices?.[0]?.message || "";
+    if (!messageContent) {
+      console.error("Message field not found in Perplexity response.");
+      throw new Error("No message field found in Perplexity response.");
+    }
+
+    // If 'message' is an object, inspect its contents
+    console.log("Message object:", messageContent); // Debugging the content
+
+    let feedback = "";
+    let accuracy = null;
 
     // Only return the desired content, accuracy, and feedback
     try {
