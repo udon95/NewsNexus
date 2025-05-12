@@ -235,6 +235,32 @@ router.post("/exit", async (req, res) => {
   res.status(200).json({ message: "Exited room" });
 });
 
+router.get("/members/:roomid", async (req, res) => {
+  const { roomid } = req.params;
+
+  const { data, error } = await supabase
+    .from("room_members")
+    .select("users(username)") 
+    .eq("roomid", roomid)
+    .is("exited_at", null);
+
+  if (error) {
+    return res.status(500).json({ error: error.message });
+  }
+
+  const usernames = data
+    .map((entry) => entry.users?.username)
+    .filter(Boolean); 
+
+  res.status(200).json(usernames);
+});
+
+
+
+
+
+
+
 module.exports = router;
 
 
