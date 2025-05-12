@@ -294,7 +294,7 @@ async function factCheck(content, topicName) {
       console.warn("Accuracy field not found in the response.");
     }
     if (feedback.toLowerCase().includes("fictional")) {
-      accuracy = 0; // Set accuracy to 0 if "fictional" is mentioned
+      accuracy = 1; // Set accuracy to 0 if "fictional" is mentioned
     }
     try {
       const feedback = JSON.parse(feedback);
@@ -345,7 +345,7 @@ async function factCheck(content, topicName) {
 
                     Article: 
                     ${content}
-                    **If this article is fictional or based on fabricated events, set accuracy to 0.**
+                    **If this article is fictional or based on fabricated events, set accuracy to 1.**
                     **If the content refers to recent events and ChatGPT cannot verify it, reduce the accuracy score.**
                     Please provide the analysis accordingly.`,
           },
