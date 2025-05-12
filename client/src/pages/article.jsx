@@ -49,17 +49,6 @@ const Article = () => {
 
   const [isExpertArticle, setIsExpertArticle] = useState(false);
 
-  useEffect(() => {
-    document.addEventListener("mouseup", handleTextSelection);
-    return () => document.removeEventListener("mouseup", handleTextSelection);
-  }, []);
-
-  useEffect(() => {
-    if (selectedText) {
-      //console.log("selectedText just updated to:", selectedText);
-    }
-  }, [selectedText]);
-
   const handleTextSelection = () => {
     const selection = window.getSelection();
     const text = selection.toString().trim();
@@ -462,18 +451,19 @@ const Article = () => {
                 </p>
               </div>
             )}
-
-            <ArticleContent
-              articleRef={articleRef}
-              title={articleData.title}
-              text={translatedText || originalText}
-              imagepath={articleData.imagepath}
-              postDate={new Date(articleData.time).toLocaleDateString()}
-              author={{
-                userid: articleData.users?.userid,
-                username: articleData.users?.username || "Unknown Author",
-              }}
-            />
+            <div onMouseUp={handleTextSelection} className="relative w-full">
+              <ArticleContent
+                articleRef={articleRef}
+                title={articleData.title}
+                text={translatedText || originalText}
+                imagepath={articleData.imagepath}
+                postDate={new Date(articleData.time).toLocaleDateString()}
+                author={{
+                  userid: articleData.users?.userid,
+                  username: articleData.users?.username || "Unknown Author",
+                }}
+              />
+            </div>
             {notes.length > 0 && (
               <div className="border border-yellow-400 bg-yellow-50 rounded-lg p-4 mt-4 w-full">
                 <h3 className="text-sm font-semibold text-yellow-700 mb-1">
