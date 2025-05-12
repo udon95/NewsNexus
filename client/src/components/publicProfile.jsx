@@ -158,8 +158,8 @@ const PublicProfile = () => {
   // );
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Navbar />
+  <div className="min-h-screen bg-white">
+    <Navbar />
       <div className="container mx-auto px-4 sm:px-8 max-w-5xl py-10 font-grotesk">
         <div className="bg-white p-6 rounded-2xl shadow-md mb-8">
           <div className="flex items-center flex-wrap justify-between gap-4">
