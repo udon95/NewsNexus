@@ -293,16 +293,30 @@ async function factCheck(content, topicName) {
     //     feedback: feedback, // Default to raw feedback if it's not valid JSON
     //   };
     // }
-    console.log("Perplexity response parsed:", parsed); // Check parsed data
+    //console.log("Perplexity response parsed:", parsed); // Check parsed data
 
     // Extract only the required fields
     //const content = parsed?.choices?.[0]?.message?.content || "";
+    const messageContent = parsed?.choices?.[0]?.message?.content || "";
     const accuracy = parsed?.accuracy || null;
     const feedback = parsed?.feedback || "";
 
     // Only return the desired content, accuracy, and feedback
+    try {
+      // Parse the content of the message, which is a JSON string
+      const contentData = JSON.parse(messageContent);
+
+      // Extract accuracy and feedback from the parsed content
+      accuracy = contentData?.accuracy || null;
+      feedback = contentData?.feedback || "";
+
+      console.log("Extracted accuracy:", accuracy);
+      console.log("Extracted feedback:", feedback);
+    } catch (err) {
+      console.error("Error parsing message content:", err.message);
+      throw new Error("Failed to parse Perplexity message content.");
+    }
     const result = {
-      //content,
       accuracy,
       feedback,
     };
