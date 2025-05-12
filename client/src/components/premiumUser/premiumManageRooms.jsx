@@ -1,12 +1,12 @@
 import { useState, useEffect } from "react";
 import supabase from "../../api/supabaseClient";
 
-const [roomMembers, setRoomMembers] = useState([]);
 
 const ManageRooms = () => {
   const [publicRooms, setPublicRooms] = useState([]);
   const [privateRooms, setPrivateRooms] = useState([]);
   const [joinedPublicRooms, setJoinedPublicRooms] = useState([]);
+  const [roomMembers, setRoomMembers] = useState([]); 
   const [joinedPrivateRooms, setJoinedPrivateRooms] = useState([]);
   const [invites, setInvites] = useState([]);
   const [newPublicRoom, setNewPublicRoom] = useState({
@@ -163,14 +163,12 @@ const ManageRooms = () => {
       room_type: currentRoomType,
       member_limit: currentLimit || 20,
     });
-    setShowModal(true);
 
     const res = await fetch(
       `https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/rooms/members/${roomid}`
     );
     const data = await res.json();
     setRoomMembers(data || []);
-
     setShowModal(true);
   };
 
