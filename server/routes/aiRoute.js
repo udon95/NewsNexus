@@ -217,6 +217,10 @@ async function factCheck(content, topicName) {
       }),
     });
     console.log("Status code from Perplexity:", pxRes.status); // Check status code
+    if (!pxRes.ok) {
+      throw new Error(`Perplexity API error with status ${pxRes.status}`);
+    }
+
     const raw = await pxRes.text(); // Get raw response text first
     //console.log("Raw response from Perplexity:", raw);
     // const choices = pxData.choices?.[0]?.message?.content;
@@ -240,10 +244,8 @@ async function factCheck(content, topicName) {
     //   );
     // }
     // console.log("Raw response from Perplexity:", raw);
-    const test = await pxRes.json();
-    console.log("test json", test);
 
-    let parsed = null;
+    let parsed;
     try {
       parsed = JSON.parse(raw);
       console.log("parsed from perplexity", parsed);
@@ -251,45 +253,46 @@ async function factCheck(content, topicName) {
       console.error("Error parsing JSON response:", err.message);
       throw new Error("Failed to parse Perplexity response as JSON.");
     }
+    console.log("Perplexity response parsed:", parsed); // Check parsed data
 
-    if (
-      !parsed ||
-      !parsed.choices ||
-      !parsed.choices[0] ||
-      !parsed.choices[0].message
-    ) {
-      throw new Error(
-        "Perplexity response does not contain the expected structure."
-      );
-    }
-    let feedback = parsed.choices[0].message.content || "";
-    //const accuracyMatch = feedback.match(/"accuracy":\s*(\d+)/); // Look for accuracy in the feedback
+    // if (
+    //   !parsed ||
+    //   !parsed.choices ||
+    //   !parsed.choices[0] ||
+    //   !parsed.choices[0].message
+    // ) {
+    //   throw new Error(
+    //     "Perplexity response does not contain the expected structure."
+    //   );
+    // }
+    // let feedback = parsed.choices[0].message.content || "";
+    // //const accuracyMatch = feedback.match(/"accuracy":\s*(\d+)/); // Look for accuracy in the feedback
 
-    //let accuracy = accuracyMatch ? parseInt(accuracyMatch[1], 10) : null;
-    let accuracy = parsed.accuracy;
-    console.log("parsed choice 0", feedback);
+    // //let accuracy = accuracyMatch ? parseInt(accuracyMatch[1], 10) : null;
+    // let accuracy = parsed.accuracy;
+    // console.log("parsed choice 0", feedback);
 
-    if (accuracy === null) {
-      console.warn("Accuracy field not found in the response.");
-      accuracy = 1;
-    }
-    if (feedback.toLowerCase().includes("fictional")) {
-      accuracy = 1; // Set accuracy to 0 if "fictional" is mentioned
-    }
-    try {
-      const feedback = JSON.parse(feedback);
-      //console.log("Parsed Perplexity response:", parsed);
-      result = {
-        accuracy: accuracy,
-        feedback: feedback,
-      };
-    } catch (err) {
-      console.error("Error cleaning feedback:", err.message);
-      result = {
-        accuracy: accuracy,
-        feedback: feedback, // Default to raw feedback if it's not valid JSON
-      };
-    }
+    // if (accuracy === null) {
+    //   console.warn("Accuracy field not found in the response.");
+    //   accuracy = 1;
+    // }
+    // if (feedback.toLowerCase().includes("fictional")) {
+    //   accuracy = 1; // Set accuracy to 0 if "fictional" is mentioned
+    // }
+    // try {
+    //   const feedback = JSON.parse(feedback);
+    //   //console.log("Parsed Perplexity response:", parsed);
+    //   result = {
+    //     accuracy: accuracy,
+    //     feedback: feedback,
+    //   };
+    // } catch (err) {
+    //   console.error("Error cleaning feedback:", err.message);
+    //   result = {
+    //     accuracy: accuracy,
+    //     feedback: feedback, // Default to raw feedback if it's not valid JSON
+    //   };
+    // }
   } catch (perpErr) {
     console.warn(
       "Perplexity fail to determine, falling back to ChatGPT:",
