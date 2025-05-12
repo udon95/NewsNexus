@@ -289,8 +289,8 @@ async function factCheck(content, topicName) {
       );
     }
 
-    const content = pxData.choices[0]?.message?.content || "";
-    if (!content) {
+    const feedback = pxData.choices[0]?.message?.content || "";
+    if (!feedback) {
       throw new Error("No content found in the Perplexity response.");
     }
     // const accuracyMatch = content.match(/"accuracy":\s*(\d+)/);
