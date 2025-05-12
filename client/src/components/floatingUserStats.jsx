@@ -113,7 +113,7 @@ const FloatingUserStats = ({ user, customClassName }) => {
         </div> */}
         <div>
   <div className="bg-[#CDE0FF] w-[80px] h-[80px] rounded-2xl flex items-center justify-center text-xl font-bold mb-1">
-    {userType === "Free" ? (
+    {/* {userType === "Free" ? (
       <>
         <div className="text-center leading-tight">
           <div className="text-3xl">{stats.reads} / 10</div>
@@ -122,7 +122,17 @@ const FloatingUserStats = ({ user, customClassName }) => {
       </>
     ) : (
       <div className="text-3xl">{stats.reads.toString().padStart(2, '0')}</div>
-    )}
+    )} */}
+    {userType === "Free" ? (
+  <div className="text-3xl sm:text-2xl font-extrabold text-[#00317F] text-center">
+    {stats.reads} / 10
+  </div>
+) : (
+  <div className="text-3xl font-bold text-[#00317F]">
+    {stats.reads.toString().padStart(2, '0')}
+  </div>
+)}
+
   </div>
   <div>{userType === "Free" ? "Reads Today" : "Reads"}</div>
 </div>
@@ -131,5 +141,7 @@ const FloatingUserStats = ({ user, customClassName }) => {
     </div>
   );
 };
+
+
 
 export default FloatingUserStats;
