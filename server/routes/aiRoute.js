@@ -201,7 +201,6 @@ async function factCheck(content, topicName) {
       error: `Article content does not match category: ${topicName}`,
     };
   }
-  const threshold = 75;
   let result;
 
   //  Perplexity factual check
@@ -244,9 +243,9 @@ The response must be **only** a single valid JSON object, no markdown, no code f
         ],
       }),
     });
-    console.log("Status code from Perplexity:", pxRes.status); // Check status code
+    //console.log("Status code from Perplexity:", pxRes.status); // Check status code
     const raw = await pxRes.text(); // Get raw response text first
-    console.log("Raw response from Perplexity:", raw);
+    //console.log("Raw response from Perplexity:", raw);
     // const choices = pxData.choices?.[0]?.message?.content;
     // console.log("Status code from Perplexity:", pxRes.status); // Check status code
     //let cleanResponse = raw.replace(/```json\n|\n```/g, ""); // Strip the markdown block (```json...```)
@@ -271,6 +270,7 @@ The response must be **only** a single valid JSON object, no markdown, no code f
     let parsed = null;
     try {
       parsed = JSON.parse(raw);
+      //console.log("parsed  from perplexity", parsed);
     } catch (err) {
       console.error("Error parsing JSON response:", err.message);
       throw new Error("Failed to parse Perplexity response as JSON.");
@@ -294,9 +294,11 @@ The response must be **only** a single valid JSON object, no markdown, no code f
     if (accuracy === null) {
       console.warn("Accuracy field not found in the response.");
     }
+    if (feedback.toLowerCase().includes("fictional")) {
+      accuracy = 0; // Set accuracy to 0 if "fictional" is mentioned
+    }
 
-    // Now process the response
-    //console.log("Parsed Perplexity response:", parsed);
+    console.log("Parsed Perplexity response:", parsed);
     result = {
       accuracy: accuracy || 0, // Default to 0 if accuracy is not found
       feedback: feedback,
@@ -344,7 +346,9 @@ The response must be **only** a single valid JSON object, no markdown, no code f
     result = parsed;
   }
 
-  console.log("parsed result:", result);
+  //console.log("parsed result:", result);
+  const threshold = 75;
+
   if (typeof result.accuracy !== "number" || result.accuracy < threshold) {
     throw {
       status: 400,
@@ -395,7 +399,7 @@ router.post("/submit-article", async (req, res) => {
     let factResult;
     try {
       factResult = await factCheck(strippedText, topicName);
-      console.log("stripped text", strippedText);
+      //console.log("stripped text", strippedText);
     } catch (err) {
       console.error("Fact-check error:", err);
 

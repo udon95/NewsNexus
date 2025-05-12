@@ -68,6 +68,7 @@ const Article = () => {
 
   // Function to fetch word definition
   const fetchDefinition = async () => {
+    console.log("fetch define", selectedText);
     if (!selectedText) return;
 
     setLoading(true);
@@ -85,6 +86,7 @@ const Article = () => {
 
       setShowDictionary(true);
     } catch (error) {
+      console.log("error fetching defnition");
       setDefinition("Error fetching definition.");
     } finally {
       setLoading(false);
