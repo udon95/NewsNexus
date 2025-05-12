@@ -1341,7 +1341,7 @@ export const PremiumWriteArticle = () => {
                   </button>
                 </div>
 
-                {accuracy !== null && aiFeedback !== null && accuracy < 75 && (
+                {accuracy !== null && aiFeedback && accuracy < 75 && (
                   <div className="mt-4 p-4 border border-red-300 bg-red-50 rounded text-sm text-black">
                     <strong>Fact Check Results:</strong>
                     <p>
