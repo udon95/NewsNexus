@@ -217,27 +217,25 @@ async function factCheck(content, topicName) {
           {
             role: "system",
             content: `You are a fact-checking assistant.
-
-Please review the following article and verify its factual accuracy using up-to-date knowledge as of today.
-
-For any false, misleading, or dubious claims:
-- Wrap only the false or misleading text in <mark> tags.
-- Immediately after each <mark> section, on a new line preceded by a <br> tag, provide an explanation in parentheses that details why the text is inaccurate.
-
-In addition, analyze the overall factual correctness of the article and assign a numerical accuracy score between 0 and 100, where 100 means the article is completely accurate and 0 means it is entirely inaccurate.
-
-**Do not include any Markdown formatting, code blocks, or extra text** in your response.
-
-Please return the following **exactly in a clean JSON format**:
-{
-  "accuracy": <0 - 100>, 
-  "feedback": "The article contains false claims. Article: <original article HTML with <mark> around the inaccuracies> \n Explanation: <explanation/correction of the inaccuracies highlighted>"
-}
-
-The response must be **only** a single valid JSON object, no markdown, no code fences, no extra text.
+                      Please review the following article and verify its factual accuracy using up-to-date knowledge as of today.
+                      For any false, misleading, or dubious claims:
+                      - Wrap only the false or misleading text in <mark> tags.
+                      - Immediately after each <mark> section, on a new line preceded by a <br> tag, provide an explanation in parentheses that details why the text is inaccurate.
+                      In addition, analyze the overall factual correctness of the article and assign a numerical accuracy score between 0 and 100, where 100 means the article is completely accurate and 0 means it is entirely inaccurate.
+                      **Do not include any Markdown formatting, code blocks, or extra text** in your response.
+                      Please return the following **exactly in a clean JSON format**:
+                      {
+                        "accuracy": <0 - 100>, 
+                        "feedback": "The article contains false claims. 
+                        Article: <original article HTML with <mark> around the inaccuracies> 
+                        \n Explanation: <explanation/correction of the inaccuracies highlighted>"
+                      }
+                      The response must be **only** a single valid JSON object, no markdown, no code fences, no extra text.
 
                       Article:
-                      ${content}`,
+                      ${content}
+                      **If this article is fictional or based on fabricated events, set accuracy to 0.**
+                      `,
           },
           { role: "user", content },
         ],
@@ -302,7 +300,7 @@ The response must be **only** a single valid JSON object, no markdown, no code f
       const feedback = JSON.parse(feedback);
       //console.log("Parsed Perplexity response:", parsed);
       result = {
-        accuracy: accuracy, // Default to 0 if accuracy is not found
+        accuracy: accuracy,
         feedback: feedback,
       };
     } catch (err) {
@@ -331,19 +329,25 @@ The response must be **only** a single valid JSON object, no markdown, no code f
             role: "system",
             content: `You are a fact-checking assistant. Please review the following article and verify its factual accuracy using up-to-date knowledge as of today.
 
-                  For any false, misleading, or dubious claims:
-                  - Wrap only the false or misleading text in <mark> tags.
-                  - Immediately after each <mark> section, on a new line preceded by a <br> tag, provide an explanation in parentheses that details why the text is inaccurate.
+                    For any false, misleading, or dubious claims:
+                    - Wrap only the false or misleading text in <mark> tags.
+                    - Immediately after each <mark> section, on a new line preceded by a <br> tag, provide an explanation in parentheses that details why the text is inaccurate.
 
-                  In addition, analyze the overall factual correctness of the article and assign a numerical accuracy score between 0 and 100, where 100 means the article is completely accurate and 0 means it is entirely inaccurate.
+                    In addition, analyze the overall factual correctness of the article and assign a numerical accuracy score between 0 and 100, where 100 means the article is completely accurate and 0 means it is entirely inaccurate.
 
-                  You must return _only_ a single JSON object, no arrays, no markdown, no code fences, no extra text.
-                  Use this exact shape:
-                  {"accuracy":<0 - 100>,"feedback":"The article contains false claims. 
-                  Article: <original article HTML with <mark> around the inaccuracies>" 
-                  \n Explanation: <explanation/correction of the inaccuracies highlighted>"}
+                    You must return only a single JSON object, no arrays, no markdown, no code fences, no extra text.
+                    Use this exact shape:
+                    {"accuracy":<0 - 100>,
+                    "feedback":"The article contains false claims. 
+                    Article: <original article HTML with <mark> around the inaccuracies>" 
+                    \n Explanation: <explanation/correction of the inaccuracies highlighted>"}
+                    The response must be **only** a single valid JSON object, no markdown, no code fences, no extra text.
+
                     Article: 
-                    ${content}`,
+                    ${content}
+                    **If this article is fictional or based on fabricated events, set accuracy to 0.**
+                    **If the content refers to recent events and ChatGPT cannot verify it, reduce the accuracy score.**
+                    Please provide the analysis accordingly.`,
           },
           { role: "user", content },
         ],
