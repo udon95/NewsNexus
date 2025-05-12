@@ -71,8 +71,8 @@ router.post("/text-to-speech", async (req, res) => {
     }
     const MAX = 3000;
     const segments = [];
-    for (let i = 0; i < fullText.length; i += MAX) {
-      segments.push(fullText.slice(i, i + MAX));
+    for (let i = 0; i < text.length; i += MAX) {
+      segments.push(text.slice(i, i + MAX));
     }
     const buffers = [];
     for (const segment of segments) {
