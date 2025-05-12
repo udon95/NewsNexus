@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import supabase from "../../api/supabaseClient";
 
+const [roomMembers, setRoomMembers] = useState([]);
+
 const ManageRooms = () => {
   const [publicRooms, setPublicRooms] = useState([]);
   const [privateRooms, setPrivateRooms] = useState([]);
@@ -158,6 +160,17 @@ const ManageRooms = () => {
     });
     setShowModal(true);
   };
+
+    const res = await fetch(
+    `https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/rooms/members/${roomid}`
+  );
+  const data = await res.json();
+  setRoomMembers(data || []);
+
+  setShowModal(true);
+};
+
+
 
   const submitRoomUpdate = async () => {
     const { roomid, name, description, room_type, member_limit } = editRoom;
@@ -512,6 +525,24 @@ const ManageRooms = () => {
   </div>
 )}
 
+                  <div>
+      <label className="block text-sm font-medium mt-2 mb-1">
+        Current Members
+      </label>
+      {roomMembers.length === 0 ? (
+        <p className="text-sm text-gray-500">No members yet.</p>
+      ) : (
+        <ul className="list-disc list-inside text-sm text-gray-700">
+          {roomMembers.map((username, idx) => (
+            <li key={idx}>{username}</li>
+          ))}
+        </ul>
+      )}
+    </div>
+  </>
+)}
+
+     
 
             <div>
                <label className="block text-sm font-medium mb-1">
