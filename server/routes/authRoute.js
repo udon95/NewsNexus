@@ -644,16 +644,18 @@ router.get("/public-profile/:username", async (req, res) => {
       return res.status(500).json({ error: "Could not load usertype" });
     }
 
-    const { data: exp, error: expError } = await supabase
+    const { data: expertApps, error: expertError } = await supabase
       .from("expert_application")
-      .select("status")
-      .eq("userid", userId)
+      .select("topicid")
+      .eq("userid", userData.userid)
+      .eq("status", "Approved");
 
-    if (expError) {
-      return res.status(500).json({ error: "Could not load expert" });
+    if (expertError) {
+      console.error("failed to fetch expert applications:", expertError);
+      // (optionally) return a 500 here
     }
-    // const isExpertApproved = expertApps.length > 0;
 
+    const expertTopicIds = expertApps?.map((ea) => ea.topicid) ?? [];
 
     // 2. Fetch articles written by the user
     const { data: articlesData, error: articlesError } = await supabase
@@ -677,37 +679,33 @@ router.get("/public-profile/:username", async (req, res) => {
 
     // 3. Fetch list of public rooms the user has joined
     let publicRooms = [];
-    if (userData.usertype === "Premium") {
-      const { data: userRooms, error: roomsError } = await supabase
-        .from("room_members")
-        .select(
-          `
+    const { data: userRooms, error: roomsError } = await supabase
+      .from("room_members")
+      .select(
+        `
           roomid,
           joined_at,
-          exited_at,
-          join_count,
-          exit_count,
           rooms (
             name
           )
         `
-        )
-        .eq("userid", userId);
+      )
+      .eq("userid", userId)
+      .is("exited_at", null);
 
-      if (roomsError) {
-        return res.status(500).json({ error: "Failed to fetch user rooms" });
-      }
+    if (roomsError) {
+      return res.status(500).json({ error: "Failed to fetch user rooms" });
+    }
 
-      if (userRooms) {
-        publicRooms = userRooms.map((rm) => ({
-          roomid: rm.roomid,
-          joined_at: rm.joined_at,
-          exited_at: rm.exited_at,
-          join_count: rm.join_count,
-          exit_count: rm.exit_count,
-          room_name: rm.rooms?.name || "",
-        }));
-      }
+    if (userRooms) {
+      publicRooms = userRooms.map((rm) => ({
+        roomid: rm.roomid,
+        joined_at: rm.joined_at,
+        exited_at: rm.exited_at,
+        join_count: rm.join_count,
+        exit_count: rm.exit_count,
+        room_name: rm.rooms?.name || "",
+      }));
     }
 
     return res.json({
@@ -717,8 +715,8 @@ router.get("/public-profile/:username", async (req, res) => {
         usertype: typeRow.usertype, // front-end can check if usertype === "Expert" to show icon
         status: userData.status,
         created_at: userData.created_at,
-        expert_status: exp.status,
       },
+      expertTopicIds,
       articles: articlesData || [],
       rooms: publicRooms || [],
       totalArticles: articlesData.length,
