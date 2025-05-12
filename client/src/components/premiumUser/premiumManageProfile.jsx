@@ -91,7 +91,7 @@ const PremManageProfile = () => {
         const { data: expertData, error: expertError } = await supabase
           .from("expert_application")
           .select("topicid, status")
-          .eq("userid", data.user?.userid) // Replace with user ID from localStorage or context
+          .eq("userid", storedUser.user?.userid) // Replace with user ID from localStorage or context
           .eq("status", "Approved");
 
         if (expertError) {
