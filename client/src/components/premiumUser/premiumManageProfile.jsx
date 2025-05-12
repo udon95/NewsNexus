@@ -68,7 +68,11 @@ const PremManageProfile = () => {
 
           setUserDetails(data.user);
           setUserType(data?.role || "Free");
-
+          const userId = data?.user?.userid;
+          if (!userId) {
+            console.error("User ID is undefined!");
+            return;
+          }
           if (data.color) {
             setProfileColor(data.color);
             setHexCode(data.color);
@@ -87,18 +91,20 @@ const PremManageProfile = () => {
             }
             return updated;
           });
-        }
-        const { data: expertData, error: expertError } = await supabase
-          .from("expert_application")
-          .select("topicid, status")
-          .eq("userid", storedUser.user?.userid) // Replace with user ID from localStorage or context
-          .eq("status", "Approved");
 
-        if (expertError) {
-          console.error("Error fetching expert topics:", expertError);
-        } else {
+          const { data: expertData, error: expertError } = await supabase
+            .from("expert_application")
+            .select("topicid, status")
+            .eq("userid", userId)
+            .eq("status", "Approved");
+
+          if (expertError) {
+            console.error("Error fetching expert topics:", expertError);
+            return;
+          }
           // Fetch topic names based on topicid
           const topicNames = [];
+
           for (const expert of expertData) {
             const { data: topicData, error: topicError } = await supabase
               .from("topic_categories")

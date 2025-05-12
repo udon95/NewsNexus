@@ -296,13 +296,13 @@ async function factCheck(content, topicName) {
     console.log("Perplexity response parsed:", parsed); // Check parsed data
 
     // Extract only the required fields
-    const content = parsed?.choices?.[0]?.message?.content || "";
+    //const content = parsed?.choices?.[0]?.message?.content || "";
     const accuracy = parsed?.accuracy || null;
     const feedback = parsed?.feedback || "";
 
     // Only return the desired content, accuracy, and feedback
     const result = {
-      content,
+      //content,
       accuracy,
       feedback,
     };
