@@ -91,7 +91,7 @@ const PremManageProfile = () => {
         const { data: expertData, error: expertError } = await supabase
           .from("expert_application")
           .select("topicid, status")
-          .eq("userid", storedUser?.user?.userid) // Replace with user ID from localStorage or context
+          .eq("userid", data.user?.userid) // Replace with user ID from localStorage or context
           .eq("status", "Approved");
 
         if (expertError) {
@@ -171,17 +171,16 @@ const PremManageProfile = () => {
   // };
   const handleDropdownChange = (index, e) => {
     const newValue = e.target.value;
+    const oldValue = dropdownValues[index];
     const alreadySelectedElsewhere =
       dropdownValues.includes(newValue) &&
       dropdownValues.indexOf(newValue) !== index;
     const nonBlankCount = dropdownValues.filter((val) => val !== "").length;
-
-    // Allow the change if it's clearing a selection or if the total non-blank count is less than 6
-    // OR if the new value is the same as the current value (no change)
     if (
       newValue === "" ||
+      newValue === oldValue ||
       nonBlankCount < 6 ||
-      newValue === dropdownValues[index]
+      (nonBlankCount === 6 && newValue !== "" && oldValue !== "")
     ) {
       if (newValue && alreadySelectedElsewhere) {
         alert("You’ve already selected this topic.");
