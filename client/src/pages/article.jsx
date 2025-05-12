@@ -49,6 +49,11 @@ const Article = () => {
 
   const [isExpertArticle, setIsExpertArticle] = useState(false);
 
+  useEffect(() => {
+    console.log("🔥 auth hook userType:", userType);
+    console.log("🔥 full user object:", user);
+  }, [userType, user]);
+
   const handleTextSelection = () => {
     const selection = window.getSelection();
     const text = selection.toString().trim();
