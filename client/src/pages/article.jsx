@@ -112,6 +112,7 @@ const Article = () => {
 
     try {
       const text = articleRef.current.innerText;
+      console.log("selected lang", selectedLanguage);
 
       const response = await fetch(
         "https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/translate/text-to-speech",
