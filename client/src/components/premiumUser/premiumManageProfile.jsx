@@ -65,6 +65,7 @@ const PremManageProfile = () => {
           const data = JSON.parse(storedUser);
 
           setUserDetails(data.user);
+          setUserType(data?.role || "Free");
 
           if (data.color) {
             setProfileColor(data.color);
@@ -401,370 +402,380 @@ const PremManageProfile = () => {
     }
   };
   //DEVI ADDED HER UI FIX HERE COMMENTED
-//   return (
-//   <div className="w-full max-w-5xl mx-auto px-4 md:px-6 pt-8 text-black font-grotesk text-base">
-//     {/* Profile Section */}
-//     <div className="bg-white p-6 rounded-2xl shadow-sm border mb-8">
-//   <h3 className="text-xl font-bold mb-4">Profile Particulars</h3>
-
-//   {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start"> */}
-//   <div className="grid grid-cols-1 md:grid-cols-[300px_1fr] gap-6 items-start">
-//     {/* Left: Color Picker */}
-//     <div className="w-full">
-//       <label className="block mb-2 text-sm font-medium">Profile Color</label>
-//       <div className="max-w-[300px] w-full rounded-lg overflow-hidden">
-//         {/* <HexColorPicker color={profileColor} onChange={handleColorChange} className="w-full" /> */}
-//         <HexColorPicker
-//           color={profileColor}
-//           onChange={handleColorChange}
-//           className="w-full rounded-lg"
-//           style={{
-//             aspectRatio: "auto",
-//             height: "200px",
-//             width:"100%",
-//           }}
-//         />
-
-//         </div>
-//         <div className="mt-4 max-w-[300px] w-full">
-//           <label className="block mb-1 text-sm font-medium">Hex Code</label>
-//           <input
-//             type="text"
-//             value={hexCode}
-//             onChange={handleHexChange}
-//             placeholder="#FFFFFF"
-//             className="w-full p-2 border rounded-lg"
-//           />
-//         </div>
-//       </div>
-
-//     {/* Right: Profile Fields */}
-//     <div className="flex-1 flex flex-col justify-between h-full">
-//       <div className="grid grid-cols-1 gap-4 w-full">
-//         <div>
-//           <label className="block mb-1 text-sm font-medium">Username</label>
-//           <input
-//             type="text"
-//             value={editUsername}
-//             onChange={(e) => setEditUsername(e.target.value)}
-//             className="w-full p-2 border rounded-lg"
-//             placeholder="Username"
-//           />
-//         </div>
-//         <div>
-//           <label className="block mb-1 text-sm font-medium">Email</label>
-//           <input
-//             type="email"
-//             value={editEmail}
-//             onChange={(e) => setEditEmail(e.target.value)}
-//             className="w-full p-2 border rounded-lg"
-//             placeholder="E-mail"
-//           />
-//         </div>
-//         <div>
-//           <label className="block mb-1 text-sm font-medium">Date of Birth</label>
-//           <DatePicker
-//             selected={editDate ? new Date(editDate) : null}
-//             onChange={(date) => {
-//               const isoString = date?.toISOString().split("T")[0];
-//               setEditDate(isoString);
-//             }}
-//             dateFormat="dd-MM-yyyy"
-//             maxDate={new Date(new Date().setFullYear(new Date().getFullYear() - 16))}
-//             showMonthDropdown
-//             showYearDropdown
-//             dropdownMode="select"
-//             scrollableYearDropdown
-//             yearDropdownItemNumber={100}
-//             placeholderText="Select your date of birth (Above 16 years old)"
-//             className="w-full p-2 border rounded-lg"
-//             wrapperClassName="w-full"
-//             popperClassName="z-[50]"
-//           />
-//           {dobError && <p className="text-red-600 text-sm mt-1">{dobError}</p>}
-//         </div>
-//         <div>
-//           <label className="block mb-1 text-sm font-medium w-full">Gender</label>
-//           <select
-//             value={editGender}
-//             onChange={(e) => setEditGender(e.target.value)}
-//             className="w-full p-2 border rounded-lg"
-//           >
-//             <option value="">Select Gender</option>
-//             <option value="Male">Male</option>
-//             <option value="Female">Female</option>
-//             <option value="Other">Prefer Not To Say</option>
-//           </select>
-//         </div>
-//       </div>
-
-//       <button
-//         onClick={updateProfile}
-//         className="bg-[#3f414c] hover:bg-[#2f313a] text-white text-sm font-medium px-5 py-2.5 rounded-xl mt-6 ml-auto w-fit"
-//       >
-//         Update Profile
-//       </button>
-//       </div>
-//     </div>
-//     </div>
-
-//     {/* Password Section */}
-//     <div className="bg-white p-6 rounded-2xl shadow-sm border mb-8">
-//       <h3 className="text-xl font-bold mb-4">Manage Password</h3>
-//       <PasswordInput
-//         name="password"
-//         value={editOldPassword}
-//         onChange={(e) => setEditOldPassword(e.target.value)}
-//         className="w-full p-2 border rounded-lg mb-2"
-//         placeholder="Old Password"
-//       />
-//       {oldPasswordError && (
-//         <p className="text-red-600 text-sm mt-1">{oldPasswordError}</p>
-//       )}
-//       <PasswordInput
-//         name="password"
-//         value={editNewPassword}
-//         onChange={(e) => setEditNewPassword(e.target.value)}
-//         className="w-full p-2 border rounded-lg mb-2"
-//         placeholder="New Password"
-//       />
-//       <PasswordInput
-//         name="password"
-//         value={editNewPasswordConfirm}
-//         onChange={(e) => setEditNewPasswordConfirm(e.target.value)}
-//         className="w-full p-2 border rounded-lg mb-2"
-//         placeholder="Confirm New Password"
-//       />
-//       {passwordError && (
-//         <p className="text-red-600 text-sm mt-1">{passwordError}</p>
-//       )}
-//       <button
-//         onClick={updatePassword}
-//         className="bg-[#3f414c] hover:bg-[#2f313a] text-white text-sm font-medium px-5 py-2.5 rounded-xl mt-4 ml-auto block"
-//       >
-//         Update Password
-//       </button>
-//     </div>
-
-//     {/* Interests Section */}
-//     <div className="bg-white p-6 rounded-2xl shadow-sm border mb-8">
-//       <h3 className="text-xl font-bold mb-4">Interest Selection (Max 6)</h3>
-
-//       <div className="flex flex-wrap gap-2 mb-4">
-//         {selectedTopics.map((topic, i) => (
-//           <span key={i} className="bg-gray-200 text-sm px-3 py-1 rounded-full">
-//             {topic}
-//           </span>
-//         ))}
-//       </div>
-
-//       {Array.from({ length: 6 }).map((_, index) => (
-//         <div key={index} className="flex items-center gap-3 mb-4">
-//           <label className="w-6 text-sm font-medium">{index + 1}.</label>
-//           <select
-//             value={dropdownValues[index]}
-//             onChange={(e) => handleDropdownChange(index, e)}
-//             className="w-full p-2 border rounded-lg"
-//           >
-//             <option value="">Select a category</option>
-//             {categories
-//               .filter(
-//                 (cat) =>
-//                   !dropdownValues.includes(cat.name) ||
-//                   cat.name === dropdownValues[index]
-//               )
-//               .map((cat) => (
-//                 <option key={cat.id} value={cat.name}>
-//                   {cat.name}
-//                 </option>
-//               ))}
-//           </select>
-//         </div>
-//       ))}
-//       <button
-//         onClick={updateInterests}
-//         className="bg-[#3f414c] hover:bg-[#2f313a] text-white text-sm font-medium px-5 py-2.5 rounded-xl mt-4 ml-auto block"
-//       >
-//         Update Interests
-//       </button>
-//       {showError && (
-//         <p className="text-red-600 text-sm mt-2">
-//           You can only select up to 6 topics.
-//         </p>
-//       )}
-//     </div>
-//   </div>
-// );
   return (
-    <div className="flex justify-center w-full px-4 md:px-5 pt-8 text-black text-2xl font-grotesk font-medium">
-      <div className="w-full max-w-4xl font-grotesk">
-        <h1 className="text-3xl font-bold mb-2">Profile Particulars:</h1>
-        <div className="p-4 bg-white shadow-md rounded-lg">
-          <div className="mb-1">Name:</div>
+  <div className="w-full max-w-5xl mx-auto px-4 md:px-6 pt-8 text-black font-grotesk text-base">
+    {/* Profile Section */}
+    <div className="bg-white p-6 rounded-2xl shadow-sm border mb-8">
+  <h3 className="text-xl font-bold mb-4">Profile Particulars</h3>
+
+  {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start"> */}
+  <div className="grid grid-cols-1 md:grid-cols-[300px_1fr] gap-6 items-start">
+    {/* Left: Color Picker */}
+    <div className="w-full">
+      <label className="block mb-2 text-sm font-medium">Profile Color</label>
+      <div className="max-w-[300px] w-full rounded-lg overflow-hidden">
+        {/* <HexColorPicker color={profileColor} onChange={handleColorChange} className="w-full" /> */}
+        <HexColorPicker
+          color={profileColor}
+          onChange={handleColorChange}
+          className="w-full rounded-lg"
+          style={{
+            aspectRatio: "auto",
+            height: "200px",
+            width:"100%",
+          }}
+        />
+
+        </div>
+        <div className="mt-4 max-w-[300px] w-full">
+          <label className="block mb-1 text-sm font-medium">Hex Code</label>
+          <input
+            type="text"
+            value={hexCode}
+            onChange={handleHexChange}
+            placeholder="#FFFFFF"
+            className="w-full p-2 border rounded-lg"
+          />
+        </div>
+      </div>
+
+    {/* Right: Profile Fields */}
+    <div className="flex-1 flex flex-col justify-between h-full">
+      <div className="grid grid-cols-1 gap-4 w-full">
+        <div>
+          <label className="block mb-1 text-sm font-medium">Username</label>
           <input
             type="text"
             value={editUsername}
             onChange={(e) => setEditUsername(e.target.value)}
-            className="w-full p-2 border rounded-lg mb-2"
+            className="w-full p-2 border rounded-lg"
             placeholder="Username"
           />
-          <div className="mb-1">Email:</div>
+        </div>
+        <div>
+          <label className="block mb-1 text-sm font-medium">Email</label>
           <input
             type="email"
             value={editEmail}
             onChange={(e) => setEditEmail(e.target.value)}
-            className="w-full p-2 border rounded-lg mb-2"
+            className="w-full p-2 border rounded-lg"
             placeholder="E-mail"
           />
-          <div className="mb-1">Date:</div>
+        </div>
+        <div>
+          <label className="block mb-1 text-sm font-medium">Date of Birth</label>
           <DatePicker
             selected={editDate ? new Date(editDate) : null}
             onChange={(date) => {
-              const isoString = date?.toISOString().split("T")[0]; // 'yyyy-mm-dd'
+              const isoString = date?.toISOString().split("T")[0];
               setEditDate(isoString);
             }}
             dateFormat="dd-MM-yyyy"
-            maxDate={
-              new Date(new Date().setFullYear(new Date().getFullYear() - 16))
-            }
+            maxDate={new Date(new Date().setFullYear(new Date().getFullYear() - 16))}
             showMonthDropdown
             showYearDropdown
             dropdownMode="select"
             scrollableYearDropdown
             yearDropdownItemNumber={100}
             placeholderText="Select your date of birth (Above 16 years old)"
-            className="w-full p-2 border rounded-lg mb-2"
+            className="w-full p-2 border rounded-lg"
             wrapperClassName="w-full"
             popperClassName="z-[50]"
           />
-          <div className="mb-1">Gender:</div>
+          {dobError && <p className="text-red-600 text-sm mt-1">{dobError}</p>}
+        </div>
+        <div>
+          <label className="block mb-1 text-sm font-medium w-full">Gender</label>
           <select
             value={editGender}
             onChange={(e) => setEditGender(e.target.value)}
-            className="w-full p-2 border rounded-lg mb-2"
+            className="w-full p-2 border rounded-lg"
           >
             <option value="">Select Gender</option>
             <option value="Male">Male</option>
             <option value="Female">Female</option>
             <option value="Other">Prefer Not To Say</option>
           </select>
-          
-          <div className="mb-1">User Type:</div>
-          <input
-            type="text"
-            value={userType} 
-            readOnly
-            className="w-full p-2 border rounded-lg mb-2 bg-gray-200"
-          />
-
-          <div className="mb-1">Choose Profile Color:</div>
-          <HexColorPicker
-            color={profileColor}
-            onChange={handleColorChange}
-            className="mb-2"
-          />
-          <div className="mb-1">Or Enter HexCode:</div>
-          <input
-            type="text"
-            value={hexCode}
-            onChange={handleHexChange}
-            placeholder="#FFFFFF"
-            className="w-full p-2 border rounded-lg mb-2"
-          />
-          <button
-            onClick={updateProfile}
-            className="bg-[#3f414c] text-[white] cursor-pointer text-sm flex justify-end self-end w-fit ml-auto mr-0 mt-5 px-5 py-2.5 rounded-xl border-[none] "
-          >
-            Update
-          </button>
         </div>
+        <div>
+  <label className="block mb-1 text-sm font-medium">Subscription Type</label>
+  <input
+    type="text"
+    value={userType}
+    readOnly
+    className="w-full p-2 border rounded-lg bg-gray-100 text-gray-800"
+  />
+</div>
 
-        {/* Password Change */}
-        <h1 className="text-3xl font-bold mb-2 mt-6">Manage Password:</h1>
-        <div className="p-4 bg-white shadow-md rounded-lg ">
-          <PasswordInput
-            name="password"
-            value={editOldPassword}
-            onChange={(e) => setEditOldPassword(e.target.value)}
-            className="w-full p-2 border rounded-lg"
-            placeholder="Old Password"
-          />
-          {oldPasswordError && (
-            <p className="text-red-600 text-sm mt-1">{oldPasswordError}</p>
-          )}
-          <PasswordInput
-            name="password"
-            value={editNewPassword}
-            onChange={(e) => setEditNewPassword(e.target.value)}
-            className="w-full p-2 border rounded-lg mt-2"
-            placeholder="New Password "
-          />
-          <PasswordInput
-            name="password"
-            value={editNewPasswordConfirm}
-            onChange={(e) => setEditNewPasswordConfirm(e.target.value)}
-            className="w-full p-2 border rounded-lg mt-2"
-            placeholder="Confirm New Password"
-          />
-          {passwordError && (
-            <p className="text-red-600 text-sm mt-2">{passwordError}</p>
-          )}
-          <button
-            onClick={updatePassword}
-            className="bg-[#3f414c] text-[white] cursor-pointer text-sm flex justify-end self-end w-fit ml-auto mr-0 mt-5 px-5 py-2.5 rounded-xl border-[none]"
-          >
-            Update
-          </button>
-        </div>
+      </div>
 
-        {/* Topic Interests */}
-        <h1 className="text-3xl font-bold mb-2 mt-6">
-          Interest Selection (Max 6):
-        </h1>
-        <div className="p-4 bg-white shadow-md rounded-lg ">
-          {Array.from({ length: 6 }).map((_, index) => (
-            <div key={index} className="flex flex-row mb-4 items-center">
-              <label className="mt-1 mr-2 font-grotesk text-2xl w-6">
-                {index + 1}.{" "}
-              </label>
-              <div className="flex-1">
-                <select
-                  value={dropdownValues[index]}
-                  onChange={(e) => handleDropdownChange(index, e)}
-                  className="w-full p-2 border rounded-lg font-grotesk"
-                >
-                  <option value="" classname="font-grotesk">
-                    Select a category
-                  </option>
-                  {categories
-                    .filter(
-                      (cat) =>
-                        !dropdownValues.includes(cat.name) ||
-                        cat.name === dropdownValues[index]
-                    )
-                    .map((cat) => (
-                      <option key={cat.id} value={cat.name}>
-                        {cat.name}
-                      </option>
-                    ))}
-                </select>
-              </div>
-            </div>
-          ))}
-          <button
-            onClick={updateInterests}
-            className="bg-[#3f414c] text-[white] cursor-pointer text-sm flex justify-end self-end w-fit ml-auto mr-0 mt-5 px-5 py-2.5 rounded-xl border-[none]"
-          >
-            Update
-          </button>
-        </div>
-
-        {showError && (
-          <p className="text-red-600">You can only select up to 6 topics.</p>
-        )}
+      <button
+        onClick={updateProfile}
+        className="bg-[#3f414c] hover:bg-[#2f313a] text-white text-sm font-medium px-5 py-2.5 rounded-xl mt-6 ml-auto w-fit"
+      >
+        Update Profile
+      </button>
       </div>
     </div>
-  );
+    </div>
+
+    {/* Password Section */}
+    <div className="bg-white p-6 rounded-2xl shadow-sm border mb-8">
+      <h3 className="text-xl font-bold mb-4">Manage Password</h3>
+      <PasswordInput
+        name="password"
+        value={editOldPassword}
+        onChange={(e) => setEditOldPassword(e.target.value)}
+        className="w-full p-2 border rounded-lg mb-2"
+        placeholder="Old Password"
+      />
+      {oldPasswordError && (
+        <p className="text-red-600 text-sm mt-1">{oldPasswordError}</p>
+      )}
+      <PasswordInput
+        name="password"
+        value={editNewPassword}
+        onChange={(e) => setEditNewPassword(e.target.value)}
+        className="w-full p-2 border rounded-lg mb-2"
+        placeholder="New Password"
+      />
+      <PasswordInput
+        name="password"
+        value={editNewPasswordConfirm}
+        onChange={(e) => setEditNewPasswordConfirm(e.target.value)}
+        className="w-full p-2 border rounded-lg mb-2"
+        placeholder="Confirm New Password"
+      />
+      {passwordError && (
+        <p className="text-red-600 text-sm mt-1">{passwordError}</p>
+      )}
+      <button
+        onClick={updatePassword}
+        className="bg-[#3f414c] hover:bg-[#2f313a] text-white text-sm font-medium px-5 py-2.5 rounded-xl mt-4 ml-auto block"
+      >
+        Update Password
+      </button>
+    </div>
+
+    {/* Interests Section */}
+    <div className="bg-white p-6 rounded-2xl shadow-sm border mb-8">
+      <h3 className="text-xl font-bold mb-4">Interest Selection (Max 6)</h3>
+
+      <div className="flex flex-wrap gap-2 mb-4">
+        {selectedTopics.map((topic, i) => (
+          <span key={i} className="bg-gray-200 text-sm px-3 py-1 rounded-full">
+            {topic}
+          </span>
+        ))}
+      </div>
+
+      {Array.from({ length: 6 }).map((_, index) => (
+        <div key={index} className="flex items-center gap-3 mb-4">
+          <label className="w-6 text-sm font-medium">{index + 1}.</label>
+          <select
+            value={dropdownValues[index]}
+            onChange={(e) => handleDropdownChange(index, e)}
+            className="w-full p-2 border rounded-lg"
+          >
+            <option value="">Select a category</option>
+            {categories
+              .filter(
+                (cat) =>
+                  !dropdownValues.includes(cat.name) ||
+                  cat.name === dropdownValues[index]
+              )
+              .map((cat) => (
+                <option key={cat.id} value={cat.name}>
+                  {cat.name}
+                </option>
+              ))}
+          </select>
+        </div>
+      ))}
+      <button
+        onClick={updateInterests}
+        className="bg-[#3f414c] hover:bg-[#2f313a] text-white text-sm font-medium px-5 py-2.5 rounded-xl mt-4 ml-auto block"
+      >
+        Update Interests
+      </button>
+      {showError && (
+        <p className="text-red-600 text-sm mt-2">
+          You can only select up to 6 topics.
+        </p>
+      )}
+    </div>
+  </div>
+);
+  // return (
+  //   <div className="flex justify-center w-full px-4 md:px-5 pt-8 text-black text-2xl font-grotesk font-medium">
+  //     <div className="w-full max-w-4xl font-grotesk">
+  //       <h1 className="text-3xl font-bold mb-2">Profile Particulars:</h1>
+  //       <div className="p-4 bg-white shadow-md rounded-lg">
+  //         <div className="mb-1">Name:</div>
+  //         <input
+  //           type="text"
+  //           value={editUsername}
+  //           onChange={(e) => setEditUsername(e.target.value)}
+  //           className="w-full p-2 border rounded-lg mb-2"
+  //           placeholder="Username"
+  //         />
+  //         <div className="mb-1">Email:</div>
+  //         <input
+  //           type="email"
+  //           value={editEmail}
+  //           onChange={(e) => setEditEmail(e.target.value)}
+  //           className="w-full p-2 border rounded-lg mb-2"
+  //           placeholder="E-mail"
+  //         />
+  //         <div className="mb-1">Date:</div>
+  //         <DatePicker
+  //           selected={editDate ? new Date(editDate) : null}
+  //           onChange={(date) => {
+  //             const isoString = date?.toISOString().split("T")[0]; // 'yyyy-mm-dd'
+  //             setEditDate(isoString);
+  //           }}
+  //           dateFormat="dd-MM-yyyy"
+  //           maxDate={
+  //             new Date(new Date().setFullYear(new Date().getFullYear() - 16))
+  //           }
+  //           showMonthDropdown
+  //           showYearDropdown
+  //           dropdownMode="select"
+  //           scrollableYearDropdown
+  //           yearDropdownItemNumber={100}
+  //           placeholderText="Select your date of birth (Above 16 years old)"
+  //           className="w-full p-2 border rounded-lg mb-2"
+  //           wrapperClassName="w-full"
+  //           popperClassName="z-[50]"
+  //         />
+  //         <div className="mb-1">Gender:</div>
+  //         <select
+  //           value={editGender}
+  //           onChange={(e) => setEditGender(e.target.value)}
+  //           className="w-full p-2 border rounded-lg mb-2"
+  //         >
+  //           <option value="">Select Gender</option>
+  //           <option value="Male">Male</option>
+  //           <option value="Female">Female</option>
+  //           <option value="Other">Prefer Not To Say</option>
+  //         </select>
+          
+  //         <div className="mb-1">User Type:</div>
+  //         <input
+  //           type="text"
+  //           value={userType} 
+  //           readOnly
+  //           className="w-full p-2 border rounded-lg mb-2 bg-gray-200"
+  //         />
+
+  //         <div className="mb-1">Choose Profile Color:</div>
+  //         <HexColorPicker
+  //           color={profileColor}
+  //           onChange={handleColorChange}
+  //           className="mb-2"
+  //         />
+  //         <div className="mb-1">Or Enter HexCode:</div>
+  //         <input
+  //           type="text"
+  //           value={hexCode}
+  //           onChange={handleHexChange}
+  //           placeholder="#FFFFFF"
+  //           className="w-full p-2 border rounded-lg mb-2"
+  //         />
+  //         <button
+  //           onClick={updateProfile}
+  //           className="bg-[#3f414c] text-[white] cursor-pointer text-sm flex justify-end self-end w-fit ml-auto mr-0 mt-5 px-5 py-2.5 rounded-xl border-[none] "
+  //         >
+  //           Update
+  //         </button>
+  //       </div>
+
+  //       {/* Password Change */}
+  //       <h1 className="text-3xl font-bold mb-2 mt-6">Manage Password:</h1>
+  //       <div className="p-4 bg-white shadow-md rounded-lg ">
+  //         <PasswordInput
+  //           name="password"
+  //           value={editOldPassword}
+  //           onChange={(e) => setEditOldPassword(e.target.value)}
+  //           className="w-full p-2 border rounded-lg"
+  //           placeholder="Old Password"
+  //         />
+  //         {oldPasswordError && (
+  //           <p className="text-red-600 text-sm mt-1">{oldPasswordError}</p>
+  //         )}
+  //         <PasswordInput
+  //           name="password"
+  //           value={editNewPassword}
+  //           onChange={(e) => setEditNewPassword(e.target.value)}
+  //           className="w-full p-2 border rounded-lg mt-2"
+  //           placeholder="New Password "
+  //         />
+  //         <PasswordInput
+  //           name="password"
+  //           value={editNewPasswordConfirm}
+  //           onChange={(e) => setEditNewPasswordConfirm(e.target.value)}
+  //           className="w-full p-2 border rounded-lg mt-2"
+  //           placeholder="Confirm New Password"
+  //         />
+  //         {passwordError && (
+  //           <p className="text-red-600 text-sm mt-2">{passwordError}</p>
+  //         )}
+  //         <button
+  //           onClick={updatePassword}
+  //           className="bg-[#3f414c] text-[white] cursor-pointer text-sm flex justify-end self-end w-fit ml-auto mr-0 mt-5 px-5 py-2.5 rounded-xl border-[none]"
+  //         >
+  //           Update
+  //         </button>
+  //       </div>
+
+  //       {/* Topic Interests */}
+  //       <h1 className="text-3xl font-bold mb-2 mt-6">
+  //         Interest Selection (Max 6):
+  //       </h1>
+  //       <div className="p-4 bg-white shadow-md rounded-lg ">
+  //         {Array.from({ length: 6 }).map((_, index) => (
+  //           <div key={index} className="flex flex-row mb-4 items-center">
+  //             <label className="mt-1 mr-2 font-grotesk text-2xl w-6">
+  //               {index + 1}.{" "}
+  //             </label>
+  //             <div className="flex-1">
+  //               <select
+  //                 value={dropdownValues[index]}
+  //                 onChange={(e) => handleDropdownChange(index, e)}
+  //                 className="w-full p-2 border rounded-lg font-grotesk"
+  //               >
+  //                 <option value="" classname="font-grotesk">
+  //                   Select a category
+  //                 </option>
+  //                 {categories
+  //                   .filter(
+  //                     (cat) =>
+  //                       !dropdownValues.includes(cat.name) ||
+  //                       cat.name === dropdownValues[index]
+  //                   )
+  //                   .map((cat) => (
+  //                     <option key={cat.id} value={cat.name}>
+  //                       {cat.name}
+  //                     </option>
+  //                   ))}
+  //               </select>
+  //             </div>
+  //           </div>
+  //         ))}
+  //         <button
+  //           onClick={updateInterests}
+  //           className="bg-[#3f414c] text-[white] cursor-pointer text-sm flex justify-end self-end w-fit ml-auto mr-0 mt-5 px-5 py-2.5 rounded-xl border-[none]"
+  //         >
+  //           Update
+  //         </button>
+  //       </div>
+
+  //       {showError && (
+  //         <p className="text-red-600">You can only select up to 6 topics.</p>
+  //       )}
+  //     </div>
+  //   </div>
+  // );
 };
 
 export default PremManageProfile;
