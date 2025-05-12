@@ -49,6 +49,16 @@ const Article = () => {
 
   const [isExpertArticle, setIsExpertArticle] = useState(false);
 
+  useEffect(() => {
+    document.addEventListener("mouseup", handleTextSelection);
+    return () => document.removeEventListener("mouseup", handleTextSelection);
+  }, []);
+
+  useEffect(() => {
+    if (selectedText) {
+      console.log("selectedText just updated to:", selectedText);
+    }
+  }, [selectedText]);
   const handleTextSelection = () => {
     const selection = window.getSelection();
     const text = selection.toString().trim();
@@ -68,13 +78,15 @@ const Article = () => {
   };
 
   // Function to fetch word definition
-  const fetchDefinition = async () => {
-    if (!selectedText) return;
-    console.log("fetch define", selectedText);
-    setLoading(true);
+  const fetchDefinition = async (word) => {
+    if (!word) return;
+    +console.log("📤 fetching definition for:", word);
+    +setLoading(true);
     try {
       const response = await fetch(
-        `https://api.dictionaryapi.dev/api/v2/entries/en/${selectedText}`
+        `https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(
+          word
+        )}`
       );
       const data = await response.json();
 
@@ -86,7 +98,7 @@ const Article = () => {
 
       setShowDictionary(true);
     } catch (error) {
-      console.log("error fetching defnition");
+      //console.log("error fetching definition");
       setDefinition("Error fetching definition.");
     } finally {
       setLoading(false);
@@ -354,11 +366,6 @@ const Article = () => {
 
   const authorName = articleData?.users?.username ?? "Unknown Author";
 
-  useEffect(() => {
-    document.addEventListener("mouseup", handleTextSelection);
-    return () => document.removeEventListener("mouseup", handleTextSelection);
-  }, []);
-
   return (
     <div
       className="min-h-screen w-screen flex flex-col bg-white"
@@ -485,7 +492,7 @@ const Article = () => {
             {selectedText && userType === "Premium" && (
               <button
                 ref={buttonRef}
-                onClick={fetchDefinition}
+                onClick={fetchDefinition(selectedText)}
                 className="absolute bg-blue-500 text-white px-3 py-1 rounded-lg flex items-center space-x-2 shadow-md"
                 style={{
                   left: `${buttonPosition.x}px`,

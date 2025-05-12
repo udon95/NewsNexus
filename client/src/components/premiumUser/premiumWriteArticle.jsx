@@ -67,6 +67,7 @@ export const PremiumWriteArticle = () => {
   const [aiFeedback, setAiFeedback] = useState("");
   const [accuracy, setAccuracy] = useState(null);
   const [openSuccess, setOpenSuccess] = useState(false);
+  const [openError, setOpenError] = useState(false);
   const [searchParams] = useSearchParams();
   const preSelectedType = searchParams.get("type"); // e.g. "room"
   const preSelectedRoomId = searchParams.get("roomid");
@@ -385,6 +386,10 @@ export const PremiumWriteArticle = () => {
           alert(
             "Article flagged by AI. Please review the highlighted sections."
           );
+          if (result.accuracy < 75) {
+            setOpenSuccess(false); // Don't show success dialog
+            setOpenError(true); // Show error message instead
+          }
         } else {
           alert(result.error || "Submission failed.");
         }

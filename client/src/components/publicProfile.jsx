@@ -17,6 +17,7 @@ const PublicProfile = () => {
       try {
         const response = await api.get(`/auth/public-profile/${username}`);
         setProfileData(response.data);
+        console.log("profile", response.data);
       } catch (err) {
         setError(err.response?.data?.error || "Error fetching user data");
       }
@@ -35,15 +36,6 @@ const PublicProfile = () => {
         <div className="bg-gray-200 p-6 rounded-lg shadow mb-2 max-w-[900px]">
           <h2 className="text-2xl font-semibold">
             {profileData.user.username}
-            <p className="text-sm text-gray-700 mt-1">
-              Joined on:{" "}
-              {new Date(profileData.user.created_at).toLocaleDateString()}
-            </p>
-            <p className="text-sm text-gray-700">
-              Articles: {profileData.totalArticles} | Total Likes:{" "}
-              {profileData.totalLikes} | Total Views: {profileData.totalViews}
-            </p>
-
             {profileData.user.expert_status === "Approved" && (
               <BadgeCheck className="inline-block ml-2 text-blue-500" />
             )}
@@ -58,6 +50,14 @@ const PublicProfile = () => {
                 Free
               </span>
             )}
+            <p className="text-sm text-gray-700 mt-1">
+              Joined on:{" "}
+              {new Date(profileData.user.created_at).toLocaleDateString()}
+            </p>
+            <p className="text-sm text-gray-700">
+              Articles: {profileData.totalArticles} | Total Likes:{" "}
+              {profileData.totalLikes} | Total Views: {profileData.totalViews}
+            </p>
           </h2>
         </div>
 
