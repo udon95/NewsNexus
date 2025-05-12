@@ -16,31 +16,6 @@ const supabase = createClient(
 const OPENAI_KEY = process.env.OPENAI_API_KEY;
 const PERPLEXITY_KEY = process.env.PERPLEXITY_API_KEY;
 
-// async function moderateText(content) {
-//   const controller = new AbortController();
-//   const timeout = setTimeout(() => controller.abort(), 8000);
-//   try {
-//     const res = await fetch("https://api.openai.com/v1/moderations", {
-//       method: "POST",
-//       headers: {
-//         Authorization: `Bearer ${OPENAI_KEY}`,
-//         "Content-Type": "application/json",
-//       },
-//       body: JSON.stringify({ input: content }),
-//       signal: controller.signal,
-//     });
-//     clearTimeout(timeout);
-//     if (!res.ok) {
-//       throw new Error(`OpenAI error: ${res.status} ${res.statusText}`);
-//     }
-//     const data = await res.json();
-//     return data.results?.[0];
-//   } catch (err) {
-//     console.error("Moderation error: ", err.message || err);
-//     return { flagged: false, error: "Moderation failed or timed out." };
-//   }
-// }
-
 function extractTextFromHTML(html) {
   const dom = new JSDOM(html);
   return dom.window.document.body.textContent || "";
@@ -142,36 +117,36 @@ const deleteImagesFromSupabase = async (imageUrls) => {
 };
 
 const generateCategoryPrompt = (content, category) => `
-You are a category validation assistant.
+      You are a category validation assistant.
 
-Determine if the following article content is relevant to the category "${category}".
-Even if the content could fit into several different categories, if the chosen category is one of them, answer "yes".
+      Determine if the following article content is relevant to the category "${category}".
+      Even if the content could fit into several different categories, if the chosen category is one of them, answer "yes".
 
-Relevance includes people, places, events, policies, or topics that originate from or strongly affect the category.
+      Relevance includes people, places, events, policies, or topics that originate from or strongly affect the category.
 
-Respond with one word only: "yes" or "no".
-EXAMPLE 1
-Category: Technology  
-Article: “Modern GPU architectures push 4 nm transistors, AI inference on-chip…”  
-Answer: Yes
+      Respond with one word only: "yes" or "no".
+      EXAMPLE 1
+      Category: Technology  
+      Article: “Modern GPU architectures push 4 nm transistors, AI inference on-chip…”  
+      Answer: Yes
 
-EXAMPLE 2
-Category: Technology  
-Article: “Baking sourdough with wild yeast, tips on kneading dough…”  
-Answer: No
+      EXAMPLE 2
+      Category: Technology  
+      Article: “Baking sourdough with wild yeast, tips on kneading dough…”  
+      Answer: No
 
-EXAMPLE 3
-Category: Culinary  
-Article:
-“When is a restaurant like a handbag? A private dining room reservation … used.”  
-Answer: Yes
+      EXAMPLE 3
+      Category: Culinary  
+      Article:
+      “When is a restaurant like a handbag? A private dining room reservation … used.”  
+      Answer: Yes
 
-NOW EVALUATE
-Category: ${category} 
-Article:
-${content}
-Answer:
-`;
+      NOW EVALUATE
+      Category: ${category} 
+      Article:
+      ${content}
+      Answer:
+      `;
 
 async function factCheck(content, topicName) {
   const catRes = await fetch("https://api.openai.com/v1/chat/completions", {
@@ -265,10 +240,13 @@ async function factCheck(content, topicName) {
     //   );
     // }
     // console.log("Raw response from Perplexity:", raw);
+    const test = await pxRes.json();
+    console.log("test json", test);
+
     let parsed = null;
     try {
       parsed = JSON.parse(raw);
-      //console.log("parsed  from perplexity", parsed);
+      console.log("parsed from perplexity", parsed);
     } catch (err) {
       console.error("Error parsing JSON response:", err.message);
       throw new Error("Failed to parse Perplexity response as JSON.");
