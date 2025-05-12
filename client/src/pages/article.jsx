@@ -352,6 +352,11 @@ const Article = () => {
 
   const authorName = articleData?.users?.username ?? "Unknown Author";
 
+  useEffect(() => {
+    document.addEventListener("mouseup", handleTextSelection);
+    return () => document.removeEventListener("mouseup", handleTextSelection);
+  }, []);
+
   return (
     <div
       className="min-h-screen w-screen flex flex-col bg-white"
