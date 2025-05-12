@@ -310,95 +310,140 @@ const ManageRooms = () => {
           </div>
         </section>
 
+
+
         {/* Private Rooms */}
-        <section>
-          <h1 className="font-bold text-3xl mb-2">
-            My Private Discussion Rooms:
-          </h1>
-          <div className="flex gap-2 items-center mb-2">
-            <label>New:</label>
-            <input
-              placeholder="Name"
-              value={newPrivateRoom.name}
-              onChange={(e) =>
-                setNewPrivateRoom({ ...newPrivateRoom, name: e.target.value })
-              }
-              className="w-1/4 px-3 py-2 border rounded-md text-base"
-            />
-            <input
-              placeholder="Description"
-              value={newPrivateRoom.description}
-              onChange={(e) =>
-                setNewPrivateRoom({
-                  ...newPrivateRoom,
-                  description: e.target.value,
-                })
-              }
-              className="w-2/3 px-3 py-2 border rounded-md text-base"
-            />
-          </div>
-          <div className="flex items-center gap-2 mb-2">
-            <label>Invite:</label>
-            <input
-              placeholder="@user1, @user2 (max 10)"
-              value={newPrivateRoom.invite}
-              onChange={(e) =>
-                setNewPrivateRoom({ ...newPrivateRoom, invite: e.target.value })
-              }
-              className="w-full px-3 py-2 border rounded-md text-base"
-            />
+<section>
+  <h1 className="font-bold text-3xl mb-2">My Private Discussion Rooms:</h1>
+  <div className="flex gap-2 items-center mb-2">
+    <label>New:</label>
+    <input
+      placeholder="Name"
+      value={newPrivateRoom.name}
+      onChange={(e) =>
+        setNewPrivateRoom({ ...newPrivateRoom, name: e.target.value })
+      }
+      className="w-1/4 px-3 py-2 border rounded-md text-base"
+    />
+    <input
+      placeholder="Description"
+      value={newPrivateRoom.description}
+      onChange={(e) =>
+        setNewPrivateRoom({
+          ...newPrivateRoom,
+          description: e.target.value,
+        })
+      }
+      className="w-1/2 px-3 py-2 border rounded-md text-base"
+    />
+    
+    {/* 🟩 ADDED: Dropdown for member limit */}
+    <select
+      value={newPrivateRoom.member_limit}
+      onChange={(e) =>
+        setNewPrivateRoom({
+          ...newPrivateRoom,
+          member_limit: parseInt(e.target.value),
+        })
+      }
+      className="w-[120px] px-3 py-2 border rounded-md text-base"
+    >
+      <option value={20}>Limit: 20</option>
+      <option value={50}>Limit: 50</option>
+      <option value={100}>Limit: 100</option>
+    </select>
+    {/* 🟩 END */}
+
+    <button
+      onClick={handleAddPrivateRoom}
+      className="bg-black text-white px-4 py-2 rounded text-base"
+    >
+      +
+    </button>
+  </div>
+
+  <div className="flex items-center gap-2 mb-2">
+    <label>Invite:</label>
+    <input
+      placeholder="@user1, @user2 (max 10)"
+      value={newPrivateRoom.invite}
+      onChange={(e) =>
+        setNewPrivateRoom({ ...newPrivateRoom, invite: e.target.value })
+      }
+      className="w-full px-3 py-2 border rounded-md text-base"
+    />
+  </div>
+
+  <div className="bg-white p-4 rounded-xl shadow space-y-2">
+    {[...privateRooms, ...joinedPrivateRooms].map((room, index) => (
+      <div key={room.roomid} className={rowStyle}>
+        <span>{index + 1}. {room.name}</span>
+        <div className="flex gap-2">
+          {room.created_by === userId && (
+            <span className="mt-2">{room.member_count} members</span>
+          )}
+          {room.created_by === userId ? (
+            <>
+              <button
+                onClick={() =>
+                  handleUpdateRoom(
+                    room.roomid,
+                    room.name,
+                    room.description,
+                    room.room_type,
+                    room.member_limit // 🟩 ensure passing this too
+                  )
+                }
+                className={buttonClass}
+              >
+                Update
+              </button>
+              <button
+                onClick={() => handleDeleteRoom(room.roomid)}
+                className={buttonClass}
+              >
+                Delete
+              </button>
+            </>
+          ) : (
             <button
-              onClick={handleAddPrivateRoom}
-              className="bg-black text-white px-4 py-2 rounded text-base"
+              onClick={() => handleExitRoom(room.roomid)}
+              className={buttonClass}
             >
-              +
+              Exit
             </button>
-          </div>
-          <div className="bg-white p-4 rounded-xl shadow space-y-2">
-            {[...privateRooms, ...joinedPrivateRooms].map((room, index) => (
-              <div key={room.roomid} className={rowStyle}>
-                <span>
-                  {index + 1}. {room.name}
-                </span>
-                <div className="flex gap-2">
-                  {room.created_by === userId && (
-                    <span className="mt-2">{room.member_count} members</span>
-                  )}
-                  {room.created_by === userId ? (
-                    <>
-                      <button
-                        onClick={() =>
-                          handleUpdateRoom(
-                            room.roomid,
-                            room.name,
-                            room.description,
-                            room.room_type
-                          )
-                        }
-                        className={buttonClass}
-                      >
-                        Update
-                      </button>
-                      <button
-                        onClick={() => handleDeleteRoom(room.roomid)}
-                        className={buttonClass}
-                      >
-                        Delete
-                      </button>
-                    </>
-                  ) : (
-                    <button
-                      onClick={() => handleExitRoom(room.roomid)}
-                      className={buttonClass}
-                    >
-                      Exit
-                    </button>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
+          )}
+        </div>
+      </div>
+    ))}
+  </div>
+</section>
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
 
         {showModal && (
           <div className="fixed inset-0 bg-black/30 backdrop-blur-sm min-h-screen flex items-center justify-center z-50">
