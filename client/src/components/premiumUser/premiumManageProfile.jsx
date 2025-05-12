@@ -23,9 +23,10 @@ const PremManageProfile = () => {
   const [editOldPassword, setEditOldPassword] = useState("");
   const [editNewPassword, setEditNewPassword] = useState("");
   const [editNewPasswordConfirm, setEditNewPasswordConfirm] = useState("");
+  const [expertTopics, setExpertTopics] = useState("");
 
-  const [profileColor, setProfileColor] = useState("#ffffff");
-  const [hexCode, setHexCode] = useState("#ffffff");
+  const [profileColor, setProfileColor] = useState("#bfd8ff");
+  const [hexCode, setHexCode] = useState("#bfd8ff");
 
   const [categories, setCategories] = useState([]);
   const [dropdownValues, setDropdownValues] = useState(Array(6).fill(""));
@@ -67,6 +68,7 @@ const PremManageProfile = () => {
           setUserDetails(data.user);
           setUserType(data?.role || "Free");
           console.log("User Expert Topics:", data.expertTopics);
+          setExpertTopics(data.expertTopics);
 
           if (data.color) {
             setProfileColor(data.color);
