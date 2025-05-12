@@ -222,7 +222,7 @@ async function factCheck(content, topicName) {
     }
 
     const raw = await pxRes.text(); // Get raw response text first
-    //console.log("Raw response from Perplexity:", raw);
+    console.log("Raw response from Perplexity:", raw);
     // const choices = pxData.choices?.[0]?.message?.content;
     // console.log("Status code from Perplexity:", pxRes.status); // Check status code
     //let cleanResponse = raw.replace(/```json\n|\n```/g, ""); // Strip the markdown block (```json...```)
@@ -248,12 +248,12 @@ async function factCheck(content, topicName) {
     let parsed;
     try {
       parsed = JSON.parse(raw);
-      console.log("parsed from perplexity", parsed);
+      //console.log("parsed from perplexity", parsed);
     } catch (err) {
       console.error("Error parsing JSON response:", err.message);
       throw new Error("Failed to parse Perplexity response as JSON.");
     }
-    console.log("Perplexity response parsed:", parsed); // Check parsed data
+    //console.log("Perplexity response parsed:", parsed); // Check parsed data
 
     // if (
     //   !parsed ||
