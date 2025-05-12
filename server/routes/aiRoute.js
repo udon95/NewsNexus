@@ -286,7 +286,9 @@ async function factCheck(content, topicName) {
     }
     const feedback = parsed.choices[0].message.content || "";
     //const accuracyMatch = feedback.match(/"accuracy":\s*(\d+)/); // Look for accuracy in the feedback
-
+    console.log("parsed choice 0", feedback);
+    const test = parsed.choices[1].message.content || "";
+    console.log("parsed choice 1", test);
     //let accuracy = accuracyMatch ? parseInt(accuracyMatch[1], 10) : null;
     let accuracy = parsed.accuracy;
 
