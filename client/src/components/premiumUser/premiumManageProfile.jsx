@@ -116,7 +116,7 @@ const PremManageProfile = () => {
               console.error("Error fetching topic name:", topicError);
             } else {
               topicNames.push({
-                topicid: expert.topicid,
+                //topicid: expert.topicid,
                 topicName: topicData?.name || "Unknown",
               });
             }
