@@ -233,11 +233,11 @@ async function factCheck(content, topicName) {
                       The response must be **only** a single valid JSON object, no markdown, no code fences, no extra text.
 
                       Article:
-                      ${responseText}
+                      ${content}
                       **If this article is fictional or based on fabricated events, set accuracy to 0.**
                       `,
           },
-          { role: "user", content: responseText },
+          { role: "user", content },
         ],
       }),
     });
@@ -289,27 +289,27 @@ async function factCheck(content, topicName) {
       );
     }
 
-    const responseText = parsed.choices[0]?.message?.content || "";
-    if (!responseText) {
+    const content = parsed.choices[0]?.message?.content || "";
+    if (!content) {
       throw new Error("No content found in the Perplexity response.");
     }
-    const accuracyMatch = responseText.match(/"accuracy":\s*(\d+)/);
+    const accuracyMatch = content.match(/"accuracy":\s*(\d+)/);
     let accuracy = 0;
 
     if (accuracyMatch) {
       accuracy = parseInt(accuracyMatch[1], 10);
     }
-    const feedbackStartIndex = responseText.indexOf('"feedback":');
-    let feedback = responseText;
+    const feedbackStartIndex = content.indexOf('"feedback":');
+    let feedback = content;
 
     if (feedbackStartIndex !== -1) {
-      feedback = responseText.slice(feedbackStartIndex + 11).trim();
+      feedback = content.slice(feedbackStartIndex + 11).trim();
     }
 
     feedback = feedback.replace(/\\n/g, "\n").replace(/\\"/g, '"');
 
     if (feedback.toLowerCase().includes("fictional")) {
-      accuracy = 0;
+      accuracy = 1;
     }
     const result = {
       accuracy: accuracy,
@@ -361,12 +361,12 @@ async function factCheck(content, topicName) {
                     The response must be **only** a single valid JSON object, no markdown, no code fences, no extra text.
 
                     Article: 
-                    ${responseText}
+                    ${content}
                     **If this article is fictional or based on fabricated events, set accuracy to 1.**
                     **If the content refers to recent events and ChatGPT cannot verify it, reduce the accuracy score.**
                     Please provide the analysis accordingly.`,
           },
-          { role: "user", content: responseText },
+          { role: "user", content },
         ],
         temperature: 0.2,
       }),
