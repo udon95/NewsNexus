@@ -591,16 +591,10 @@ const PremManageProfile = () => {
                   Expert In
                 </label>
                 <ul>
-                  {expertTopics.length > 0 ? (
+                  {expertTopics.length > 0 &&
                     expertTopics.map((topic, index) => (
-                      <li key={index}>
-                        {topic.topicName || "Unknown Topic"} (Topic ID:{" "}
-                        {topic.topicid})
-                      </li>
-                    ))
-                  ) : (
-                    <p>No expert topics</p>
-                  )}
+                      <li key={index}>{topic.topicName || "Unknown Topic"}</li>
+                    ))}
                 </ul>
               </div>
             </div>
