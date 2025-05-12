@@ -58,8 +58,7 @@ const Article = () => {
       return;
     }
     setSelectedText(text);
-    //console.log("highlighted text", text);
-    //console.log("selectedtext", selectedText);
+
     const rect = selection.getRangeAt(0).getBoundingClientRect();
     setButtonPosition({
       x: rect.left + window.scrollX,
@@ -70,7 +69,6 @@ const Article = () => {
   // Function to fetch word definition
   const fetchDefinition = async (word) => {
     if (!word) return;
-    console.log("📤 fetching definition for:", word);
     setLoading(true);
     try {
       const response = await fetch(
@@ -88,7 +86,6 @@ const Article = () => {
 
       setShowDictionary(true);
     } catch (error) {
-      //console.log("error fetching definition");
       setDefinition("Error fetching definition.");
     } finally {
       setLoading(false);
@@ -484,7 +481,6 @@ const Article = () => {
               <button
                 ref={buttonRef}
                 onClick={() => {
-                  console.log("define button seleteced text", selectedText);
                   fetchDefinition(selectedText);
                 }}
                 className="absolute bg-blue-500 text-white px-3 py-1 rounded-lg flex items-center space-x-2 shadow-md"

@@ -724,7 +724,7 @@ router.get("/public-profile/:username", async (req, res) => {
         status: userData.status,
         created_at: userData.created_at,
       },
-      expertTopic,
+      expertTopics,
       articles: articlesData || [],
       rooms: publicRooms || [],
       totalArticles: articlesData.length,
