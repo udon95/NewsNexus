@@ -297,7 +297,7 @@ async function factCheck(content, topicName) {
 
     // Extract only the required fields
     //const content = parsed?.choices?.[0]?.message?.content || "";
-    const messageContent = parsed?.choices?.[0]?.message || "";
+    const messageContent = parsed?.choices?.[0]?.message?.content || "";
     if (!messageContent) {
       console.error("Message field not found in Perplexity response.");
       throw new Error("No message field found in Perplexity response.");
@@ -305,6 +305,7 @@ async function factCheck(content, topicName) {
 
     // If 'message' is an object, inspect its contents
     console.log("Message object:", messageContent); // Debugging the content
+    const cleanedContent = messageContent.replace(/^```json\n|\n```$/g, ""); // Remove the surrounding backticks and line breaks
 
     let feedback = "";
     let accuracy = null;
@@ -323,6 +324,11 @@ async function factCheck(content, topicName) {
     } catch (err) {
       console.error("Error parsing message content:", err.message);
       throw new Error("Failed to parse Perplexity message content.");
+    }
+
+    if (feedback.toLowerCase().includes("fictional")) {
+      accuracy = 0; // Set accuracy to 0 if the content is fictional
+      feedback = `The article is entirely fictional and does not correspond to real events or persons.`;
     }
     const result = {
       accuracy,
@@ -376,7 +382,11 @@ async function factCheck(content, topicName) {
     });
     const gptData = await gptRes.json();
     const parsed = JSON.parse(gptData.choices[0].message.content);
-    result = parsed;
+    let result = parsed;
+    if (result.feedback.toLowerCase().includes("fictional")) {
+      result.accuracy = 0; // Set accuracy to 0 if the article is fictional
+      result.feedback = `The article is entirely fictional and does not correspond to real events or persons.`;
+    }
   }
 
   //console.log("parsed result:", result);
