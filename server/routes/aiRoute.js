@@ -305,7 +305,7 @@ async function factCheck(content, topicName) {
 
     // If 'message' is an object, inspect its contents
     console.log("Message object:", messageContent); // Debugging the content
-    const cleanedContent = messageContent.replace(/^```json\n|\n```$/g, ""); // Remove the surrounding backticks and line breaks
+    const cleanedContent = messageContent.replace(/^```json\n|\n```$/g, ""); // Remove surrounding backticks and line breaks
 
     let feedback = "";
     let accuracy = null;
@@ -313,7 +313,7 @@ async function factCheck(content, topicName) {
     // Only return the desired content, accuracy, and feedback
     try {
       // Parse the content of the message, which is a JSON string
-      const contentData = JSON.parse(messageContent);
+      const contentData = JSON.parse(cleanedContent);
       console.log("content data".contentData);
       // Extract accuracy and feedback from the parsed content
       accuracy = contentData?.accuracy || null;
@@ -380,8 +380,12 @@ async function factCheck(content, topicName) {
         temperature: 0.2,
       }),
     });
+    console.log("Status code from Perplexity:", gptRes.status); // Check status code
+    if (!gptRes.ok) {
+      throw new Error(`Perplexity API error with status ${gptRes.status}`);
+    }
     const gptData = await gptRes.json();
-    console.log("gptData", gptData);
+    //console.log("gptData", gptData);
     const parsed = JSON.parse(gptData.choices[0].message.content);
 
     let result = parsed;
