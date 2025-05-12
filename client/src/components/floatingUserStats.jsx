@@ -117,7 +117,7 @@ const FloatingUserStats = ({ user, customClassName }) => {
       <>
         <div className="text-center leading-tight">
           <div className="text-3xl">{stats.reads} / 10</div>
-          <div className="text-[10px] font-medium">Today</div>
+          <div className="text-[10px] font-medium">Today's Reads</div>
         </div>
       </>
     ) : (
