@@ -56,9 +56,10 @@ const Article = () => {
 
   useEffect(() => {
     if (selectedText) {
-      console.log("selectedText just updated to:", selectedText);
+      //console.log("selectedText just updated to:", selectedText);
     }
   }, [selectedText]);
+
   const handleTextSelection = () => {
     const selection = window.getSelection();
     const text = selection.toString().trim();
@@ -68,8 +69,8 @@ const Article = () => {
       return;
     }
     setSelectedText(text);
-    console.log("highlighted text", text);
-    console.log("selectedtext", selectedText);
+    //console.log("highlighted text", text);
+    //console.log("selectedtext", selectedText);
     const rect = selection.getRangeAt(0).getBoundingClientRect();
     setButtonPosition({
       x: rect.left + window.scrollX,
@@ -80,8 +81,8 @@ const Article = () => {
   // Function to fetch word definition
   const fetchDefinition = async (word) => {
     if (!word) return;
-    +console.log("📤 fetching definition for:", word);
-    +setLoading(true);
+    console.log("📤 fetching definition for:", word);
+    setLoading(true);
     try {
       const response = await fetch(
         `https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(
@@ -492,7 +493,10 @@ const Article = () => {
             {selectedText && userType === "Premium" && (
               <button
                 ref={buttonRef}
-                onClick={() => fetchDefinition(selectedText)}
+                onClick={() => {
+                  console.log("define button seleteced text", selectedText);
+                  fetchDefinition(selectedText);
+                }}
                 className="absolute bg-blue-500 text-white px-3 py-1 rounded-lg flex items-center space-x-2 shadow-md"
                 style={{
                   left: `${buttonPosition.x}px`,
