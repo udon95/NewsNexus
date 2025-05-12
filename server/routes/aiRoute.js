@@ -6,7 +6,7 @@ const { ImageAnnotatorClient } = require("@google-cloud/vision");
 
 router.use(express.json());
 const { JSDOM } = require("jsdom");
-const { RolesAnywhere } = require("aws-sdk");
+//const { RolesAnywhere } = require("aws-sdk");
 
 const supabase = createClient(
   process.env.SUPABASE_URL,
@@ -289,24 +289,24 @@ async function factCheck(content, topicName) {
       );
     }
 
-    const content = parsed.choices[0]?.message?.content || "";
+    const content = pxData.choices[0]?.message?.content || "";
     if (!content) {
       throw new Error("No content found in the Perplexity response.");
     }
-    const accuracyMatch = content.match(/"accuracy":\s*(\d+)/);
-    let accuracy = 0;
+    // const accuracyMatch = content.match(/"accuracy":\s*(\d+)/);
+    // let accuracy = 0;
 
-    if (accuracyMatch) {
-      accuracy = parseInt(accuracyMatch[1], 10);
-    }
-    const feedbackStartIndex = content.indexOf('"feedback":');
-    let feedback = content;
+    // if (accuracyMatch) {
+    //   accuracy = parseInt(accuracyMatch[1], 10);
+    // }
+    // const feedbackStartIndex = content.indexOf('"feedback":');
+    // let feedback = content;
 
-    if (feedbackStartIndex !== -1) {
-      feedback = content.slice(feedbackStartIndex + 11).trim();
-    }
+    // if (feedbackStartIndex !== -1) {
+    //   feedback = content.slice(feedbackStartIndex + 11).trim();
+    // }
 
-    feedback = feedback.replace(/\\n/g, "\n").replace(/\\"/g, '"');
+    // feedback = feedback.replace(/\\n/g, "\n").replace(/\\"/g, '"');
 
     if (feedback.toLowerCase().includes("fictional")) {
       accuracy = 1;
