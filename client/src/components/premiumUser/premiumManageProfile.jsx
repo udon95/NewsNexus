@@ -186,7 +186,7 @@ const PremManageProfile = () => {
       newValue === "" ||
       newValue === oldValue ||
       nonBlankCount < 6 ||
-      (nonBlankCount === 6 && newValue !== "" && oldValue !== "")
+      (nonBlankCount === 6 && oldValue !== "")
     ) {
       if (newValue && alreadySelectedElsewhere) {
         alert("You’ve already selected this topic.");
@@ -356,7 +356,7 @@ const PremManageProfile = () => {
 
   // update interests
   const updateInterests = async () => {
-    if (selectedTopics.length >= 6) {
+    if (selectedTopics.length > 6) {
       alert("You can only select up to 6 interests.");
       return;
     }
