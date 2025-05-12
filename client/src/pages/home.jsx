@@ -42,7 +42,8 @@
 
     return (
       <div className="w-full min-w-screen min-h-screen flex flex-col bg-white">
-        <div className="w-full h-[300px] bg-[#7FB0FE]">
+        {/* <div className="w-full h-[300px] bg-[#7FB0FE]"> */}
+        <div className="w-full h-[260px] sm:h-[300px] bg-[#7FB0FE]">
         <div
           className="
             max-w-screen-xl
@@ -59,21 +60,23 @@
           "
         >
 
-
             <div className="grid grid-cols-1 sm:grid-cols-2 items-center h-full gap-4">
               {/* LEFT SIDE: Title + Subtitle stacked */}
               <div>
-              <h1 className="text-black text-4xl font-bold font-grotesk w-[300px]">
+              {/* <h1 className="text-black text-4xl font-bold font-grotesk w-[300px]"> */}
+              <h1 className="text-black text-3xl sm:text-4xl font-bold font-grotesk max-w-full sm:max-w-[400px] break-words">
                 Navigating the Singaporean News Landscape
               </h1>
-              <p className="mt-4 text-sm font-medium" style={{ color: "#00317F" }}>
+              {/* <p className="mt-4 text-sm font-medium" style={{ color: "#00317F" }}> */}
+              <p className="mt-2 text-xs sm:text-sm font-medium leading-snug" style={{ color: "#00317F" }}>
                 Join us in building a smarter, fact-powered news space.
                 </p>
               </div>
 
 
               {/* RIGHT SIDE: Counter overlay remains aligned right */}
-              <div className="sm:justify-self-end w-full sm:w-auto flex justify-center sm:justify-end">
+              {/* <div className="sm:justify-self-end w-full sm:w-auto flex justify-center sm:justify-end"> */}
+              <div className="hidden md:flex sm:justify-self-end w-full sm:w-auto justify-center sm:justify-end">
                 <ProgressOverlay />
               </div>
             </div>
@@ -101,12 +104,14 @@
         </div>
         <Navbar />
         <div className="flex flex-col lg:flex-row gap-4 px-4">
-    {user && (
-      <div className="sticky top-4 self-start w-full lg:w-[100px] left-25">
-        <FloatingUserStats user={user} />
-      </div>
-    )}
+        {user && (
+          <div className="hidden md:block sticky top-4 self-start w-full lg:w-[100px] left-25">
+            <FloatingUserStats user={user} />
+          </div>
+        )}
 
+
+      
     
         {/* <div className="flex justify-center w-full mt-12">
           {userType !== "Premium" && (
@@ -118,7 +123,10 @@
             </button>
           )}{" "}
         </div> */}
-  <div className="flex-1">
+
+
+
+      <div className="flex-1">
         <VideoComponent />
         <ComparisonTable />
 
@@ -161,6 +169,8 @@
             <LatestNews displayLimit={3} />
           </div>
 
+
+
         <div className="flex justify-center mt-12 mb-5">
           <button
             onClick={() => navigate("/explore")}
@@ -182,4 +192,3 @@
 
 
   export default Home;
-
