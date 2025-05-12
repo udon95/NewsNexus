@@ -243,7 +243,7 @@ The response must be **only** a single valid JSON object, no markdown, no code f
         ],
       }),
     });
-    //console.log("Status code from Perplexity:", pxRes.status); // Check status code
+    console.log("Status code from Perplexity:", pxRes.status); // Check status code
     const raw = await pxRes.text(); // Get raw response text first
     //console.log("Raw response from Perplexity:", raw);
     // const choices = pxData.choices?.[0]?.message?.content;
@@ -287,9 +287,10 @@ The response must be **only** a single valid JSON object, no markdown, no code f
       );
     }
     const feedback = parsed.choices[0].message.content || "";
-    const accuracyMatch = feedback.match(/"accuracy":\s*(\d+)/); // Look for accuracy in the feedback
+    //const accuracyMatch = feedback.match(/"accuracy":\s*(\d+)/); // Look for accuracy in the feedback
 
-    let accuracy = accuracyMatch ? parseInt(accuracyMatch[1], 10) : null;
+    //let accuracy = accuracyMatch ? parseInt(accuracyMatch[1], 10) : null;
+    let accuracy = parsed.accuracy;
 
     if (accuracy === null) {
       console.warn("Accuracy field not found in the response.");
@@ -297,12 +298,20 @@ The response must be **only** a single valid JSON object, no markdown, no code f
     if (feedback.toLowerCase().includes("fictional")) {
       accuracy = 0; // Set accuracy to 0 if "fictional" is mentioned
     }
-
-    //console.log("Parsed Perplexity response:", parsed);
-    result = {
-      accuracy: accuracy || 0, // Default to 0 if accuracy is not found
-      feedback: feedback,
-    };
+    try {
+      const feedback = JSON.parse(feedback);
+      //console.log("Parsed Perplexity response:", parsed);
+      result = {
+        accuracy: accuracy, // Default to 0 if accuracy is not found
+        feedback: feedback,
+      };
+    } catch (err) {
+      console.error("Error cleaning feedback:", err.message);
+      result = {
+        accuracy: accuracy,
+        feedback: feedback, // Default to raw feedback if it's not valid JSON
+      };
+    }
   } catch (perpErr) {
     console.warn(
       "Perplexity fail to determine, falling back to ChatGPT:",
