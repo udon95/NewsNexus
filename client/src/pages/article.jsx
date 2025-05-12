@@ -58,8 +58,8 @@ const Article = () => {
       return;
     }
     setSelectedText(text);
-    console.log("selected text", text);
-
+    console.log("highlighted text", text);
+    console.log("selectedtext", selectedText);
     const rect = selection.getRangeAt(0).getBoundingClientRect();
     setButtonPosition({
       x: rect.left + window.scrollX,
@@ -69,9 +69,8 @@ const Article = () => {
 
   // Function to fetch word definition
   const fetchDefinition = async () => {
-    console.log("fetch define", selectedText);
     if (!selectedText) return;
-
+    console.log("fetch define", selectedText);
     setLoading(true);
     try {
       const response = await fetch(
@@ -108,9 +107,7 @@ const Article = () => {
 
     try {
       const text = articleRef.current.innerText;
-      const locale = selectedLanguage === "en"
-      ? "en-US"
-      : selectedLanguage;
+      const locale = selectedLanguage === "en" ? "en-US" : selectedLanguage;
       console.log("selected lang", locale);
 
       const response = await fetch(
@@ -365,7 +362,7 @@ const Article = () => {
   return (
     <div
       className="min-h-screen w-screen flex flex-col bg-white"
-      onMouseUp={handleTextSelection}
+      //onMouseUp={handleTextSelection}
     >
       <Navbar />
       <main className="flex flex-col items-center w-full px-4 sm:px-8 py-6 mx-auto max-w-[1000px]">

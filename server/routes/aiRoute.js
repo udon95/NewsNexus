@@ -298,7 +298,7 @@ The response must be **only** a single valid JSON object, no markdown, no code f
       accuracy = 0; // Set accuracy to 0 if "fictional" is mentioned
     }
 
-    console.log("Parsed Perplexity response:", parsed);
+    //console.log("Parsed Perplexity response:", parsed);
     result = {
       accuracy: accuracy || 0, // Default to 0 if accuracy is not found
       feedback: feedback,
