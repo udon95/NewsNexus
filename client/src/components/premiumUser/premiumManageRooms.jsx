@@ -10,7 +10,6 @@ const ManageRooms = () => {
   const [newPublicRoom, setNewPublicRoom] = useState({
     name: "",
     description: "",
-    member_limit: 20,
   });
   const [newPrivateRoom, setNewPrivateRoom] = useState({
     name: "",
@@ -83,14 +82,13 @@ const ManageRooms = () => {
           ...newPublicRoom,
           room_type: "Public",
           created_by: userId,
-          member_limit: newPublicRoom.member_limit || 20,
         }),
       }
     );
 
     if (res.ok) {
       alert("Public room created");
-      setNewPublicRoom({ name: "", description: "", member_limit: 20 });
+      setNewPublicRoom({ name: "", description: ""});
       fetchRooms();
     }
   };
