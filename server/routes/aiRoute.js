@@ -222,7 +222,7 @@ async function factCheck(content, topicName) {
     }
 
     const raw = await pxRes.text(); // Get raw response text first
-    console.log("Raw response from Perplexity:", raw);
+    //console.log("Raw response from Perplexity:", raw);
     // const choices = pxData.choices?.[0]?.message?.content;
     // console.log("Status code from Perplexity:", pxRes.status); // Check status code
     //let cleanResponse = raw.replace(/```json\n|\n```/g, ""); // Strip the markdown block (```json...```)
@@ -253,7 +253,7 @@ async function factCheck(content, topicName) {
       console.error("Error parsing JSON response:", err.message);
       throw new Error("Failed to parse Perplexity response as JSON.");
     }
-    console.log("Perplexity response parsed:", parsed); // Check parsed data
+    //console.log("Perplexity response parsed:", parsed); // Check parsed data
 
     // if (
     //   !parsed ||
@@ -314,7 +314,7 @@ async function factCheck(content, topicName) {
     try {
       // Parse the content of the message, which is a JSON string
       const contentData = JSON.parse(messageContent);
-
+      console.log("content data".contentData);
       // Extract accuracy and feedback from the parsed content
       accuracy = contentData?.accuracy || null;
       feedback = contentData?.feedback || "";
@@ -381,8 +381,12 @@ async function factCheck(content, topicName) {
       }),
     });
     const gptData = await gptRes.json();
+    console.log("gptData", gptData);
     const parsed = JSON.parse(gptData.choices[0].message.content);
+
     let result = parsed;
+    console.log("chatgpt parsed", result);
+
     if (result.feedback.toLowerCase().includes("fictional")) {
       result.accuracy = 0; // Set accuracy to 0 if the article is fictional
       result.feedback = `The article is entirely fictional and does not correspond to real events or persons.`;
