@@ -114,6 +114,9 @@ const PublicProfile = () => {
       <Navbar />
       <main className="w-full px-4 sm:px-8 py-10 font-grotesk space-y-10">
   
+      <div className="max-w-5xl mx-auto">
+  <section className="w-full bg-white rounded-2xl border shadow p-6 flex flex-col sm:flex-row items-start gap-6">
+    {/* Profile card content */}
         {/* Profile Summary */}
         <section className="w-full bg-white rounded-2xl border shadow p-6 flex flex-col sm:flex-row items-start gap-6">
   {/* Avatar Box (rounded-square like navbar) */}
@@ -163,6 +166,8 @@ const PublicProfile = () => {
     </div>
   </div>
 </section>
+</section>
+</div>
 
   
         {/* Articles Section */}
