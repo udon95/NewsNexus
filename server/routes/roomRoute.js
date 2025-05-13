@@ -170,6 +170,31 @@ router.post("/invite", async (req, res) => {
     return res.status(404).json({ error: "User not found" });
   }
 
+
+   const { data: existingInvite } = await supabase
+    .from("room_invites")
+    .select("*")
+    .eq("userid", user.userid)
+    .eq("roomid", roomid)
+    .single();
+
+  if (existingInvite) {
+    return res.status(400).json({ error: "User already invited" });
+  }
+
+   const { data: existingMember } = await supabase
+    .from("room_members")
+    .select("*")
+    .eq("userid", user.userid)
+    .eq("roomid", roomid)
+    .is("exited_at", null)
+    .single();
+
+  if (existingMember) {
+    return res.status(400).json({ error: "User is already a member" });
+  }
+
+
   const { error: insertError } = await supabase.from("room_invites").insert([
     {
       userid: user.userid,
@@ -183,6 +208,9 @@ router.post("/invite", async (req, res) => {
 
   res.status(200).json({ message: "Invitation sent" });
 });
+
+
+
 
 router.post("/accept", async (req, res) => {
   const { userid, roomid } = req.body;
