@@ -221,9 +221,9 @@ async function factCheck(content, topicName) {
       throw new Error(`Perplexity API error with status ${pxRes.status}`);
     }
 
-    const raw = await pxRes.text(); // Get raw response text first
+    //const raw = await pxRes.text(); // Get raw response text first
     //console.log("Raw response from Perplexity:", raw);
-    // const choices = pxData.choices?.[0]?.message?.content;
+    const raw = pxData.choices?.[0]?.message?.content;
     // console.log("Status code from Perplexity:", pxRes.status); // Check status code
     //let cleanResponse = raw.replace(/```json\n|\n```/g, ""); // Strip the markdown block (```json...```)
 
@@ -244,7 +244,8 @@ async function factCheck(content, topicName) {
     //   );
     // }
     // console.log("Raw response from Perplexity:", raw);
-
+    console.log("choices", raw);
+    
     let parsed;
     try {
       parsed = JSON.parse(raw);
@@ -304,7 +305,7 @@ async function factCheck(content, topicName) {
     // }
 
     // If 'message' is an object, inspect its contents
-    //console.log("Message object:", messageContent); // Debugging the content
+    console.log("Message object:", parsed); // Debugging the content
 
     let feedback = "";
     let accuracy = null;
@@ -337,7 +338,7 @@ async function factCheck(content, topicName) {
 
     if (feedback.toLowerCase().includes("fictional")) {
       accuracy = 0; // Set accuracy to 0 if the content is fictional
-      feedback = `The article is entirely fictional and does not correspond to real events or persons.`;
+      feedback = `The article has fictional content and does not correspond to real events or persons.`;
     }
     const result = {
       accuracy,
@@ -409,7 +410,13 @@ async function factCheck(content, topicName) {
 
   //console.log("parsed result:", result);
   const threshold = 75;
-
+  if (!result || typeof result.accuracy !== "number") {
+    throw {
+      status: 500,
+      error: "Fact-checking failed: result is missing or invalid.",
+      result,
+    };
+  }
   if (result.accuracy < threshold) {
     throw {
       status: 400,
