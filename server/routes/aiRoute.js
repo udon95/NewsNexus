@@ -160,6 +160,24 @@ const jsonSchema = {
   },
 };
 
+function decodeUnicodeEscapes(str) {
+  if (typeof str !== "string") return str;
+  // Replace \xHH and \uHHHH with their actual characters
+  return str
+    .replace(/\\x([0-9A-Fa-f]{2})/g, (_, hex) =>
+      String.fromCharCode(parseInt(hex, 16))
+    )
+    .replace(/\\u([0-9A-Fa-f]{4})/g, (_, hex) =>
+      String.fromCharCode(parseInt(hex, 16))
+    );
+}
+
+function cleanText(str) {
+  const decoded = decodeUnicodeEscapes(str);
+  // Replace non-breaking space (\u00A0) and soft hyphen (\u00AD) with a regular space
+  return decoded.replace(/[\u00A0\u00AD]/g, " ");
+}
+
 async function factCheck(content, topicName) {
   const catRes = await fetch("https://api.openai.com/v1/chat/completions", {
     method: "POST",
@@ -337,7 +355,7 @@ async function factCheck(content, topicName) {
 
     finalResult = {
       accuracy: gptParsed.accuracy,
-      feedback: gptParsed.feedback,
+      feedback: cleanText(gptParsed.feedback),
     };
     if (finalResult.feedback.toLowerCase().includes("fictional")) {
       finalResult.accuracy = 0;
