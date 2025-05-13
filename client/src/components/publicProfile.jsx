@@ -110,8 +110,8 @@ const PublicProfile = () => {
   // );
 
   return (
-    <div className="w-full bg-[#F9FAFB] text-gray-900">
-      <Navbar />
+  <div className="min-h-screen w-screen bg-[#F9FAFB] text-gray-900 overflow-x-hidden">
+    <Navbar />
       <main className="w-full px-4 sm:px-8 py-10 font-grotesk space-y-10">
   
         
