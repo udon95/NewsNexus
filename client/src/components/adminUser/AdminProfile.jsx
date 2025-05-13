@@ -123,52 +123,70 @@ const AdminProfile = () => {
       <p className="ml-10 mt-10 text-lg">Loading or not authenticated...</p>
     );
 
-  return (
-    <div className="w-screen min-h-screen flex-col overflow-auto">
-      <div className="flex-1 font-grotesk">
-        <div className="text-2xl sm:text-3xl text-left mt-8 ml-10 mb-5 font-bold">
-          Profile particulars:
+    
+return (
+  <div className="w-screen min-h-screen bg-gray-50 flex justify-center py-10 overflow-auto font-grotesk">
+    <div className="w-full max-w-3xl px-6">
+      {/* Profile Section */}
+      <section className="mb-12">
+        <h2 className="text-2xl sm:text-3xl font-bold mb-6 text-gray-800">Profile Particulars</h2>
+
+        <div className="bg-white p-4 rounded-xl shadow mb-6">
+          <label className="block text-gray-600 mb-2 text-sm">Username</label>
+          <div className="bg-gray-100 rounded-xl p-3 text-lg">{admin.username}</div>
         </div>
-        <div className="ml-10 mt-5 max-w-[700px] bg-gray-100 rounded-2xl p-3 text-lg shadow-lg">
-          {admin.username}
-        </div>
-        <input
-          className="ml-10 mt-8 min-w-[700px] bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300"
-          placeholder={user.email}
-          onChange={(e) => setNewEmail(e.target.value)}
-        />
-        <button
-          type="button"
-          className="px-6 py-3 bg-[#3F414C] flex ml-10 mt-8 text-white rounded-lg hover:bg-opacity-90 cursor-pointer"
-          onClick={updateUserEmail}
-        >
-          Update
-        </button>
-        <div className="text-2xl sm:text-3xl text-left mt-8 ml-10 mb-5 font-bold">
-          Manage password:
-        </div>
-        <div className="flex flex-col">
+
+        <div className="bg-white p-4 rounded-xl shadow mb-6">
+          <label className="block text-gray-600 mb-2 text-sm">Update Email</label>
           <input
-            className="flex-1 ml-10 mt-5 max-w-[700px] bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300"
-            placeholder="Old password"
-            onChange={(e) => setOldPass(e.target.value)}
-          />
-          <input
-            className="ml-10 mt-8 max-w-[700px] bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300"
-            placeholder="New password"
-            onChange={(e) => setNewPass(e.target.value)}
+            type="email"
+            className="w-full bg-gray-100 rounded-xl p-3 text-lg outline-none focus:ring-2 focus:ring-gray-300"
+            placeholder={user.email}
+            onChange={(e) => setNewEmail(e.target.value)}
           />
           <button
             type="button"
-            className="max-w-[105px] px-6 py-3 bg-[#3F414C] flex ml-10 mt-8 text-white rounded-lg hover:bg-opacity-90 cursor-pointer"
-            onClick={updatePassword}
+            className="mt-4 px-5 py-2 bg-[#3F414C] text-white rounded-lg hover:bg-opacity-90"
+            onClick={updateUserEmail}
           >
-            Update
+            Update Email
           </button>
         </div>
-      </div>
+      </section>
+
+      <section>
+        <h2 className="text-2xl sm:text-3xl font-bold mb-6 text-gray-800">Manage Password</h2>
+
+        <div className="bg-white p-4 rounded-xl shadow">
+          <label className="block text-gray-600 mb-2 text-sm">Old Password</label>
+          <input
+            type="password"
+            className="w-full bg-gray-100 rounded-xl p-3 text-lg outline-none focus:ring-2 focus:ring-gray-300 mb-4"
+            placeholder="Old password"
+            onChange={(e) => setOldPass(e.target.value)}
+          />
+
+          <label className="block text-gray-600 mb-2 text-sm">New Password</label>
+          <input
+            type="password"
+            className="w-full bg-gray-100 rounded-xl p-3 text-lg outline-none focus:ring-2 focus:ring-gray-300 mb-4"
+            placeholder="New password"
+            onChange={(e) => setNewPass(e.target.value)}
+          />
+
+          <button
+            type="button"
+            className="px-5 py-2 bg-[#3F414C] text-white rounded-lg hover:bg-opacity-90"
+            onClick={updatePassword}
+          >
+            Update Password
+          </button>
+        </div>
+      </section>
     </div>
-  );
+  </div>
+);
+
 };
 
 export default AdminProfile;
