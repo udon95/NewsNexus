@@ -13,7 +13,7 @@ const AdminRoomArticleReports = () => {
   const [article, setArticle] = useState(null);
   const [articles, setArticles] = useState([]);
 
-  const openReport = (row) => {
+  const openReport = async (row) => {
     fetchArticleLink(row.target_id);
     console.log(article);
 
@@ -137,7 +137,7 @@ const AdminRoomArticleReports = () => {
                 {article && article.Suspended ? "Suspended" : "Active"}
               </div>
               <textarea className="ml-10 mt-5 max-w-[500px] bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300">
-                {article ? article.text : "No text in article"}
+                {selectedItem ? selectedItem.text : "No text in article"}
               </textarea>
               <div className="flex">
                 <button
