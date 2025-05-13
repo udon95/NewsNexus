@@ -221,9 +221,9 @@ async function factCheck(content, topicName) {
       throw new Error(`Perplexity API error with status ${pxRes.status}`);
     }
 
-    //const raw = await pxRes.text(); // Get raw response text first
-    //console.log("Raw response from Perplexity:", raw);
-    const raw = pxData.choices?.[0]?.message?.content;
+    const raw = await pxRes.text(); // Get raw response text first
+    console.log("Raw response from Perplexity:", raw);
+    const perC = pxRes.choices?.[0]?.message?.content;
     // console.log("Status code from Perplexity:", pxRes.status); // Check status code
     //let cleanResponse = raw.replace(/```json\n|\n```/g, ""); // Strip the markdown block (```json...```)
 
@@ -244,17 +244,20 @@ async function factCheck(content, topicName) {
     //   );
     // }
     // console.log("Raw response from Perplexity:", raw);
-    console.log("choices", raw);
-    
-    let parsed;
-    try {
-      parsed = JSON.parse(raw);
-      //console.log("parsed from perplexity", parsed);
-    } catch (err) {
-      console.error("Error parsing JSON response:", err.message);
-      throw new Error("Failed to parse Perplexity response as JSON.");
-    }
-    //console.log("Perplexity response parsed:", parsed); // Check parsed data
+    console.log("choices", perC);
+
+    const parsed = await pxRes.json(); // Get raw response text first
+    console.log("Parsed response from Perplexity:", parsed);
+
+    // let parsed;
+    // try {
+    //   parsed = JSON.parse(raw);
+    //   //console.log("parsed from perplexity", parsed);
+    // } catch (err) {
+    //   console.error("Error parsing JSON response:", err.message);
+    //   throw new Error("Failed to parse Perplexity response as JSON.");
+    // }
+    // console.log("Perplexity response parsed:", parsed); // Check parsed data
 
     // if (
     //   !parsed ||
@@ -305,7 +308,7 @@ async function factCheck(content, topicName) {
     // }
 
     // If 'message' is an object, inspect its contents
-    console.log("Message object:", parsed); // Debugging the content
+    //console.log("Message object:", parsed); // Debugging the content
 
     let feedback = "";
     let accuracy = null;
