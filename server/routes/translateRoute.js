@@ -59,7 +59,7 @@ router.post("/text-to-speech", async (req, res) => {
       default:
         voiceId = "Jasmine";
         languageCode = "en-SG";
-        engine="neural";
+        engine = "neural";
     }
 
     if (!usePolly) {
@@ -79,6 +79,7 @@ router.post("/text-to-speech", async (req, res) => {
         OutputFormat: "mp3",
         VoiceId: voiceId,
         LanguageCode: languageCode,
+        Engine: engine,
       };
       const { AudioStream } = await polly.synthesizeSpeech(params).promise();
       buffers.push(AudioStream);
