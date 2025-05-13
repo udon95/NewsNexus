@@ -110,41 +110,53 @@ const AdminUserDetails = () => {
           <div className="text-2xl sm:text-3xl text-left mt-8 ml-10 font-bold">
             User details:
           </div>
-          <div className="flex ">
-          <div className="ml-10 mt-8 min-w-[1100px] bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300">
-            Username:&emsp;{userDetails.username}
+          <div className="ml-10 mt-5 max-w-[700px] bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300">
+            <div className="flex">                
+              <div className="font-black mb-1">Username : &emsp;</div>
+              <div className="text-blue-600">
+                {userDetails.username}
+              </div>
+            </div>
           </div>
+          <div className="ml-10 mt-5 max-w-[700px] bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300">
+            <div className="flex">                
+              <div className="font-black mb-1">Email : &emsp;</div>
+              <div className="text-blue-600">
+                {userDetails.email}
+              </div>
+            </div>
           </div>
-          <div className="flex ">
-            <input
-              className="ml-10 mt-8 min-w-[500px] bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300"
-              value={"Email:  " + userDetails.email}
-              id="emailInput"
-              readOnly
-            />
-            <input
-            className="ml-10 mt-8 min-w-[500px] bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300"
-            value={"Account status:\t" + userDetails.status}
-            readOnly
-            />
+          <div className="ml-10 mt-5 max-w-[700px] bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300">
+            <div className="flex">                
+              <div className="font-black mb-1">Account status : &emsp;</div>
+              <div className="text-blue-600">
+                {userDetails.status}
+              </div>
+            </div>
+          </div>
+          <div className="ml-10 mt-5 max-w-[700px] bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300">
+            <div className="flex">                
+              <div className="font-black mb-1">User Type : &emsp;</div>
+              <div className="text-blue-600">
+                {(premiumUserList.some((user) => user.userid === userDetails.userid)
+                ? "Premium User"
+                : "Free User"
+               )}
+              </div>
+            </div>
+          </div>
+          <div className="ml-10 mt-5 max-w-[700px] bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300">
+            <div className="flex">                
+              <div className="font-black mb-1">Expert User : &emsp;</div>
+              <div className="text-blue-600">
+                {(expertUserList.some((user) => user.username === userDetails.username)
+                ? "Yes"
+                : "No"
+               )}
+              </div>
+            </div>
           </div>
 
-          <input
-            className="ml-10 mt-8 min-w-[500px] bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300"
-            value={(premiumUserList.some((user) => user.userid === userDetails.userid)
-                ? "User Type:  Premium User"
-                : "User Type:  Free User"
-               )}
-            readOnly
-          />
-          <input
-            className="ml-10 mt-8 min-w-[500px] bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300"
-            value={(expertUserList.some((user) => user.username === userDetails.username)
-                ? "Expert User:  Yes"
-                : "Expert User:  No"
-               )}
-            readOnly
-          />
           <div className="flex ">
             <button
               type="button"
