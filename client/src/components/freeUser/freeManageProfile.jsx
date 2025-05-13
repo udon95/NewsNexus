@@ -358,7 +358,7 @@ const FreeManageProfile = () => {
         <h3 className="text-xl font-bold mb-4">Profile Particulars</h3>
 
         {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start"> */}
-        <div className="flex-1 flex flex-col justify-between h-full">
+        <div className="grid grid-cols-1 md:grid-cols-[300px_1fr] gap-6 items-start">
           <div className="grid grid-cols-1 gap-4 w-full">
             <div>
               <label className="block mb-1 text-sm font-medium">Username</label>
@@ -504,86 +504,92 @@ const FreeManageProfile = () => {
             Update Profile
           </button>
         </div>
+      </div>
 
-        {/* Password Change */}
-        <h3 className="text-2xl font-bold  font-grotesk mb-1 mt-6">
-          Manage Password:
-        </h3>
-        <div className="p-4 bg-white shadow-md rounded-lg font-grotesk">
-          <PasswordInput
-            name="password"
-            value={editOldPassword}
-            onChange={(e) => setEditOldPassword(e.target.value)}
-            className="w-full p-2 border rounded-lg"
-            placeholder="Old Password"
-          />
-          {oldPasswordError && (
-            <p className="text-red-600 text-sm mt-1">{oldPasswordError}</p>
-          )}
-          <PasswordInput
-            name="password"
-            value={editNewPassword}
-            onChange={(e) => setEditNewPassword(e.target.value)}
-            className="w-full p-2 border rounded-lg mt-2"
-            placeholder="New Password "
-          />
-          <PasswordInput
-            name="password"
-            value={editNewPasswordConfirm}
-            onChange={(e) => setEditNewPasswordConfirm(e.target.value)}
-            className="w-full p-2 border rounded-lg mt-2"
-            placeholder="Confirm New Password"
-          />
-          {passwordError && (
-            <p className="text-red-600 text-sm mt-2">{passwordError}</p>
-          )}
-          <button
-            onClick={updatePassword}
-            className="bg-[#3f414c] text-[white] cursor-pointer text-sm flex justify-end self-end w-fit ml-auto mr-0 mt-5 px-5 py-2.5 rounded-xl border-[none]"
-          >
-            Update
-          </button>
-        </div>
+      {/* Password Change */}
+      <div className="bg-white p-6 rounded-2xl shadow-sm border mb-8">
+        <h3 className="text-xl font-bold mb-4">Manage Password</h3>
+        <PasswordInput
+          name="password"
+          value={editOldPassword}
+          onChange={(e) => setEditOldPassword(e.target.value)}
+          className="w-full p-2 border rounded-lg"
+          placeholder="Old Password"
+        />
+        {oldPasswordError && (
+          <p className="text-red-600 text-sm mt-1">{oldPasswordError}</p>
+        )}
+        <PasswordInput
+          name="password"
+          value={editNewPassword}
+          onChange={(e) => setEditNewPassword(e.target.value)}
+          className="w-full p-2 border rounded-lg mt-2"
+          placeholder="New Password "
+        />
+        <PasswordInput
+          name="password"
+          value={editNewPasswordConfirm}
+          onChange={(e) => setEditNewPasswordConfirm(e.target.value)}
+          className="w-full p-2 border rounded-lg mt-2"
+          placeholder="Confirm New Password"
+        />
+        {passwordError && (
+          <p className="text-red-600 text-sm mt-2">{passwordError}</p>
+        )}
+        <button
+          onClick={updatePassword}
+          className="bg-[#3f414c] text-[white] cursor-pointer text-sm flex justify-end self-end w-fit ml-auto mr-0 mt-5 px-5 py-2.5 rounded-xl border-[none]"
+        >
+          Update
+        </button>
+      </div>
 
-        {/* Topic Interests */}
-        <h3 className="text-2xl font-bold font-grotesk mb-1 mt-6">
-          Interest Selection (Max 6):
-        </h3>
-        <div className="p-4 bg-white shadow-md rounded-lg font-grotesk">
-          {Array.from({ length: 6 }).map((_, index) => (
-            <div key={index} className="flex flex-row mb-4">
-              <label className="mt-1 mr-2 font-grotesk text-2xl  w-6">
-                {index + 1}.{" "}
-              </label>
-              <select
-                value={dropdownValues[index]}
-                onChange={(e) => handleDropdownChange(index, e)}
-                className="w-full p-2 border rounded-lg font-grotesk"
-              >
-                <option value="" classname="font-grotesk">
-                  Select a category
-                </option>
-                {categories
-                  .filter(
-                    (cat) =>
-                      !dropdownValues.includes(cat.name) ||
-                      cat.name === dropdownValues[index]
-                  )
-                  .map((cat) => (
-                    <option key={cat.id} value={cat.name}>
-                      {cat.name}
-                    </option>
-                  ))}
-              </select>
-            </div>
+      {/* Topic Interests */}
+      <div className="bg-white p-6 rounded-2xl shadow-sm border mb-8">
+        <h3 className="text-xl font-bold mb-4">Interest Selection (Max 6)</h3>
+        <div className="flex flex-wrap gap-2 mb-4">
+          {selectedTopics.map((topic, i) => (
+            <span
+              key={i}
+              className="bg-gray-200 text-sm px-3 py-1 rounded-full"
+            >
+              {topic}
+            </span>
           ))}
-          <button
-            onClick={updateInterests}
-            className="bg-[#3f414c] text-[white] cursor-pointer text-sm flex justify-end self-end w-fit ml-auto mr-0 mt-5 px-5 py-2.5 rounded-xl border-[none]"
-          >
-            Update
-          </button>
         </div>
+        {Array.from({ length: 6 }).map((_, index) => (
+          <div key={index} className="flex flex-row mb-4">
+            <label className="mt-1 mr-2 font-grotesk text-2xl  w-6">
+              {index + 1}.{" "}
+            </label>
+            <select
+              value={dropdownValues[index]}
+              onChange={(e) => handleDropdownChange(index, e)}
+              className="w-full p-2 border rounded-lg font-grotesk"
+            >
+              <option value="" classname="font-grotesk">
+                Select a category
+              </option>
+              {categories
+                .filter(
+                  (cat) =>
+                    !dropdownValues.includes(cat.name) ||
+                    cat.name === dropdownValues[index]
+                )
+                .map((cat) => (
+                  <option key={cat.id} value={cat.name}>
+                    {cat.name}
+                  </option>
+                ))}
+            </select>
+          </div>
+        ))}
+        <button
+          onClick={updateInterests}
+          className="bg-[#3f414c] text-[white] cursor-pointer text-sm flex justify-end self-end w-fit ml-auto mr-0 mt-5 px-5 py-2.5 rounded-xl border-[none]"
+        >
+          Update
+        </button>
 
         {showError && (
           <p className="text-red-600">You can only select up to 6 topics.</p>
