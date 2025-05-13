@@ -130,9 +130,7 @@ const AdminCommentReports = () => {
                 <button
                   type="button"
                   className="px-6 py-3 bg-[#3F414C] flex ml-10 mt-7 text-white rounded-lg hover:bg-opacity-90 cursor-pointer"
-                  onClick={() =>
-                    suspendComment(selectedItem, !comment.Suspended)
-                  }
+                  onClick={() => suspendComment(selectedItem, !comment.Suspended)}
                 >
                   {comment && comment.Suspended == true
                     ? "Unsuspend"
@@ -143,9 +141,7 @@ const AdminCommentReports = () => {
                   <button
                     type="button"
                     className="px-6 py-3 bg-[#3F414C] flex ml-5 mt-7 text-white rounded-lg hover:bg-opacity-90 cursor-pointer"
-                    onClick={() =>
-                      suspendComment(selectedItem, false)
-                    }
+                    onClick={() => suspendComment(selectedItem, false)}
                   >
                     Reject report
                   </button>

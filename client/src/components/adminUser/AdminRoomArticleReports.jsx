@@ -120,19 +120,20 @@ const AdminRoomArticleReports = () => {
                 Report details:
               </div>
               <div className="ml-10 mt-5 max-w-[500px] bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300">
-                Username : &emsp;{selectedItem ? selectedItem.username : ""}
+                Username : &emsp; {selectedItem ? selectedItem.username : ""}
               </div>
               <div className="ml-10 mt-5 max-w-[500px] bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300">
-                Infringement : &emsp;{selectedItem ? selectedItem.reason : ""}
+                Infringement : &emsp; {selectedItem ? selectedItem.reason : ""}
               </div>
               <div className="ml-10 mt-5 max-w-[500px] bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300">
-                Article Status : &emsp;
-                {article && article.Suspended ? "Suspended" : "Active"}
+                Article Status : &emsp; {article && article.Suspended ? "Suspended" : "Active"}
               </div>
-              <div className="ml-10 mt-5 max-w-[500px] bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none underline focus:ring-2 focus:ring-gray-300 cursor-pointer"
-                onClick={() => articleRedirect()}>
-                Article Link : <br />
-                {article ? article.title : ""}
+              <div className="ml-10 mt-5 max-w-[500px] bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300">
+                <div className="font-semibold mb-1">Article title :</div>
+                <div className="underline cursor-pointer text-blue-600" 
+                    onClick={() => articleRedirect()}>
+                  {article ? article.title : ""}
+                </div>
               </div>
               <div className="ml-10 mt-5 max-w-[500px] bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300">
                 {article ? (<div dangerouslySetInnerHTML={{ __html: article.content }} />) : ("No text in article")}
@@ -141,22 +142,15 @@ const AdminRoomArticleReports = () => {
                 <button
                   type="button"
                   className="px-6 py-3 bg-[#3F414C] flex ml-10 mt-7 text-white rounded-lg hover:bg-opacity-90 cursor-pointer"
-                  onClick={() =>
-                    suspendArticle(selectedItem, !article.Suspended)
-                  }
+                  onClick={() => suspendArticle(selectedItem, !article.Suspended)}
                 >
-                  {article && article.Suspended == true
-                    ? "Unsuspend"
-                    : "Suspend"}{" "}
-                  article
+                  {article && article.Suspended == true? "Unsuspend": "Suspend"}{" "}article
                 </button>
                 {selectedItem.resolved == false ? (
                   <button
                     type="button"
                     className="px-6 py-3 bg-[#3F414C] flex ml-5 mt-7 text-white rounded-lg hover:bg-opacity-90 cursor-pointer"
-                    onClick={() =>
-                      suspendArticle(selectedItem, false)
-                    }
+                    onClick={() => suspendArticle(selectedItem, false)}
                   >
                     Reject report
                   </button>
@@ -196,8 +190,7 @@ const AdminRoomArticleReports = () => {
               </thead>
               <tbody>
                 {displayedRows.map((row, index) => (
-                  <tr
-                    key={row.id}
+                  <tr key={row.id}
                     className="cursor-pointer hover:bg-gray-300 transition-colors"
                     onClick={() => openReport(row)}
                   >
