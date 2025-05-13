@@ -231,7 +231,7 @@ async function factCheck(content, topicName) {
                       **Do not include any Markdown formatting, code blocks, or extra text** in your response.
                       Please return the following **exactly in a clean JSON format**:
                       {
-                        "accuracy": <0 - 100>, 
+                        "accuracy": <1 - 100>, 
                         "feedback": "The article contains false claims. 
                         Article: <original article HTML with <mark> around the inaccuracies> 
                         \n Explanation: <explanation/correction of the inaccuracies highlighted>"
@@ -240,7 +240,7 @@ async function factCheck(content, topicName) {
 
                       Article:
                       ${content}
-                      **If this article is fictional or based on fabricated events, set accuracy to 0.** `,
+                      **If this article is fictional or based on fabricated events, set accuracy to 1.** `,
           },
           { role: "user", content },
         ],
@@ -256,7 +256,7 @@ async function factCheck(content, topicName) {
     }
 
     const pxData = await pxRes.json();
-    //const parsed = pxData.choices?.[0]?.message?.content;
+    const parsed = pxData.choices?.[0]?.message?.content;
 
     let presult = parsed;
     if (typeof parsed === "string") {
@@ -311,14 +311,14 @@ async function factCheck(content, topicName) {
                       After each <mark> section, on a new line with a <br> tag, provide a parenthetical explanation of why it is inaccurate or cannot be verified. 
                       If the entire article is fictional, mark the entire article in <mark> tags and explain why.
 
-                    In addition, analyze the overall factual correctness of the article and assign a numerical accuracy score between 0 and 100, where 100 means the article is completely accurate and 0 means it is entirely inaccurate.
+                    In addition, analyze the overall factual correctness of the article and assign a numerical accuracy score between 0 and 100, where 100 means the article is completely accurate and 1 means it is entirely inaccurate.
                     **If this article is fictional or based on fabricated events, set accuracy to 1.**
                     **If the content refers to recent events and ChatGPT cannot verify it, reduce the accuracy score.**
                     Please provide the analysis accordingly.
 
                     You must return only a single JSON object, no arrays, no markdown, no code fences, no extra text.
                     Use this exact shape:
-                    {"accuracy":<0 - 100>,
+                    {"accuracy":<1 - 100>,
                     "feedback":"The article contains false claims. 
                     Article: <original article HTML with <mark> around the inaccuracies>" 
                     \n Explanation: <explanation/correction of the inaccuracies highlighted>"}
