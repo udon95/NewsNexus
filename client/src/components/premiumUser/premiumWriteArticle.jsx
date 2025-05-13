@@ -438,6 +438,8 @@ export const PremiumWriteArticle = () => {
         setOpenSuccess(false); // Hide success dialog
         setOpenError(true); // Show error warning
       }
+      console.log("accuracy final", accuracy);
+      console.log("feedback final", aiFeedback);
       return;
     } else {
       // ---------------------- ROOM ARTICLE ----------------------
@@ -925,6 +927,8 @@ export const PremiumWriteArticle = () => {
     setAccuracy(null);
     setAiFeedback("");
     setUploadAction(""); // <- DEVI ADDED THIS FOR THE LOAD AND POST INDICATOR
+    setOpenError(false);
+    setOpenSuccess(false);
 
     // Reset Tiptap editor content (this is the key)
     if (editor) {
