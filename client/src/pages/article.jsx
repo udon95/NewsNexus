@@ -305,7 +305,7 @@ const Article = () => {
       }
     };
 
-    if (articleId && user) {
+    if (articleId) {
       fetchArticle();
     }
   }, [articleId, user]);
