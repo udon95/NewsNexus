@@ -131,11 +131,12 @@ const AdminArticleReports = () => {
                 Article Status : &emsp;
                 {article && article.Suspended ? "Suspended" : "Active"}
               </div>
-              <div className="ml-10 mt-5 max-w-[500px] bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none underline focus:ring-2 focus:ring-gray-300 cursor-pointer"
-                onClick={() => articleRedirect()}
-              >
-                Article Link : <br />
-                {article ? article.title : ""}
+              <div className="ml-10 mt-5 max-w-[500px] bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300">
+                <div className="font-semibold mb-1">Article link :</div>
+                <div className="underline cursor-pointer text-blue-600"  
+                    onClick={() => articleRedirect()}>
+                  {article ? article.title : ""}
+                </div>
               </div>
               <div className="flex">
                 <button
