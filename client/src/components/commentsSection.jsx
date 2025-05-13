@@ -233,19 +233,22 @@ const CommentsSection = ({ articleId }) => {
                       open={Boolean(menuAnchor[comment.commentid])}
                       onClose={() => handleMenuClose(comment.commentid)}
                     >
-                      <MenuItem
-                        onClick={() => {
-                          setReportTarget({
-                            type: "comment",
-                            id: comment.commentid,
-                          });
-                          handleMenuClose(comment.commentid);
-                        }}
-                        style={{ color: "red" }}
-                      >
-                        Report Comment
-                      </MenuItem>
-
+                     
+                      {user?.userid !== comment.userid && (
+                        <MenuItem
+                          onClick={() => {
+                            setReportTarget({
+                              type: "comment",
+                              id: comment.commentid,
+                            });
+                            handleMenuClose(comment.commentid);
+                          }}
+                          style={{ color: "red" }}
+                        >
+                          Report Comment
+                        </MenuItem>
+                      )}
+                      
                       {user?.userid === comment.userid && (
                         <MenuItem
                           onClick={() => {
