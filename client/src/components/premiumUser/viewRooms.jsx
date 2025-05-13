@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import supabase from "../../api/supabaseClient";
 import Search from "../search.jsx";
 import Navbar from "../navbar.jsx";
-import FloatingRoomStats from "../floatingRoomStats.jsx";
+import FloatingRoomStats from "../floatingRommStats.jsx";
 import useAuthHook from "../../hooks/useAuth.jsx";
 
 
@@ -215,20 +215,58 @@ const ViewRoomsPage = () => {
 
 
   // FINAL sorted room list: Private → Joined (latest) → Unjoined (latest)
-  const sortedFilteredRooms = [
+  // const sortedFilteredRooms = [
     // Only show private rooms if the user is a current member (exited_at is null)
+  //   ...filteredRooms.filter(
+  //     (r) => r.room_type === "Private" && userRooms.has(r.roomid)
+  //   ),
+  //   ...filteredRooms
+  //     .filter((r) => r.room_type !== "Private" && userRooms.has(r.roomid))
+  //     .sort((a, b) => new Date(b.created_at) - new Date(a.created_at)),
+  //   ...filteredRooms
+  //     .filter((r) => r.room_type !== "Private" && !userRooms.has(r.roomid))
+  //     .sort((a, b) => new Date(b.created_at) - new Date(a.created_at)),
+  // ];
+ 
+  const sortedFilteredRooms = [
+    // 1. My private rooms
     ...filteredRooms.filter(
-      (r) => r.room_type === "Private" && userRooms.has(r.roomid)
+      (r) =>
+        r.room_type === "Private" &&
+        userRooms.has(r.roomid) &&
+        r.created_by === user?.userid
     ),
+    // 2. Joined private rooms (not created by me)
+    ...filteredRooms.filter(
+      (r) =>
+        r.room_type === "Private" &&
+        userRooms.has(r.roomid) &&
+        r.created_by !== user?.userid
+    ),
+    // 3. My public rooms
     ...filteredRooms
-      .filter((r) => r.room_type !== "Private" && userRooms.has(r.roomid))
+      .filter(
+        (r) =>
+          r.room_type !== "Private" &&
+          userRooms.has(r.roomid) &&
+          r.created_by === user?.userid
+      )
       .sort((a, b) => new Date(b.created_at) - new Date(a.created_at)),
+    // 4. Joined public rooms (not created by me)
+    ...filteredRooms
+      .filter(
+        (r) =>
+          r.room_type !== "Private" &&
+          userRooms.has(r.roomid) &&
+          r.created_by !== user?.userid
+      )
+      .sort((a, b) => new Date(b.created_at) - new Date(a.created_at)),
+    // 5. Unjoined public rooms
     ...filteredRooms
       .filter((r) => r.room_type !== "Private" && !userRooms.has(r.roomid))
       .sort((a, b) => new Date(b.created_at) - new Date(a.created_at)),
   ];
- 
-
+  
 
   const getRoomImage = async (roomid) => {
     try {
