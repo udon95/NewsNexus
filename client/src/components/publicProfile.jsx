@@ -277,38 +277,55 @@ const PublicProfile = () => {
       <main className="max-w-5xl mx-auto px-6 py-10 font-grotesk space-y-10">
   
         {/* Profile Summary */}
-        <section className="bg-white rounded-2xl border shadow p-6 flex flex-col sm:flex-row gap-6">
-          <div className="w-24 h-24 rounded-full bg-gray-300 flex-shrink-0" />
-          <div className="flex-1">
-            <div className="flex items-center gap-3 mb-2">
-              <h1 className="text-2xl font-bold">{user.username}</h1>
-              {user.expert_status === "Approved" && (
-                <span className="flex items-center gap-1 text-blue-600 text-sm font-medium">
-                  <BadgeCheck className="w-4 h-4" />
-                  Verified Expert
-                </span>
-              )}
-              <span className={`text-sm px-3 py-1 rounded-full font-medium ${
-                user.usertype === "Premium"
-                  ? "bg-yellow-400 text-black"
-                  : "bg-gray-300 text-black"
-              }`}>
-                {user.usertype}
-              </span>
-            </div>
-            <p className="text-sm text-gray-600 mb-1">
-              Joined: {new Date(user.created_at).toLocaleDateString()}
-            </p>
-            <p className="text-sm text-gray-600 mb-1">
-              Articles: {profileData.totalArticles} | Likes: {profileData.totalLikes} | Views: {profileData.totalViews}
-            </p>
-            {expertTopics?.length > 0 && (
-              <p className="text-sm text-gray-600">
-                Expertise in: {expertTopics.map(t => t.name).join(", ")}
-              </p>
-            )}
-          </div>
-        </section>
+        <section className="w-full bg-white rounded-2xl border shadow p-6 flex flex-col sm:flex-row items-start gap-6">
+  {/* Avatar Box (rounded-square like navbar) */}
+  <div className="w-20 h-20 bg-black text-white flex items-center justify-center rounded-lg text-xl font-bold">
+    {user.username?.charAt(0).toUpperCase()}
+  </div>
+
+  {/* User Info */}
+  <div className="flex-1">
+    <div className="flex items-center flex-wrap gap-3 mb-2">
+      <h1 className="text-2xl font-bold text-gray-900">{user.username}</h1>
+      {user.expert_status === "Approved" && (
+        <span className="flex items-center gap-1 text-blue-600 text-sm font-medium">
+          <BadgeCheck className="w-4 h-4" />
+          Verified Expert
+        </span>
+      )}
+      <span className={`text-sm px-3 py-1 rounded-full font-medium ${
+        user.usertype === "Premium"
+          ? "bg-yellow-400 text-black"
+          : "bg-gray-300 text-black"
+      }`}>
+        {user.usertype}
+      </span>
+    </div>
+
+    {/* Stats Row */}
+    <div className="mt-2 text-sm text-gray-700 space-y-1">
+      <p>
+        <span className="font-medium">Joined:</span>{" "}
+        {new Date(user.created_at).toLocaleDateString()}
+      </p>
+      <p>
+        <span className="font-medium">Articles:</span> {profileData.totalArticles} |
+        <span className="font-medium ml-2">Upvotes:</span> {profileData.totalUpvotes} |
+        <span className="font-medium ml-2">Downvotes:</span> {profileData.totalDownvotes}
+      </p>
+      <p>
+        <span className="font-medium">Views:</span> {profileData.totalViews}
+      </p>
+      {expertTopics?.length > 0 && (
+        <p>
+          <span className="font-medium">Expertise in:</span>{" "}
+          {expertTopics.map((t) => t.name).join(", ")}
+        </p>
+      )}
+    </div>
+  </div>
+</section>
+
   
         {/* Articles Section */}
         <section className="bg-white rounded-2xl border shadow p-6">
