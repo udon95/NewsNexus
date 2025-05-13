@@ -130,8 +130,7 @@ const AdminRoomArticleReports = () => {
               </div>
               <div className="ml-10 mt-5 max-w-[700px] bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300">
                 <div className="font-semibold mb-1">Article Title :</div>
-                <div className="underline cursor-pointer text-blue-600"  
-                    onClick={() => articleRedirect()}>
+                <div className="underline">
                   {article ? article.title : ""}
                 </div>
               </div>
