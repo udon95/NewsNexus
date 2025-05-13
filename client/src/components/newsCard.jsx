@@ -37,7 +37,8 @@ const NewsCard = ({ articleid, title, imageUrl }) => {
   };
 
   const handleCardClick = () => {
-    navigate(`/article/${encodeURIComponent(title)}`);
+    const safeTitle = encodeURIComponent(title).replace(/\./g, "%2E");
+    navigate(`/article/${safeTitle}`);
   };
 
   return (

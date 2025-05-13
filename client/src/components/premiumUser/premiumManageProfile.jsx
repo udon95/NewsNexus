@@ -445,7 +445,6 @@ const PremManageProfile = () => {
       setProfileColor(value);
     }
   };
-  //DEVI ADDED HER UI FIX HERE COMMENTED
   return (
     <div className="w-full max-w-5xl mx-auto px-4 md:px-6 pt-8 text-black font-grotesk text-base">
       {/* Profile Section */}
