@@ -547,11 +547,15 @@ const ManageRooms = () => {
                 )}
               </div>
 
+
               {editRoom.room_type === "Private" && (
   <div>
-    <label className="block text-sm font-medium mt-2 mb-1">
-      Invite New Users
-    </label>
+    <div className="flex justify-between items-center mt-2 mb-1">
+      <label className="block text-sm font-medium">
+        Invite New Users
+      </label>
+      <span className="text-xs text-gray-500 italic">(put username to invite)</span>
+    </div>
     <input
       placeholder="@user1, @user2 (max 10)"
       value={editRoom.invite}
@@ -564,8 +568,8 @@ const ManageRooms = () => {
 )}
 
 
-                
 
+      
 
               <div className="flex justify-end gap-2 pt-2">
                 <button
