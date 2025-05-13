@@ -160,6 +160,38 @@ const jsonSchema = {
   },
 };
 
+function extractFirstJsonObject(str) {
+  // Find the first {...} block in the string
+  const match = str.match(/{[\s\S]*}/);
+  if (match) {
+    try {
+      return JSON.parse(match[0]);
+    } catch (e) {
+      console.error("Failed to parse extracted JSON:", match[0]);
+      throw new Error("Extracted JSON is not valid.");
+    }
+  }
+  throw new Error("No JSON object found in response.");
+}
+
+function decodeUnicodeEscapes(str) {
+  if (typeof str !== "string") return str;
+  // Replace \xHH and \uHHHH with their actual characters
+  return str
+    .replace(/\\x([0-9A-Fa-f]{2})/g, (_, hex) =>
+      String.fromCharCode(parseInt(hex, 16))
+    )
+    .replace(/\\u([0-9A-Fa-f]{4})/g, (_, hex) =>
+      String.fromCharCode(parseInt(hex, 16))
+    );
+}
+
+function cleanText(str) {
+  const decoded = decodeUnicodeEscapes(str);
+  // Replace non-breaking space (\u00A0) and soft hyphen (\u00AD) with a regular space
+  return decoded.replace(/[\u00A0\u00AD]/g, " ");
+}
+
 async function factCheck(content, topicName) {
   const catRes = await fetch("https://api.openai.com/v1/chat/completions", {
     method: "POST",
@@ -213,7 +245,7 @@ async function factCheck(content, topicName) {
                       **Do not include any Markdown formatting, code blocks, or extra text** in your response.
                       Please return the following **exactly in a clean JSON format**:
                       {
-                        "accuracy": <0 - 100>, 
+                        "accuracy": <1 - 100>, 
                         "feedback": "The article contains false claims. 
                         Article: <original article HTML with <mark> around the inaccuracies> 
                         \n Explanation: <explanation/correction of the inaccuracies highlighted>"
@@ -222,7 +254,7 @@ async function factCheck(content, topicName) {
 
                       Article:
                       ${content}
-                      **If this article is fictional or based on fabricated events, set accuracy to 0.** `,
+                      **If this article is fictional or based on fabricated events, set accuracy to 1.** `,
           },
           { role: "user", content },
         ],
@@ -241,16 +273,17 @@ async function factCheck(content, topicName) {
     const parsed = pxData.choices?.[0]?.message?.content;
 
     let presult = parsed;
-    if (typeof parsed === "string") {
+    if (typeof presult === "string") {
       let cleaned = parsed.trim();
-      // Remove code block markers if present
       cleaned = cleaned.replace(/^``````$/g, "");
       try {
         presult = JSON.parse(cleaned);
       } catch (e) {
-        console.error("Failed to parse Perplexity response:", cleaned);
-        throw new Error("Perplexity response content is not valid JSON.");
+        presult = extractFirstJsonObject(cleaned);
       }
+    } else if (typeof presult === "object" && presult !== null) {
+    } else {
+      throw new Error("Perplexity response is neither string nor object.");
     }
 
     if (
@@ -278,26 +311,28 @@ async function factCheck(content, topicName) {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "gpt-3.5-turbo",
+        model: "gpt-4o",
         messages: [
           {
             role: "system",
             content: `You are a fact-checking assistant. For the following article, verify every claim using only information you can confirm from reliable, up-to-date sources. 
-                    If you cannot find evidence for a claim, or if the event is fictional, assign an accuracy score of 0 and clearly state "No verifiable information found."
-                    If a claim refers to the future or is unconfirmed, explain that it cannot be verified.
+                    
+                    If a claim refers to events after October 2023, clearly state that you cannot verify it because your knowledge only goes up to October 2023. Do not label such claims as fictional or fabricated-simply mark them as unverifiable due to your knowledge cutoff.
+                    Only label an article as fictional if it describes events that are clearly invented or impossible, not merely because they are recent or outside your knowledge cutoff.
+                    If you cannot find evidence for a claim within your knowledge, mark it as unverifiable and explain that it may be true but cannot be confirmed due to your knowledge cutoff.
 
-                     For every sentence or claim in the article, if it is false or unverifiable, wrap only the false or unverifiable part in <mark> tags. 
-                      After each <mark> section, on a new line with a <br> tag, provide a parenthetical explanation of why it is inaccurate or cannot be verified. 
-                      If the entire article is fictional, mark the entire article in <mark> tags and explain why.
+                    For every sentence or claim in the article, if it is false or unverifiable, wrap only the false or unverifiable part in <mark> tags. 
+                    After each <mark> section, on a new line with a <br> tag, provide a parenthetical explanation of why it is inaccurate or cannot be verified. 
+                    If the entire article is fictional, mark the entire article in <mark> tags and explain why.
 
-                    In addition, analyze the overall factual correctness of the article and assign a numerical accuracy score between 0 and 100, where 100 means the article is completely accurate and 0 means it is entirely inaccurate.
+                    In addition, analyze the overall factual correctness of the article and assign a numerical accuracy score between 0 and 100, where 100 means the article is completely accurate and 1 means it is entirely inaccurate.
                     **If this article is fictional or based on fabricated events, set accuracy to 1.**
                     **If the content refers to recent events and ChatGPT cannot verify it, reduce the accuracy score.**
                     Please provide the analysis accordingly.
 
                     You must return only a single JSON object, no arrays, no markdown, no code fences, no extra text.
                     Use this exact shape:
-                    {"accuracy":<0 - 100>,
+                    {"accuracy":<1 - 100>,
                     "feedback":"The article contains false claims. 
                     Article: <original article HTML with <mark> around the inaccuracies>" 
                     \n Explanation: <explanation/correction of the inaccuracies highlighted>"}
@@ -309,7 +344,7 @@ async function factCheck(content, topicName) {
           },
           { role: "user", content },
         ],
-        temperature: 0.2,
+        temperature: 0.0,
       }),
     });
     console.log("Status code from Chatgpt:", gptRes.status);
@@ -318,6 +353,7 @@ async function factCheck(content, topicName) {
     }
     const gptData = await gptRes.json();
     let gptParsed = gptData.choices[0].message.content;
+
     if (typeof gptParsed === "string") {
       let cleaned = gptParsed.trim().replace(/^``````$/g, "");
       try {
@@ -326,15 +362,15 @@ async function factCheck(content, topicName) {
         console.error("Failed to parse ChatGPT response:", cleaned);
         throw new Error("ChatGPT response content is not valid JSON.");
       }
+    } else if (typeof gptParsed === "object" && gptParsed !== null) {
+    } else {
+      throw new Error("ChatGPT response is neither string nor object.");
     }
+
     finalResult = {
       accuracy: gptParsed.accuracy,
-      feedback: gptParsed.feedback,
+      feedback: cleanText(gptParsed.feedback),
     };
-    if (finalResult.feedback.toLowerCase().includes("fictional")) {
-      finalResult.accuracy = 0;
-      finalResult.feedback = `The article is entirely fictional and does not correspond to real events or persons.`;
-    }
   }
 
   //console.log("parsed result:", result);
@@ -368,7 +404,7 @@ router.post("/submit-article", async (req, res) => {
     } = req.body;
 
     const strippedText = extractTextFromHTML(updatedHTML);
-    console.log("stripped text for fact check", strippedText);
+    //console.log("stripped text for fact check", strippedText);
 
     if (!title || !updatedHTML || !authorId || !topicid || !topicName) {
       return res.status(400).json({ error: "Missing required fields." });

@@ -123,7 +123,7 @@ const TestimonialSlider = () => {
 
     fetchTestimonials();
   }, []);
-  console.log("testimonial", testimonials);
+  //console.log("testimonial", testimonials);
 
   if (loading) {
     return <div>Loading ...</div>;

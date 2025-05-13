@@ -27,6 +27,8 @@ const FloatingWriteButton = () => {
   const hiddenPaths = [
     "/freeDashboard/writeArticle",
     "/premiumDashboard/writeArticle",
+    "/freeDashboard/edit/*",
+    "/premiumDashboard/edit/*",
     "/adminDashboard/*",
   ];
   const normalizedPath = currentPath.replace(/\/+$/, ""); // remove trailing slashes
