@@ -155,26 +155,6 @@ const PremManageProfile = () => {
     setSelectedTopics(selected);
   }, [dropdownValues]);
 
-  // handle dropdown selection
-  // const handleDropdownChange = (index, e) => {
-  //   const newValue = e.target.value;
-  //   const alreadySelected = dropdownValues.includes(newValue);
-
-  //   const selectedCount = dropdownValues.filter((val) => val !== "").length;
-  //   if (selectedCount >= 6 && newValue !== "" && !dropdownValues.includes("")) {
-  //     alert("You can only select up to 6 interests.");
-  //     return;
-  //   }
-
-  //   if (newValue && alreadySelected) {
-  //     alert("You’ve already selected this topic.");
-  //     return;
-  //   }
-
-  //   const newValues = [...dropdownValues];
-  //   newValues[index] = newValue;
-  //   setDropdownValues(newValues);
-  // };
   const handleDropdownChange = (index, e) => {
     const newValue = e.target.value;
     const oldValue = dropdownValues[index];

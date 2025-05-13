@@ -378,8 +378,8 @@ export const PremiumWriteArticle = () => {
         if (result.feedback) {
           setAiFeedback(result.feedback);
           setAccuracy(result.accuracy || null);
-          console.log("accuracy", result.accuracy);
-          console.log("feedback", result.feedback);
+          //console.log("accuracy", result.accuracy);
+          //console.log("feedback", result.feedback);
 
           alert(
             "Article flagged by AI. Please review the highlighted sections."
@@ -438,8 +438,8 @@ export const PremiumWriteArticle = () => {
         setOpenSuccess(false); // Hide success dialog
         setOpenError(true); // Show error warning
       }
-      console.log("accuracy final", accuracy);
-      console.log("feedback final", aiFeedback);
+      //console.log("accuracy final", accuracy);
+      //console.log("feedback final", aiFeedback);
       return;
     } else {
       // ---------------------- ROOM ARTICLE ----------------------
@@ -813,10 +813,10 @@ export const PremiumWriteArticle = () => {
           //     .from("room_article_images")
           //     .insert([{ postid, image_url: publicUrl }]);
         }
-        console.log("image", publicUrl);
+        //console.log("image", publicUrl);
       }
 
-      console.log("uploaded images", uploadedImageUrls);
+      //console.log("uploaded images", uploadedImageUrls);
 
       try {
         const response = await fetch(

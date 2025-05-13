@@ -26,6 +26,7 @@ const ManageRooms = () => {
     description: "",
     room_type: "Public",
     member_limit: 20,
+    invite: "",
   });
 
   const userProfile = JSON.parse(localStorage.getItem("userProfile"));
@@ -183,6 +184,34 @@ const ManageRooms = () => {
         body: JSON.stringify({ name, description, room_type, member_limit }),
       }
     );
+    
+     if (room_type === "Private" && editRoom.invite) {
+    const usernames = editRoom.invite
+      .split(",")
+      .map((s) => s.replace("@", "").trim())
+      .filter(Boolean);
+
+    if (usernames.length > 10) {
+      alert("You can only invite up to 10 users.");
+      return;
+    }
+
+    for (let username of usernames) {
+      await fetch(
+        "https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/rooms/invite",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            invitee_username: username,
+            roomid,
+          }),
+        }
+      );
+    }
+  }
+
+    setEditRoom((prev) => ({ ...prev, invite: "" }));
 
     setShowModal(false);
     fetchRooms();
@@ -517,6 +546,25 @@ const ManageRooms = () => {
                   </ul>
                 )}
               </div>
+
+              {editRoom.room_type === "Private" && (
+  <div>
+    <label className="block text-sm font-medium mt-2 mb-1">
+      Invite New Users
+    </label>
+    <input
+      placeholder="@user1, @user2 (max 10)"
+      value={editRoom.invite}
+      onChange={(e) =>
+        setEditRoom({ ...editRoom, invite: e.target.value }) 
+      }
+      className="w-full px-3 py-2 border rounded-md"
+    />
+  </div>
+)}
+
+
+                
 
 
               <div className="flex justify-end gap-2 pt-2">
