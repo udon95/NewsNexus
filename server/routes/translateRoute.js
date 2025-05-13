@@ -2,20 +2,16 @@ const express = require("express");
 const router = express.Router();
 const AWS = require("aws-sdk");
 
-// Configure AWS (ensure your AWS credentials are set up properly)
 AWS.config.update({
   region: "ap-southeast-1",
 });
 
-// Initialize AWS services
 const translate = new AWS.Translate();
 const polly = new AWS.Polly({ signatureVersion: "v4" });
 
-// Translation endpoint: Translates text to the target language
 router.post("/", async (req, res) => {
   try {
     const { text, targetLang } = req.body;
-    // Example: assuming text is in English; targetLang should be one of "en", "zh", "ms", or "ta"
     const params = {
       Text: text,
       SourceLanguageCode: "en",
@@ -32,36 +28,38 @@ router.post("/", async (req, res) => {
   }
 });
 
-// Text-to-Speech endpoint: Synthesize speech from text using AWS Polly if supported
 router.post("/text-to-speech", async (req, res) => {
   try {
     const { text, targetLang } = req.body;
     let voiceId;
     let languageCode;
     let usePolly = true;
+    let engine = "standard";
 
     // Determine voice based on the target language
     switch (targetLang) {
       case "en":
-        voiceId = "Jasmine"; 
+        voiceId = "Jasmine";
         languageCode = "en-SG";
+        engine = "neural";
         break;
-      case "zh": 
+      case "zh":
         voiceId = "Zhiyu";
         languageCode = "cmn-CN";
         break;
 
-      case "ms": 
+      case "ms":
         console.log("TTS for Malay not supported.");
         usePolly = false;
         break;
-      case "ta": 
+      case "ta":
         console.log("TTS for Tamil not supported.");
         usePolly = false;
         break;
       default:
         voiceId = "Jasmine";
         languageCode = "en-SG";
+        engine="neural";
     }
 
     if (!usePolly) {
@@ -93,30 +91,6 @@ router.post("/text-to-speech", async (req, res) => {
       "Content-Length": finalAudio.length,
     });
     return res.send(finalAudio);
-    // const params = {
-    //   Text: text,
-    //   OutputFormat: "mp3",
-    //   VoiceId: voiceId,
-    //   LanguageCode: languageCode,
-    // };
-
-    // polly.synthesizeSpeech(params, (err, data) => {
-    //   if (err) {
-    //     console.error("AWS Polly error:", err);
-    //     return res
-    //       .status(500)
-    //       .json({ error: "An error occurred during TTS synthesis." });
-    //   }
-    //   if (data && data.AudioStream instanceof Buffer) {
-    //     res.set({
-    //       "Content-Type": "audio/mpeg",
-    //       "Content-Length": data.AudioStream.length,
-    //     });
-    //     return res.send(data.AudioStream);
-    //   } else {
-    //     return res.status(500).json({ error: "Audio stream is empty." });
-    //   }
-    // });
   } catch (error) {
     console.error("TTS error:", error);
     return res

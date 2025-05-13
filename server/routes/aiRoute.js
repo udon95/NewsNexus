@@ -160,6 +160,20 @@ const jsonSchema = {
   },
 };
 
+function extractFirstJsonObject(str) {
+  // Find the first {...} block in the string
+  const match = str.match(/{[\s\S]*}/);
+  if (match) {
+    try {
+      return JSON.parse(match[0]);
+    } catch (e) {
+      console.error("Failed to parse extracted JSON:", match[0]);
+      throw new Error("Extracted JSON is not valid.");
+    }
+  }
+  throw new Error("No JSON object found in response.");
+}
+
 function decodeUnicodeEscapes(str) {
   if (typeof str !== "string") return str;
   // Replace \xHH and \uHHHH with their actual characters
@@ -259,14 +273,13 @@ async function factCheck(content, topicName) {
     const parsed = pxData.choices?.[0]?.message?.content;
 
     let presult = parsed;
-    if (typeof parsed === "string") {
+    if (typeof presult === "string") {
       let cleaned = parsed.trim();
       cleaned = cleaned.replace(/^``````$/g, "");
       try {
         presult = JSON.parse(cleaned);
       } catch (e) {
-        console.error("Failed to parse Perplexity response:", cleaned);
-        throw new Error("Perplexity response content is not valid JSON.");
+        presult = extractFirstJsonObject(cleaned);
       }
     } else if (typeof presult === "object" && presult !== null) {
     } else {
