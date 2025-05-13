@@ -927,6 +927,8 @@ export const PremiumWriteArticle = () => {
     setAccuracy(null);
     setAiFeedback("");
     setUploadAction(""); // <- DEVI ADDED THIS FOR THE LOAD AND POST INDICATOR
+    setOpenError(false);
+    setOpenSuccess(false);
 
     // Reset Tiptap editor content (this is the key)
     if (editor) {
