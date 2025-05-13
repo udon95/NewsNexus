@@ -53,29 +53,6 @@ if (visionKey) {
   );
 }
 
-async function checkAvailableModels() {
-  try {
-    const response = await fetch("https://api.openai.com/v1/models", {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
-      },
-    });
-
-    if (response.ok) {
-      const data = await response.json();
-      console.log("Available models:", data.data);
-    } else {
-      console.error("Error fetching available models:", response.statusText);
-    }
-  } catch (err) {
-    console.error("Error while checking available models:", err.message);
-  }
-}
-
-// Call check for models when the server starts
-checkAvailableModels();
-
 app.get("/", (req, res) => {
   res.send("Hello, World!");
 });

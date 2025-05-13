@@ -297,33 +297,42 @@ async function factCheck(content, topicName) {
 
     // Extract only the required fields
     //const content = parsed?.choices?.[0]?.message?.content || "";
-    const messageContent = parsed?.choices?.[0]?.message?.content || "";
-    if (!messageContent) {
-      console.error("Message field not found in Perplexity response.");
-      throw new Error("No message field found in Perplexity response.");
-    }
+    // const messageContent = parsed?.choices?.[0]?.message?.content || "";
+    // if (!messageContent) {
+    //   console.error("Message field not found in Perplexity response.");
+    //   throw new Error("No message field found in Perplexity response.");
+    // }
 
     // If 'message' is an object, inspect its contents
-    console.log("Message object:", messageContent); // Debugging the content
-    const cleanedContent = messageContent.replace(/^```json\n|\n```$/g, ""); // Remove surrounding backticks and line breaks
-    console.log("cleaned content", cleanedContent);
+    //console.log("Message object:", messageContent); // Debugging the content
+
     let feedback = "";
     let accuracy = null;
-
+    // const cleanedContent = messageContent.replace(/^```json\n|\n```$/g, ""); // Remove surrounding backticks and line breaks
+    // console.log("cleaned content", cleanedContent);
     // Only return the desired content, accuracy, and feedback
-    try {
-      // Parse the content of the message, which is a JSON string
-      const contentData = JSON.parse(cleanedContent);
-      console.log("content data", contentData);
-      // Extract accuracy and feedback from the parsed content
-      accuracy = contentData?.accuracy || null;
-      feedback = contentData?.feedback || "";
+    // try {
+    //   // Parse the content of the message, which is a JSON string
+    //   const contentData = JSON.parse(cleanedContent);
+    //   console.log("content data", contentData);
+    //   // Extract accuracy and feedback from the parsed content
+    //   accuracy = contentData?.accuracy || null;
+    //   feedback = contentData?.feedback || "";
 
-      console.log("Extracted accuracy:", accuracy);
-      console.log("Extracted feedback:", feedback);
-    } catch (err) {
-      console.error("Error parsing message content:", err.message);
-      throw new Error("Failed to parse Perplexity message content.");
+    //   console.log("Extracted accuracy:", accuracy);
+    //   console.log("Extracted feedback:", feedback);
+    // } catch (err) {
+    //   console.error("Error parsing message content:", err.message);
+    //   throw new Error("Failed to parse Perplexity message content.");
+    // }
+    if (
+      typeof parsed.accuracy === "number" &&
+      typeof parsed.feedback === "string"
+    ) {
+      accuracy = parsed.accuracy;
+      feedback = parsed.feedback;
+    } else {
+      throw new Error("Perplexity response missing expected fields.");
     }
 
     if (feedback.toLowerCase().includes("fictional")) {
