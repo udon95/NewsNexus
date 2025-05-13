@@ -357,10 +357,6 @@ async function factCheck(content, topicName) {
       accuracy: gptParsed.accuracy,
       feedback: cleanText(gptParsed.feedback),
     };
-    if (finalResult.feedback.toLowerCase().includes("fictional")) {
-      finalResult.accuracy = 0;
-      finalResult.feedback = `The article is entirely fictional and does not correspond to real events or persons.`;
-    }
   }
 
   //console.log("parsed result:", result);
