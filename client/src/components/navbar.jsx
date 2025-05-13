@@ -17,7 +17,7 @@ const Navbar = () => {
         .limit(1)
         .maybeSingle();
 
-      console.log("PROMO CHECK:", data);
+      //console.log("PROMO CHECK:", data);
 
       if (
         data?.promotion_active &&

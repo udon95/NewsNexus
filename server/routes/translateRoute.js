@@ -43,25 +43,25 @@ router.post("/text-to-speech", async (req, res) => {
     // Determine voice based on the target language
     switch (targetLang) {
       case "en":
-        voiceId = "Joanna"; // or "Matthew"
-        languageCode = "en-US";
+        voiceId = "Jasmine"; 
+        languageCode = "en-SG";
         break;
-      case "zh": // Simplified Chinese
+      case "zh": 
         voiceId = "Zhiyu";
         languageCode = "cmn-CN";
         break;
 
-      case "ms": // Malay – not supported by AWS Polly
+      case "ms": 
         console.log("TTS for Malay not supported.");
         usePolly = false;
         break;
-      case "ta": // Tamil – not supported by AWS Polly
+      case "ta": 
         console.log("TTS for Tamil not supported.");
         usePolly = false;
         break;
       default:
-        voiceId = "Joanna";
-        languageCode = "en-US";
+        voiceId = "Jasmine";
+        languageCode = "en-SG";
     }
 
     if (!usePolly) {

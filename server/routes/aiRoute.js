@@ -268,8 +268,7 @@ async function factCheck(content, topicName) {
         console.error("Failed to parse Perplexity response:", cleaned);
         throw new Error("Perplexity response content is not valid JSON.");
       }
-    } else if (typeof parsed === "object" && parsed !== null) {
-      presult = parsed; // Already an object, use as is
+    } else if (typeof presult === "object" && presult !== null) {
     } else {
       throw new Error("Perplexity response is neither string nor object.");
     }
@@ -304,12 +303,14 @@ async function factCheck(content, topicName) {
           {
             role: "system",
             content: `You are a fact-checking assistant. For the following article, verify every claim using only information you can confirm from reliable, up-to-date sources. 
-                    If you cannot find evidence for a claim, or if the event is fictional, assign an accuracy score of 0 and clearly state "No verifiable information found."
-                    If a claim refers to the future or is unconfirmed, explain that it cannot be verified.
+                    
+                    If a claim refers to events after October 2023, clearly state that you cannot verify it because your knowledge only goes up to October 2023. Do not label such claims as fictional or fabricated-simply mark them as unverifiable due to your knowledge cutoff.
+                    Only label an article as fictional if it describes events that are clearly invented or impossible, not merely because they are recent or outside your knowledge cutoff.
+                    If you cannot find evidence for a claim within your knowledge, mark it as unverifiable and explain that it may be true but cannot be confirmed due to your knowledge cutoff.
 
-                     For every sentence or claim in the article, if it is false or unverifiable, wrap only the false or unverifiable part in <mark> tags. 
-                      After each <mark> section, on a new line with a <br> tag, provide a parenthetical explanation of why it is inaccurate or cannot be verified. 
-                      If the entire article is fictional, mark the entire article in <mark> tags and explain why.
+                    For every sentence or claim in the article, if it is false or unverifiable, wrap only the false or unverifiable part in <mark> tags. 
+                    After each <mark> section, on a new line with a <br> tag, provide a parenthetical explanation of why it is inaccurate or cannot be verified. 
+                    If the entire article is fictional, mark the entire article in <mark> tags and explain why.
 
                     In addition, analyze the overall factual correctness of the article and assign a numerical accuracy score between 0 and 100, where 100 means the article is completely accurate and 1 means it is entirely inaccurate.
                     **If this article is fictional or based on fabricated events, set accuracy to 1.**
