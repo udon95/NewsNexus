@@ -111,7 +111,7 @@ const AdminUserDetails = () => {
             User details:
           </div>
           <div className="flex ">
-          <div className="ml-10 mt-8 min-w-[1010px] bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300">
+          <div className="ml-10 mt-8 min-w-[1800px] bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300">
             Username:&emsp;{userDetails.username}
           </div>
           </div>

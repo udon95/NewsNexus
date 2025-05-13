@@ -130,7 +130,7 @@ const AdminRoomArticleReports = () => {
               </div>
               <div className="ml-10 mt-5 max-w-[700px] bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300">
                 <div className="flex">
-                  <div className="font-bold mb-1">Article Title : &emsp; </div>
+                  <div className="font-black mb-1">Article Title : &emsp; </div>
                   <div className="underline">
                     {article ? article.title : ""}
                   </div>
@@ -138,7 +138,7 @@ const AdminRoomArticleReports = () => {
 
               </div>
               <div className="ml-10 mt-5 max-w-[700px] bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300">
-                <div className="font-bold mb-1">Article Text :<br/></div>
+                <div className="font-black mb-1">Article Text :<br/></div>
                 <div className="">
                   {article ? (<div dangerouslySetInnerHTML={{ __html: article.content }} />) : ("No text in article")}
                 </div>
