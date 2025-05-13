@@ -152,11 +152,12 @@ const AdminCommunityNotes = () => {
               <div className="text-2xl sm:text-3xl text-left mt-8 ml-10 mb-5 font-bold">
                 Community Notes details:
               </div>
-              <div
-                className="ml-10 mt-5 max-w-[700px] bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none underline focus:ring-2 focus:ring-gray-300 cursor-pointer"
-                onClick={() => articleRedirect()}
-              >
-                Article Link : <br /> {selectedArticle.title}
+              <div className="ml-10 mt-5 max-w-[700px] bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300">
+                <div className="font-semibold mb-1">Article link :</div>
+                <div className="underline cursor-pointer text-blue-600"  
+                    onClick={() => articleRedirect()}>
+                  {selectedArticle ? selectedArticle.title : ""}
+                </div>
               </div>
               <div className="ml-10 mt-5 max-w-[700px] bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300">
                 Posted by: &emsp;{articleOwner}
