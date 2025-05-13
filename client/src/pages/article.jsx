@@ -251,7 +251,7 @@ const Article = () => {
           `articleid, title, text, imagepath, time, view_count,
         rating, status, userid, topicid, amendment, users (userid, username)`
         )
-        .eq("title", articleId)
+        .eq("articleid", articleId)
         .single();
 
       if (!error && data?.articleid) {

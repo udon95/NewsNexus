@@ -127,7 +127,9 @@ function App() {
             <Route path="/guidelines" element={<Guidelines />} />
             <Route path="/privacy" element={<Privacy />} />
             <Route path="/latest" element={<Latest />} />
-            <Route path="/article/:articleName" element={<Article />} />
+            <Route path="/article/:articleId" element={<Article />} />
+            {/* <Route path="/article/:articleName" element={<Article />} /> */}
+
             <Route path="/profile/:username" element={<PublicProfile />} />
             <Route path="/rooms" element={<ViewRooms />} />
 
