@@ -119,12 +119,11 @@ const AdminCommentReports = () => {
               <div className="ml-10 mt-5 max-w-[500px] bg-gray-100 rounded-2xl p-3 break-words text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300">
                 Infringement : &emsp; {selectedItem ? selectedItem.reason : ""}
               </div>
+              <div className="ml-10 mt-5 max-w-[500px] bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300">
+                Comment Status : &emsp; {comment && comment.Suspended ? "Suspended" : "Active"}
+              </div>
               <div className="ml-10 mt-5 max-w-[500px] bg-gray-100 rounded-2xl p-3 break-words text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300">
                 Comment : <br /> {selectedItem ? comment.content : ""}
-              </div>
-              <div className="ml-10 mt-5 max-w-[500px] bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300">
-                Comment Status : &emsp;
-                {comment && comment.Suspended ? "Suspended" : "Active"}
               </div>
               <div className="flex">
                 <button
