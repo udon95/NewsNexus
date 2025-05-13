@@ -358,7 +358,7 @@ const FreeManageProfile = () => {
         <h3 className="text-xl font-bold mb-4">Profile Particulars</h3>
 
         {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start"> */}
-        <div className="grid grid-cols-1 md:grid-cols-[300px_1fr] gap-6 items-start">
+        <div className="flex-1 flex flex-col justify-between h-full">
           <div className="grid grid-cols-1 gap-4 w-full">
             <div>
               <label className="block mb-1 text-sm font-medium">Username</label>
