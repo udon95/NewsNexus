@@ -484,7 +484,7 @@ const PremManageProfile = () => {
 
             {expertTopics.length > 0 && (
             <div className="mt-3">
-            <label className="block mb-1 text-sm font-medium">Expert:</label>
+            <label className="block mb-1 text-sm font-medium">Expert Area:</label>
             <select
               className="w-full p-2 border rounded-lg bg-gray-100 text-gray-800 cursor-not-allowed"
               disabled
