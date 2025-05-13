@@ -128,7 +128,7 @@ const AdminUsers = () => {
           <input
             id="search"
             placeholder="Enter username"
-            className="ml-10 mt-5 min-w-[500px] bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300"
+            className="ml-10 mt-5 min-w-[700px] bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300"
             onChange={handleSearch}
           />
         </div>

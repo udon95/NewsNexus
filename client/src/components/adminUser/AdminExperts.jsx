@@ -90,18 +90,18 @@ const setApplicantWithTopic = (application) => {
               <div className="text-2xl sm:text-3xl text-left mt-8 ml-10 mb-5 font-bold">
                 Applicant particulars:
               </div>
-              <div className="ml-10 mt-5 max-w-[500px] bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300">
+              <div className="ml-10 mt-5 max-w-[700px] bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300">
                 User:&emsp;{applicant.username}
               </div>
-              <div className="ml-10 mt-5 max-w-[500px] bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300">
+              <div className="ml-10 mt-5 max-w-[700px] bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300">
                 Topic:&emsp;{userTopic.name}
               </div>
-              <div className="ml-10 mt-5 max-w-[500px] bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300">
+              <div className="ml-10 mt-5 max-w-[700px] bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300">
                 Profession:
                 <br />
                 {applicant ? applicant.description : "Professional designation"}
               </div>
-              <div className="ml-10 mt-5 max-w-[500px] min-h-[200px] bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300">
+              <div className="ml-10 mt-5 max-w-[700px] min-h-[200px] bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300">
                 {applicant.cv
                   ? applicant.cv.split("\n").map((line, idx) => (
                       <span key={idx}>

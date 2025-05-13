@@ -153,15 +153,15 @@ const AdminCommunityNotes = () => {
                 Community Notes details:
               </div>
               <div
-                className="ml-10 mt-5 max-w-[500px] bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none underline focus:ring-2 focus:ring-gray-300 cursor-pointer"
+                className="ml-10 mt-5 max-w-[700px] bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none underline focus:ring-2 focus:ring-gray-300 cursor-pointer"
                 onClick={() => articleRedirect()}
               >
                 Article Link : <br /> {selectedArticle.title}
               </div>
-              <div className="ml-10 mt-5 max-w-[500px] bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300">
+              <div className="ml-10 mt-5 max-w-[700px] bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300">
                 Posted by: &emsp;{articleOwner}
               </div>
-              <div className="ml-10 mt-5 max-w-[500px] bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300">
+              <div className="ml-10 mt-5 max-w-[700px] bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300">
                 Article Status : &emsp;
                 {selectedArticle && selectedArticle.Suspended
                   ? "Suspended"

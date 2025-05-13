@@ -129,11 +129,11 @@ const AdminProfile = () => {
         <div className="text-2xl sm:text-3xl text-left mt-8 ml-10 mb-5 font-bold">
           Profile particulars:
         </div>
-        <div className="ml-10 mt-5 max-w-[500px] bg-gray-100 rounded-2xl p-3 text-lg shadow-lg">
+        <div className="ml-10 mt-5 max-w-[700px] bg-gray-100 rounded-2xl p-3 text-lg shadow-lg">
           {admin.username}
         </div>
         <input
-          className="ml-10 mt-8 min-w-[500px] bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300"
+          className="ml-10 mt-8 min-w-[700px] bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300"
           placeholder={user.email}
           onChange={(e) => setNewEmail(e.target.value)}
         />
@@ -149,12 +149,12 @@ const AdminProfile = () => {
         </div>
         <div className="flex flex-col">
           <input
-            className="flex-1 ml-10 mt-5 max-w-[500px] bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300"
+            className="flex-1 ml-10 mt-5 max-w-[700px] bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300"
             placeholder="Old password"
             onChange={(e) => setOldPass(e.target.value)}
           />
           <input
-            className="ml-10 mt-8 max-w-[500px] bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300"
+            className="ml-10 mt-8 max-w-[700px] bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300"
             placeholder="New password"
             onChange={(e) => setNewPass(e.target.value)}
           />
