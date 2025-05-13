@@ -26,28 +26,7 @@ const FreeManageProfile = () => {
   const [categories, setCategories] = useState([]);
   const [dropdownValues, setDropdownValues] = useState(Array(6).fill(""));
   const [userType, setUserType] = useState("");
-  const [expertTopics, setExpertTopics] = useState([]);
-
-  useEffect(() => {
-    const fetchExpertTopics = async () => {
-      const { data: expertData, error: expertError } = await supabase
-        .from("expert_application")
-        .select("topicid, status")
-        .eq("userid", userDetails.userid)
-        .eq("status", "Approved");
-
-      if (expertError) {
-        console.error("Error fetching expert topics:", expertError);
-        return;
-      }
-
-      setExpertTopics(expertData);
-    };
-
-    if (userDetails) {
-      fetchExpertTopics();
-    }
-  }, [userDetails]);
+  const [expertTopics, setExpertTopics] = useState("");
 
   useEffect(() => {
     const fetchUserProfile = async () => {
@@ -57,6 +36,7 @@ const FreeManageProfile = () => {
           const data = JSON.parse(storedUser);
 
           setUserDetails(data.user);
+          setUserType(data?.role || "Free");
 
           //  Ensure interests are always an array before setting state
           const formattedInterests = Array.isArray(data.interests)
@@ -71,6 +51,37 @@ const FreeManageProfile = () => {
             }
             return updated;
           });
+          const { data: expertData, error: expertError } = await supabase
+            .from("expert_application")
+            .select("topicid, status")
+            .eq("userid", userId)
+            .eq("status", "Approved");
+
+          if (expertError) {
+            console.error("Error fetching expert topics:", expertError);
+            return;
+          }
+          // Fetch topic names based on topicid
+          const topicNames = [];
+
+          for (const expert of expertData) {
+            const { data: topicData, error: topicError } = await supabase
+              .from("topic_categories")
+              .select("name")
+              .eq("topicid", expert.topicid)
+              .single(); // Get the topic name for the topicid
+
+            if (topicError) {
+              console.error("Error fetching topic name:", topicError);
+            } else {
+              topicNames.push(
+                //topicid: expert.topicid,
+                topicData?.name || "Unknown"
+              );
+            }
+          }
+
+          setExpertTopics(topicNames);
         }
       } catch (err) {
         console.error("Profile fetch error:", err.message);
@@ -105,24 +116,29 @@ const FreeManageProfile = () => {
   // handle dropdown selection
   const handleDropdownChange = (index, e) => {
     const newValue = e.target.value;
-    const alreadySelected = dropdownValues.includes(newValue);
+    const oldValue = dropdownValues[index];
+    const alreadySelectedElsewhere =
+      dropdownValues.includes(newValue) &&
+      dropdownValues.indexOf(newValue) !== index;
+    const nonBlankCount = dropdownValues.filter((val) => val !== "").length;
+    if (
+      newValue === "" ||
+      newValue === oldValue ||
+      nonBlankCount < 6 ||
+      (nonBlankCount === 6 && oldValue !== "")
+    ) {
+      if (newValue && alreadySelectedElsewhere) {
+        alert("You’ve already selected this topic.");
+        return;
+      }
 
-    const selectedCount = dropdownValues.filter((val) => val !== "").length;
-    if (selectedCount >= 6 && newValue !== "" && !dropdownValues.includes("")) {
+      const newValues = [...dropdownValues];
+      newValues[index] = newValue;
+      setDropdownValues(newValues);
+    } else {
       alert("You can only select up to 6 interests.");
-      return;
     }
-
-    if (newValue && alreadySelected) {
-      alert("You’ve already selected this topic.");
-      return;
-    }
-
-    const newValues = [...dropdownValues];
-    newValues[index] = newValue;
-    setDropdownValues(newValues);
   };
-
   useEffect(() => {
     if (editDate) {
       const dobDate = new Date(editDate);
@@ -336,13 +352,94 @@ const FreeManageProfile = () => {
   }, [userDetails, authProfile]);
 
   return (
-    <div className="flex justify-center w-full px-4 md:px-5 pt-8 text-black text-2xl font-grotesk font-medium">
-      <div className="w-full md:w-2/3 max-w-[1000px]">
-        <h3 className="text-2xl font-grotesk font-bold mb-1">
-          Profile Particulars:
-        </h3>
-        <div className="p-4 bg-white shadow-md rounded-lg font-grotesk">
-          <div className="mb-1">Name:</div>
+    <div className="w-full max-w-5xl mx-auto px-4 md:px-6 pt-8 text-black font-grotesk text-base">
+      {/* Profile Section */}
+      <div className="bg-white p-6 rounded-2xl shadow-sm border mb-8">
+        <h3 className="text-xl font-bold mb-4">Profile Particulars</h3>
+
+        {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start"> */}
+        <div className="flex-1 flex flex-col justify-between h-full">
+          <div className="grid grid-cols-1 gap-4 w-full">
+            <div>
+              <label className="block mb-1 text-sm font-medium">Username</label>
+              <input
+                type="text"
+                value={editUsername}
+                onChange={(e) => setEditUsername(e.target.value)}
+                className="w-full p-2 border rounded-lg"
+                placeholder="Username"
+              />
+            </div>
+            <div>
+              <label className="block mb-1 text-sm font-medium">Email</label>
+              <input
+                type="email"
+                value={editEmail}
+                onChange={(e) => setEditEmail(e.target.value)}
+                className="w-full p-2 border rounded-lg"
+                placeholder="E-mail"
+              />
+            </div>
+            <div>
+              <label className="block mb-1 text-sm font-medium">
+                Date of Birth
+              </label>
+              <DatePicker
+                selected={editDate ? new Date(editDate) : null}
+                onChange={(date) => {
+                  const isoString = date?.toISOString().split("T")[0];
+                  setEditDate(isoString);
+                }}
+                dateFormat="dd-MM-yyyy"
+                maxDate={
+                  new Date(
+                    new Date().setFullYear(new Date().getFullYear() - 16)
+                  )
+                }
+                showMonthDropdown
+                showYearDropdown
+                dropdownMode="select"
+                scrollableYearDropdown
+                yearDropdownItemNumber={100}
+                placeholderText="Select your date of birth (Above 16 years old)"
+                className="w-full p-2 border rounded-lg"
+                wrapperClassName="w-full"
+                popperClassName="z-[50]"
+              />
+              {dobError && (
+                <p className="text-red-600 text-sm mt-1">{dobError}</p>
+              )}
+            </div>
+            <div>
+              <label className="block mb-1 text-sm font-medium w-full">
+                Gender
+              </label>
+              <select
+                value={editGender}
+                onChange={(e) => setEditGender(e.target.value)}
+                className="w-full p-2 border rounded-lg"
+              >
+                <option value="">Select Gender</option>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+                <option value="Other">Prefer Not To Say</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block mb-1 text-sm font-medium">
+                Subscription Type
+              </label>
+              <input
+                type="text"
+                value={userType}
+                readOnly
+                className="w-full p-2 border rounded-lg bg-gray-100 text-gray-800"
+              />
+            </div>
+          </div>
+
+          {/* <div className="mb-1">Name:</div>
           <input
             type="text"
             value={editUsername}
@@ -399,12 +496,12 @@ const FreeManageProfile = () => {
             value={userType} // Display userType here
             readOnly
             className="w-full p-2 border rounded-lg mb-2 bg-gray-200"
-          />
+          /> */}
           <button
             onClick={updateProfile}
             className="bg-[#3f414c] text-[white] cursor-pointer text-sm flex justify-end self-end w-fit ml-auto mr-0 mt-5 px-5 py-2.5 rounded-xl border-[none]"
           >
-            Update
+            Update Profile
           </button>
         </div>
 
