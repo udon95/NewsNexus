@@ -122,17 +122,26 @@ const AdminArticleReports = () => {
                 Report details:
               </div>
               <div className="ml-10 mt-5 max-w-[700px] bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300">
-                Username : &emsp;{selectedItem ? selectedItem.username : ""}
+                <div className="font-black mb-1">Username : &emsp;</div>
+                <div className="underline cursor-pointer text-blue-600">
+                  {selectedItem ? selectedItem.username : ""}
+                </div>
               </div>
               <div className="ml-10 mt-5 max-w-[700px] bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300">
-                Infringement : &emsp;{selectedItem ? selectedItem.reason : ""}
-              </div>              
-              <div className="ml-10 mt-5 max-w-[700px] bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300">
-                Article Status : &emsp;
-                {article && article.Suspended ? "Suspended" : "Active"}
+                <div className="font-black mb-1">Infringement : &emsp;</div>
+                <div className="underline cursor-pointer text-blue-600">
+                  {selectedItem ? selectedItem.reason : ""}
+                </div>
               </div>
               <div className="ml-10 mt-5 max-w-[700px] bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300">
-                <div className="font-semibold mb-1">Article link :</div>
+                <div className="font-black mb-1">Article Status : &emsp;</div>
+                <div className="underline cursor-pointer text-blue-600">
+                  {article && article.Suspended ? "Suspended" : "Active"}
+                </div>
+              </div>
+
+              <div className="ml-10 mt-5 max-w-[700px] bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300">
+                <div className="font-black mb-1">Article link :</div>
                 <div className="underline cursor-pointer text-blue-600"  
                     onClick={() => articleRedirect()}>
                   {article ? article.title : ""}
