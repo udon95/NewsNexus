@@ -136,6 +136,9 @@ const AdminRoomArticleReports = () => {
                 Article Status : &emsp;
                 {article && article.Suspended ? "Suspended" : "Active"}
               </div>
+              <textarea className="ml-10 mt-5 max-w-[500px] bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300">
+                {article ? article.text : "No text in article"}
+              </textarea>
               <div className="flex">
                 <button
                   type="button"
