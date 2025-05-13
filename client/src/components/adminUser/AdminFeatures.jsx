@@ -69,7 +69,7 @@ const AdminFeatures = () => {
 
       if (uploadError) {
         console.error("Error uploading video:", uploadError);
-        alert("Error uploading video:", uploadError.message);
+        alert("Error uploading video:"+ uploadError.message);
       } else {
         // Retrieve public URL of the uploaded file
         const { data: publicUrlData } = supabase.storage
@@ -85,7 +85,7 @@ const AdminFeatures = () => {
           .select();
         if (insertError) {
           console.error("Error inserting video metadata:", insertError);
-          alert("Error inserting video metadata:", insertError.message);
+          alert("Error inserting video metadata:"+ insertError.message);
         } else {
           alert("Upload successful!");
           setFeatureVideos((prev) => [...prev, ...insertData]);

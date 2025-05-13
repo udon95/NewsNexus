@@ -160,14 +160,24 @@ const AdminCommunityNotes = () => {
                 </div>
               </div>
               <div className="ml-10 mt-5 max-w-[700px] bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300">
-                Posted by: &emsp;{articleOwner}
+                <div className="flex">                
+                  <div className="font-black mb-1">Posted by : &emsp;</div>
+                  <div className="text-blue-600">
+                    {articleOwner}
+                  </div>
+                </div>
               </div>
               <div className="ml-10 mt-5 max-w-[700px] bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300">
-                Article Status : &emsp;
-                {selectedArticle && selectedArticle.Suspended
-                  ? "Suspended"
-                  : "Active"}
+                <div className="flex">                
+                  <div className="font-black mb-1">Article Status : &emsp;</div>
+                  <div className="text-blue-600">
+                    {selectedArticle && selectedArticle.Suspended
+                      ? "Suspended"
+                      : "Active"}
+                  </div>
+                </div>
               </div>
+
               {selectedArticleNotes.length > 0 ? (
                 <div className="text-2xl sm:text-2xl text-left mt-8 ml-10 font-bold">
                   Suggested Notes:

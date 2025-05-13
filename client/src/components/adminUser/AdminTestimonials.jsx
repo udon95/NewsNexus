@@ -131,7 +131,7 @@ const AdminTestimonials = () => {
                   {displayedRows.map((row, index) => (
                     <tr
                       key={row.id}
-                      className="cursor-pointer hover:bg-gray-300 transition-colors"
+                      className="hover:bg-gray-300 transition-colors"
                       onClick={() => openReport(row)}
                     >
                       <td className="p-3">{index + 1}</td>
