@@ -961,6 +961,7 @@ export const PremiumEditArticle = () => {
           setAmendment(article.amendment || "");
 
           editor.commands.setContent(article.text);
+          setWordCount(article.text.trim().split(/\s+/).filter(Boolean).length);
 
           if (generalError) {
             console.error(
@@ -1019,7 +1020,7 @@ export const PremiumEditArticle = () => {
           setEditorContent(roomData.content);
 
           setAmendment(roomData.amendment || "");
-
+          setWordCount(roomData.content.trim().split(/\s+/).filter(Boolean).length);
           if (editor) editor.setEditable(roomData.status === "Draft");
 
           const { data: imageRows } = await supabase
