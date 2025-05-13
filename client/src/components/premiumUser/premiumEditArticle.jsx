@@ -67,8 +67,12 @@ export const PremiumEditArticle = () => {
   const supabaseImagesInsertedRef = useRef(false);
   const [showUpdateSuccess, setShowUpdateSuccess] = useState(false);
   const [editorReady, setEditorReady] = useState(false);
+
   const [aiFeedback, setAiFeedback] = useState("");
   const [accuracy, setAccuracy] = useState(null);
+  const [openSuccess, setOpenSuccess] = useState(false);
+  const [openError, setOpenError] = useState(false);
+
   const [isUploading, setIsUploading] = useState(false);
   const [uploadAction, setUploadAction] = useState(""); // "post" or "draft"
   const [pendingImages, setPendingImages] = useState([]);
