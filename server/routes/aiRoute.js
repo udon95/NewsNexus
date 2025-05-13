@@ -238,7 +238,7 @@ async function factCheck(content, topicName) {
     }
 
     const pxData = await pxRes.json();
-    const parsed = pxData.choices?.[0]?.message?.content;
+    //const parsed = pxData.choices?.[0]?.message?.content;
 
     let presult = parsed;
     if (typeof parsed === "string") {
@@ -281,7 +281,7 @@ async function factCheck(content, topicName) {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "gpt-3.5-turbo",
+        model: "gpt-4o",
         messages: [
           {
             role: "system",
@@ -312,7 +312,7 @@ async function factCheck(content, topicName) {
           },
           { role: "user", content },
         ],
-        temperature: 0.2,
+        temperature: 0.0,
       }),
     });
     console.log("Status code from Chatgpt:", gptRes.status);
@@ -321,6 +321,7 @@ async function factCheck(content, topicName) {
     }
     const gptData = await gptRes.json();
     let gptParsed = gptData.choices[0].message.content;
+
     if (typeof gptParsed === "string") {
       let cleaned = gptParsed.trim().replace(/^``````$/g, "");
       try {
@@ -329,7 +330,11 @@ async function factCheck(content, topicName) {
         console.error("Failed to parse ChatGPT response:", cleaned);
         throw new Error("ChatGPT response content is not valid JSON.");
       }
+    } else if (typeof gptParsed === "object" && gptParsed !== null) {
+    } else {
+      throw new Error("ChatGPT response is neither string nor object.");
     }
+
     finalResult = {
       accuracy: gptParsed.accuracy,
       feedback: gptParsed.feedback,
