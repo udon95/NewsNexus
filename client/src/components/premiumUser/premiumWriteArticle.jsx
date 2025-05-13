@@ -438,6 +438,8 @@ export const PremiumWriteArticle = () => {
         setOpenSuccess(false); // Hide success dialog
         setOpenError(true); // Show error warning
       }
+      console.log("accuracy final", accuracy);
+      console.log("feedback final", aiFeedback);
       return;
     } else {
       // ---------------------- ROOM ARTICLE ----------------------
