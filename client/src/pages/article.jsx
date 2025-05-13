@@ -22,8 +22,8 @@ import TranslateButton from "../components/translate.jsx";
 const Article = () => {
   const articleRef = useRef(null);
   const { userType, user } = useAuthHook();
-  const { articleName } = useParams();
-  const decodedTitle = decodeURIComponent(articleName);
+  const { articleId } = useParams();
+  //const decodedTitle = decodeURIComponent(articleName);
   const navigate = useNavigate();
 
   const [articleData, setArticleData] = useState(null);
@@ -108,7 +108,7 @@ const Article = () => {
     try {
       const text = articleRef.current.innerText;
       const locale = selectedLanguage === "en" ? "en-US" : selectedLanguage;
-      console.log("selected lang", locale);
+      //console.log("selected lang", locale);
 
       const response = await fetch(
         "https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/translate/text-to-speech",
@@ -251,7 +251,7 @@ const Article = () => {
           `articleid, title, text, imagepath, time, view_count,
         rating, status, userid, topicid, amendment, users (userid, username)`
         )
-        .eq("title", decodedTitle)
+        .eq("title", articleId)
         .single();
 
       if (!error && data?.articleid) {
@@ -305,10 +305,10 @@ const Article = () => {
       }
     };
 
-    if (articleName && user) {
+    if (articleId && user) {
       fetchArticle();
     }
-  }, [articleName, user]);
+  }, [articleId, user]);
 
   useEffect(() => {
     const fetchReadingHistory = async () => {

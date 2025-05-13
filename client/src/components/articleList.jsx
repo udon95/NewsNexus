@@ -254,7 +254,7 @@ const ArticleList = ({
                     if (!isDraft) {
                       const route = isRoom
                         ? `/room/${article.roomid}`
-                        : `/article/${encodeURIComponent(article.title)}`;
+                        : `/article/${article.id}`;
                       navigate(route);
                     }
                   }}
