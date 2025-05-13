@@ -238,7 +238,7 @@ async function factCheck(content, topicName) {
     }
 
     const pxData = await pxRes.json();
-    //const parsed = pxData.choices?.[0]?.message?.content;
+    const parsed = pxData.choices?.[0]?.message?.content;
 
     let presult = parsed;
     if (typeof parsed === "string") {
