@@ -119,27 +119,42 @@ const AdminRoomArticleReports = () => {
               <div className="text-2xl sm:text-3xl text-left mt-8 ml-10 mb-5 font-bold">
                 Report details:
               </div>
+
               <div className="ml-10 mt-5 max-w-[700px] bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300">
-                Username : &emsp; {selectedItem ? selectedItem.username : ""}
+                <div className="flex">
+                  <div className="font-black mb-1">Username : &emsp; </div>
+                  <div className="text-blue-600">
+                    {selectedItem ? selectedItem.username : ""}
+                  </div>
+                </div>
               </div>
               <div className="ml-10 mt-5 max-w-[700px] bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300">
-                Infringement : &emsp; {selectedItem ? selectedItem.reason : ""}
+                <div className="flex">
+                  <div className="font-black mb-1">Infringement : &emsp; </div>
+                  <div className="text-blue-600">
+                    {selectedItem ? selectedItem.reason : ""}
+                  </div>
+                </div>
               </div>
               <div className="ml-10 mt-5 max-w-[700px] bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300">
-                Article Status : &emsp; {article && article.Suspended ? "Suspended" : "Active"}
+                <div className="flex">
+                  <div className="font-black mb-1">Article Status : &emsp; </div>
+                  <div className="text-blue-600">
+                    {article && article.Suspended ? "Suspended" : "Active"}
+                  </div>
+                </div>
               </div>
               <div className="ml-10 mt-5 max-w-[700px] bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300">
                 <div className="flex">
                   <div className="font-black mb-1">Article Title : &emsp; </div>
-                  <div className="underline">
+                  <div className="text-blue-600">
                     {article ? article.title : ""}
                   </div>
                 </div>
-
               </div>
               <div className="ml-10 mt-5 max-w-[700px] bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300">
                 <div className="font-black mb-1">Article Text :<br/></div>
-                <div className="">
+                <div className="text-blue-600">
                   {article ? (<div dangerouslySetInnerHTML={{ __html: article.content }} />) : ("No text in article")}
                 </div>
               </div>
