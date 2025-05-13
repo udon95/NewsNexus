@@ -119,13 +119,13 @@ const AdminRoomArticleReports = () => {
               <div className="text-2xl sm:text-3xl text-left mt-8 ml-10 mb-5 font-bold">
                 Report details:
               </div>
-              <div className="ml-10 mt-5 max-w-[500px] bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300">
+              <div className="ml-10 mt-5 max-w-[700px] bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300">
                 Username : &emsp; {selectedItem ? selectedItem.username : ""}
               </div>
-              <div className="ml-10 mt-5 max-w-[500px] bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300">
+              <div className="ml-10 mt-5 max-w-[700px] bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300">
                 Infringement : &emsp; {selectedItem ? selectedItem.reason : ""}
               </div>
-              <div className="ml-10 mt-5 max-w-[500px] bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300">
+              <div className="ml-10 mt-5 max-w-[700px] bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300">
                 Article Status : &emsp; {article && article.Suspended ? "Suspended" : "Active"}
               </div>
               <div className="ml-10 mt-5 max-w-[700px] bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300">
@@ -135,7 +135,7 @@ const AdminRoomArticleReports = () => {
                   {article ? article.title : ""}
                 </div>
               </div>
-              <div className="ml-10 mt-5 max-w-[500px] bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300">
+              <div className="ml-10 mt-5 max-w-[700px] bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300">
                 <div className="font-semibold mb-1">Article Text :<br/></div>
                 <div className="">
                   {article ? (<div dangerouslySetInnerHTML={{ __html: article.content }} />) : ("No text in article")}

@@ -113,16 +113,16 @@ const AdminCommentReports = () => {
               <div className="text-2xl sm:text-3xl text-left mt-8 ml-10 mb-5 font-bold">
                 Report details:
               </div>
-              <div className="ml-10 mt-5 max-w-[500px] bg-gray-100 rounded-2xl p-3 break-words text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300">
+              <div className="ml-10 mt-5 max-w-[700px] bg-gray-100 rounded-2xl p-3 break-words text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300">
                 Username : &emsp; {selectedItem ? selectedItem.username : ""}
               </div>
-              <div className="ml-10 mt-5 max-w-[500px] bg-gray-100 rounded-2xl p-3 break-words text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300">
+              <div className="ml-10 mt-5 max-w-[700px] bg-gray-100 rounded-2xl p-3 break-words text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300">
                 Infringement : &emsp; {selectedItem ? selectedItem.reason : ""}
               </div>
-              <div className="ml-10 mt-5 max-w-[500px] bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300">
+              <div className="ml-10 mt-5 max-w-[700px] bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300">
                 Comment Status : &emsp; {comment && comment.Suspended ? "Suspended" : "Active"}
               </div>
-              <div className="ml-10 mt-5 max-w-[500px] bg-gray-100 rounded-2xl p-3 break-words text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300">
+              <div className="ml-10 mt-5 max-w-[700px] bg-gray-100 rounded-2xl p-3 break-words text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300">
                 Comment : <br /> {selectedItem ? comment.content : ""}
               </div>
               <div className="flex">
