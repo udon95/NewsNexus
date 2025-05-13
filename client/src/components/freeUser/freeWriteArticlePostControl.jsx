@@ -57,6 +57,8 @@ export const FreeWriteArticle = () => {
   const [aiFeedback, setAiFeedback] = useState("");
   const [accuracy, setAccuracy] = useState(null);
   const [openSuccess, setOpenSuccess] = useState(false);
+  const [openError, setOpenError] = useState(false);
+
   const [postType, setPostType] = useState("General");
   const [uploadAction, setUploadAction] = useState(""); // "post" or "draft"
   const [isUploading, setIsUploading] = useState(false);

@@ -62,9 +62,12 @@ const EditFreeArticle = () => {
   const [articleStatus, setArticleStatus] = useState(null);
   const [amendment, setAmendment] = useState("");
   const [showUpdateSuccess, setShowUpdateSuccess] = useState(false);
+
   const [aiFeedback, setAiFeedback] = useState("");
   const [accuracy, setAccuracy] = useState(null);
-  // console.log("Auth session:", supabase.auth.getSession());
+  const [openSuccess, setOpenSuccess] = useState(false);
+  const [openError, setOpenError] = useState(false);
+
   const [uploadAction, setUploadAction] = useState(""); // "post" or "draft"
   const [isUploading, setIsUploading] = useState(false);
   const [pendingImages, setPendingImages] = useState([]);
@@ -1014,25 +1017,36 @@ const EditFreeArticle = () => {
                     </div>
                   )}
 
-                {accuracy !== null && aiFeedback !== null && accuracy < 75 && (
-                    <div className="mt-4 p-4 border border-red-300 bg-red-50 rounded text-sm text-black">
-                      <strong>Fact Check Results:</strong>
-                      {accuracy !== null && (
+                  {accuracy !== null &&
+                    aiFeedback !== null &&
+                    accuracy < 75 && (
+                      <div className="mt-4 p-4 border border-red-300 bg-red-50 rounded text-sm text-black">
+                        <strong>Fact Check Results:</strong>
+                        {accuracy !== null && (
+                          <p>
+                            <strong>Accuracy: </strong>
+                            {accuracy}%
+                          </p>
+                        )}
                         <p>
-                          <strong>Accuracy: </strong>
-                          {accuracy}%
+                          <strong>Feedback: </strong>
                         </p>
-                      )}
-                      <p>
-                        <strong>Feedback: </strong>
-                      </p>
-                      <div
-                        className="mt-1"
-                        dangerouslySetInnerHTML={{ __html: aiFeedback }}
-                      />
-                    </div>
-                  )}
-
+                        <div
+                          className="mt-1"
+                          dangerouslySetInnerHTML={{ __html: aiFeedback }}
+                        />
+                      </div>
+                    )}
+                  <Box mb={1} mt={1}>
+                    <Typography
+                      variant="body2"
+                      color="textSecondary"
+                      sx={{ fontStyle: "italic" }}
+                    >
+                      Note: AI fact-check feedback is provided for guidance only
+                      and may be inaccurate. Please verify facts independently.
+                    </Typography>
+                  </Box>
                   <div
                     className="min-h-[400px] max-h-[600px] overflow-y-auto border rounded-md bg-white p-4 mt-3 focus-within:outline-none"
                     onClick={() => editor.commands.focus()}
@@ -1302,40 +1316,40 @@ const EditFreeArticle = () => {
             </div>
           )}
           <Dialog
-          open={openSuccess}
-          onClose={() => {
-            setOpenSuccess(false);
-            handleClearInputs();
-          }}
-          aria-labelledby="success-dialog-title"
-        >
-          <DialogTitle id="success-dialog-title">Article Posted!</DialogTitle>
-          <DialogContent>
-            <strong>Fact Check Results:</strong>
-            <p>
-              <strong>Accuracy: </strong>
-              {accuracy}%
-            </p>
+            open={openSuccess}
+            onClose={() => {
+              setOpenSuccess(false);
+              handleClearInputs();
+            }}
+            aria-labelledby="success-dialog-title"
+          >
+            <DialogTitle id="success-dialog-title">Article Posted!</DialogTitle>
+            <DialogContent>
+              <strong>Fact Check Results:</strong>
+              <p>
+                <strong>Accuracy: </strong>
+                {accuracy}%
+              </p>
 
-            <p>
-              <strong>Feedback: </strong>
-            </p>
-            <div
-              className="mt-1"
-              dangerouslySetInnerHTML={{ __html: aiFeedback }}
-            />
-          </DialogContent>
-          <DialogActions>
-            <Button
-              onClick={() => {
-                setOpenSuccess(false);
-                handleClearInputs();
-              }}
-            >
-              OK
-            </Button>
-          </DialogActions>
-        </Dialog>
+              <p>
+                <strong>Feedback: </strong>
+              </p>
+              <div
+                className="mt-1"
+                dangerouslySetInnerHTML={{ __html: aiFeedback }}
+              />
+            </DialogContent>
+            <DialogActions>
+              <Button
+                onClick={() => {
+                  setOpenSuccess(false);
+                  handleClearInputs();
+                }}
+              >
+                OK
+              </Button>
+            </DialogActions>
+          </Dialog>
           {showUpdateSuccess && (
             <div className="fixed inset-0 backdrop-blur-sm bg-white/5 flex items-center justify-center z-50">
               <div
