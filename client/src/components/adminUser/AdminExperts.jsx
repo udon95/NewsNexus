@@ -110,37 +110,23 @@ const setApplicantWithTopic = (application) => {
                 <div className="flex">                
                   <div className="font-black mb-1">Profession : &emsp;</div>
                   <div className="text-blue-600">
-                    {applicant ? applicant.description : "Professional designation"}
+                    {applicant ? applicant.description : "Nil"}
                   </div>
                 </div>
               </div>
-              <div className="ml-10 mt-5 max-w-[700px] bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300">
-                <div className="flex">                
-                  <div className="font-black mb-1">Profession : &emsp;</div>
-                  <div className="text-blue-600">
-                                    {applicant.cv
-                  ? applicant.cv.split("\n").map((line, idx) => (
-                      <span key={idx}>
-                        {line}
-                        <br />
-                      </span>
-                    ))
-                  : "No professional designation"}
-                  </div>
-                </div>
-              </div>
-
-
               <div className="ml-10 mt-5 max-w-[700px] min-h-[200px] bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300">
-                {applicant.cv
-                  ? applicant.cv.split("\n").map((line, idx) => (
+                <div className="flex">                
+                  <div className="font-black mb-1">Experiences : &emsp;</div>
+                  <div className="text-blue-600">
+                    {applicant.cv ? applicant.cv.split("\n").map((line, idx) => (
                       <span key={idx}>
-                        {line}
-                        <br />
+                        {line}<br />
                       </span>
-                    ))
-                  : "No professional designation"}
+                    )) : "No professional designation"}
+                  </div>
+                </div>
               </div>
+
               <div className="flex">
                 <button
                   type="button"

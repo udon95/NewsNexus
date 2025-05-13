@@ -148,7 +148,7 @@ const AdminTestimonials = () => {
                       <td className="p-3">{                
                         <button
                           type="button"
-                          className={`px-6 py-3 flex ml-10 mt-7 text-white rounded-lg hover:bg-opacity-90 cursor-pointer ${
+                          className={`px-6 py-3 flex text-white rounded-lg hover:bg-opacity-90 cursor-pointer ${
                             row.homepage_display ? 'bg-red-600' : 'bg-[#3F414C]'}`}                          
                             onClick={() =>setDisplay(
                               row.id,
