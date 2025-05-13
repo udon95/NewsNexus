@@ -30,13 +30,11 @@ const PublicProfile = () => {
   if (!profileData) return <div>Loading...</div>;
 
   return (
-    // <div className="min-h-screen min-w-screen flex flex-col bg-white">
-    <div className="min-h-screen bg-[#FAFAFA] flex flex-col">
+    <div className="min-h-screen min-w-screen flex flex-col bg-white">
       <Navbar />
       <div className="flex-grow container mx-auto px-4 sm:px-8 max-w-4xl font-grotesk py-8 ">
-        {/* <div className="bg-gray-200 p-6 rounded-lg shadow mb-2 max-w-[900px]"> */}
-        <div className="bg-white p-6 rounded-2xl shadow-md mb-6 border border-gray-200 w-full max-w-3xl">
-          {/* <h2 className="text-2xl font-semibold">
+        <div className="bg-gray-200 p-6 rounded-lg shadow mb-2 max-w-[900px]">
+          <h2 className="text-2xl font-semibold">
             {profileData.user.username}
             {profileData.user.expert_status === "Approved" && (
               <BadgeCheck className="inline-block ml-2 text-blue-500" />
@@ -67,42 +65,12 @@ const PublicProfile = () => {
                 {profileData.expertTopics.map((t) => t.name).join(", ")}
               </p>
             )}
-          </h2> */}
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-  <div>
-    <h2 className="text-2xl font-bold text-gray-900">{profileData.user.username}</h2>
-    <p className="text-sm text-gray-500">
-      Joined on: {new Date(profileData.user.created_at).toLocaleDateString()}
-    </p>
-    <p className="text-sm text-gray-500">
-      Articles: {profileData.totalArticles} | Likes: {profileData.totalLikes} | Views: {profileData.totalViews}
-    </p>
-    {profileData.expertTopics?.length > 0 && (
-      <p className="text-sm text-gray-500">
-        Expert in: {profileData.expertTopics.map((t) => t.name).join(", ")}
-      </p>
-    )}
-  </div>
-  <div className="flex flex-row items-center gap-2">
-    {profileData.user.expert_status === "Approved" && (
-      <BadgeCheck className="text-blue-600 w-5 h-5" />
-    )}
-    <span className={`px-3 py-1 text-sm rounded-full font-semibold ${
-      profileData.user.usertype === "Premium" ? "bg-yellow-300 text-black" : "bg-gray-300 text-black"
-    }`}>
-      {profileData.user.usertype}
-    </span>
-  </div>
-</div>
-
+          </h2>
         </div>
 
         <div className="flex flex-col flex-grow items-center w-full px-4">
-            {/* <div className="w-full max-w-5xl p-6 font-grotesk bg-gray-200">
-              <h1 className="text-4xl mb-8 font-grotesk text-left">Articles:</h1> */}
-            <div className="w-full max-w-5xl p-6 bg-white rounded-2xl shadow-md border border-gray-200 mt-4">
-            <h2 className="text-2xl font-bold mb-6 text-gray-800">Articles</h2>
-
+          <div className="w-full max-w-5xl p-6 font-grotesk bg-gray-200">
+            <h1 className="text-4xl mb-8 font-grotesk text-left">Articles:</h1>
 
             {/* <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6 w-full">
               <ul>
@@ -121,8 +89,7 @@ const PublicProfile = () => {
             <div className="w-full max-w-[2000px] mx-auto">
               <div className="space-y-6">
                 {profileData.articles.length === 0 ? (
-                  // <div className="text-center text-gray-500 font-medium mt-6">
-                  <div className="text-center text-gray-400 font-medium py-6 italic">
+                  <div className="text-center text-gray-500 font-medium mt-6">
                     No articles available.
                   </div>
                 ) : (
@@ -168,15 +135,10 @@ const PublicProfile = () => {
             </div> */}
           </div>
 
-          {/* <div className="w-full max-w-5xl p-6 font-grotesk bg-gray-200">
+          <div className="w-full max-w-5xl p-6 font-grotesk bg-gray-200">
             <h1 className="text-4xl mb-8 font-grotesk text-left">
               Public Rooms Joined:
-            </h1>{" "} */}
-            <div className="w-full max-w-5xl p-6 mt-4 bg-white rounded-2xl shadow-md border border-gray-200">
-  <h2 className="text-2xl font-bold mb-6 text-gray-800">
-      Room Membership :
-  </h2>
-
+            </h1>{" "}
             <ul>
               {profileData.rooms.map((room) => (
                 <li key={room.roomid} className="mb-1">
@@ -192,7 +154,6 @@ const PublicProfile = () => {
           </div>
         </div>
       </div>
-      <div className="h-10" />
     </div>
   );
 };
