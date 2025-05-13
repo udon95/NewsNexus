@@ -23,6 +23,7 @@ const Article = () => {
   const articleRef = useRef(null);
   const { userType, user } = useAuthHook();
   const { articleName } = useParams();
+  const decodedTitle = decodeURIComponent(articleName);
   const navigate = useNavigate();
 
   const [articleData, setArticleData] = useState(null);
@@ -250,7 +251,7 @@ const Article = () => {
           `articleid, title, text, imagepath, time, view_count,
         rating, status, userid, topicid, amendment, users (userid, username)`
         )
-        .eq("title", articleName)
+        .eq("title", decodedTitle)
         .single();
 
       if (!error && data?.articleid) {

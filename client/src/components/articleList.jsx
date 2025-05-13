@@ -22,17 +22,17 @@ const ArticleList = ({
   useEffect(() => {
     const deleteExpiredDrafts = async () => {
       const now = new Date();
-  
+
       for (const article of articles) {
         if (!isDraft) continue;
-  
+
         const createdAt = isRoom
           ? new Date(article.created_at)
           : new Date(article.time);
-  
+
         const expiryDate = new Date(createdAt);
         expiryDate.setDate(expiryDate.getDate() + 7);
-  
+
         if (now >= expiryDate) {
           const id = isRoom ? article.postid : article.articleid;
           if (isRoom) {
@@ -43,9 +43,9 @@ const ArticleList = ({
         }
       }
     };
-  
+
     deleteExpiredDrafts();
-  }, [articles, isDraft, isRoom]);  
+  }, [articles, isDraft, isRoom]);
 
   useEffect(() => {
     const fetchVotes = async () => {
@@ -135,46 +135,46 @@ const ArticleList = ({
       );
       if (!confirmed) return;
     }
-  
+
     const bucketName = "articles-images";
-  
+
     const { data: images, error: fetchError } = await supabase
       .from("article_images")
       .select("image_url")
       .eq("articleid", articleid);
-  
+
     if (fetchError) {
       console.error("Error fetching article images:", fetchError);
       return;
     }
-  
+
     if (images && images.length > 0) {
       const imagePaths = images.map((img) => {
         const parts = img.image_url.split(`/object/public/${bucketName}/`);
-        return parts[1]; 
+        return parts[1];
       });
-  
+
       const { error: storageError } = await supabase.storage
         .from(bucketName)
         .remove(imagePaths);
-  
+
       if (storageError) {
         console.error("Error deleting images from storage:", storageError);
       }
     }
-  
+
     const { error } = await supabase
       .from("articles")
       .delete()
       .eq("articleid", articleid);
-  
+
     if (error) {
       console.error("Error deleting article:", error);
       return;
     }
-  
+
     setOpenMenuIndex(null);
-  
+
     if (onDeleteSuccess) {
       onDeleteSuccess(articleid);
     }
@@ -187,46 +187,46 @@ const ArticleList = ({
       );
       if (!confirmed) return;
     }
-  
+
     const bucketName = "room-article-images";
-  
+
     const { data: images, error: fetchError } = await supabase
       .from("room_article_images")
       .select("image_url")
       .eq("postid", postid);
-  
+
     if (fetchError) {
       console.error("Error fetching room article images:", fetchError);
       return;
     }
-  
+
     if (images && images.length > 0) {
       const imagePaths = images.map((img) => {
         const parts = img.image_url.split(`/object/public/${bucketName}/`);
-        return parts[1]; 
+        return parts[1];
       });
-  
+
       const { error: storageError } = await supabase.storage
         .from(bucketName)
         .remove(imagePaths);
-  
+
       if (storageError) {
         console.error("Error deleting images from storage:", storageError);
       }
     }
-  
+
     const { error } = await supabase
       .from("room_articles")
       .delete()
       .eq("postid", postid);
-  
+
     if (error) {
       console.error("Error deleting room article:", error);
       return;
     }
-  
+
     setOpenMenuIndex(null);
-  
+
     if (onDeleteSuccess) {
       onDeleteSuccess(postid);
     }
@@ -234,9 +234,7 @@ const ArticleList = ({
 
   return (
     <div className="mt-6 font-grotesk w-full pb-4">
-      <h2 className="text-3xl font-bold mb-2 w-3/3 md:w-2/3">
-        {title}
-      </h2>
+      <h2 className="text-3xl font-bold mb-2 w-3/3 md:w-2/3">{title}</h2>
       {articles.length === 0 ? (
         <p className="px-4 py-6 text-center text-gray-500">
           {isDraft ? "No drafts available." : "No articles available."}
@@ -256,11 +254,10 @@ const ArticleList = ({
                     if (!isDraft) {
                       const route = isRoom
                         ? `/room/${article.roomid}`
-                        : `/article/${article.title}`;
+                        : `/article/${encodeURIComponent(article.title)}`;
                       navigate(route);
                     }
                   }}
-                  
                   className="w-full min-h-[15rem] border border-black rounded-2xl shadow-md cursor-pointer hover:shadow-lg transition bg-white flex flex-col"
                 >
                   {/* Article Information */}
@@ -285,13 +282,17 @@ const ArticleList = ({
                           <div className="flex items-center gap-2 text-green-500">
                             <ThumbsUp />
                             <span className="font-semibold text-black">
-                              {formatCount(voteCounts[article.articleid]?.up || 0)}
+                              {formatCount(
+                                voteCounts[article.articleid]?.up || 0
+                              )}
                             </span>
                           </div>
                           <div className="flex items-center gap-2 text-red-500">
                             <ThumbsDown />
                             <span className="font-semibold text-black">
-                              {formatCount(voteCounts[article.articleid]?.down || 0)}
+                              {formatCount(
+                                voteCounts[article.articleid]?.down || 0
+                              )}
                             </span>
                           </div>
                         </div>
@@ -300,7 +301,9 @@ const ArticleList = ({
                           className="article-menu-trigger p-1 text-lg font-bold text-black hover:text-gray-600"
                           onClick={(e) => {
                             e.stopPropagation();
-                            setOpenMenuIndex(openMenuIndex === index ? null : index);
+                            setOpenMenuIndex(
+                              openMenuIndex === index ? null : index
+                            );
                           }}
                         >
                           <EllipsisVertical />
@@ -310,14 +313,19 @@ const ArticleList = ({
                     {isDraft && (
                       <div className="flex justify-between items-center flex-wrap px-4 pb-2 pt-1 text-sm gap-2">
                         <div className="max-w-[80%] text-black overflow-hidden whitespace-nowrap text-ellipsis">
-                          Expires: {isRoom ? calculateExpiryDateRoom(article) : calculateExpiryDate(article)}
+                          Expires:{" "}
+                          {isRoom
+                            ? calculateExpiryDateRoom(article)
+                            : calculateExpiryDate(article)}
                         </div>
 
                         <button
                           className="article-menu-trigger p-1 text-lg font-bold text-black hover:text-gray-600"
                           onClick={(e) => {
                             e.stopPropagation();
-                            setOpenMenuIndex(openMenuIndex === index ? null : index);
+                            setOpenMenuIndex(
+                              openMenuIndex === index ? null : index
+                            );
                           }}
                         >
                           <EllipsisVertical />
@@ -330,14 +338,16 @@ const ArticleList = ({
                           className="article-menu-trigger p-1 text-lg font-bold text-black hover:text-gray-600"
                           onClick={(e) => {
                             e.stopPropagation();
-                            setOpenMenuIndex(openMenuIndex === index ? null : index);
+                            setOpenMenuIndex(
+                              openMenuIndex === index ? null : index
+                            );
                           }}
                         >
                           <EllipsisVertical />
                         </button>
                       </div>
                     )}
-                  
+
                     {/* Dropdown Menu (Appears on Click) */}
                     {openMenuIndex === index && (
                       <div className="article-menu-dropdown absolute bottom-10 right-2 bg-white shadow-md border border-gray-300 rounded-lg min-w-[120px] z-50">
@@ -348,11 +358,13 @@ const ArticleList = ({
                               className="block px-4 py-2 w-full text-left hover:bg-gray-100"
                               onClick={(e) => {
                                 e.stopPropagation();
-                                const id = isRoom ? article.postid : article.articleid;
-                                const route = isPremium ? `/premiumDashboard/edit/${id}` : `/freeDashboard/edit/${id}`;
-                                navigate(
-                                  route
-                                );
+                                const id = isRoom
+                                  ? article.postid
+                                  : article.articleid;
+                                const route = isPremium
+                                  ? `/premiumDashboard/edit/${id}`
+                                  : `/freeDashboard/edit/${id}`;
+                                navigate(route);
                               }}
                             >
                               Edit
@@ -364,8 +376,12 @@ const ArticleList = ({
                               className="block px-4 py-2 w-full text-left hover:bg-gray-100"
                               onClick={(e) => {
                                 e.stopPropagation();
-                                const id = isRoom ? article.postid : article.articleid;
-                                isRoom ? handleDeleteRoomArticle(id) : handleDeleteArticle(id);
+                                const id = isRoom
+                                  ? article.postid
+                                  : article.articleid;
+                                isRoom
+                                  ? handleDeleteRoomArticle(id)
+                                  : handleDeleteArticle(id);
                               }}
                             >
                               Delete
