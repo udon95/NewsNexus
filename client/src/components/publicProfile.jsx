@@ -112,7 +112,7 @@ const PublicProfile = () => {
   return (
     <div className="relative min-h-screen w-screen flex flex-col bg-white">
     <Navbar />
-      <main className="w-full px-4 sm:px-8 py-10 font-grotesk space-y-10">
+    <main className="w-full bg-[#F9FAFB] text-gray-900 px-4 sm:px-8 py-10">
   
         
         {/* Profile Summary */}
