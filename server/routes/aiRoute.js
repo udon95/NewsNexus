@@ -148,6 +148,18 @@ const generateCategoryPrompt = (content, category) => `
       Answer:
       `;
 
+const jsonSchema = {
+  schema: {
+    type: "object",
+    properties: {
+      accuracy: { type: "number" },
+      feedback: { type: "string" },
+    },
+    required: ["accuracy", "feedback"],
+    additionalProperties: false,
+  },
+};
+
 async function factCheck(content, topicName) {
   const catRes = await fetch("https://api.openai.com/v1/chat/completions", {
     method: "POST",
@@ -176,7 +188,7 @@ async function factCheck(content, topicName) {
       error: `Article content does not match category: ${topicName}`,
     };
   }
-  let result;
+  let finalResult;
 
   //  Perplexity factual check
   try {
@@ -193,9 +205,10 @@ async function factCheck(content, topicName) {
             role: "system",
             content: `You are a fact-checking assistant.
                       Please review the following article and verify its factual accuracy using up-to-date knowledge as of today.
-                      For any false, misleading, or dubious claims:
-                      - Wrap only the false or misleading text in <mark> tags.
-                      - Immediately after each <mark> section, on a new line preceded by a <br> tag, provide an explanation in parentheses that details why the text is inaccurate.
+                      For every sentence or claim in the article, if it is false or unverifiable, wrap only the false or unverifiable part in <mark> tags. 
+                      After each <mark> section, on a new line with a <br> tag, provide a parenthetical explanation of why it is inaccurate or cannot be verified. 
+                      If the entire article is fictional, mark the entire article in <mark> tags and explain why.
+                      
                       In addition, analyze the overall factual correctness of the article and assign a numerical accuracy score between 0 and 100, where 100 means the article is completely accurate and 0 means it is entirely inaccurate.
                       **Do not include any Markdown formatting, code blocks, or extra text** in your response.
                       Please return the following **exactly in a clean JSON format**:
@@ -209,11 +222,14 @@ async function factCheck(content, topicName) {
 
                       Article:
                       ${content}
-                      **If this article is fictional or based on fabricated events, set accuracy to 0.**
-                      `,
+                      **If this article is fictional or based on fabricated events, set accuracy to 0.** `,
           },
           { role: "user", content },
         ],
+        response_format: {
+          type: "json_schema",
+          json_schema: jsonSchema,
+        },
       }),
     });
     console.log("Status code from Perplexity:", pxRes.status); // Check status code
@@ -221,134 +237,34 @@ async function factCheck(content, topicName) {
       throw new Error(`Perplexity API error with status ${pxRes.status}`);
     }
 
-    const raw = await pxRes.text(); // Get raw response text first
-    console.log("Raw response from Perplexity:", raw);
-    const perC = pxRes.choices?.[0]?.message?.content;
-    // console.log("Status code from Perplexity:", pxRes.status); // Check status code
-    //let cleanResponse = raw.replace(/```json\n|\n```/g, ""); // Strip the markdown block (```json...```)
+    const pxData = await pxRes.json();
+    const parsed = pxData.choices?.[0]?.message?.content;
 
-    // If the status code is not 2xx, throw an error
-    // if (!pxRes.ok) {
-    //   const errorText = await pxRes.text(); // Get the error message if response is not okay
-    //   console.error("Error response from Perplexity:", errorText);
-    //   throw new Error(`Perplexity request failed with status ${pxRes.status}`);
-    // }
-    // if (/i['’]?m not sure|unknown|cannot verify/i.test(raw)) {
-    //   throw new Error("Perplexity unsure");
-    // }
-    // let start = raw.indexOf("{");
-    // let end = raw.lastIndexOf("}");
-    // if (start === -1 || end === -1) {
-    //   throw new Error(
-    //     "—couldn't find JSON braces in the model output!—\n" + raw
-    //   );
-    // }
-    // console.log("Raw response from Perplexity:", raw);
-    console.log("choices", perC);
+    let presult = parsed;
+    if (typeof parsed === "string") {
+      let cleaned = parsed.trim();
+      // Remove code block markers if present
+      cleaned = cleaned.replace(/^``````$/g, "");
+      try {
+        presult = JSON.parse(cleaned);
+      } catch (e) {
+        console.error("Failed to parse Perplexity response:", cleaned);
+        throw new Error("Perplexity response content is not valid JSON.");
+      }
+    }
 
-    const parsed = await pxRes.json(); // Get raw response text first
-    console.log("Parsed response from Perplexity:", parsed);
-
-    // let parsed;
-    // try {
-    //   parsed = JSON.parse(raw);
-    //   //console.log("parsed from perplexity", parsed);
-    // } catch (err) {
-    //   console.error("Error parsing JSON response:", err.message);
-    //   throw new Error("Failed to parse Perplexity response as JSON.");
-    // }
-    // console.log("Perplexity response parsed:", parsed); // Check parsed data
-
-    // if (
-    //   !parsed ||
-    //   !parsed.choices ||
-    //   !parsed.choices[0] ||
-    //   !parsed.choices[0].message
-    // ) {
-    //   throw new Error(
-    //     "Perplexity response does not contain the expected structure."
-    //   );
-    // }
-    // let feedback = parsed.choices[0].message.content || "";
-    // //const accuracyMatch = feedback.match(/"accuracy":\s*(\d+)/); // Look for accuracy in the feedback
-
-    // //let accuracy = accuracyMatch ? parseInt(accuracyMatch[1], 10) : null;
-    // let accuracy = parsed.accuracy;
-    // console.log("parsed choice 0", feedback);
-
-    // if (accuracy === null) {
-    //   console.warn("Accuracy field not found in the response.");
-    //   accuracy = 1;
-    // }
-    // if (feedback.toLowerCase().includes("fictional")) {
-    //   accuracy = 1; // Set accuracy to 0 if "fictional" is mentioned
-    // }
-    // try {
-    //   const feedback = JSON.parse(feedback);
-    //   //console.log("Parsed Perplexity response:", parsed);
-    //   result = {
-    //     accuracy: accuracy,
-    //     feedback: feedback,
-    //   };
-    // } catch (err) {
-    //   console.error("Error cleaning feedback:", err.message);
-    //   result = {
-    //     accuracy: accuracy,
-    //     feedback: feedback, // Default to raw feedback if it's not valid JSON
-    //   };
-    // }
-    //console.log("Perplexity response parsed:", parsed); // Check parsed data
-
-    // Extract only the required fields
-    //const content = parsed?.choices?.[0]?.message?.content || "";
-    // const messageContent = parsed?.choices?.[0]?.message?.content || "";
-    // if (!messageContent) {
-    //   console.error("Message field not found in Perplexity response.");
-    //   throw new Error("No message field found in Perplexity response.");
-    // }
-
-    // If 'message' is an object, inspect its contents
-    //console.log("Message object:", parsed); // Debugging the content
-
-    let feedback = "";
-    let accuracy = null;
-    // const cleanedContent = messageContent.replace(/^```json\n|\n```$/g, ""); // Remove surrounding backticks and line breaks
-    // console.log("cleaned content", cleanedContent);
-    // Only return the desired content, accuracy, and feedback
-    // try {
-    //   // Parse the content of the message, which is a JSON string
-    //   const contentData = JSON.parse(cleanedContent);
-    //   console.log("content data", contentData);
-    //   // Extract accuracy and feedback from the parsed content
-    //   accuracy = contentData?.accuracy || null;
-    //   feedback = contentData?.feedback || "";
-
-    //   console.log("Extracted accuracy:", accuracy);
-    //   console.log("Extracted feedback:", feedback);
-    // } catch (err) {
-    //   console.error("Error parsing message content:", err.message);
-    //   throw new Error("Failed to parse Perplexity message content.");
-    // }
     if (
-      typeof parsed.accuracy === "number" &&
-      typeof parsed.feedback === "string"
+      typeof presult.accuracy === "number" &&
+      typeof presult.feedback === "string"
     ) {
-      accuracy = parsed.accuracy;
-      feedback = parsed.feedback;
+      finalResult = {
+        accuracy: presult.accuracy,
+        feedback: presult.feedback,
+      };
+      //console.log("Final extracted result:", finalResult);
     } else {
       throw new Error("Perplexity response missing expected fields.");
     }
-
-    if (feedback.toLowerCase().includes("fictional")) {
-      accuracy = 0; // Set accuracy to 0 if the content is fictional
-      feedback = `The article has fictional content and does not correspond to real events or persons.`;
-    }
-    const result = {
-      accuracy,
-      feedback,
-    };
-
-    console.log("Final extracted result:", result); // Check the final output
   } catch (perpErr) {
     console.warn(
       "Perplexity fail to determine, falling back to ChatGPT:",
@@ -366,11 +282,13 @@ async function factCheck(content, topicName) {
         messages: [
           {
             role: "system",
-            content: `You are a fact-checking assistant. Please review the following article and verify its factual accuracy using up-to-date knowledge as of today.
+            content: `You are a fact-checking assistant. For the following article, verify every claim using only information you can confirm from reliable, up-to-date sources. 
+                    If you cannot find evidence for a claim, or if the event is fictional, assign an accuracy score of 0 and clearly state "No verifiable information found."
+                    If a claim refers to the future or is unconfirmed, explain that it cannot be verified.
 
-                    For any false, misleading, or dubious claims:
-                    - Wrap only the false or misleading text in <mark> tags.
-                    - Immediately after each <mark> section, on a new line preceded by a <br> tag, provide an explanation in parentheses that details why the text is inaccurate.
+                     For every sentence or claim in the article, if it is false or unverifiable, wrap only the false or unverifiable part in <mark> tags. 
+                      After each <mark> section, on a new line with a <br> tag, provide a parenthetical explanation of why it is inaccurate or cannot be verified. 
+                      If the entire article is fictional, mark the entire article in <mark> tags and explain why.
 
                     In addition, analyze the overall factual correctness of the article and assign a numerical accuracy score between 0 and 100, where 100 means the article is completely accurate and 0 means it is entirely inaccurate.
                     **If this article is fictional or based on fabricated events, set accuracy to 1.**
@@ -394,40 +312,48 @@ async function factCheck(content, topicName) {
         temperature: 0.2,
       }),
     });
-    console.log("Status code from Chatgpt:", gptRes.status); // Check status code
+    console.log("Status code from Chatgpt:", gptRes.status);
     if (!gptRes.ok) {
       throw new Error(`Chatgpt API error with status ${gptRes.status}`);
     }
     const gptData = await gptRes.json();
-    //console.log("gptData", gptData);
-    const parsed = JSON.parse(gptData.choices[0].message.content);
-
-    let result = parsed;
-    console.log("chatgpt parsed", result);
-
-    if (result.feedback.toLowerCase().includes("fictional")) {
-      result.accuracy = 0; // Set accuracy to 0 if the article is fictional
-      result.feedback = `The article is entirely fictional and does not correspond to real events or persons.`;
+    let gptParsed = gptData.choices[0].message.content;
+    if (typeof gptParsed === "string") {
+      let cleaned = gptParsed.trim().replace(/^``````$/g, "");
+      try {
+        gptParsed = JSON.parse(cleaned);
+      } catch (e) {
+        console.error("Failed to parse ChatGPT response:", cleaned);
+        throw new Error("ChatGPT response content is not valid JSON.");
+      }
+    }
+    finalResult = {
+      accuracy: gptParsed.accuracy,
+      feedback: gptParsed.feedback,
+    };
+    if (finalResult.feedback.toLowerCase().includes("fictional")) {
+      finalResult.accuracy = 0;
+      finalResult.feedback = `The article is entirely fictional and does not correspond to real events or persons.`;
     }
   }
 
   //console.log("parsed result:", result);
   const threshold = 75;
-  if (!result || typeof result.accuracy !== "number") {
+  if (!finalResult || typeof finalResult.accuracy !== "number") {
     throw {
       status: 500,
       error: "Fact-checking failed: result is missing or invalid.",
-      result,
+      result: finalResult,
     };
   }
-  if (result.accuracy < threshold) {
+  if (finalResult.accuracy < threshold) {
     throw {
       status: 400,
       error: "Article failed fact-checking.",
-      ...result,
+      ...finalResult,
     };
   }
-  return result;
+  return finalResult;
 }
 
 router.post("/submit-article", async (req, res) => {

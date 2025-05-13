@@ -427,10 +427,17 @@ export const PremiumWriteArticle = () => {
       setPendingImages([]);
       handleClearInputs();
 
-      setAccuracy(result.accuracy);
-      setAiFeedback(result.feedback);
-      //alert(`Article posted successfully. Accuracy Score: ${result.accuracy}%`);
-      setOpenSuccess(true);
+      if (result.accuracy >= 75) {
+        setAccuracy(result.accuracy);
+        setAiFeedback(result.feedback);
+        setOpenSuccess(true); // Show success dialog
+        setOpenError(false); // Hide error warning
+      } else {
+        setAccuracy(result.accuracy);
+        setAiFeedback(result.feedback);
+        setOpenSuccess(false); // Hide success dialog
+        setOpenError(true); // Show error warning
+      }
       return;
     } else {
       // ---------------------- ROOM ARTICLE ----------------------
@@ -1343,8 +1350,8 @@ export const PremiumWriteArticle = () => {
                     <LinkIcon size={16} />
                   </button>
                 </div>
-
-                {accuracy !== null && aiFeedback && accuracy < 75 && (
+                {openError && (
+                  /* {accuracy !== null && aiFeedback && accuracy < 75 && ( */
                   <div className="mt-4 p-4 border border-red-300 bg-red-50 rounded text-sm text-black">
                     <strong>Fact Check Results:</strong>
                     <p>
