@@ -6,8 +6,6 @@ import PasswordInput from "../components/showPW.jsx";
 import "../index.css";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import Guidelines from "./guidelines.jsx";
-import Privacy from "./privacy.jsx";
 
 function Register() {
   const [step, setStep] = useState(1);
@@ -27,11 +25,6 @@ function Register() {
 
   const [categories, setCategories] = useState([]);
   const [dropdownValues, setDropdownValues] = useState(Array(6).fill(""));
-
-  const [acceptedGuidelines, setAcceptedGuidelines] = useState(false);
-  const [acceptedPrivacy, setAcceptedPrivacy] = useState(false);
-  const [showGuidelinesModal, setShowGuidelinesModal] = useState(false);
-  const [showPrivacyModal, setShowPrivacyModal] = useState(false);
 
   useEffect(() => {
     const validateForm = () => {
@@ -62,18 +55,12 @@ function Register() {
 
       if (!userData.gender) newErrors.gender = "Please select a gender.";
 
-      if (!acceptedGuidelines)
-        newErrors.acceptedGuidelines =
-          "You must agree to the platform guidelines.";
-      if (!acceptedPrivacy)
-        newErrors.acceptedPrivacy = "You must agree to the privacy policy.";
-
       setErrors(newErrors);
       setIsValid(Object.keys(newErrors).length === 0); // If no errors, form is valid
     };
 
     validateForm();
-  }, [userData, acceptedGuidelines, acceptedPrivacy]);
+  }, [userData]);
 
   useEffect(() => {
     async function fetchCategories() {
@@ -172,17 +159,17 @@ function Register() {
             <h2 className="text-3xl sm:text-5xl font-bold text-gray-900 mb-10 mt-0 font-grotesk">
               Register
             </h2>
-            <p className="text-sm text-gray-600 mb-4">
-              You are registering as a <strong>Free User</strong>.
-            </p>
 
             {/* Step 1: User Information */}
             <form className="space-y-6 sm:space-y-5">
               <div>
-                <div className="flex items-center mb-6 relative group">
+                {/* <div className="flex items-center mb-6 relative group"> */}
+                <div className="flex items-center mb-4 relative group">
                   <label
                     htmlFor="username"
-                    className="text-2xl sm:text-2xl font-normal text-black w-30"
+                    // className="text-2xl sm:text-2xl font-normal text-black w-30"
+                    className="text-base font-medium text-gray-800 w-32 mr-4"
+
                   >
                     Username:
                   </label>
@@ -191,7 +178,8 @@ function Register() {
                     name="username"
                     value={userData.username}
                     onChange={handleInputChange}
-                    className="flex-grow p-3 rounded-lg bg-[#F3F3F3] focus:ring-2 focus:ring-blue-500 shadow-lg"
+                    // className="flex-grow p-3 rounded-lg bg-[#F3F3F3] focus:ring-2 focus:ring-blue-500 shadow-lg"
+                    className="w-full p-3 rounded-md bg-[#F3F3F3] focus:ring-2 focus:ring-blue-500 shadow-md"
                     placeholder="Enter your name"
                   />
                   {errors.username && (
@@ -202,7 +190,7 @@ function Register() {
                 </div>
 
                 <div className="flex items-center mb-6 relative group">
-                  <label className="text-2xl sm:text-2xl font-normal text-black w-30">
+                  <label className="text-base font-medium text-gray-800 w-32 mr-4">
                     Email:
                   </label>
                   <input
@@ -210,7 +198,8 @@ function Register() {
                     name="email"
                     value={userData.email}
                     onChange={handleInputChange}
-                    className="flex-grow p-3 rounded-lg bg-[#F3F3F3] focus:ring-2 focus:ring-blue-500 shadow-lg"
+                    // className="flex-grow p-3 rounded-lg bg-[#F3F3F3] focus:ring-2 focus:ring-blue-500 shadow-lg"
+                    className="w-full p-3 rounded-md bg-[#F3F3F3] focus:ring-2 focus:ring-blue-500 shadow-md"
                     placeholder="Enter your email"
                   />
                   {errors.email && (
@@ -221,7 +210,8 @@ function Register() {
                 </div>
 
                 <div className="flex items-center mb-6 relative group">
-                  <label className="text-2xl sm:text-2xl font-normal text-black w-30">
+                  {/* <label className="text-2xl sm:text-2xl font-normal text-black w-30"> */}
+                  <label className="text-base font-medium text-gray-800 w-32 mr-4">
                     Password:
                   </label>
                   <PasswordInput
@@ -233,7 +223,8 @@ function Register() {
                         password: e.target.value,
                       }))
                     }
-                    className="flex-grow p-3 rounded-lg bg-[#F3F3F3] focus:ring-2 focus:ring-blue-500 shadow-lg"
+                    // className="flex-grow p-3 rounded-lg bg-[#F3F3F3] focus:ring-2 focus:ring-blue-500 shadow-lg"
+                    className="w-full p-3 rounded-md bg-[#F3F3F3] focus:ring-2 focus:ring-blue-500 shadow-md"
                     placeholder="Enter a password"
                   />
                   {errors.password && (
@@ -243,7 +234,8 @@ function Register() {
                   )}
                 </div>
                 <div className="flex items-center mb-6 relative group">
-                  <label className="text-2xl sm:text-2xl font-normal text-black w-30">
+                  {/* <label className="text-2xl sm:text-2xl font-normal text-black w-30"> */}
+                  <label className="text-base font-medium text-gray-800 w-32 mr-4">
                     Re-enter password:
                   </label>
                   <PasswordInput
@@ -255,7 +247,8 @@ function Register() {
                         confirmPassword: e.target.value,
                       }))
                     }
-                    className="flex-grow p-3 rounded-lg bg-[#F3F3F3] focus:ring-2 focus:ring-blue-500 shadow-lg"
+                    // className="flex-grow p-3 rounded-lg bg-[#F3F3F3] focus:ring-2 focus:ring-blue-500 shadow-lg"
+                    className="w-full p-3 rounded-md bg-[#F3F3F3] focus:ring-2 focus:ring-blue-500 shadow-md"
                     placeholder="Re-Enter password"
                   />
                   {errors.confirmPassword && (
@@ -265,10 +258,11 @@ function Register() {
                   )}
                 </div>
                 <div className="flex items-center mb-6 relative group">
-                  <label className="text-2xl sm:text-2xl font-normal text-black w-30">
+                  {/* <label className="text-2xl sm:text-2xl font-normal text-black w-30"> */}
+                  <label className="text-base font-medium text-gray-800 w-32 mr-4">
                     Date of Birth:
                   </label>
-                  <div className="flex-grow relative group">
+                  {/* <div className="flex-grow relative group">
                     <DatePicker
                       selected={userData.dob}
                       onChange={(date) =>
@@ -286,7 +280,9 @@ function Register() {
                       scrollableYearDropdown
                       yearDropdownItemNumber={100}
                       placeholderText="Select your date of birth (Above 16 years old)"
-                      className="w-full p-3 rounded-lg bg-[#F3F3F3] focus:ring-2 focus:ring-blue-500 shadow-lg font-grotesk"
+                      // className="w-full p-3 rounded-lg bg-[#F3F3F3] focus:ring-2 focus:ring-blue-500 shadow-lg font-grotesk"
+                      // className="w-full p-3 rounded-md bg-[#F3F3F3] focus:ring-2 focus:ring-blue-500 shadow-md"
+                      className="w-full p-3 text-base rounded-md bg-[#F3F3F3] focus:ring-2 focus:ring-blue-500 shadow-md"
                       wrapperClassName="w-full"
                     />
                     {errors.dob && (
@@ -294,17 +290,43 @@ function Register() {
                         {errors.dob}
                       </div>
                     )}
-                  </div>
+                  </div> */}
+                  <div className="w-full relative group">
+                  <DatePicker
+                    selected={userData.dob}
+                    onChange={(date) =>
+                      setUserData((prev) => ({ ...prev, dob: date }))
+                    }
+                    dateFormat="dd-MM-yyyy"
+                    maxDate={new Date(new Date().setFullYear(new Date().getFullYear() - 16))}
+                    showMonthDropdown
+                    showYearDropdown
+                    dropdownMode="select"
+                    scrollableYearDropdown
+                    yearDropdownItemNumber={100}
+                    placeholderText="Select your date of birth (Must >16 years old)"
+                    className="block w-full p-3 text-base rounded-md bg-[#F3F3F3] focus:ring-2 focus:ring-blue-500 shadow-md"
+                    wrapperClassName="w-full"
+                  />
+                  {errors.dob && (
+                    <div className="absolute top-[-30px] left-1/2 -translate-x-1/2 bg-red-500 text-white text-xs p-2 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                      {errors.dob}
+                    </div>
+                  )}
+                </div>
+
                 </div>
                 <div className="flex items-center mb-6 relative group">
-                  <label className="text-2xl sm:text-2xl font-normal text-black w-30">
+                  {/* <label className="text-2xl sm:text-2xl font-normal text-black w-30"> */}
+                  <label className="text-base font-medium text-gray-800 w-32 mr-4">
                     Gender:
                   </label>
                   <select
                     name="gender"
                     value={userData.gender}
                     onChange={handleInputChange}
-                    className="flex-grow p-3 rounded-lg bg-[#F3F3F3] focus:ring-2  shadow-lg font-grotesk"
+                    // className="flex-grow p-3 rounded-lg bg-[#F3F3F3] focus:ring-2  shadow-lg font-grotesk"
+                    className="w-full p-3 rounded-md bg-[#F3F3F3] focus:ring-2 focus:ring-blue-500 shadow-md"
                   >
                     <option value="">Select Gender</option>
                     <option value="Male">Male</option>
@@ -318,107 +340,14 @@ function Register() {
                     </div>
                   )}
                 </div>
-                <div className="mb-6">
-                  <div className="flex items-center">
-                    <input
-                      type="checkbox"
-                      id="guidelines"
-                      checked={acceptedGuidelines}
-                      onChange={() => setAcceptedGuidelines((v) => !v)}
-                      className="mr-2"
-                    />
-                    <label htmlFor="guidelines" className="text-base">
-                      I agree to the&nbsp;
-                    </label>
-                    <button
-                      type="button"
-                      onClick={() => setShowGuidelinesModal(true)}
-                      className="underline text-blue-500"
-                    >
-                      Platform Guidelines
-                    </button>
-                    .
-                  </div>
-                  {errors.acceptedGuidelines && (
-                    <p className="text-red-500 text-sm">
-                      {errors.acceptedGuidelines}
-                    </p>
-                  )}
 
-                  <div className="flex items-center mt-2">
-                    <input
-                      type="checkbox"
-                      id="privacy"
-                      checked={acceptedPrivacy}
-                      onChange={() => setAcceptedPrivacy((v) => !v)}
-                      className="mr-2"
-                    />
-                    <label htmlFor="privacy" className="text-base">
-                      I agree to the&nbsp;
-                    </label>
-                    <button
-                      type="button"
-                      onClick={() => setShowPrivacyModal(true)}
-                      className="underline text-blue-500"
-                    >
-                      Privacy Policy
-                    </button>
-                    .
-                  </div>
-                  {errors.acceptedPrivacy && (
-                    <p className="text-red-500 text-sm">
-                      {errors.acceptedPrivacy}
-                    </p>
-                  )}
-                </div>
-
-                {showGuidelinesModal && (
-                  <div
-                    style={{ backdropFilter: "blur(4px)" }}
-                    className="fixed inset-0 bg-opacity-50 z-50 flex items-center justify-center"
-                  >
-                    <div className="bg-white w-11/12 max-w-2xl rounded-lg relative">
-                      <button
-                        onClick={() => setShowGuidelinesModal(false)}
-                        className="absolute top-4 right-4 text-gray-500 hover:text-gray-800 z-10"
-                        aria-label="Close guidelines"
-                      >
-                        ✕
-                      </button>
-
-                      <div className="overflow-y-auto max-h-[90vh] p-6">
-                        <Guidelines hideNavbar />
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {showPrivacyModal && (
-                  <div
-                    style={{ backdropFilter: "blur(4px)" }}
-                    className="fixed inset-0 bg-opacity-50 z-50 flex items-center justify-center"
-                  >
-                    <div className="bg-white w-11/12 max-w-2xl rounded-lg relative">
-                      <button
-                        onClick={() => setShowPrivacyModal(false)}
-                        className="absolute top-4 right-4 text-gray-500 hover:text-gray-800 z-10"
-                        aria-label="Close privacy polices"
-                      >
-                        ✕
-                      </button>
-
-                      <div className="overflow-y-auto max-h-[90vh] p-6">
-                        <Privacy hideNavbar />
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                <div className="flex justify-end gap-3 mt-4 sm:mt-4">
+                {/* <div className="flex justify-end gap-3 mt-4 sm:mt-4"> */}
+                <div className="flex justify-end gap-4 mt-6">
                   <button
                     type="button"
                     onClick={() => navigate("/login")}
-                    className="px-6 py-2 bg-[#3F414C] text-white rounded-lg hover:bg-opacity-90 cursor-pointer"
+                    // className="px-6 py-2 bg-[#3F414C] text-white rounded-lg hover:bg-opacity-90 cursor-pointer"
+                    className="px-6 py-2 rounded-md bg-[#3F414C] text-white text-sm hover:bg-opacity-90"
                   >
                     Login
                   </button>
@@ -426,11 +355,16 @@ function Register() {
                   <button
                     type="button"
                     onClick={handleNext}
-                    className={`px-6 py-2 rounded-lg text-white transition ${
+                    // className={`px-6 py-2 rounded-lg text-white transition ${
+                    //   isValid
+                    //     ? "bg-[#3F414C] hover:bg-[#3F414C] cursor-pointer"
+                    //     : "bg-gray-400 cursor-not-allowed"
+                    // }`}
+                    className={`px-6 py-2 rounded-md text-white text-sm transition ${
                       isValid
-                        ? "bg-[#3F414C] hover:bg-[#3F414C] cursor-pointer"
+                        ? "bg-[#3F414C] hover:bg-opacity-90 cursor-pointer"
                         : "bg-gray-400 cursor-not-allowed"
-                    }`}
+                    }`}                    
                     disabled={!isValid}
                   >
                     Next
@@ -440,45 +374,89 @@ function Register() {
             </form>
           </div>
         ) : (
-          <div className="flex flex-col items-center font-grotesk">
-            <h2 className="text-2xl font-bold mb-4">Select Your Interests</h2>
-            <h2 className="text-xl mb-4">
-              (Choose 6. Starting from Most Interested)
-            </h2>
-            {Array.from({ length: 6 }).map((_, index) => (
-              <div key={index} className="flex flex-row mb-4">
-                <label className="mt-1 mr-2 font-grotesk text-2xl">
-                  {index + 1}.{" "}
-                </label>
-                <select
-                  value={dropdownValues[index]}
-                  onChange={(e) => handleDropdownChange(index, e)}
-                  className="p-2 border rounded-lg"
-                >
-                  <option value="">Select a category</option>
-                  {categories
-                    .filter(
-                      (cat) =>
-                        !dropdownValues.includes(cat.name) ||
-                        cat.name === dropdownValues[index]
-                    )
-                    .map((cat) => (
-                      <option key={cat.id} value={cat.name}>
-                        {cat.name}
-                      </option>
-                    ))}
-                </select>
-              </div>
-            ))}
-            <button
-              type="button"
-              onClick={() => handleFinalSubmit(selectedTopics)}
-              className="mt-4 px-4 py-2 bg-[#3F414C] hover:bg-[#3F414C] cursor-pointer text-white rounded-lg"
-            >
-              Submit
-            </button>
-          </div>
+          // <div className="flex flex-col items-center font-grotesk">
+          //   <h2 className="text-2xl font-bold mb-4">Select Your Interests</h2>
+          //   <h2 className="text-xl mb-4">
+          //     (Choose 6. Starting from Most Interested)
+          //   </h2>
+          //   {/* <div className="grid grid-cols-1 gap-4"> */}
+          //   {Array.from({ length: 6 }).map((_, index) => (
+          //     <div key={index} className="flex flex-row mb-4">
+          //       <label className="mt-1 mr-2 font-grotesk text-2xl">
+          //         {index + 1}.{" "}
+          //       </label>
+          //       <select
+          //         value={dropdownValues[index]}
+          //         onChange={(e) => handleDropdownChange(index, e)}
+          //         className="p-2 border rounded-lg"
+          //       >
+          //         <option value="">Select a category</option>
+          //         {categories.map((cat) => (
+          //           <option key={cat.id} value={cat.name}>
+          //             {cat.name}
+          //           </option>
+          //         ))}
+          //       </select>
+          //     </div>
+          //   ))}
+          //   {/* </div> */}
+          //   <button
+          //     type="button"
+          //     onClick={() => handleFinalSubmit(selectedTopics)}
+          //     className="mt-4 px-4 py-2 bg-[#3F414C] hover:bg-[#3F414C] cursor-pointer text-white rounded-lg"
+          //   >
+          //     Submit
+          //   </button>
+          // </div>
+          <div className="flex items-center justify-center min-h-screen w-full px-4 font-grotesk">
+  <div className="bg-white shadow-md rounded-xl p-8 w-full max-w-xl">
+    <h2 className="text-2xl sm:text-3xl font-bold text-center mb-2">
+      Select Your Interests
+    </h2>
+    <p className="text-center text-sm text-gray-600 mb-6">
+      (Choose 6. Starting from Most Interested)
+    </p>
+
+    {Array.from({ length: 6 }).map((_, index) => (
+      <div key={index} className="flex items-center mb-4">
+        <span className="text-lg w-6 text-right mr-3">{index + 1}.</span>
+        <select
+          value={dropdownValues[index]}
+          onChange={(e) => handleDropdownChange(index, e)}
+          // className="flex-grow p-3 border rounded-lg bg-[#F3F3F3] focus:ring-2 focus:ring-blue-500 shadow-sm"
+          className="w-full p-3 rounded-md bg-[#F3F3F3] focus:ring-2 focus:ring-blue-500 shadow-md"
+        >
+          <option value="">Select a category</option>
+          {categories.map((cat) => (
+            <option key={cat.id} value={cat.name}>
+              {cat.name}
+            </option>
+          ))}
+        </select>
+      </div>
+    ))}
+
+    <div className="flex justify-end mt-6">
+      <button
+        type="button"
+        onClick={() => handleFinalSubmit(selectedTopics)}
+        className="bg-[#3F414C] text-white px-6 py-2 rounded-md hover:bg-opacity-90 transition"
+      >
+        Submit
+      </button>
+    </div>
+  </div>
+</div>
+
         )}
+
+        {/* <button
+          type="button"
+          onClick={resendConfirmationEmail}
+          className="mt-4 text-sm underline"
+        >
+          Resend confirmation email
+        </button> */}
       </main>
     </div>
   );
