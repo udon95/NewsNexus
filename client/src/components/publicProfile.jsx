@@ -17,6 +17,7 @@ const PublicProfile = () => {
       try {
         const response = await api.get(`/auth/public-profile/${username}`);
         setProfileData(response.data);
+        // console.log("profile", response.data);
       } catch (err) {
         setError(err.response?.data?.error || "Error fetching user data");
       }
@@ -35,15 +36,6 @@ const PublicProfile = () => {
         <div className="bg-gray-200 p-6 rounded-lg shadow mb-2 max-w-[900px]">
           <h2 className="text-2xl font-semibold">
             {profileData.user.username}
-            <p className="text-sm text-gray-700 mt-1">
-              Joined on:{" "}
-              {new Date(profileData.user.created_at).toLocaleDateString()}
-            </p>
-            <p className="text-sm text-gray-700">
-              Articles: {profileData.totalArticles} | Total Likes:{" "}
-              {profileData.totalLikes} | Total Views: {profileData.totalViews}
-            </p>
-
             {profileData.user.expert_status === "Approved" && (
               <BadgeCheck className="inline-block ml-2 text-blue-500" />
             )}
@@ -58,6 +50,21 @@ const PublicProfile = () => {
                 Free
               </span>
             )}
+            <p className="text-sm text-gray-700 mt-1">
+              Joined on:{" "}
+              {new Date(profileData.user.created_at).toLocaleDateString()}
+            </p>
+
+            <p className="text-sm text-gray-700">
+              Articles: {profileData.totalArticles} | Total Likes:{" "}
+              {profileData.totalLikes} | Total Views: {profileData.totalViews}
+            </p>
+            {profileData.expertTopics?.length > 0 && (
+              <p className="text-sm text-gray-700 mt-1">
+                Expert in:{" "}
+                {profileData.expertTopics.map((t) => t.name).join(", ")}
+              </p>
+            )}
           </h2>
         </div>
 
@@ -65,7 +72,7 @@ const PublicProfile = () => {
           <div className="w-full max-w-5xl p-6 font-grotesk bg-gray-200">
             <h1 className="text-4xl mb-8 font-grotesk text-left">Articles:</h1>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6 w-full">
+            {/* <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6 w-full">
               <ul>
                 {profileData.articles.map((article) => (
                   <li key={article.articleid} className="mb-2">
@@ -78,6 +85,24 @@ const PublicProfile = () => {
                   </li>
                 ))}
               </ul>
+            </div> */}
+            <div className="w-full max-w-[2000px] mx-auto">
+              <div className="space-y-6">
+                {profileData.articles.length === 0 ? (
+                  <div className="text-center text-gray-500 font-medium mt-6">
+                    No articles available.
+                  </div>
+                ) : (
+                  profileData.articles.map((article) => (
+                    <NewsCard
+                      key={article.articleid}
+                      articleid={article.articleid}
+                      title={article.title}
+                      imageUrl={article.imagepath}
+                    />
+                  ))
+                )}
+              </div>
             </div>
 
             {/* <div className="w-full max-w-[900px] mx-auto">

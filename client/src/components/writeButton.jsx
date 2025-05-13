@@ -1,5 +1,5 @@
 import { useNavigate, useLocation, useParams } from "react-router-dom";
-import { Pencil  } from "lucide-react";
+import { Pencil } from "lucide-react";
 import { React, useEffect } from "react";
 
 const FloatingWriteButton = () => {
@@ -27,9 +27,16 @@ const FloatingWriteButton = () => {
   const hiddenPaths = [
     "/freeDashboard/writeArticle",
     "/premiumDashboard/writeArticle",
+    "/adminDashboard/*",
   ];
-  if (hiddenPaths.includes(currentPath)) return null;
+  const normalizedPath = currentPath.replace(/\/+$/, ""); // remove trailing slashes
 
+  if (
+    hiddenPaths.some((path) =>
+      normalizedPath.startsWith(path.replace("/*", ""))
+    )
+  )
+    return null;
   const handleClick = () => {
     if (currentPath.startsWith("/room/")) {
       const roomid = currentPath.split("/")[2]; // get room ID from URL

@@ -2,12 +2,14 @@ import React, { useEffect, useState } from "react";
 import NewsCard from "./newsCard";
 import supabase from "../api/supabaseClient";
 
+
 const ExpertNewsCard = ({
   searchQuery = "",
   topic = "",
   disableNavigation,
 }) => {
   const [expertArticles, setExpertArticles] = useState([]);
+
 
   useEffect(() => {
     const fetchExpertArticles = async () => {
@@ -17,12 +19,14 @@ const ExpertNewsCard = ({
         .eq("status", "Published")
         .order("time", { ascending: false });
 
+
       // Search filter
       if (searchQuery.trim()) {
         articleQuery = articleQuery.or(
           `title.ilike.%${searchQuery}%,text.ilike.%${searchQuery}%`
         );
       }
+
 
       // Topic filter
       if (Array.isArray(topic) && topic.length > 0) {
@@ -31,12 +35,15 @@ const ExpertNewsCard = ({
         articleQuery = articleQuery.eq("topicid", topic);
       }
 
+
       const { data: articles, error: articleError } = await articleQuery;
+
 
       if (articleError) {
         console.error("Error fetching articles:", articleError);
         return;
       }
+
 
       // Fetch expert applications
       const { data: expertApps, error: expertError } = await supabase
@@ -44,10 +51,12 @@ const ExpertNewsCard = ({
         .select("userid, topicid")
         .eq("status", "Approved");
 
+
       if (expertError) {
         console.error("Error fetching expert applications:", expertError);
         return;
       }
+
 
       // Filter to only expert-written articles
       const expertWrittenArticles = articles.filter((article) =>
@@ -56,14 +65,17 @@ const ExpertNewsCard = ({
         )
       );
 
+
       setExpertArticles(expertWrittenArticles);
     };
+
 
     fetchExpertArticles();
   }, [searchQuery, topic]);
 
+
   return (
-    <div className="w-full max-w-[900px] mx-auto space-y-6 font-grotesk">
+    <div className="w-full max-w-[1000px] mx-auto space-y-6 font-grotesk">
       {expertArticles.length === 0 ? (
         <div className="text-center text-gray-500 font-medium mt-6">
           No expert articles available.
@@ -98,5 +110,6 @@ const ExpertNewsCard = ({
     </div>
   );
 };
+
 
 export default ExpertNewsCard;

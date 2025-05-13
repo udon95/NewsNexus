@@ -53,7 +53,7 @@ const LatestNews = ({
         return;
       }
 
-      // Filter out expert-authored articles
+      //  Filter out expert-authored articles
       const { data: expertApps, error: expertError } = await supabase
         .from("expert_application")
         .select("userid, topicid")
@@ -82,7 +82,7 @@ const LatestNews = ({
     : latestArticles;
 
   return (
-    <div className="w-full max-w-[900px] mx-auto">
+    <div className="w-full max-w-[2000px] mx-auto">
       <div className="space-y-6">
         {articlesToDisplay.length === 0 ? (
           <div className="text-center text-gray-500 font-medium mt-6">

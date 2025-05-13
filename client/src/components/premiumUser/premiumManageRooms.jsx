@@ -1,16 +1,17 @@
 import { useState, useEffect } from "react";
 import supabase from "../../api/supabaseClient";
 
+
 const ManageRooms = () => {
   const [publicRooms, setPublicRooms] = useState([]);
   const [privateRooms, setPrivateRooms] = useState([]);
   const [joinedPublicRooms, setJoinedPublicRooms] = useState([]);
+  const [roomMembers, setRoomMembers] = useState([]); 
   const [joinedPrivateRooms, setJoinedPrivateRooms] = useState([]);
   const [invites, setInvites] = useState([]);
   const [newPublicRoom, setNewPublicRoom] = useState({
     name: "",
     description: "",
-    member_limit: 20,
   });
   const [newPrivateRoom, setNewPrivateRoom] = useState({
     name: "",
@@ -44,13 +45,13 @@ const ManageRooms = () => {
       `https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/rooms/joined/${userId}`
     );
     const data = await res.json();
-  
+
     const publicJoined = data.filter((room) => room.room_type === "Public");
     const privateJoined = data.filter((room) => room.room_type === "Private");
-  
+
     setJoinedPublicRooms(publicJoined);
     setJoinedPrivateRooms(privateJoined);
-  };    
+  };
 
   const fetchInvites = async () => {
     const { data, error } = await supabase
@@ -83,14 +84,13 @@ const ManageRooms = () => {
           ...newPublicRoom,
           room_type: "Public",
           created_by: userId,
-          member_limit: newPublicRoom.member_limit || 20,
         }),
       }
     );
 
     if (res.ok) {
       alert("Public room created");
-      setNewPublicRoom({ name: "", description: "", member_limit: 20 });
+      setNewPublicRoom({ name: "", description: "" });
       fetchRooms();
     }
   };
@@ -105,7 +105,7 @@ const ManageRooms = () => {
           ...newPrivateRoom,
           room_type: "Private",
           created_by: userId,
-          member_limit: newPublicRoom.member_limit || 20,
+          member_limit: newPrivateRoom.member_limit || 20,
         }),
       }
     );
@@ -139,12 +139,17 @@ const ManageRooms = () => {
         );
       }
 
-      setNewPrivateRoom({ name: "", description: "", member_limit: 20, invite: "" });
+      setNewPrivateRoom({
+        name: "",
+        description: "",
+        member_limit: 20,
+        invite: "",
+      });
       fetchRooms();
     }
   };
 
-  const handleUpdateRoom = (
+  const handleUpdateRoom = async (
     roomid,
     currentName,
     currentDescription,
@@ -158,6 +163,12 @@ const ManageRooms = () => {
       room_type: currentRoomType,
       member_limit: currentLimit || 20,
     });
+
+    const res = await fetch(
+      `https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/rooms/members/${roomid}`
+    );
+    const data = await res.json();
+    setRoomMembers(data || []);
     setShowModal(true);
   };
 
@@ -198,7 +209,7 @@ const ManageRooms = () => {
     );
     alert("You exited the room");
     fetchJoinedRooms(); // refresh
-  };  
+  };
 
   const handleAcceptInvite = async (roomid) => {
     await fetch(
@@ -284,7 +295,8 @@ const ManageRooms = () => {
                             room.roomid,
                             room.name,
                             room.description,
-                            room.room_type
+                            room.room_type,
+                            room.member_limit
                           )
                         }
                         className={buttonClass}
@@ -336,9 +348,34 @@ const ManageRooms = () => {
                   description: e.target.value,
                 })
               }
-              className="w-2/3 px-3 py-2 border rounded-md text-base"
+              className="w-1/2 px-3 py-2 border rounded-md text-base"
             />
+
+            {/* 🟩 ADDED: Dropdown for member limit */}
+            <select
+              value={newPrivateRoom.member_limit}
+              onChange={(e) =>
+                setNewPrivateRoom({
+                  ...newPrivateRoom,
+                  member_limit: parseInt(e.target.value),
+                })
+              }
+              className="w-[120px] px-3 py-2 border rounded-md text-base"
+            >
+              <option value={20}>Limit: 20</option>
+              <option value={50}>Limit: 50</option>
+              <option value={100}>Limit: 100</option>
+            </select>
+            {/* 🟩 END */}
+
+            <button
+              onClick={handleAddPrivateRoom}
+              className="bg-black text-white px-4 py-2 rounded text-base"
+            >
+              +
+            </button>
           </div>
+
           <div className="flex items-center gap-2 mb-2">
             <label>Invite:</label>
             <input
@@ -349,13 +386,8 @@ const ManageRooms = () => {
               }
               className="w-full px-3 py-2 border rounded-md text-base"
             />
-            <button
-              onClick={handleAddPrivateRoom}
-              className="bg-black text-white px-4 py-2 rounded text-base"
-            >
-              +
-            </button>
           </div>
+
           <div className="bg-white p-4 rounded-xl shadow space-y-2">
             {[...privateRooms, ...joinedPrivateRooms].map((room, index) => (
               <div key={room.roomid} className={rowStyle}>
@@ -374,7 +406,8 @@ const ManageRooms = () => {
                             room.roomid,
                             room.name,
                             room.description,
-                            room.room_type
+                            room.room_type,
+                            room.member_limit // 🟩 ensure passing this too
                           )
                         }
                         className={buttonClass}
@@ -449,27 +482,42 @@ const ManageRooms = () => {
                 </select>
               </div>
 
+              {editRoom.room_type === "Private" && (
+                <div>
+                  <label className="block text-sm font-medium mb-1">
+                    Member Limit
+                  </label>
+                  <input
+                    type="number"
+                    min={1}
+                    max={100}
+                    value={editRoom.member_limit}
+                    onChange={(e) =>
+                      setEditRoom({
+                        ...editRoom,
+                        member_limit: parseInt(e.target.value),
+                      })
+                    }
+                    className="w-full px-3 py-2 border rounded-md"
+                  />
+                </div>
+              )}
 
-            <div>
-               <label className="block text-sm font-medium mb-1">
-            Member Limit
-           </label>
-           <input
-            type="number"
-            min={1}
-            max={100}
-            value={editRoom.member_limit}
-            onChange={(e) =>
-             setEditRoom({
-               ...editRoom,
-               member_limit: parseInt(e.target.value),
-             })
-           }
-           className="w-full px-3 py-2 border rounded-md"
-          />
-          </div>
+              <div>
+                <label className="block text-sm font-medium mt-2 mb-1">
+                  Current Members
+                </label>
+                {roomMembers.length === 0 ? (
+                  <p className="text-sm text-gray-500">No members yet.</p>
+                ) : (
+                  <ul className="list-disc list-inside text-sm text-gray-700">
+                    {roomMembers.map((username, idx) => (
+                      <li key={idx}>{username}</li>
+                    ))}
+                  </ul>
+                )}
+              </div>
 
-              
 
               <div className="flex justify-end gap-2 pt-2">
                 <button
@@ -513,7 +561,7 @@ const ManageRooms = () => {
                   >
                     Decline
                   </button>
-                </div>  
+                </div>
               </div>
             ))}
           </div>

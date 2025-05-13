@@ -22,7 +22,7 @@ app.use(
   cors({
     origin: "https://van.dpyq2cohucoc7.amplifyapp.com", //For Hosted
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"], //  include PUT here
-    allowedHeaders: ["Content-Type", "Authorization"],     // add other headers if needed
+    allowedHeaders: ["Content-Type", "Authorization"], // add other headers if needed
     // origin: "http://localhost:5173", // localhost frontend
     credentials: true, // Allow cookies & authentication headers
   })
@@ -43,11 +43,38 @@ if (visionKey) {
 
   // Debug logs (remove after testing)
   console.log("[Google Vision] Key file written to:", keyPath);
-  console.log("[Google Vision] ENV matches:", process.env.GOOGLE_APPLICATION_CREDENTIALS === keyPath);
+  console.log(
+    "[Google Vision] ENV matches:",
+    process.env.GOOGLE_APPLICATION_CREDENTIALS === keyPath
+  );
 } else {
-  console.error("[Google Vision]  GOOGLE_VISION_KEY_JS not found in environment.");
+  console.error(
+    "[Google Vision]  GOOGLE_VISION_KEY_JS not found in environment."
+  );
 }
 
+async function checkAvailableModels() {
+  try {
+    const response = await fetch("https://api.openai.com/v1/models", {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+      },
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      console.log("Available models:", data.data);
+    } else {
+      console.error("Error fetching available models:", response.statusText);
+    }
+  } catch (err) {
+    console.error("Error while checking available models:", err.message);
+  }
+}
+
+// Call check for models when the server starts
+checkAvailableModels();
 
 app.get("/", (req, res) => {
   res.send("Hello, World!");

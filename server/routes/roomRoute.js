@@ -187,6 +187,29 @@ router.post("/invite", async (req, res) => {
 router.post("/accept", async (req, res) => {
   const { userid, roomid } = req.body;
 
+  // 🔹 BEFORE INSERT: count current members
+  const { count: currentCount, error: memberCountError } = await supabase
+    .from("room_members")
+    .select("*", { count: "exact", head: true })
+    .eq("roomid", roomid)
+    .is("exited_at", null);
+
+  if (memberCountError) return res.status(500).json({ error: memberCountError.message });
+
+  // 🔹 Get room limit
+  const { data: roomData, error: roomError } = await supabase
+    .from("rooms")
+    .select("member_limit, room_type")
+    .eq("roomid", roomid)
+    .single();
+
+  if (roomError || !roomData) return res.status(500).json({ error: "Room not found" });
+
+  if (roomData.room_type === "Private" && currentCount >= roomData.member_limit) {
+    return res.status(400).json({ error: "Member limit reached" });
+  }
+
+
   const { error } = await supabase
     .from("room_members")
     .upsert(
@@ -234,6 +257,32 @@ router.post("/exit", async (req, res) => {
 
   res.status(200).json({ message: "Exited room" });
 });
+
+router.get("/members/:roomid", async (req, res) => {
+  const { roomid } = req.params;
+
+  const { data, error } = await supabase
+    .from("room_members")
+    .select("users(username)") 
+    .eq("roomid", roomid)
+    .is("exited_at", null);
+
+  if (error) {
+    return res.status(500).json({ error: error.message });
+  }
+
+  const usernames = data
+    .map((entry) => entry.users?.username)
+    .filter(Boolean); 
+
+  res.status(200).json(usernames);
+});
+
+
+
+
+
+
 
 module.exports = router;
 

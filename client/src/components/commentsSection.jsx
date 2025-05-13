@@ -138,7 +138,7 @@ const CommentsSection = ({ articleId }) => {
   return (
     <div className="w-full flex flex-col items-center">
       {/* Comment Input */}
-      <div className="w-full max-w-2xl flex items-center justify-between px-4 py-4">
+      <div className="w-full max-w-[1000px] px-4 sm:px-8 py-4 mx-auto flex items-center justify-between">
         <input
           type="text"
           placeholder="Write a comment..."
@@ -161,7 +161,7 @@ const CommentsSection = ({ articleId }) => {
       </div>
 
       {/* Comments List */}
-      <div className="w-full max-w-2xl mt-6">
+      <div className="w-full max-w-[1000px] mt-6">
         <h2 className="text-3xl font-bold text-black mb-4">Comments</h2>
         {comments.map((comment) => (
           <div key={comment.commentid} className="mb-6">

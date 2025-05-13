@@ -15,7 +15,7 @@ import {
   Flag,
   StickyNote,
   BookOpenIcon,
-  X
+  X,
 } from "lucide-react";
 import TranslateButton from "../components/translate.jsx";
 
@@ -49,7 +49,6 @@ const Article = () => {
 
   const [isExpertArticle, setIsExpertArticle] = useState(false);
 
-
   const handleTextSelection = () => {
     const selection = window.getSelection();
     const text = selection.toString().trim();
@@ -68,13 +67,14 @@ const Article = () => {
   };
 
   // Function to fetch word definition
-  const fetchDefinition = async () => {
-    if (!selectedText) return;
-
+  const fetchDefinition = async (word) => {
+    if (!word) return;
     setLoading(true);
     try {
       const response = await fetch(
-        `https://api.dictionaryapi.dev/api/v2/entries/en/${selectedText}`
+        `https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(
+          word
+        )}`
       );
       const data = await response.json();
 
@@ -106,6 +106,8 @@ const Article = () => {
 
     try {
       const text = articleRef.current.innerText;
+      const locale = selectedLanguage === "en" ? "en-US" : selectedLanguage;
+      console.log("selected lang", locale);
 
       const response = await fetch(
         "https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/translate/text-to-speech",
@@ -114,7 +116,7 @@ const Article = () => {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             text: text,
-            targetLang: selectedLanguage,
+            targetLang: locale,
           }),
         }
       );
@@ -238,21 +240,24 @@ const Article = () => {
     }
   };
 
+  const hasRecordedRef = useRef(false);
+
   useEffect(() => {
     const fetchArticle = async () => {
       const { data, error } = await supabase
         .from("articles")
         .select(
-          `articleid, title, text, imagepath, time, view_count, 
-          rating, status, userid, topicid, amendment, users (userid, username)`
+          `articleid, title, text, imagepath, time, view_count,
+        rating, status, userid, topicid, amendment, users (userid, username)`
         )
         .eq("title", articleName)
         .single();
 
-      if (!error) {
+      if (!error && data?.articleid) {
         setArticleData(data);
         setOriginalText(data.text);
-        
+
+        // Optional: check for expert status
         if (data?.userid && data?.topicid) {
           const { data: match } = await supabase
             .from("expert_application")
@@ -263,43 +268,45 @@ const Article = () => {
             .single();
           setIsExpertArticle(!!match);
         }
-        
 
-
+        // Load notes
         const { data: noteData } = await supabase
           .from("community_notes")
           .select("*")
           .eq("target_id", data.articleid)
           .eq("Status", "Approved");
-
         setNotes(noteData || []);
 
-        if (data?.articleid) {
-          const { data: currentView } = await supabase
-            .from("articles")
-            .select("view_count")
-            .eq("articleid", data.articleid)
-            .single();
+        // View count
+        const { data: currentView } = await supabase
+          .from("articles")
+          .select("view_count")
+          .eq("articleid", data.articleid)
+          .single();
+        const updatedCount = (currentView?.view_count || 0) + 1;
+        await supabase
+          .from("articles")
+          .update({ view_count: updatedCount })
+          .eq("articleid", data.articleid);
 
-          const updatedCount = (currentView?.view_count || 0) + 1;
-          await supabase
-            .from("articles")
-            .update({ view_count: updatedCount })
-            .eq("articleid", data.articleid);
-
-          if (user) {
-            await supabase.from("reading_history").insert([
-              {
-                articleid: data.articleid,
-                userid: user.userid,
-                read_date: new Date().toISOString(),
-              },
-            ]);
-          }
+        // Only insert read history once
+        if (user && !hasRecordedRef.current) {
+          hasRecordedRef.current = true;
+          //console.log("reading", data.articleid);
+          await supabase.from("reading_history").insert([
+            {
+              articleid: data.articleid,
+              userid: user.userid,
+              read_date: new Date().toISOString(),
+            },
+          ]);
         }
       }
     };
-    fetchArticle();
+
+    if (articleName && user) {
+      fetchArticle();
+    }
   }, [articleName, user]);
 
   useEffect(() => {
@@ -349,7 +356,7 @@ const Article = () => {
   return (
     <div
       className="min-h-screen w-screen flex flex-col bg-white"
-      onMouseUp={handleTextSelection}
+      //onMouseUp={handleTextSelection}
     >
       <Navbar />
       <main className="flex flex-col items-center w-full px-4 sm:px-8 py-6 mx-auto max-w-[1000px]">
@@ -375,7 +382,6 @@ const Article = () => {
                 Published on {new Date(articleData.time).toLocaleDateString()}
               </span>
             </div>
-
 
             <div className="flex justify-between items-center w-full mb-4">
               <Rate articleId={articleData.articleid} />
@@ -437,21 +443,24 @@ const Article = () => {
             {articleData.amendment && (
               <div className="border border-yellow-400 bg-yellow-50 text-yellow-900 rounded-md p-3 mt-4 mb-2 w-full">
                 <p className="font-semibold text-sm mb-1 uppercase">Update:</p>
-                <p className="text-sm whitespace-pre-line">{articleData.amendment}</p>
+                <p className="text-sm whitespace-pre-line">
+                  {articleData.amendment}
+                </p>
               </div>
             )}
-
-            <ArticleContent
-              articleRef={articleRef}
-              title={articleData.title}
-              text={translatedText || originalText}
-              imagepath={articleData.imagepath}
-              postDate={new Date(articleData.time).toLocaleDateString()}
-              author={{
-                userid: articleData.users?.userid,
-                username: articleData.users?.username || "Unknown Author",
-              }}
-            />
+            <div onMouseUp={handleTextSelection} className="relative w-full">
+              <ArticleContent
+                articleRef={articleRef}
+                title={articleData.title}
+                text={translatedText || originalText}
+                imagepath={articleData.imagepath}
+                postDate={new Date(articleData.time).toLocaleDateString()}
+                author={{
+                  userid: articleData.users?.userid,
+                  username: articleData.users?.username || "Unknown Author",
+                }}
+              />
+            </div>
             {notes.length > 0 && (
               <div className="border border-yellow-400 bg-yellow-50 rounded-lg p-4 mt-4 w-full">
                 <h3 className="text-sm font-semibold text-yellow-700 mb-1">
@@ -471,7 +480,9 @@ const Article = () => {
             {selectedText && userType === "Premium" && (
               <button
                 ref={buttonRef}
-                onClick={fetchDefinition}
+                onClick={() => {
+                  fetchDefinition(selectedText);
+                }}
                 className="absolute bg-blue-500 text-white px-3 py-1 rounded-lg flex items-center space-x-2 shadow-md"
                 style={{
                   left: `${buttonPosition.x}px`,
@@ -481,7 +492,7 @@ const Article = () => {
                 }}
               >
                 <BookOpenIcon className="h-5 w-5" />
-                <span>{loading ? "Loading…" : `Define "{selectedText}"`}</span>
+                <span>{loading ? "Loading…" : `Define "${selectedText}"`}</span>
               </button>
             )}
 

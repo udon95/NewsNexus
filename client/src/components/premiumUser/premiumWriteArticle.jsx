@@ -67,6 +67,7 @@ export const PremiumWriteArticle = () => {
   const [aiFeedback, setAiFeedback] = useState("");
   const [accuracy, setAccuracy] = useState(null);
   const [openSuccess, setOpenSuccess] = useState(false);
+  const [openError, setOpenError] = useState(false);
   const [searchParams] = useSearchParams();
   const preSelectedType = searchParams.get("type"); // e.g. "room"
   const preSelectedRoomId = searchParams.get("roomid");
@@ -377,9 +378,16 @@ export const PremiumWriteArticle = () => {
         if (result.feedback) {
           setAiFeedback(result.feedback);
           setAccuracy(result.accuracy || null);
+          console.log("accuracy", result.accuracy);
+          console.log("feedback", result.feedback);
+
           alert(
             "Article flagged by AI. Please review the highlighted sections."
           );
+          if (result.accuracy < 75) {
+            setOpenSuccess(false); // Don't show success dialog
+            setOpenError(true); // Show error message instead
+          }
         } else {
           alert(result.error || "Submission failed.");
         }
@@ -1053,10 +1061,13 @@ export const PremiumWriteArticle = () => {
   };
 
   return (
-    <div className="w-full min-h-screen flex flex-col items-center bg-indigo-50"> {/* DEVI MADE CHANGES HERE */}
-      <div className="w-full max-w-5xl px-4 py-10"> {/* DEVI MADE CHANGES HERE */}
+    <div className="w-full min-h-screen flex flex-col items-center bg-indigo-50">
+      {" "}
+      {/* DEVI MADE CHANGES HERE */}
+      <div className="w-full max-w-5xl px-4 py-10">
+        {" "}
+        {/* DEVI MADE CHANGES HERE */}
         <h1 className="text-3xl font-bold mb-1">Publish Your Articles :</h1>
-
         <div className="flex flex-col gap-5 w-full">
           <div>
             <label className="block text-xl font-semibold mb-1">
@@ -1333,7 +1344,7 @@ export const PremiumWriteArticle = () => {
                   </button>
                 </div>
 
-                {accuracy !== null && aiFeedback !== null && accuracy < 75 && (
+                {accuracy !== null && aiFeedback && accuracy < 75 && (
                   <div className="mt-4 p-4 border border-red-300 bg-red-50 rounded text-sm text-black">
                     <strong>Fact Check Results:</strong>
                     <p>
@@ -1446,7 +1457,6 @@ export const PremiumWriteArticle = () => {
             </button>
           </div>
         </div>
-
         {showConfirm && (
           <div className="fixed inset-0 backdrop-blur-sm bg-white/5 flex items-center justify-center z-50">
             <div className="bg-white p-6 rounded-lg shadow-xl text-center">
@@ -1468,7 +1478,6 @@ export const PremiumWriteArticle = () => {
             </div>
           </div>
         )}
-
         {showLinkModal && (
           <div className="fixed inset-0 flex items-center justify-center backdrop-blur-sm bg-white/10 z-50">
             <div className="bg-white rounded-md p-6 shadow-lg w-[90%] max-w-sm">
@@ -1536,7 +1545,6 @@ export const PremiumWriteArticle = () => {
             </div>
           </div>
         )}
-
         {showDraftNotification && (
           <div className="fixed inset-0 backdrop-blur-sm bg-white/5 flex items-center justify-center z-50">
             <div
@@ -1563,7 +1571,6 @@ export const PremiumWriteArticle = () => {
             </div>
           </div>
         )}
-
         <Dialog
           open={openSuccess}
           onClose={() => {
@@ -1599,7 +1606,6 @@ export const PremiumWriteArticle = () => {
             </Button>
           </DialogActions>
         </Dialog>
-
         {showTopicApplication && (
           <div className="fixed inset-0 backdrop-blur-sm bg-white/10 flex items-center justify-center z-50">
             <div className="bg-white p-6 rounded-lg shadow-xl w-[90%] max-w-md text-center">
@@ -1642,7 +1648,8 @@ export const PremiumWriteArticle = () => {
             </div>
           </div>
         )}
-      </div> {/*DEVI CHANGED FROM MAIN TO DIV*/}
+      </div>{" "}
+      {/*DEVI CHANGED FROM MAIN TO DIV*/}
     </div>
   );
 };

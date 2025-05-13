@@ -55,7 +55,7 @@ const ArticlesRank = ({
         return;
       }
 
-      // Expert filter
+      //  Expert filter
       const { data: expertApps, error: expertError } = await supabase
         .from("expert_application")
         .select("userid, topicid")
@@ -95,7 +95,7 @@ const ArticlesRank = ({
   };
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 max-w-[900px] w-full">
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 max-w-[1100px] w-full">
       {articles.map((article, index) => (
         <div
           key={article.articleid}
