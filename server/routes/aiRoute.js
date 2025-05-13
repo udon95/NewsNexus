@@ -243,7 +243,6 @@ async function factCheck(content, topicName) {
     let presult = parsed;
     if (typeof parsed === "string") {
       let cleaned = parsed.trim();
-      // Remove code block markers if present
       cleaned = cleaned.replace(/^``````$/g, "");
       try {
         presult = JSON.parse(cleaned);
@@ -251,6 +250,10 @@ async function factCheck(content, topicName) {
         console.error("Failed to parse Perplexity response:", cleaned);
         throw new Error("Perplexity response content is not valid JSON.");
       }
+    } else if (typeof parsed === "object" && parsed !== null) {
+      presult = parsed; // Already an object, use as is
+    } else {
+      throw new Error("Perplexity response is neither string nor object.");
     }
 
     if (
@@ -368,7 +371,7 @@ router.post("/submit-article", async (req, res) => {
     } = req.body;
 
     const strippedText = extractTextFromHTML(updatedHTML);
-    console.log("stripped text for fact check", strippedText);
+    //console.log("stripped text for fact check", strippedText);
 
     if (!title || !updatedHTML || !authorId || !topicid || !topicName) {
       return res.status(400).json({ error: "Missing required fields." });
