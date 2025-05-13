@@ -483,17 +483,20 @@ const PremManageProfile = () => {
             </div>
 
             {expertTopics.length > 0 && (
-              <div>
-                <label className="block mb-1 text-sm font-medium">
-                  Expert Topics:
-                </label>
-                <ul>
-                  {expertTopics.map((topic, index) => (
-                    <li key={index}>{topic}</li> // Display only the topic name
-                  ))}
-                </ul>
-              </div>
-            )}
+            <div className="mt-3">
+            <label className="block mb-1 text-sm font-medium">Expert:</label>
+            <select
+              className="w-full p-2 border rounded-lg bg-gray-100 text-gray-800 cursor-not-allowed"
+              disabled
+            >
+              {expertTopics.map((topic, index) => (
+                <option key={index} value={topic}>
+                  {topic}
+                </option>
+              ))}
+            </select>
+          </div>
+          )}
           </div>
 
           {/* Right: Profile Fields */}
