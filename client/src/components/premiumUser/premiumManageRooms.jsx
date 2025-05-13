@@ -408,7 +408,7 @@ const ManageRooms = () => {
           <div className="flex items-center gap-2 mb-2">
             <label>Invite:</label>
             <input
-              placeholder="@user1, @user2 (max 10)"
+              placeholder="Put usernames to invite (max 10)"
               value={newPrivateRoom.invite}
               onChange={(e) =>
                 setNewPrivateRoom({ ...newPrivateRoom, invite: e.target.value })
