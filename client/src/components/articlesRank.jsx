@@ -90,8 +90,8 @@ const ArticlesRank = ({
     fetchRankedArticles();
   }, [searchQuery, topic, selectedTime]);
 
-  const handleCardClick = (title) => {
-    navigate(`/article/${encodeURIComponent(title)}`);
+  const handleCardClick = (articleId) => {
+    navigate(`/article/${encodeURIComponent(articleId)}`);
   };
 
   return (
@@ -99,7 +99,7 @@ const ArticlesRank = ({
       {articles.map((article, index) => (
         <div
           key={article.articleid}
-          onClick={() => handleCardClick(article.title)}
+          onClick={() => handleCardClick(article.articleid)}
           className="w-full h-60 border border-black rounded-2xl shadow-md cursor-pointer hover:shadow-lg transition bg-white flex flex-col"
         >
           <div className="w-full h-48 bg-gray-200 rounded-t-2xl overflow-hidden relative">
