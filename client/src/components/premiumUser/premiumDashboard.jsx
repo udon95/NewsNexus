@@ -10,6 +10,7 @@ import PremiumManageRooms from "./premiumManageRooms.jsx";
 import PremiumEditArticle from "./premiumEditArticle";
 import RoomPage from "./roomPage.jsx";
 
+
 function PremiumDashboard() {
   return (
     <div className="w-full min-w-screen min-h-screen flex flex-col overflow-hidden">
@@ -28,11 +29,13 @@ function PremiumDashboard() {
             {/* Other Sidebar Pages */}
             <Route path="manageArticles" element={<PremManageArticle />} />
             <Route path="writeArticle" element={<PremiumWriteArticle />} />
+            <Route path="edit/:id" element={<PremiumEditArticle />} />
 
             <Route path="writeArticle/:id" element={<PremiumWriteArticle />} />
             <Route path="edit/:id" element={<PremiumEditArticle />} />
             <Route path="manageProfile" element={<PremiumManageProfile />} />
             <Route path="submitTestimonial" element={<PremiumSubmitTest />} />
+            {/* <Route path="manageRooms" element={<PremiumManageRooms />} /> */}
             <Route path="manageRooms" element={<PremiumManageRooms />} />
             <Route path="applyExpert" element={<PremiumApplyExpert />} />
            
