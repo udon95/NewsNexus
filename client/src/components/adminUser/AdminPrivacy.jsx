@@ -7,7 +7,7 @@ const AdminPrivacy = () => {
   useEffect(() => {
     const fetchPrivacy = async () => {
       const { data, error } = await supabase
-        .from("guideline")
+        .from("privacy")
         .select("text")
         .eq("displayed", true)
         .maybeSingle();
@@ -22,13 +22,13 @@ const AdminPrivacy = () => {
   const handleClick = async () => {
     // Set all previous privacy polices to not displayed
     await supabase
-      .from("guideline")
+      .from("privacy")
       .update({ displayed: false })
       .eq("displayed", true);
 
     // Get any existing privacy polices to preserve effective_date
     const { data: existing } = await supabase
-      .from("guideline")
+      .from("privacy")
       .select("effective_date")
       .eq("displayed", true)
       .maybeSingle();
