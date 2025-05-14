@@ -160,7 +160,9 @@ const Article = () => {
     }
 
     setSelectedLanguage(targetLang);
-    const textToTranslate = originalText;
+    //const textToTranslate = originalText;
+    const doc = new DOMParser().parseFromString(originalText, "text/html");
+    const textToTranslate = doc.body.textContent || "";
     setTranslating(true);
 
     try {
@@ -537,10 +539,12 @@ const Article = () => {
                       <X className="h-6 w-6 text-gray-600 hover:text-black" />
                     </button>
                   </div>
-                  <p className="text-lg mt-2">
-                    <strong>{selectedText}:</strong>{" "}
-                    {loading ? "Loading..." : definition}
-                  </p>
+                  <div className="mt-4 max-h-60 overflow-y-auto text-left">
+                    <p className="text-lg mt-2">
+                      <strong>{selectedText}:</strong>{" "}
+                      {loading ? "Loading..." : definition}
+                    </p>
+                  </div>
                 </div>
               </div>
             )}
