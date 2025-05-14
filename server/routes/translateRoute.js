@@ -8,17 +8,54 @@ AWS.config.update({
 
 const translate = new AWS.Translate();
 const polly = new AWS.Polly({ signatureVersion: "v4" });
+// Splits `text` into pieces < maxLen characters, breaking on sentence end-punctuation.
+function chunkText(text, maxLen = 4500) {
+  // Grab sentences (including trailing .!? and whitespace)
+  const sentences = text.match(/[^\.!\?]+[\.!\?]+(\s|$)/g) || [];
+  const chunks = [];
+  let current = "";
+  for (const s of sentences) {
+    if ((current + s).length > maxLen) {
+      if (current) {
+        chunks.push(current.trim());
+        current = "";
+      }
+      // If single sentence > maxLen, slice it
+      if (s.length > maxLen) {
+        for (let i = 0; i < s.length; i += maxLen) {
+          chunks.push(s.substr(i, maxLen));
+        }
+      } else {
+        current = s;
+      }
+    } else {
+      current += s;
+    }
+  }
+  if (current) chunks.push(current.trim());
+  return chunks;
+}
 
 router.post("/", async (req, res) => {
   try {
     const { text, targetLang } = req.body;
-    const params = {
-      Text: text,
-      SourceLanguageCode: "en",
-      TargetLanguageCode: targetLang,
-    };
-    const result = await translate.translateText(params).promise();
-    return res.status(200).json({ translatedText: result.TranslatedText });
+    const parts = chunkText(text, 4500);
+    const translatedParts = [];
+
+    for (const part of parts) {
+      const { TranslatedText } = await translate
+        .translateText({
+          Text: part,
+          SourceLanguageCode: "en",
+          TargetLanguageCode: targetLang,
+        })
+        .promise();
+      translatedParts.push(TranslatedText);
+    }
+
+    // Reassemble translated chunks
+    const translatedText = translatedParts.join(" ");
+    return res.status(200).json({ translatedText });
   } catch (error) {
     console.error("Translation error:", error);
     return res.status(500).json({

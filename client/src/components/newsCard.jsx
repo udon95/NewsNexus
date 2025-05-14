@@ -37,7 +37,7 @@ const NewsCard = ({ articleid, title, imageUrl }) => {
   };
 
   const handleCardClick = () => {
-    navigate(`/article/${encodeURIComponent(title)}`);
+    navigate(`/article/${articleid}`);
   };
 
   return (

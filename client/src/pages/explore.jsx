@@ -10,7 +10,6 @@ import useAuthHook from "../hooks/useAuth.jsx";
 import supabase from "../api/supabaseClient";
 import FloatingUserStats from "../components/floatingUserStats.jsx";
 
-
 const Explore = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const initialQuery = searchParams.get("query") || "";
@@ -23,16 +22,13 @@ const Explore = () => {
   const [timeFilter, setTimeFilter] = useState("Latest");
   const [isInterestsLoaded, setIsInterestsLoaded] = useState(false);
 
-
   const { user, userType } = useAuthHook();
   const isPremium = userType === "Premium";
   const isSearching = searchQuery.trim() !== "";
 
-
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
-
 
   const handleSearch = (query) => {
     setSearchQuery(query);
@@ -41,11 +37,9 @@ const Explore = () => {
     setSearchParams(params);
   };
 
-
   const handleTimeFilterChange = (value) => {
     setTimeFilter(value);
   };
-
 
   const handleTopicChange = (value) => {
     setSelectedTopic(value);
@@ -54,22 +48,20 @@ const Explore = () => {
     setSearchParams(params);
   };
 
-
   useEffect(() => {
     const loadAll = async () => {
       const { data: topicData, error: topicError } = await supabase
         .from("topic_categories")
         .select("topicid, name");
 
-
       if (!topicError && topicData) {
         setTopics(topicData);
-
 
         // 🧠 Match name from URL to topicid
         if (initialTopic && topicData.length > 0) {
           const matched = topicData.find(
-            (t) => t.name.toLowerCase().trim() === initialTopic.toLowerCase().trim()
+            (t) =>
+              t.name.toLowerCase().trim() === initialTopic.toLowerCase().trim()
           );
           if (matched) {
             setSelectedTopic(matched.topicid);
@@ -79,13 +71,11 @@ const Explore = () => {
           }
         }
 
-
         if (user) {
           const { data: interestData, error: interestError } = await supabase
             .from("topicinterest")
             .select("interesttype")
             .eq("userid", user.userid);
-
 
           if (!interestError && interestData?.length > 0) {
             const parsedInterests = interestData[0].interesttype
@@ -93,7 +83,6 @@ const Explore = () => {
               .map((s) => s.trim())
               .filter(Boolean);
             setUserInterests(parsedInterests);
-
 
             if (!initialTopic && parsedInterests.length > 0) {
               setSelectedTopic("recommended");
@@ -107,14 +96,11 @@ const Explore = () => {
         }
       }
 
-
       setIsInterestsLoaded(true);
     };
 
-
     loadAll();
   }, [user]);
-
 
   useEffect(() => {
     const params = {};
@@ -123,14 +109,14 @@ const Explore = () => {
     setSearchParams(params);
   }, [searchQuery, selectedTopic]);
 
-
-  const selectedTopicName = topics.find((t) => t.topicid === selectedTopic)?.name;
+  const selectedTopicName = topics.find(
+    (t) => t.topicid === selectedTopic
+  )?.name;
   const interestTopicIDs = topics
     .filter((t) =>
       userInterests.map((i) => i.toLowerCase()).includes(t.name.toLowerCase())
     )
     .map((t) => t.topicid);
-
 
   let pageTitle = "Explore All Articles:";
   if (selectedTopic === "recommended") {
@@ -139,7 +125,6 @@ const Explore = () => {
     pageTitle = `Explore “${selectedTopicName}” Articles:`;
   }
 
-
   let resolvedTopic = "";
   if (selectedTopic === "recommended") {
     resolvedTopic = interestTopicIDs;
@@ -147,45 +132,42 @@ const Explore = () => {
     resolvedTopic = selectedTopic;
   }
 
-
   if (selectedTopic === "recommended" && !isInterestsLoaded) {
     return null;
   }
-
 
   return (
     <div className="w-full min-w-screen min-h-screen flex flex-col bg-white">
       <Navbar />
       <div className="flex flex-col lg:flex-row gap-4 px-4">
-  {user && (
-    <div className="sticky top-10 self-start w-full lg:w-[100px] left-28">
-      <FloatingUserStats user={user} />
-    </div>
-  )}
-  <div className="flex-1">
-      <div className="flex flex-col sm:flex-row justify-center items-center min-w-[970px] gap-4 mt-5 px-4">
-        <div className="w-full max-w-[970px]">
-          <Search
-            onSearch={handleSearch}
-            initialQuery={searchQuery}
-            initialTimeFilter={timeFilter}
-            onTimeFilterChange={handleTimeFilterChange}
-            topics={topics}
-            selectedTopic={selectedTopic}
-            onTopicChange={handleTopicChange}
-          />
-        </div>
-      </div>
+        {user && (
+          <div className="sticky top-10 self-start w-full lg:w-[100px] left-28">
+            <FloatingUserStats user={user} />
+          </div>
+        )}
+        <div className="flex-1">
+          <div className="flex flex-col sm:flex-row justify-center items-center min-w-[970px] gap-4 mt-5 px-4">
+            <div className="w-full max-w-[970px]">
+              <Search
+                onSearch={handleSearch}
+                initialQuery={searchQuery}
+                initialTimeFilter={timeFilter}
+                onTimeFilterChange={handleTimeFilterChange}
+                topics={topics}
+                selectedTopic={selectedTopic}
+                onTopicChange={handleTopicChange}
+              />
+            </div>
+          </div>
 
-
-      {isSearching ? (
-        <>
-          <div className="w-full font-grotesk mt-8">
-            <h1 className="text-2xl sm:text-3xl mb-5 text-left max-w-[970px] mx-auto">
-              Search Results:
-            </h1>
-            {/* <div className="flex justify-center w-full"> */} {/**/}
-            {/* <div className="w-full max-w-[1000px] mx-auto px-4">
+          {isSearching ? (
+            <>
+              <div className="w-full font-grotesk mt-8">
+                <h1 className="text-2xl sm:text-3xl mb-5 text-left max-w-[970px] mx-auto">
+                  Search Results:
+                </h1>
+                {/* <div className="flex justify-center w-full"> */} {/**/}
+                {/* <div className="w-full max-w-[1000px] mx-auto px-4">
               <Rank
                 searchQuery={searchQuery}
                 topic={resolvedTopicId || resolvedTopic}
@@ -193,83 +175,81 @@ const Explore = () => {
                 customClassName="w-full"
               />
             </div> */}
-            <div className="w-full max-w-[1000px] mx-auto px-4">
-  <Rank
-    searchQuery={searchQuery}
-    topic={resolvedTopicId || resolvedTopic}
-    selectedTime={timeFilter}
-    customClassName="w-full max-w-[1000px] mx-auto px-4 mb-5"
-  />
-</div>
-
-
-          </div>
-          <div className="w-full font-grotesk mt-5">
-            {/* <div className="flex justify-center mb-5 w-full"> */}
-            <div className="w-full max-w-[1030px] mx-auto px-4 mb-5">
-              <Expert
-                searchQuery={searchQuery}
-                disableNavigation={!isPremium}
-                topic={resolvedTopicId || resolvedTopic}
-              />
-            </div>
-          </div>
-          <div className="w-full font-grotesk">
-            {/* <div className="flex justify-center mb-5 w-full"> */}
-            <div className="w-full max-w-[1030px] mx-auto px-4 mb-5">
-              <LatestNews
-                searchQuery={searchQuery}
-                topic={resolvedTopicId || resolvedTopic}
-                timeFilter={timeFilter}
-              />
-            </div>
-          </div>
-        </>
-      ) : (
-        <>
-          <div className="w-full font-grotesk mt-8">
-            <h1 className="text-2xl sm:text-3xl mb-5 text-left max-w-[970px] mx-auto">
-              {pageTitle}
-            </h1>
-            <div className="w-full max-w-[1000px] mx-auto px-4 mb-5">
-              <Rank
-                searchQuery={searchQuery}
-                topic={resolvedTopicId || resolvedTopic}
-                selectedTime={timeFilter}
-              />
-            </div>
-            <div className="w-full font-grotesk mt-5">
-              <h1 className="text-2xl sm:text-3xl mb-5 text-left max-w-[970px] mx-auto">
-                Expert:
-              </h1>
-              {/* <div className="flex justify-center mb-5 w-full"> */} {/*Original*/}
-              <div className="w-full max-w-[1000px] mx-auto px-4 mb-5">
-                <Expert
-                  disableNavigation={!isPremium}
-                  topic={resolvedTopicId || resolvedTopic}
-                />
+                <div className="w-full max-w-[1000px] mx-auto px-4">
+                  <Rank
+                    searchQuery={searchQuery}
+                    topic={resolvedTopicId || resolvedTopic}
+                    selectedTime={timeFilter}
+                    customClassName="w-full max-w-[1000px] mx-auto px-4 mb-5"
+                  />
+                </div>
               </div>
-            </div>
-          </div>
-          <div className="w-full font-grotesk mt-5">
-            <h1 className="text-2xl sm:text-3xl mb-5 text-left max-w-[970px] mx-auto">
-              Latest News:
-            </h1>
-            <div className="w-full max-w-[1000px] mx-auto px-4 mb-5">
-              <LatestNews
-                searchQuery={searchQuery}
-                topic={resolvedTopicId || resolvedTopic}
-                timeFilter={timeFilter}
-              />
-            </div>
-          </div>
-        </>
-      )}
-    </div>
-    </div>
+              <div className="w-full font-grotesk mt-5">
+                {/* <div className="flex justify-center mb-5 w-full"> */}
+                <div className="w-full max-w-[1030px] mx-auto px-4 mb-5">
+                  <Expert
+                    searchQuery={searchQuery}
+                    disableNavigation={!isPremium}
+                    topic={resolvedTopicId || resolvedTopic}
+                  />
+                </div>
+              </div>
+              <div className="w-full font-grotesk">
+                {/* <div className="flex justify-center mb-5 w-full"> */}
+                <div className="w-full max-w-[1030px] mx-auto px-4 mb-5">
+                  <LatestNews
+                    searchQuery={searchQuery}
+                    topic={resolvedTopicId || resolvedTopic}
+                    timeFilter={timeFilter}
+                  />
+                </div>
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="w-full font-grotesk mt-8">
+                <h1 className="text-2xl sm:text-3xl mb-5 text-left max-w-[970px] mx-auto">
+                  {pageTitle}
+                </h1>
+                <div className="w-full max-w-[1000px] mx-auto px-4 mb-5">
+                  <Rank
+                    searchQuery={searchQuery}
+                    topic={resolvedTopicId || resolvedTopic}
+                    selectedTime={timeFilter}
+                  />
+                </div>
+                <div className="w-full font-grotesk mt-5">
+                  <h1 className="text-2xl sm:text-3xl mb-5 text-left max-w-[970px] mx-auto">
+                    Expert:
+                  </h1>
+                  {/* <div className="flex justify-center mb-5 w-full"> */}{" "}
+                  {/*Original*/}
+                  <div className="w-full max-w-[1000px] mx-auto px-4 mb-5">
+                    <Expert
+                      disableNavigation={!isPremium}
+                      topic={resolvedTopicId || resolvedTopic}
+                    />
+                  </div>
+                </div>
+              </div>
+              <div className="w-full font-grotesk mt-5">
+                <h1 className="text-2xl sm:text-3xl mb-5 text-left max-w-[970px] mx-auto">
+                  Latest News:
+                </h1>
+                <div className="w-full max-w-[1000px] mx-auto px-4 mb-5">
+                  <LatestNews
+                    searchQuery={searchQuery}
+                    topic={resolvedTopicId || resolvedTopic}
+                    timeFilter={timeFilter}
+                  />
+                </div>
+              </div>
+            </>
+          )}
+        </div>
+      </div>
     </div>
   );
 };
-
 
 export default Explore;

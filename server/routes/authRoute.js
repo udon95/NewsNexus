@@ -716,6 +716,21 @@ router.get("/public-profile/:username", async (req, res) => {
       totalLikes += a.total_votes || 0;
       totalViews += a.view_count || 0;
     });
+    const articleIds = articlesData.map((a) => a.articleid);
+
+    const { data: voteData, error: voteError } = await supabase
+      .from("ratings")
+      .select("vote_type")
+      .in("articleid", articleIds);
+
+    if (voteError) console.error("Error fetching vote data:", voteError);
+
+    let upvotes = 0;
+    let downvotes = 0;
+    voteData?.forEach(({ vote_type }) => {
+      if (vote_type === "upvote") upvotes++;
+      if (vote_type === "downvote") downvotes++;
+    });
 
     // 3. Fetch list of public rooms the user has joined
     let publicRooms = [];
@@ -752,7 +767,7 @@ router.get("/public-profile/:username", async (req, res) => {
       user: {
         userid: userData.userid,
         username: userData.username,
-        usertype: typeRow.usertype, // front-end can check if usertype === "Expert" to show icon
+        usertype: typeRow.usertype, 
         status: userData.status,
         created_at: userData.created_at,
       },
@@ -762,6 +777,8 @@ router.get("/public-profile/:username", async (req, res) => {
       totalArticles: articlesData.length,
       totalLikes,
       totalViews,
+      upvotes,
+      downvotes,
     });
   } catch (err) {
     console.error("Error fetching public profile:", err);

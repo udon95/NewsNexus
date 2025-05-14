@@ -256,7 +256,7 @@ const ArticleList = ({
                     if (!isDraft) {
                       const route = isRoom
                         ? `/room/${article.roomid}`
-                        : `/article/${article.title}`;
+                        : `/article/${article.articleid}`;
                       navigate(route);
                     }
                   }}
