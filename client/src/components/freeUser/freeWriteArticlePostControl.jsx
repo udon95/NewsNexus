@@ -378,26 +378,40 @@ export const FreeWriteArticle = () => {
         if (result.feedback) {
           setAiFeedback(result.feedback);
           setAccuracy(result.accuracy || null);
+          //console.log("accuracy", result.accuracy);
+          //console.log("feedback", result.feedback);
+
           alert(
-            " Article flagged by AI. Please review the highlighted sections."
+            "Article flagged by AI. Please review the highlighted sections."
           );
+          if (result.accuracy < 75) {
+            setOpenSuccess(false); // Don't show success dialog
+            setOpenError(true); // Show error message instead
+          }
         } else {
           alert(result.error || "Submission failed.");
         }
         setIsUploading(false);
         setUploadAction(""); // DEVI ADDED THIS
-        //  This is important to prevent saving
         return;
       }
-
       pendingImages.forEach((img) => URL.revokeObjectURL(img.previewUrl)); // cleanup object URLs
       setPendingImages([]);
       handleClearInputs();
 
-      setAccuracy(result.accuracy);
-      setAiFeedback(result.feedback);
-      //alert(`Article posted successfully. Accuracy Score: ${result.accuracy}%`);
-      setOpenSuccess(true);
+      if (result.accuracy >= 75) {
+        setAccuracy(result.accuracy);
+        setAiFeedback(result.feedback);
+        setOpenSuccess(true); // Show success dialog
+        setOpenError(false); // Hide error warning
+      } else {
+        setAccuracy(result.accuracy);
+        setAiFeedback(result.feedback);
+        setOpenSuccess(false); // Hide success dialog
+        setOpenError(true); // Show error warning
+      }
+      //console.log("accuracy final", accuracy);
+      //console.log("feedback final", aiFeedback);
       return;
     }
   };
