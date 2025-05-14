@@ -7,7 +7,7 @@ import NewsCard from "./newsCard.jsx";
 
 const PublicProfile = () => {
   const { username } = useParams();
-  const [profileData, setProfileData] = useState(null);
+  const [profileData, setProfileData] = useState({});
   const [error, setError] = useState("");
   //const [counts, setCounts] = useState({ upvote: 0, downvote: 0 });
 
@@ -24,8 +24,14 @@ const PublicProfile = () => {
     fetchUserData();
   }, [username]);
 
-  const { user, articles, rooms, expertTopics, upvotes, downvotes } =
-    profileData;
+  const {
+    user,
+    articles = [],
+    rooms = [],
+    expertTopics = [],
+    upvotes = 0,
+    downvotes = 0,
+  } = profileData;
 
   if (error) return <div className="text-red-500">{error}</div>;
   if (!profileData) return <div className="text-center py-10">Loading...</div>;

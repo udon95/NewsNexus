@@ -16,6 +16,7 @@ import {
   StickyNote,
   BookOpenIcon,
   X,
+  Loader,
 } from "lucide-react";
 import TranslateButton from "../components/translate.jsx";
 
@@ -35,6 +36,8 @@ const Article = () => {
   const [originalText, setOriginalText] = useState("");
   const [translatedText, setTranslatedText] = useState("");
   const [selectedLanguage, setSelectedLanguage] = useState("en");
+  const [ttsLoading, setTtsLoading] = useState(false);
+  const [translating, setTranslating] = useState(false);
   const [selectedText, setSelectedText] = useState("");
   const [definition, setDefinition] = useState(null);
   const [showDictionary, setShowDictionary] = useState(false);
@@ -94,6 +97,8 @@ const Article = () => {
   };
 
   const handleTTS = async () => {
+    if (ttsLoading) return;
+
     if (isSpeaking && speechRef.current) {
       speechRef.current.pause();
       setIsSpeaking(false);
@@ -105,9 +110,10 @@ const Article = () => {
       return;
     }
 
+    setTtsLoading(true);
     try {
       const text = articleRef.current.innerText;
-      const locale = selectedLanguage === "en" ? "en-US" : selectedLanguage;
+      const locale = selectedLanguage === "en" ? "en-SG" : selectedLanguage;
       //console.log("selected lang", locale);
 
       const response = await fetch(
@@ -139,10 +145,13 @@ const Article = () => {
       audio.play();
     } catch (error) {
       alert("TTS not supported for selected language: " + selectedLanguage);
+    } finally {
+      setTtsLoading(false);
     }
   };
 
   const handleTranslate = async (targetLang) => {
+    if (translating) return;
     if (!articleRef.current) {
       alert("Article content not available.");
       return;
@@ -150,6 +159,7 @@ const Article = () => {
 
     setSelectedLanguage(targetLang);
     const textToTranslate = originalText;
+    setTranslating(true);
 
     try {
       const response = await fetch(
@@ -168,6 +178,8 @@ const Article = () => {
     } catch (error) {
       console.error("Error translating article:", error);
       alert("Error translating article: " + error.message);
+    } finally {
+      setTranslating(false);
     }
   };
 
@@ -411,18 +423,26 @@ const Article = () => {
                 {userType === "Premium" && (
                   <button
                     onClick={handleTTS}
+                    disabled={ttsLoading}
                     title="Text-to-Speech"
                     className="w-10 h-10 p-2 bg-gray-200 rounded-lg hover:bg-gray-300 flex items-center justify-center"
                   >
-                    <Headphones className="h-5 w-5 text-black" />
+                    {ttsLoading ? (
+                      <Loader className="animate-spin h-5 w-5 text-gray-600" />
+                    ) : (
+                      <Headphones className="h-5 w-5 text-black" />
+                    )}
                   </button>
                 )}
-                {userType === "Premium" && (
-                  <TranslateButton
-                    onLanguageSelect={handleTranslate}
-                    className="h-5 w-5 text-black"
-                  />
-                )}
+                {userType === "Premium" &&
+                  (translating ? (
+                    <Loader className="animate-spin h-6 w-6 text-black" />
+                  ) : (
+                    <TranslateButton
+                      onLanguageSelect={handleTranslate}
+                      className="h-5 w-5 text-black"
+                    />
+                  ))}
                 <button
                   onClick={handleShareClick}
                   title="Share"
