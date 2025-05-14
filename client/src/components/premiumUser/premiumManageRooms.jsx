@@ -11,6 +11,8 @@ const ManageRooms = () => {
   const [invites, setInvites] = useState([]);
   const [inviteInput, setInviteInput] = useState("");
   const [validUserPills, setValidUserPills] = useState([]); // list of confirmed usernames
+  const [editInviteInput, setEditInviteInput] = useState("");
+  const [editValidUserPills, setEditValidUserPills] = useState([]);
 
   const [newPublicRoom, setNewPublicRoom] = useState({
     name: "",
@@ -137,20 +139,40 @@ const ManageRooms = () => {
       }      
 
       // Validate usernames before inviting
-      const { data: users } = await supabase
-        .from("user_profiles") // adjust table name if different
-        .select("username")
-        .in("username", usernames);
+      // const { data: users } = await supabase
+      //   .from("user_profiles") // adjust table name if different
+      //   .select("username")
+      //   .in("username", usernames);
 
-      const validUsernames = users.map((u) => u.username);
-      const invalidUsernames = usernames.filter(
-        (name) => !validUsernames.includes(name)
-      );
+      // const validUsernames = users.map((u) => u.username);
+      // const invalidUsernames = usernames.filter(
+      //   (name) => !validUsernames.includes(name)
+      // );
 
-      if (invalidUsernames.length > 0) {
-        alert(`The following usernames are invalid: ${invalidUsernames.join(", ")}`);
-      return;
-      }
+      // if (invalidUsernames.length > 0) {
+      //   alert(`The following usernames are invalid: ${invalidUsernames.join(", ")}`);
+      // return;
+      // }
+
+      // Validate usernames AND ensure only Premium users are invited
+const { data: users } = await supabase
+.from("user_profiles")
+.select("username, subscription_tier")
+.in("username", usernames);
+
+const validUsernames = users
+.filter((u) => u.subscription_tier === "Premium")
+.map((u) => u.username);
+
+const invalidUsernames = usernames.filter(
+(name) => !validUsernames.includes(name)
+);
+
+if (invalidUsernames.length > 0) {
+alert(`These users are not Premium: ${invalidUsernames.join(", ")}`);
+return;
+}
+
 
 
       // for (let username of usernames) {
@@ -213,13 +235,14 @@ const ManageRooms = () => {
       }
     );
     
-     if (room_type === "Private" && editRoom.invite) {
+    //  if (room_type === "Private" && editRoom.invite) {
+      if (room_type === "Private" && editValidUserPills.length > 0) {
     // const usernames = editRoom.invite
     //   .split(",")
     //   .map((s) => s.replace("@", "").trim())
     //   .filter(Boolean);
 
-    const usernames = validUserPills;
+    const usernames = editValidUserPills;
 
     if (usernames.length > 10) {
       alert("You can only invite up to 10 users.");
@@ -239,6 +262,8 @@ const ManageRooms = () => {
         }
       );
     }
+    setEditValidUserPills([]);
+
   }
 
     setEditRoom((prev) => ({ ...prev, invite: "" }));
@@ -521,21 +546,21 @@ const ManageRooms = () => {
             />
           </div> */}
 
-<div className="flex items-center gap-3">
-  <span className="text-base font-medium text-gray-700 w-[40px]">New:</span>
-  <input
-    placeholder="Name"
-    value={newPrivateRoom.name}
-    onChange={(e) => setNewPrivateRoom({ ...newPrivateRoom, name: e.target.value })}
-    className="flex-1 px-3 py-2 border border-gray-300 rounded-md text-sm"
-  />
-  <input
-    placeholder="Description"
-    value={newPrivateRoom.description}
-    onChange={(e) => setNewPrivateRoom({ ...newPrivateRoom, description: e.target.value })}
-    className="flex-[2] px-3 py-2 border border-gray-300 rounded-md text-sm"
-  />
-  {/* <select
+        <div className="flex items-center gap-3">
+          <span className="text-base font-medium text-gray-700 w-[40px]">New:</span>
+          <input
+            placeholder="Name"
+            value={newPrivateRoom.name}
+            onChange={(e) => setNewPrivateRoom({ ...newPrivateRoom, name: e.target.value })}
+            className="flex-1 px-3 py-2 border border-gray-300 rounded-md text-sm"
+          />
+          <input
+            placeholder="Description"
+            value={newPrivateRoom.description}
+            onChange={(e) => setNewPrivateRoom({ ...newPrivateRoom, description: e.target.value })}
+            className="flex-[2] px-3 py-2 border border-gray-300 rounded-md text-sm"
+          />
+          {/* <select
     value={newPrivateRoom.member_limit}
     onChange={(e) => setNewPrivateRoom({ ...newPrivateRoom, member_limit: parseInt(e.target.value) })}
     className="w-[110px] px-3 py-2 border border-gray-300 rounded-md text-sm"
@@ -543,32 +568,32 @@ const ManageRooms = () => {
     <option value={20}>Limit: 20</option>
     <option value={50}>Limit: 50</option>
     <option value={100}>Limit: 100</option>
-  </select> */}
-  <div className="flex items-center gap-2">
-  <label className="text-sm font-medium text-gray-700">Limit:</label>
-  <select
-    value={newPrivateRoom.member_limit}
-    onChange={(e) =>
-      setNewPrivateRoom({
-        ...newPrivateRoom,
-        member_limit: parseInt(e.target.value),
-      })
-    }
-    className="px-3 py-2 border border-gray-300 rounded-md text-sm"
-  >
-    <option value={20}>20</option>
-    <option value={50}>50</option>
-    <option value={100}>100</option>
-  </select>
-</div>
+          </select> */}
+          <div className="flex items-center gap-2">
+          <label className="text-sm font-medium text-gray-700">Limit:</label>
+          <select
+            value={newPrivateRoom.member_limit}
+            onChange={(e) =>
+                setNewPrivateRoom({
+                ...newPrivateRoom,
+                member_limit: parseInt(e.target.value),
+              })
+            }
+            className="px-3 py-2 border border-gray-300 rounded-md text-sm"
+          >
+            <option value={20}>20</option>
+            <option value={50}>50</option>
+            <option value={100}>100</option>
+          </select>
+        </div>
 
-  <button
-    onClick={handleAddPrivateRoom}
-    className="bg-black text-white px-4 py-2 rounded-md text-sm hover:bg-blue-700"
-  >
-    +
-  </button>
-</div>
+          <button
+            onClick={handleAddPrivateRoom}
+            className="bg-black text-white px-4 py-2 rounded-md text-sm hover:bg-blue-700"
+          >
+            +
+          </button>
+        </div>
 
 
           <div className="flex flex-col gap-2 mb-4">
@@ -626,57 +651,137 @@ const ManageRooms = () => {
       //     setInviteInput("");
       //   }
               // }}
-              onKeyDown={async (e) => {
+              // onKeyDown={async (e) => {
 
+              //   if (e.key === "Enter" || e.key === ",") {
+              //     e.preventDefault();
+        
+              //     if (validUserPills.length >= newPrivateRoom.member_limit - 1) {
+              //       alert(`You can only invite up to ${newPrivateRoom.member_limit - 1} users.`);
+              //       setInviteInput("");
+              //       return;
+              //     }
+        
+              //     const trimmed = inviteInput.replace("@", "").trim().toLowerCase();
+              //     // Block self-invite
+              //     if (trimmed === myUsername?.toLowerCase()) {
+              //       alert("You cannot invite yourself to your own room.");
+              //       setInviteInput("");
+              //       return;
+              //     }
+              //     if (!trimmed) return;
+
+              //     // Live limit check
+              //     if (validUserPills.length >= newPrivateRoom.member_limit - 1) {
+              //       alert(`You can only invite up to ${newPrivateRoom.member_limit - 1} users.`);
+              //       setInviteInput("");
+              //       return;
+              //     }
+      
+              //     // Check for duplicates (case-insensitive)
+              //     if (validUserPills.some((u) => u.toLowerCase() === trimmed)) {
+              //       setInviteInput("");
+              //       return;
+              //     }
+      
+              //     // Validate with Supabase
+              //     // const { data, error } = await supabase
+              //     //   .from("users")
+              //     //   .select("username");
+      
+              //     // const matchingUser = data?.find(
+              //     //   (u) => u.username.toLowerCase() === trimmed
+              //     //   );
+      
+              //     // if (matchingUser) {
+              //     //   setValidUserPills([...validUserPills, matchingUser.username]);
+              //     // } else {
+              //     //   alert(`Username "${inviteInput}" not found.`);
+              //     // }
+      
+              //     // setInviteInput("");
+              //     const { data: userMatch, error: userError } = await supabase
+              //     .from("users")
+              //     .select("username, userid")
+              //     .ilike("username", trimmed)
+              //     .maybeSingle();
+                
+              //   if (!userMatch) {
+              //     alert(`Username "${inviteInput}" not found.`);
+              //     setInviteInput("");
+              //     return;
+              //   }
+                
+              //   const { data: tierMatch, error: tierError } = await supabase
+              //     .from("usertype")
+              //     .select("usertype")
+              //     .eq("userid", userMatch.userid)
+              //     .maybeSingle();
+                
+              //   if (tierMatch?.usertype !== "Premium") {
+              //     alert(`User "${userMatch.username}" is not a Premium user.`);
+              //   } else {
+              //     setValidUserPills([...validUserPills, userMatch.username]);
+              //   }
+                
+              //   setInviteInput("");
+                
+              //   }
+              // }}
+              onKeyDown={async (e) => {
                 if (e.key === "Enter" || e.key === ",") {
                   e.preventDefault();
-        
-                  if (validUserPills.length >= newPrivateRoom.member_limit - 1) {
-                    alert(`You can only invite up to ${newPrivateRoom.member_limit - 1} users.`);
-                    setInviteInput("");
-                    return;
-                  }
-        
+              
                   const trimmed = inviteInput.replace("@", "").trim().toLowerCase();
-                  // Block self-invite
-                  if (trimmed === myUsername?.toLowerCase()) {
-                    alert("You cannot invite yourself to your own room.");
+                  if (!trimmed || trimmed === myUsername?.toLowerCase()) {
+                    alert("You cannot invite yourself or an empty username.");
                     setInviteInput("");
                     return;
                   }
-                  if (!trimmed) return;
-
-                  // Live limit check
-                  if (validUserPills.length >= newPrivateRoom.member_limit - 1) {
-                    alert(`You can only invite up to ${newPrivateRoom.member_limit - 1} users.`);
-                    setInviteInput("");
-                    return;
-                  }
-      
-                  // Check for duplicates (case-insensitive)
+              
                   if (validUserPills.some((u) => u.toLowerCase() === trimmed)) {
                     setInviteInput("");
                     return;
                   }
-      
-                  // Validate with Supabase
-                  const { data, error } = await supabase
-                    .from("users")
-                    .select("username");
-      
-                  const matchingUser = data?.find(
-                    (u) => u.username.toLowerCase() === trimmed
-                    );
-      
-                  if (matchingUser) {
-                    setValidUserPills([...validUserPills, matchingUser.username]);
-                  } else {
-                    alert(`Username "${inviteInput}" not found.`);
+              
+                  if (validUserPills.length >= newPrivateRoom.member_limit - 1) {
+                    alert(`You can only invite up to ${newPrivateRoom.member_limit - 1} users.`);
+                    setInviteInput("");
+                    return;
                   }
-      
+              
+                  // Step 1: Get userid for the username
+                  const { data: userRow, error: userErr } = await supabase
+                    .from("users")
+                    .select("userid, username")
+                    .ilike("username", trimmed)
+                    .maybeSingle();
+              
+                  if (!userRow) {
+                    alert(`Username "${inviteInput}" not found.`);
+                    setInviteInput("");
+                    return;
+                  }
+              
+                  const userIdToCheck = userRow.userid;
+              
+                  // Step 2: Check Premium status for that userid
+                  const { data: typeRow, error: typeErr } = await supabase
+                    .from("usertype")
+                    .select("usertype")
+                    .eq("userid", userIdToCheck)
+                    .maybeSingle();
+              
+                  if (!typeRow || typeRow.usertype !== "Premium") {
+                    alert(`User "${userRow.username}" is not a Premium user.`);
+                  } else {
+                    setValidUserPills([...validUserPills, userRow.username]);
+                  }
+              
                   setInviteInput("");
                 }
               }}
+              
       
             />
           </div>
@@ -728,7 +833,6 @@ const ManageRooms = () => {
               </div>
             ))}
           </div> */}
-          {/* <div className="bg-white p-4 rounded-xl shadow space-y-2"> */}
           {/* <div className="bg-white p-4 rounded-xl shadow space-y-2 max-h-[200px] overflow-y-auto pr-2"> */}
           <div className="bg-gray-100 p-4 rounded-xl shadow space-y-2 h-[180px] overflow-y-scroll scrollbar scrollbar-thumb-gray-400 scrollbar-track-gray-200">
           {[...privateRooms, ...joinedPrivateRooms].length === 0 ? (
@@ -834,7 +938,7 @@ const ManageRooms = () => {
                   <label className="block text-sm font-medium mb-1">
                     Member Limit
                   </label>
-                  <input
+                  {/* <input
                     type="number"
                     min={1}
                     max={100}
@@ -846,7 +950,22 @@ const ManageRooms = () => {
                       })
                     }
                     className="w-full px-3 py-2 border rounded-md"
-                  />
+                  /> */}
+                  <select
+                    value={editRoom.member_limit}
+                    onChange={(e) =>
+                    setEditRoom({
+                      ...editRoom,
+                      member_limit: parseInt(e.target.value),
+                    })
+                    }
+                      className="w-full px-3 py-2 border rounded-md"
+                    >
+                      <option value={20}>20 members</option>
+                      <option value={50}>50 members</option>
+                      <option value={100}>100 members</option>
+                    </select>
+
                 </div>
               )}
 
@@ -857,37 +976,130 @@ const ManageRooms = () => {
                 {roomMembers.length === 0 ? (
                   <p className="text-sm text-gray-500">No members yet.</p>
                 ) : (
-                  <ul className="list-disc list-inside text-sm text-gray-700">
-                    {roomMembers.map((username, idx) => (
-                      <li key={idx}>{username}</li>
-                    ))}
-                  </ul>
+                  // <ul className="list-disc list-inside text-sm text-gray-700">
+                  //   {roomMembers.map((username, idx) => (
+                  //     <li key={idx}>{username}</li>
+                  //   ))}
+                  // </ul>
+                  <div className="max-h-40 overflow-y-auto border rounded-md px-3 py-2 bg-gray-50 scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100">
+                    <ul className="list-disc list-inside text-sm text-gray-700">
+                      {roomMembers.map((username, idx) => (
+                        <li key={idx}>{username}</li>
+                      ))}
+                    </ul>
+                  </div>
+
                 )}
               </div>
 
 
               {editRoom.room_type === "Private" && (
-          <div>
-            <div className="flex justify-between items-center mt-2 mb-1">
-              <label className="block text-sm font-medium">
-                Invite New Users
-              </label>
-              <span className="text-xs text-gray-500 italic">(put username to invite)</span>
-            </div>
-            <input
-              placeholder="@user1, @user2 (max 10)"
-              value={editRoom.invite}
-              onChange={(e) =>
-                setEditRoom({ ...editRoom, invite: e.target.value }) 
-              }
-              className="w-full px-3 py-2 border rounded-md"
-            />
-          </div>
-        )}
+              <div>
+                <div className="flex justify-between items-center mt-2 mb-1">
+                  <label className="block text-sm font-medium">
+                    Invite New Users
+                  </label>
+                  <span className="text-xs text-gray-500 italic">(put username to invite)</span>
+                </div>
+                {/* <input
+                  placeholder="@user1, @user2 (max 10)"
+                  value={editRoom.invite}
+                  onChange={(e) =>
+                    setEditRoom({ ...editRoom, invite: e.target.value }) 
+                  }
+                  className="w-full px-3 py-2 border rounded-md"
+                /> */}
+                <div className="flex items-center flex-wrap gap-2 border border-gray-300 rounded-md px-3 py-2 max-h-28 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100">
+                  {editValidUserPills.map((user) => (
+                    <div
+                      key={user}
+                      className="flex items-center bg-gray-200 text-sm rounded-full px-3 py-1"
+                    >
+                      {user}
+                      <button
+                        className="ml-2 text-gray-600 hover:text-red-500"
+                        onClick={() =>
+                          setEditValidUserPills(editValidUserPills.filter((u) => u !== user))
+                        }
+                      >
+                        &times;
+                      </button>
+                    </div>
+                  ))}
+
+                  <input
+                    type="text"
+                    placeholder="Type username and hit Enter"
+                    className="flex-1 px-2 py-1 outline-none text-sm"
+                    value={editInviteInput}
+                    onChange={(e) => setEditInviteInput(e.target.value)}
+                    onKeyDown={async (e) => {
+                      if (e.key === "Enter" || e.key === ",") {
+                      e.preventDefault();
+
+                      const trimmed = editInviteInput.replace("@", "").trim().toLowerCase();
+                        if (!trimmed || trimmed === myUsername?.toLowerCase()) {
+                          alert("You cannot invite yourself or an empty username.");
+                          setEditInviteInput("");
+                          return;
+                        }
+
+                        if (roomMembers.some((m) => m.toLowerCase() === trimmed)) {
+                          alert(`User "${trimmed}" is already in the room.`);
+                          setEditInviteInput("");
+                          return;
+                        }
+
+                        if (editValidUserPills.some((u) => u.toLowerCase() === trimmed)) {
+                          setEditInviteInput("");
+                          return;
+                        }
+
+                        if (editValidUserPills.length >= editRoom.member_limit - roomMembers.length) {
+                          alert(`You can only invite up to ${editRoom.member_limit - roomMembers.length} more users.`);
+                          setEditInviteInput("");
+                            return;
+                        }
+
+                        const { data: userRow } = await supabase
+                          .from("users")
+                          .select("userid, username")
+                          .ilike("username", trimmed)
+                          .maybeSingle();
+
+                        if (!userRow) {
+                          alert(`Username "${editInviteInput}" not found.`);
+                          setEditInviteInput("");
+                          return;
+                        }
+
+                        const { data: typeRow } = await supabase
+                          .from("usertype")
+                          .select("usertype")
+                          .eq("userid", userRow.userid)
+                          .maybeSingle();
+
+                        if (!typeRow || typeRow.usertype !== "Premium") {
+                          alert(`User "${userRow.username}" is not a Premium user.`);
+                        } else {
+                          setEditValidUserPills([...editValidUserPills, userRow.username]);
+                        }
+
+                        setEditInviteInput("");
+                      }
+                    }}
+                    />
+              </div>
+
+              <div className="mt-1 text-sm text-gray-500">
+                {editValidUserPills.length} of {editRoom.member_limit - roomMembers.length} invited
+              </div>
+
+              </div>
+            )}
 
 
 
-      
 
               <div className="flex justify-end gap-2 pt-2">
                 <button
