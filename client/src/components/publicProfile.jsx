@@ -4,6 +4,7 @@ import { BadgeCheck } from "lucide-react";
 import Navbar from "./navbar.jsx";
 import api from "../api/axios.jsx";
 import NewsCard from "./newsCard.jsx";
+import supabase from "../api/supabaseClient.js";
 
 const PublicProfile = () => {
   const { username } = useParams();
