@@ -13,6 +13,7 @@ const ManageRooms = () => {
   const [validUserPills, setValidUserPills] = useState([]); // list of confirmed usernames
   const [editInviteInput, setEditInviteInput] = useState("");
   const [editValidUserPills, setEditValidUserPills] = useState([]);
+  const [removedMembers, setRemovedMembers] = useState([]);
 
   const [newPublicRoom, setNewPublicRoom] = useState({
     name: "",
@@ -155,25 +156,23 @@ const ManageRooms = () => {
       // }
 
       // Validate usernames AND ensure only Premium users are invited
-const { data: users } = await supabase
-.from("user_profiles")
-.select("username, subscription_tier")
-.in("username", usernames);
+      const { data: users } = await supabase
+        .from("user_profiles")
+        .select("username, subscription_tier")
+        .in("username", usernames);
 
-const validUsernames = users
-.filter((u) => u.subscription_tier === "Premium")
-.map((u) => u.username);
+      const validUsernames = users
+        .filter((u) => u.subscription_tier === "Premium")
+        .map((u) => u.username);
 
-const invalidUsernames = usernames.filter(
-(name) => !validUsernames.includes(name)
-);
+      const invalidUsernames = usernames.filter(
+        (name) => !validUsernames.includes(name)
+      );
 
-if (invalidUsernames.length > 0) {
-alert(`These users are not Premium: ${invalidUsernames.join(", ")}`);
-return;
-}
-
-
+      if (invalidUsernames.length > 0) {
+        alert(`These users are not Premium: ${invalidUsernames.join(", ")}`);
+      return;
+      }
 
       // for (let username of usernames) {
       for (let username of validUsernames) {
@@ -264,6 +263,18 @@ return;
     }
     setEditValidUserPills([]);
 
+  }
+
+  // Remove marked members
+  if (removedMembers.length > 0) {
+    for (let username of removedMembers) {
+      await fetch("https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/rooms/remove-member", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ roomid, username }),
+      });
+    }
+      setRemovedMembers([]);
   }
 
     setEditRoom((prev) => ({ ...prev, invite: "" }));
@@ -976,17 +987,32 @@ return;
                 {roomMembers.length === 0 ? (
                   <p className="text-sm text-gray-500">No members yet.</p>
                 ) : (
-                  // <ul className="list-disc list-inside text-sm text-gray-700">
-                  //   {roomMembers.map((username, idx) => (
-                  //     <li key={idx}>{username}</li>
-                  //   ))}
-                  // </ul>
+
                   <div className="max-h-40 overflow-y-auto border rounded-md px-3 py-2 bg-gray-50 scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100">
-                    <ul className="list-disc list-inside text-sm text-gray-700">
+                    {/* <ul className="list-disc list-inside text-sm text-gray-700">
                       {roomMembers.map((username, idx) => (
                         <li key={idx}>{username}</li>
                       ))}
-                    </ul>
+                    </ul> */}
+                    <div className="flex flex-wrap gap-2">
+                    {roomMembers
+                      .filter((member) => !removedMembers.includes(member))
+                      .map((member, index) => (
+                        <div
+                          key={index}
+                          className="flex items-center bg-gray-200 text-sm rounded-full px-3 py-1"
+                        >
+                          {member}
+                          <button
+                            className="ml-2 text-gray-600 hover:text-red-500"
+                            onClick={() => setRemovedMembers([...removedMembers, member])}
+                          >
+                            &times;
+                          </button>
+                        </div>
+                        ))}
+                    </div>
+
                   </div>
 
                 )}
