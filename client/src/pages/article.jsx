@@ -35,6 +35,7 @@ const Article = () => {
   const [isSpeaking, setIsSpeaking] = useState(false);
   const speechRef = useRef(null);
   const [originalText, setOriginalText] = useState("");
+  const [originalHtml, setOriginalHtml] = useState("");
   const [translatedText, setTranslatedText] = useState("");
   const [selectedLanguage, setSelectedLanguage] = useState("en");
   const [ttsLoading, setTtsLoading] = useState(false);
@@ -169,7 +170,9 @@ const Article = () => {
     }
 
     setSelectedLanguage(targetLang);
-    const textToTranslate = originalText.trim();
+    //const parser = new DOMParser().parseFromString(originalText, "text/html");
+    //const plain = parser.body.textContent || "";
+    const textToTranslate = originalText;
 
     setTranslating(true);
     try {
@@ -266,6 +269,16 @@ const Article = () => {
 
   const hasRecordedRef = useRef(false);
 
+  const displayHtml =
+    //  if still English or nothing translated yet:
+    selectedLanguage === "en" || !translatedText
+      ? originalHtml
+      : // otherwise, wrap each paragraph in <p>…</p>
+        translatedText
+          .split("\n\n") // split on blank lines
+          .map((para) => `<p>${para}</p>`)
+          .join("");
+
   useEffect(() => {
     const fetchArticle = async () => {
       const { data, error } = await supabase
@@ -279,10 +292,12 @@ const Article = () => {
 
       if (!error && data?.articleid) {
         setArticleData(data);
-        //const parser = new DOMParser().parseFromString(data.text, "text/html");
-        //const plain = parser.body.textContent || "";
-        setOriginalText(data.text);
-        console.log("clean text eng", plain);
+        setOriginalHtml(data.text);
+
+        const doc = new DOMParser().parseFromString(data.text, "text/html");
+        const plain = doc.body.textContent || "";
+        setOriginalText(plain);
+
         // Optional: check for expert status
         if (data?.userid && data?.topicid) {
           const { data: match } = await supabase
@@ -492,7 +507,8 @@ const Article = () => {
               <ArticleContent
                 articleRef={articleRef}
                 title={articleData.title}
-                text={translatedText || originalText}
+                //text={translatedText || originalText}
+                text={displayHtml}
                 imagepath={articleData.imagepath}
                 postDate={new Date(articleData.time).toLocaleDateString()}
                 author={{
