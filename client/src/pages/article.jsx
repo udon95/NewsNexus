@@ -158,17 +158,16 @@ const Article = () => {
       return;
     }
 
-    // setSelectedLanguage(targetLang);
-    // const textToTranslate = articleRef.current.innerText.trim();
-    // setTranslating(true);
-
-    if (targetLang === "en" || targetLang === selectedLanguage) {
+    if (targetLang === "en") {
       setTranslatedText("");
       setSelectedLanguage("en");
       return;
     }
 
-    // Otherwise, initiate a real translation
+    if (targetLang === selectedLanguage) {
+      return;
+    }
+
     setSelectedLanguage(targetLang);
     const textToTranslate = articleRef.current.innerText.trim();
 
