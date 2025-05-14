@@ -86,7 +86,7 @@ const FloatingUserStats = ({ user, customClassName }) => {
   return (
     // <div className="absolute top-[498px] left-20 z-40 flex flex-col items-start gap-3">
     <div
-      className={`z-100 mt-[35px] flex flex-col items-start gap-3 ${
+      className={`z-[100] mt-[35px] flex flex-col items-start gap-3 ${
         customClassName || "top-[498px] left-20"
       }`}
     >
