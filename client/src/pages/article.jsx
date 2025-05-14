@@ -169,7 +169,7 @@ const Article = () => {
     }
 
     setSelectedLanguage(targetLang);
-    const textToTranslate = articleRef.current.innerText.trim();
+    const textToTranslate = originalText.trim();
 
     setTranslating(true);
     try {
@@ -279,8 +279,10 @@ const Article = () => {
 
       if (!error && data?.articleid) {
         setArticleData(data);
-        setOriginalText(data.text);
-
+        const parser = new DOMParser().parseFromString(data.text, "text/html");
+        const plain = parser.body.textContent || "";
+        setOriginalText(plain);
+        console.log("clean text eng", plain);
         // Optional: check for expert status
         if (data?.userid && data?.topicid) {
           const { data: match } = await supabase
