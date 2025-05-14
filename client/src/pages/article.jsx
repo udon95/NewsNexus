@@ -17,6 +17,8 @@ import {
   BookOpenIcon,
   X,
   Loader,
+  Pause,
+  CircleStop,
 } from "lucide-react";
 import TranslateButton from "../components/translate.jsx";
 
@@ -424,11 +426,17 @@ const Article = () => {
                   <button
                     onClick={handleTTS}
                     disabled={ttsLoading}
-                    title="Text-to-Speech"
-                    className="w-10 h-10 p-2 bg-gray-200 rounded-lg hover:bg-gray-300 flex items-center justify-center"
+                    title={isSpeaking ? "Pause TTS" : "Play TTS"}
+                    className={`w-10 h-10 p-2 bg-gray-200 rounded-lg hover:bg-gray-300 flex items-center justify-center ${
+                      ttsLoading
+                        ? "bg-gray-100 cursor-wait"
+                        : "bg-gray-200 hover:bg-gray-300"
+                    }`}
                   >
                     {ttsLoading ? (
                       <Loader className="animate-spin h-5 w-5 text-gray-600" />
+                    ) : isSpeaking ? (
+                      <Pause className="h-5 w-5 text-black" />
                     ) : (
                       <Headphones className="h-5 w-5 text-black" />
                     )}
