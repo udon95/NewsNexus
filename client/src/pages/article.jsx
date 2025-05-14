@@ -279,9 +279,9 @@ const Article = () => {
 
       if (!error && data?.articleid) {
         setArticleData(data);
-        const parser = new DOMParser().parseFromString(data.text, "text/html");
-        const plain = parser.body.textContent || "";
-        setOriginalText(plain);
+        //const parser = new DOMParser().parseFromString(data.text, "text/html");
+        //const plain = parser.body.textContent || "";
+        setOriginalText(data.text);
         console.log("clean text eng", plain);
         // Optional: check for expert status
         if (data?.userid && data?.topicid) {
