@@ -29,7 +29,7 @@ const PublicProfile = () => {
       let { data, error } = await supabase
         .from("ratings")
         .select("vote_type")
-        .eq("userid", user.userId);
+        .eq("userid", profileData.user.userId);
 
       if (error) {
         console.error(error);
@@ -50,7 +50,7 @@ const PublicProfile = () => {
     }
 
     fetchVotes();
-  }, [userId]);
+  }, [profileData]);
 
   if (error) return <div className="text-red-500">{error}</div>;
   if (!profileData) return <div className="text-center py-10">Loading...</div>;
