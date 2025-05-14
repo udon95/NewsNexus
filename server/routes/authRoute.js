@@ -767,7 +767,7 @@ router.get("/public-profile/:username", async (req, res) => {
       user: {
         userid: userData.userid,
         username: userData.username,
-        usertype: typeRow.usertype, // front-end can check if usertype === "Expert" to show icon
+        usertype: typeRow.usertype, 
         status: userData.status,
         created_at: userData.created_at,
       },

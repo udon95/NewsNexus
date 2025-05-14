@@ -10,8 +10,6 @@ const PublicProfile = () => {
   const [profileData, setProfileData] = useState(null);
   const [error, setError] = useState("");
   //const [counts, setCounts] = useState({ upvote: 0, downvote: 0 });
-  const { user, articles, rooms, expertTopics, upvotes, downvotes } =
-    profileData;
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -25,6 +23,9 @@ const PublicProfile = () => {
 
     fetchUserData();
   }, [username]);
+
+  const { user, articles, rooms, expertTopics, upvotes, downvotes } =
+    profileData;
 
   if (error) return <div className="text-red-500">{error}</div>;
   if (!profileData) return <div className="text-center py-10">Loading...</div>;
