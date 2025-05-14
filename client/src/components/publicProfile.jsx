@@ -4,14 +4,14 @@ import { BadgeCheck } from "lucide-react";
 import Navbar from "./navbar.jsx";
 import api from "../api/axios.jsx";
 import NewsCard from "./newsCard.jsx";
-import supabase from "../api/supabaseClient.js";
 
 const PublicProfile = () => {
   const { username } = useParams();
   const [profileData, setProfileData] = useState(null);
   const [error, setError] = useState("");
-  const [counts, setCounts] = useState({ upvote: 0, downvote: 0 });
-  const { user, articles, rooms, expertTopics } = profileData;
+  //const [counts, setCounts] = useState({ upvote: 0, downvote: 0 });
+  const { user, articles, rooms, expertTopics, upvotes, downvotes } =
+    profileData;
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -25,34 +25,6 @@ const PublicProfile = () => {
 
     fetchUserData();
   }, [username]);
-
-  useEffect(() => {
-    async function fetchVotes() {
-      let { data, error } = await supabase
-        .from("ratings")
-        .select("vote_type")
-        .eq("userid", user.userid);
-
-      if (error) {
-        console.error(error);
-        return;
-      }
-
-      // Count upvotes and downvotes
-      const voteCounts = data.reduce(
-        (acc, row) => {
-          if (row.vote_type === "upvote") acc.upvote += 1;
-          if (row.vote_type === "downvote") acc.downvote += 1;
-          return acc;
-        },
-        { upvote: 0, downvote: 0 }
-      );
-
-      setCounts(voteCounts);
-    }
-
-    fetchVotes();
-  }, [user.userid]);
 
   if (error) return <div className="text-red-500">{error}</div>;
   if (!profileData) return <div className="text-center py-10">Loading...</div>;
@@ -181,10 +153,8 @@ const PublicProfile = () => {
               <p>
                 <span className="font-medium">Articles:</span>{" "}
                 {profileData.totalArticles} |
-                <span className="font-medium ml-2">Upvotes:</span>{" "}
-                {counts.upvote} |
-                <span className="font-medium ml-2">Downvotes:</span>{" "}
-                {counts.downvote}
+                <span className="font-medium ml-2">Upvotes:</span> {upvotes} |
+                <span className="font-medium ml-2">Downvotes:</span> {downvotes}
               </p>
               <p>
                 <span className="font-medium">Views:</span>{" "}
