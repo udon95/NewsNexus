@@ -29,7 +29,7 @@ const PublicProfile = () => {
       let { data, error } = await supabase
         .from("ratings")
         .select("vote_type")
-        .eq("userid", userId);
+        .eq("userid", user.userId);
 
       if (error) {
         console.error(error);
