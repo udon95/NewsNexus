@@ -86,32 +86,32 @@ const FloatingUserStats = ({ user, customClassName }) => {
   return (
     // <div className="absolute top-[498px] left-20 z-40 flex flex-col items-start gap-3">
     <div
-      className={`z-[100] mt-[35px] flex flex-col items-start gap-3 ${
+      className={` z-40 flex flex-col items-start gap-3 ${
         customClassName || "top-[498px] left-20"
       }`}
     >
-      <div className="text-sm font-bold text-[#00317F] mb-2 -ml-1">
+      <div className="text-sm font-bold relative z-100 text-[#00317F] mb-2 -ml-1">
         {new Date().toLocaleString("default", { month: "long" })}'s Streak
       </div>
 
       <div className="flex flex-col gap-3 text-center text-xs text-[#00317F] font-medium">
         <div>
-          <div className="bg-[#CDE0FF] w-[80px] h-[80px] rounded-2xl flex items-center justify-center text-3xl font-bold mb-1">
+          <div className="bg-[#CDE0FF] relative z-100 w-[80px] h-[80px] rounded-2xl flex items-center justify-center text-3xl font-bold mb-1">
             {stats.articles.toString().padStart(2, "0")}
           </div>
-          <div>Published</div>
+          <div className="relative z-100">Published</div>
         </div>
         <div>
-          <div className="bg-[#CDE0FF] w-[80px] h-[80px] rounded-2xl flex items-center justify-center text-3xl font-bold mb-1">
+          <div className="bg-[#CDE0FF] relative z-100 w-[80px] h-[80px] rounded-2xl flex items-center justify-center text-3xl font-bold mb-1">
             {stats.drafts.toString().padStart(2, "0")}
           </div>
-          <div>Drafts</div>
+          <div className="relative z-100">Drafts</div>
         </div>
         <div>
-          <div className="bg-[#CDE0FF] w-[80px] h-[80px] rounded-2xl flex items-center justify-center text-3xl font-bold mb-1">
+          <div className="bg-[#CDE0FF] relative z-100 w-[80px] h-[80px] rounded-2xl flex items-center justify-center text-3xl font-bold mb-1">
             {stats.comments.toString().padStart(2, "0")}
           </div>
-          <div>Comments</div>
+          <div className="relative z-100">Comments</div>
         </div>
         {/* <div>
           <div className="bg-[#CDE0FF] w-[80px] h-[80px] rounded-2xl flex items-center justify-center text-3xl font-bold mb-1">
@@ -120,7 +120,7 @@ const FloatingUserStats = ({ user, customClassName }) => {
           <div>Reads</div>
         </div> */}
         <div>
-          <div className="bg-[#CDE0FF] w-[80px] h-[80px] rounded-2xl flex items-center justify-center text-xl font-bold mb-1">
+          <div className="bg-[#CDE0FF] relative z-100 w-[80px] h-[80px] rounded-2xl flex items-center justify-center text-xl font-bold mb-1">
             {/* {userType === "Free" ? (
       <>
         <div className="text-center leading-tight">
@@ -132,16 +132,16 @@ const FloatingUserStats = ({ user, customClassName }) => {
       <div className="text-3xl">{stats.reads.toString().padStart(2, '0')}</div>
     )} */}
             {userType === "Free" ? (
-              <div className="text-3xl sm:text-2xl font-extrabold text-[#00317F] text-center">
+              <div className="text-3xl sm:text-2xl relative z-100 font-extrabold text-[#00317F] text-center">
                 {stats.reads} / 10
               </div>
             ) : (
-              <div className="text-3xl font-bold text-[#00317F]">
+              <div className="text-3xl font-bold relative z-100 text-[#00317F]">
                 {stats.reads.toString().padStart(2, "0")}
               </div>
             )}
           </div>
-          <div>{userType === "Free" ? "Reads Today" : "Reads"}</div>
+          <div className="relative z-100">{userType === "Free" ? "Reads Today" : "Reads"}</div>
         </div>
       </div>
     </div>
