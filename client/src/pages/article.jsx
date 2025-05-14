@@ -26,7 +26,6 @@ const Article = () => {
   const articleRef = useRef(null);
   const { userType, user } = useAuthHook();
   const { articleId } = useParams();
-  //const decodedTitle = decodeURIComponent(articleName);
   const navigate = useNavigate();
 
   const [articleData, setArticleData] = useState(null);
@@ -114,7 +113,7 @@ const Article = () => {
 
     setTtsLoading(true);
     try {
-      const text = articleRef.current.innerText;
+      const text = articleRef.current.innerText.trim();
       const locale = selectedLanguage === "en" ? "en-SG" : selectedLanguage;
       //console.log("selected lang", locale);
 
@@ -160,9 +159,7 @@ const Article = () => {
     }
 
     setSelectedLanguage(targetLang);
-    //const textToTranslate = originalText;
-    const doc = new DOMParser().parseFromString(originalText, "text/html");
-    const textToTranslate = doc.body.textContent || "";
+    const textToTranslate = articleRef.current.innerText.trim();
     setTranslating(true);
 
     try {
