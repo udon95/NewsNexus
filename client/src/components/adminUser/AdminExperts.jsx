@@ -72,14 +72,14 @@ const AdminExperts = () => {
 
   // }, [applicant]);
 
-const setApplicantWithTopic = (application) => {
-  setApplicant(application);
-  setUserTopic(topics.find((topic) => topic.topicid == application.topicid));
-  console.log(application.topicid);
-  console.log(userTopic);
+  const setApplicantWithTopic = (application) => {
+    setApplicant(application);
+    setUserTopic(topics.find((topic) => topic.topicid == application.topicid));
+    console.log(application.topicid);
+    console.log(userTopic);
 
 
-} 
+  } 
 
   return (
     <div className="w-screen min-h-screen flex flex-col overflow-auto">

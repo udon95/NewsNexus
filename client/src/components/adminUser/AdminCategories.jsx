@@ -73,6 +73,8 @@ const AdminCategories = () => {
     } else {
       alert("Added topic : " + newTopic);
     }
+
+    window.location.reload();
   };
 
   const createTopicFromSuggestion = async (topic) => {
