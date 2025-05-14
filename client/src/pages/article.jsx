@@ -158,10 +158,21 @@ const Article = () => {
       return;
     }
 
+    // setSelectedLanguage(targetLang);
+    // const textToTranslate = articleRef.current.innerText.trim();
+    // setTranslating(true);
+
+    if (targetLang === "en" || targetLang === selectedLanguage) {
+      setTranslatedText("");
+      setSelectedLanguage("en");
+      return;
+    }
+
+    // Otherwise, initiate a real translation
     setSelectedLanguage(targetLang);
     const textToTranslate = articleRef.current.innerText.trim();
-    setTranslating(true);
 
+    setTranslating(true);
     try {
       const response = await fetch(
         "https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/translate",
