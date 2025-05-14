@@ -11,6 +11,7 @@ const PublicProfile = () => {
   const [profileData, setProfileData] = useState(null);
   const [error, setError] = useState("");
   const [counts, setCounts] = useState({ upvote: 0, downvote: 0 });
+  const { user, articles, rooms, expertTopics } = profileData;
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -30,7 +31,7 @@ const PublicProfile = () => {
       let { data, error } = await supabase
         .from("ratings")
         .select("vote_type")
-        .eq("userid", profileData.user.userId);
+        .eq("userid", user.userid);
 
       if (error) {
         console.error(error);
@@ -51,12 +52,10 @@ const PublicProfile = () => {
     }
 
     fetchVotes();
-  }, [profileData]);
+  }, [user.userid]);
 
   if (error) return <div className="text-red-500">{error}</div>;
   if (!profileData) return <div className="text-center py-10">Loading...</div>;
-
-  const { user, articles, rooms, expertTopics } = profileData;
 
   // return (
   //   <div className="min-h-screen bg-white text-gray-900">
