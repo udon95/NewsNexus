@@ -307,7 +307,37 @@ router.get("/members/:roomid", async (req, res) => {
 });
 
 
+// 🔹 REMOVE a member from room
+router.post("/remove-member", async (req, res) => {
+  const { roomid, username } = req.body;
 
+  if (!roomid || !username) {
+    return res.status(400).json({ error: "Missing roomid or username" });
+  }
+
+  // Get user ID from username
+  const { data: user, error: userError } = await supabase
+    .from("users")
+    .select("userid")
+    .eq("username", username)
+    .maybeSingle();
+
+  if (userError || !user) {
+    return res.status(404).json({ error: "User not found" });
+  }
+
+  const { error: deleteError } = await supabase
+    .from("room_members")
+    .delete()
+    .eq("roomid", roomid)
+    .eq("userid", user.userid);
+
+  if (deleteError) {
+    return res.status(500).json({ error: deleteError.message });
+  }
+
+  res.status(200).json({ message: "Member removed from room" });
+});
 
 
 
