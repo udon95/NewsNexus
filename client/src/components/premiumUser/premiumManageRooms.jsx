@@ -214,11 +214,18 @@ const ManageRooms = () => {
       member_limit: currentLimit || 20,
     });
 
-    const res = await fetch(
-      `https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/rooms/members/${roomid}`
-    );
-    const data = await res.json();
-    setRoomMembers(data || []);
+    const { data, error } = await supabase
+    .from("room_members")
+    .select("userid, users(username)")
+    .eq("roomid", roomid);
+  
+  if (data) {
+    const formatted = data.map((entry) => ({
+      userid: entry.userid,
+      username: entry.users?.username || "",
+    }));
+    setRoomMembers(formatted);
+  }  
     setShowModal(true);
   };
 
@@ -267,13 +274,20 @@ const ManageRooms = () => {
 
   // Remove marked members
   if (removedMembers.length > 0) {
-    for (let username of removedMembers) {
+    // for (let username of removedMembers) {
+    //   await fetch("https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/rooms/remove-member", {
+    //     method: "POST",
+    //     headers: { "Content-Type": "application/json" },
+    //     body: JSON.stringify({ roomid, username }),
+    //   });
+    // }
+    for (let member of removedMembers) {
       await fetch("https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/rooms/remove-member", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ roomid, username }),
+        body: JSON.stringify({ roomid, username: member.username }),
       });
-    }
+    }    
       setRemovedMembers([]);
   }
 
@@ -995,22 +1009,44 @@ const ManageRooms = () => {
                       ))}
                     </ul> */}
                     <div className="flex flex-wrap gap-2">
-                    {roomMembers
-                      .filter((member) => !removedMembers.includes(member))
+                    {/* {roomMembers
+                      .filter((member) => !removedMembers.includes(member.userid))
                       .map((member, index) => (
                         <div
                           key={index}
                           className="flex items-center bg-gray-200 text-sm rounded-full px-3 py-1"
                         >
-                          {member}
+                          {member.username}
                           <button
                             className="ml-2 text-gray-600 hover:text-red-500"
-                            onClick={() => setRemovedMembers([...removedMembers, member])}
+                            // onClick={() => setRemovedMembers([...removedMembers, member])}
+                            onClick={() => setRemovedMembers([...removedMembers, member.userid])}
                           >
                             &times;
                           </button>
                         </div>
+                        ))} */}
+                        {roomMembers
+                          // .filter((member) => !removedMembers.includes(member.userid))
+                          .filter((member) => !removedMembers.some((rm) => rm.userid === member.userid))
+                          .map((member, index) => (
+                          <div
+                            key={index}
+                            className="flex items-center bg-gray-200 text-sm rounded-full px-3 py-1"
+                          >
+                            {member.username}
+                            {member.userid !== userId && (
+                              <button
+                                className="ml-2 text-gray-600 hover:text-red-500"
+                                // onClick={() => setRemovedMembers([...removedMembers, member.userid])}
+                                onClick={() => setRemovedMembers([...removedMembers, { userid: member.userid, username: member.username }])}
+                              >
+                                &times;
+                              </button>
+                            )}
+                          </div>
                         ))}
+
                     </div>
 
                   </div>
