@@ -309,7 +309,7 @@ const ManageRooms = () => {
         <section className="bg-white p-5 rounded-lg shadow-md space-y-4 border border-gray-200">
         <h1 className="font-bold text-2xl text-gray-800">My Public Discussion Rooms</h1>
 
-          <div className="flex gap-2 items-center mb-2">
+          {/* <div className="flex gap-2 items-center mb-2">
             <label>New:</label>
             <input
               placeholder="Name"
@@ -336,8 +336,30 @@ const ManageRooms = () => {
               >
               +
             </button>
-          </div>
-          
+          </div> */}
+
+        <div className="flex items-center gap-3">
+          <span className="text-base font-medium text-gray-700 w-[40px]">New:</span>
+            <input
+              placeholder="Name"
+              value={newPublicRoom.name}
+              onChange={(e) => setNewPublicRoom({ ...newPublicRoom, name: e.target.value })}
+              className="flex-1 px-3 py-2 border border-gray-300 rounded-md text-sm"
+            />
+          <input
+            placeholder="Description"
+            value={newPublicRoom.description}
+            onChange={(e) => setNewPublicRoom({ ...newPublicRoom, description: e.target.value })}
+            className="flex-[2] px-3 py-2 border border-gray-300 rounded-md text-sm"
+          />
+          <button
+            onClick={handleAddPublicRoom}
+            className="bg-black text-white px-4 py-2 rounded-md text-sm hover:bg-blue-700"
+          >
+            +
+          </button>
+        </div>
+  
           {/* <div className="bg-white p-4 rounded-xl shadow space-y-2">
             {[...publicRooms, ...joinedPublicRooms].map((room, index) => (
               <div key={room.roomid} className={rowStyle}>
@@ -440,8 +462,8 @@ const ManageRooms = () => {
         <section className="bg-white p-5 rounded-lg shadow-md space-y-4 border border-gray-200">
         <h1 className="font-bold text-2xl text-gray-800">My Private Discussion Rooms</h1>
 
-          <div className="flex gap-2 items-center mb-2">
-            <label>New:</label>
+          {/* <div className="flex gap-2 items-center mb-2"> */}
+            {/* <label>New:</label>
             <input
               placeholder="Name"
               value={newPrivateRoom.name}
@@ -460,10 +482,10 @@ const ManageRooms = () => {
                 })
               }
               className="w-1/2 px-3 py-2 border rounded-md text-base"
-            />
+            /> */}
 
             {/* 🟩 ADDED: Dropdown for member limit */}
-            <select
+            {/* <select
               value={newPrivateRoom.member_limit}
               onChange={(e) =>
                 setNewPrivateRoom({
@@ -479,13 +501,13 @@ const ManageRooms = () => {
             </select>
             {/* 🟩 END */}
 
-            <button
+            {/* <button
               onClick={handleAddPrivateRoom}
               className="bg-black text-white px-4 py-2 rounded text-base"
             >
               +
-            </button>
-          </div>
+            </button> 
+          </div>  */}
 
           {/* <div className="flex items-center gap-2 mb-2">
             <label>Invite:</label>
@@ -499,35 +521,85 @@ const ManageRooms = () => {
             />
           </div> */}
 
-  <div className="flex flex-col gap-2 mb-4">
-  <label className="text-sm font-medium text-gray-700">Invite Users:</label>
-  
-  {/* <div className="flex flex-wrap items-center gap-2 border border-gray-300 rounded-md px-2 py-1"> */}
-  <div className="flex items-center flex-wrap gap-2 border border-gray-300 rounded-md px-3 py-2 max-h-28 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100">
-    {validUserPills.map((user) => (
-      <div
-        key={user}
-        className="flex items-center bg-gray-200 text-sm rounded-full px-3 py-1"
-      >
-        {user}
-        <button
-          className="ml-2 text-gray-600 hover:text-red-500"
-          onClick={() =>
-            setValidUserPills(validUserPills.filter((u) => u !== user))
-          }
-        >
-          &times;
-        </button>
-      </div>
-    ))}
+<div className="flex items-center gap-3">
+  <span className="text-base font-medium text-gray-700 w-[40px]">New:</span>
+  <input
+    placeholder="Name"
+    value={newPrivateRoom.name}
+    onChange={(e) => setNewPrivateRoom({ ...newPrivateRoom, name: e.target.value })}
+    className="flex-1 px-3 py-2 border border-gray-300 rounded-md text-sm"
+  />
+  <input
+    placeholder="Description"
+    value={newPrivateRoom.description}
+    onChange={(e) => setNewPrivateRoom({ ...newPrivateRoom, description: e.target.value })}
+    className="flex-[2] px-3 py-2 border border-gray-300 rounded-md text-sm"
+  />
+  {/* <select
+    value={newPrivateRoom.member_limit}
+    onChange={(e) => setNewPrivateRoom({ ...newPrivateRoom, member_limit: parseInt(e.target.value) })}
+    className="w-[110px] px-3 py-2 border border-gray-300 rounded-md text-sm"
+  >
+    <option value={20}>Limit: 20</option>
+    <option value={50}>Limit: 50</option>
+    <option value={100}>Limit: 100</option>
+  </select> */}
+  <div className="flex items-center gap-2">
+  <label className="text-sm font-medium text-gray-700">Limit:</label>
+  <select
+    value={newPrivateRoom.member_limit}
+    onChange={(e) =>
+      setNewPrivateRoom({
+        ...newPrivateRoom,
+        member_limit: parseInt(e.target.value),
+      })
+    }
+    className="px-3 py-2 border border-gray-300 rounded-md text-sm"
+  >
+    <option value={20}>20</option>
+    <option value={50}>50</option>
+    <option value={100}>100</option>
+  </select>
+</div>
 
-    <input
-      type="text"
-      placeholder="Type username and hit Enter"
-      className="flex-1 px-2 py-1 outline-none text-sm"
-      value={inviteInput}
-      onChange={(e) => setInviteInput(e.target.value)}
-      // onKeyDown={async (e) => {
+  <button
+    onClick={handleAddPrivateRoom}
+    className="bg-black text-white px-4 py-2 rounded-md text-sm hover:bg-blue-700"
+  >
+    +
+  </button>
+</div>
+
+
+          <div className="flex flex-col gap-2 mb-4">
+          <label className="text-sm font-medium text-gray-700">Invite Users:</label>
+  
+          {/* <div className="flex flex-wrap items-center gap-2 border border-gray-300 rounded-md px-2 py-1"> */}
+          <div className="flex items-center flex-wrap gap-2 border border-gray-300 rounded-md px-3 py-2 max-h-28 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100">
+            {validUserPills.map((user) => (
+              <div
+                key={user}
+                className="flex items-center bg-gray-200 text-sm rounded-full px-3 py-1"
+              >
+                {user}
+                <button
+                  className="ml-2 text-gray-600 hover:text-red-500"
+                  onClick={() =>
+                    setValidUserPills(validUserPills.filter((u) => u !== user))
+                  }
+                >
+                  &times;
+                </button>
+              </div>
+            ))}
+
+            <input
+              type="text"
+              placeholder="Type username and hit Enter"
+              className="flex-1 px-2 py-1 outline-none text-sm"
+              value={inviteInput}
+              onChange={(e) => setInviteInput(e.target.value)}
+              // onKeyDown={async (e) => {
       //   if (e.key === "Enter" || e.key === ",") {
       //     e.preventDefault();
       //     const trimmed = inviteInput.replace("@", "").trim();
@@ -553,62 +625,62 @@ const ManageRooms = () => {
 
       //     setInviteInput("");
       //   }
-      // }}
-      onKeyDown={async (e) => {
+              // }}
+              onKeyDown={async (e) => {
 
-        if (e.key === "Enter" || e.key === ",") {
-          e.preventDefault();
+                if (e.key === "Enter" || e.key === ",") {
+                  e.preventDefault();
         
-          if (validUserPills.length >= newPrivateRoom.member_limit - 1) {
-            alert(`You can only invite up to ${newPrivateRoom.member_limit - 1} users.`);
-            setInviteInput("");
-            return;
-          }
+                  if (validUserPills.length >= newPrivateRoom.member_limit - 1) {
+                    alert(`You can only invite up to ${newPrivateRoom.member_limit - 1} users.`);
+                    setInviteInput("");
+                    return;
+                  }
         
-          const trimmed = inviteInput.replace("@", "").trim().toLowerCase();
-          // Block self-invite
-          if (trimmed === myUsername?.toLowerCase()) {
-            alert("You cannot invite yourself to your own room.");
-            setInviteInput("");
-            return;
-          }
-          if (!trimmed) return;
+                  const trimmed = inviteInput.replace("@", "").trim().toLowerCase();
+                  // Block self-invite
+                  if (trimmed === myUsername?.toLowerCase()) {
+                    alert("You cannot invite yourself to your own room.");
+                    setInviteInput("");
+                    return;
+                  }
+                  if (!trimmed) return;
 
-          // Live limit check
-          if (validUserPills.length >= newPrivateRoom.member_limit - 1) {
-            alert(`You can only invite up to ${newPrivateRoom.member_limit - 1} users.`);
-            setInviteInput("");
-            return;
-          }
+                  // Live limit check
+                  if (validUserPills.length >= newPrivateRoom.member_limit - 1) {
+                    alert(`You can only invite up to ${newPrivateRoom.member_limit - 1} users.`);
+                    setInviteInput("");
+                    return;
+                  }
       
-          // Check for duplicates (case-insensitive)
-          if (validUserPills.some((u) => u.toLowerCase() === trimmed)) {
-            setInviteInput("");
-            return;
-          }
+                  // Check for duplicates (case-insensitive)
+                  if (validUserPills.some((u) => u.toLowerCase() === trimmed)) {
+                    setInviteInput("");
+                    return;
+                  }
       
-          // Validate with Supabase
-          const { data, error } = await supabase
-            .from("users")
-            .select("username");
+                  // Validate with Supabase
+                  const { data, error } = await supabase
+                    .from("users")
+                    .select("username");
       
-          const matchingUser = data?.find(
-            (u) => u.username.toLowerCase() === trimmed
-          );
+                  const matchingUser = data?.find(
+                    (u) => u.username.toLowerCase() === trimmed
+                    );
       
-          if (matchingUser) {
-            setValidUserPills([...validUserPills, matchingUser.username]);
-          } else {
-            alert(`Username "${inviteInput}" not found.`);
-          }
+                  if (matchingUser) {
+                    setValidUserPills([...validUserPills, matchingUser.username]);
+                  } else {
+                    alert(`Username "${inviteInput}" not found.`);
+                  }
       
-          setInviteInput("");
-        }
-      }}
+                  setInviteInput("");
+                }
+              }}
       
-    />
-  </div>
-</div>
+            />
+          </div>
+        </div>
 
 
           {/* <div className="bg-white p-4 rounded-xl shadow space-y-2">
@@ -630,7 +702,7 @@ const ManageRooms = () => {
                             room.name,
                             room.description,
                             room.room_type,
-                            room.member_limit // 🟩 ensure passing this too
+                            room.member_limit // ensure passing this too
                           )
                         }
                         className={buttonClass}
