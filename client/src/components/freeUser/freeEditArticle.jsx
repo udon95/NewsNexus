@@ -1154,6 +1154,7 @@ const EditFreeArticle = () => {
                   <button
                     className="bg-yellow-500 text-white px-4 py-2 rounded-md"
                     onClick={handleSaveDraft}
+                    disabled={isUploading}
                   >
                     {isUploading && uploadAction === "draft"
                       ? "Saving..."
@@ -1163,6 +1164,7 @@ const EditFreeArticle = () => {
                   <button
                     className="bg-blue-600 text-white px-4 py-2 rounded-md"
                     onClick={handlePostArticle}
+                    disabled={isUploading}
                   >
                     {isUploading && uploadAction === "post"
                       ? "Posting..."
@@ -1173,6 +1175,7 @@ const EditFreeArticle = () => {
                 <button
                   className="bg-blue-600 text-white px-4 py-2 rounded-md"
                   onClick={handlePostArticle}
+                  disabled={isUploading}
                 >
                   Add Update
                 </button>

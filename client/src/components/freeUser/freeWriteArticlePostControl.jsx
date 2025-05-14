@@ -1043,7 +1043,7 @@ export const FreeWriteArticle = () => {
                   : "bg-blue-600"
               } text-white`}
               onClick={monthlyPostCount >= 4 ? null : handlePostArticle}
-              disabled={monthlyPostCount >= 4}
+              disabled={monthlyPostCount >= 4 || isUploading}
             >
               {isUploading && uploadAction === "post" ? "Posting..." : "Post"}
             </button>

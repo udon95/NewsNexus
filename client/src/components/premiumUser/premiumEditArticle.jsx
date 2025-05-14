@@ -1653,6 +1653,7 @@ export const PremiumEditArticle = () => {
                 <button
                   className="bg-yellow-500 text-white px-4 py-2 rounded-md"
                   onClick={handleSaveDraft}
+                  disabled={isUploading}
                 >
                   {isUploading && uploadAction === "draft"
                     ? "Saving..."
@@ -1663,6 +1664,7 @@ export const PremiumEditArticle = () => {
                   <button
                     className="bg-blue-600 text-white px-4 py-2 rounded-md"
                     onClick={handlePostGeneralArticle}
+                    disabled={isUploading}
                   >
                     {isUploading && uploadAction === "post"
                       ? "Posting..."
@@ -1672,6 +1674,7 @@ export const PremiumEditArticle = () => {
                   <button
                     className="bg-blue-600 text-white px-4 py-2 rounded-md"
                     onClick={handlePostRoomArticle}
+                    disabled={isUploading}
                   >
                     {isUploading && uploadAction === "post"
                       ? "Posting..."
