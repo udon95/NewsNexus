@@ -272,8 +272,21 @@ const ManageRooms = () => {
 
   }
 
+  // 🔹 Remove members from the room
+if (removedMembers.length > 0) {
+  for (let member of removedMembers) {
+    await fetch("https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/rooms/remove-member", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ roomid, username: member.username }),
+    });
+  }
+  setRemovedMembers([]);
+}
+
+
   // Remove marked members
-  if (removedMembers.length > 0) {
+  // if (removedMembers.length > 0) {
     // for (let username of removedMembers) {
     //   await fetch("https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/rooms/remove-member", {
     //     method: "POST",
@@ -281,15 +294,15 @@ const ManageRooms = () => {
     //     body: JSON.stringify({ roomid, username }),
     //   });
     // }
-    for (let member of removedMembers) {
-      await fetch("https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/rooms/remove-member", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ roomid, username: member.username }),
-      });
-    }    
-      setRemovedMembers([]);
-  }
+  //   for (let member of removedMembers) {
+  //     await fetch("https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/rooms/remove-member", {
+  //       method: "POST",
+  //       headers: { "Content-Type": "application/json" },
+  //       body: JSON.stringify({ roomid, username: member.username }),
+  //     });
+  //   }    
+  //     setRemovedMembers([]);
+  // }
 
     setEditRoom((prev) => ({ ...prev, invite: "" }));
 
