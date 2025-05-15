@@ -176,63 +176,40 @@ const PublicProfile = () => {
   {/* Info Area */}
   <div className="flex-1 flex flex-col justify-center">
     {/* Username & Badges */}
-    <div className="flex flex-wrap items-center gap-3 mb-2">
+    <div className="flex flex-wrap items-center justify-between gap-3 mb-3">
       <h1 className="text-2xl font-bold text-gray-900">{user.username}</h1>
-      {user.expert_status === "Approved" && (
-        <span className="flex items-center gap-1 text-blue-600 text-sm font-medium bg-blue-50 px-2 py-1 rounded-full">
-          <BadgeCheck className="w-4 h-4" />
-          Verified Expert
+      <div className="flex gap-2">
+        {user.expert_status === "Approved" && (
+          <span className="flex items-center gap-1 text-blue-600 text-sm font-medium bg-blue-50 px-2 py-1 rounded-full">
+            <BadgeCheck className="w-4 h-4" />
+            Verified Expert
+          </span>
+        )}
+        <span
+          className={`text-sm px-3 py-1 rounded-full font-medium ${
+            user.usertype === "Premium"
+              ? "bg-yellow-400 text-black"
+              : "bg-gray-300 text-black"
+          }`}
+        >
+          {user.usertype}
         </span>
-      )}
-      <span
-        className={`text-sm px-3 py-1 rounded-full font-medium ${
-          user.usertype === "Premium"
-            ? "bg-yellow-400 text-black"
-            : "bg-gray-300 text-black"
-        }`}
-      >
-        {user.usertype}
-      </span>
+      </div>
     </div>
 
-    {/* Horizontal Info Rows */}
-    {/* <div className="text-sm text-gray-700 space-y-1 sm:space-y-0 sm:space-x-6 sm:flex sm:items-center">
+    {/* Grid Stats */}
+    <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-8 gap-y-1 text-sm text-gray-700">
       <span><strong>Joined:</strong> {new Date(user.created_at).toLocaleDateString()}</span>
       <span><strong>Articles:</strong> {profileData.totalArticles}</span>
+      <span><strong>Views:</strong> {profileData.totalViews}</span>
       <span><strong>Upvotes:</strong> {profileData.upvotes}</span>
       <span><strong>Downvotes:</strong> {profileData.downvotes}</span>
-      <span><strong>Views:</strong> {profileData.totalViews}</span>
-    </div> */}
-    <div className="text-sm text-gray-700 space-y-1">
-  <div className="flex flex-wrap gap-x-6">
-    <span><strong>Joined:</strong> {new Date(user.created_at).toLocaleDateString()}</span>
-    <span><strong>Articles:</strong> {profileData.totalArticles}</span>
-    <span><strong>Views:</strong> {profileData.totalViews}</span>
-  </div>
-  <div className="flex flex-wrap gap-x-6">
-    <span><strong>Upvotes:</strong> {profileData.upvotes}</span>
-    <span><strong>Downvotes:</strong> {profileData.downvotes}</span>
-  </div>
-  {expertTopics?.length > 0 && (
-    <div className="flex flex-wrap items-center gap-2 mt-2">
-      <span className="text-sm font-semibold text-gray-600">Expertise:</span>
-      {expertTopics.map((t) => (
-        <span
-          key={t.name}
-          className="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-xs font-medium"
-        >
-          {t.name}
-        </span>
-      ))}
     </div>
-  )}
-</div>
-
 
     {/* Expertise Tags */}
-    {/* {expertTopics?.length > 0 && (
-      <div className="mt-2 flex flex-wrap gap-2">
-        <span className="text-sm font-semibold text-gray-600">Expertise in:</span>
+    {expertTopics?.length > 0 && (
+      <div className="flex flex-wrap items-center gap-2 mt-4">
+        <span className="text-sm font-semibold text-gray-600">Expertise:</span>
         {expertTopics.map((t) => (
           <span
             key={t.name}
@@ -242,9 +219,10 @@ const PublicProfile = () => {
           </span>
         ))}
       </div>
-    )} */}
+    )}
   </div>
 </section>
+
 
 
   
