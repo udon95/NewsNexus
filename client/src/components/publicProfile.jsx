@@ -234,17 +234,32 @@ const PublicProfile = () => {
               
 
               // PREMIUM USERS — PRIVATE ROOM they are NOT a member of → black, not clickable
+              // if (userType === "Premium" && isPrivate && !isMember) {
+              //   return (
+              //     <span
+              //       key={room.roomid}
+              //       title="This is a private room. Join to access."
+              //       className={`${commonClasses} bg-black text-white cursor-not-allowed`}
+              //     >
+              //       {room.room_name}
+              //     </span>
+              //   );
+              // }
               if (userType === "Premium" && isPrivate && !isMember) {
                 return (
-                  <span
-                    key={room.roomid}
-                    title="This is a private room. Join to access."
-                    className={`${commonClasses} bg-black text-white cursor-not-allowed`}
-                  >
-                    {room.room_name}
-                  </span>
+                  <div key={room.roomid} className="relative group">
+                    <span
+                      className={`${commonClasses} bg-black text-white cursor-not-allowed`}
+                    >
+                      {room.room_name}
+                    </span>
+                    <div className="absolute z-10 left-0 mt-2 hidden group-hover:block bg-gray-800 text-white text-xs px-3 py-2 rounded-md shadow-lg max-w-xs text-center whitespace-nowrap">
+                      This is a private room. Join to access.
+                    </div>
+                  </div>
                 );
               }
+              
 
               // PREMIUM USERS — PRIVATE ROOM they ARE a member of → black, clickable
               if (userType === "Premium" && isPrivate && isMember) {
