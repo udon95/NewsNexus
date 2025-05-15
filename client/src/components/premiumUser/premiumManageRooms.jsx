@@ -355,18 +355,31 @@ if (removedMembers.length > 0) {
     fetchJoinedRooms(); // refresh
   };
 
-  const handleAcceptInvite = async (roomid) => {
-    await fetch(
-      "https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/rooms/accept",
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userid: userId, roomid }),
-      }
-    );
-    alert("Joined room");
-    fetchInvites();
-  };
+const handleAcceptInvite = async (roomid) => {
+  const { data: typeRow } = await supabase
+    .from("usertype")
+    .select("usertype")
+    .eq("userid", userId)
+    .maybeSingle();
+
+  if (!typeRow || typeRow.usertype !== "Premium") {
+    alert("Only Premium users can join rooms.");
+    return;
+  }
+
+  await fetch(
+    "https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/rooms/accept",
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userid: userId, roomid }),
+    }
+  );
+  alert("Joined room");
+  fetchInvites();
+  fetchJoinedRooms();
+};
+
 
   const handleDeclineInvite = async (roomid) => {
     await fetch(
