@@ -213,6 +213,7 @@ router.post("/invite", async (req, res) => {
     {
       userid: user.userid,
       roomid,
+      invited_at: new Date().toISOString()
     },
   ]);
 
