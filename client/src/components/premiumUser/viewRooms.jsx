@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import supabase from "../../api/supabaseClient";
 import Search from "../search.jsx";
 import Navbar from "../navbar.jsx";
-import FloatingRoomStats from "../floatingRoomStats.jsx";
+import FloatingRoomStats from "../floatingRommStats.jsx";
 import useAuthHook from "../../hooks/useAuth.jsx";
 
 
@@ -275,6 +275,7 @@ const ViewRoomsPage = () => {
         .from("room_articles")
         .select("postid")
         .eq("roomid", roomid) // Filter by roomid
+        .eq("status", "Published") // Add this line to ignore drafts
         .order("created_at", { ascending: true }) // Order by creation date (oldest first)
         .limit(1) // Get only the oldest article
         .single();
