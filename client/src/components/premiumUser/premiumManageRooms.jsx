@@ -39,27 +39,56 @@ const ManageRooms = () => {
   const userId = userProfile?.user?.userid;
   const myUsername = userProfile?.user?.username;
 
+  
   const fetchRooms = async () => {
-    const res = await fetch(
-      `https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/rooms/${userId}`
-    );
-    const data = await res.json();
-    setPublicRooms(data.filter((room) => room.room_type === "Public"));
-    setPrivateRooms(data.filter((room) => room.room_type === "Private"));
-  };
+  const res = await fetch(
+    `https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/rooms/${userId}`
+  );
+  const data = await res.json();
+    
+  const fetchCounts = await Promise.all(
+    data.map(async (room) => {
+      const { count, error } = await supabase
+        .from("room_members")
+        .select("*", { count: "exact", head: true })
+        .eq("roomid", room.roomid);
+
+      return {
+        ...room,
+        member_count: count || 0,
+      };
+    })
+  );
+
+  setPublicRooms(fetchCounts.filter((room) => room.room_type === "Public"));
+  setPrivateRooms(fetchCounts.filter((room) => room.room_type === "Private"));
+};
+
 
   const fetchJoinedRooms = async () => {
-    const res = await fetch(
-      `https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/rooms/joined/${userId}`
-    );
-    const data = await res.json();
+  const res = await fetch(
+    `https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/rooms/joined/${userId}`
+  );
+  const data = await res.json();
 
-    const publicJoined = data.filter((room) => room.room_type === "Public");
-    const privateJoined = data.filter((room) => room.room_type === "Private");
+  const fetchCounts = await Promise.all(
+    data.map(async (room) => {
+      const { count, error } = await supabase
+        .from("room_members")
+        .select("*", { count: "exact", head: true })
+        .eq("roomid", room.roomid);
 
-    setJoinedPublicRooms(publicJoined);
-    setJoinedPrivateRooms(privateJoined);
-  };
+      return {
+        ...room,
+        member_count: count || 0,
+      };
+    })
+  );
+
+  setJoinedPublicRooms(fetchCounts.filter((room) => room.room_type === "Public"));
+  setJoinedPrivateRooms(fetchCounts.filter((room) => room.room_type === "Private"));
+};
+
 
   const fetchInvites = async () => {
     const { data, error } = await supabase
