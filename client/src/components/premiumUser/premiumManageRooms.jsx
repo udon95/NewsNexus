@@ -39,65 +39,78 @@ const ManageRooms = () => {
   const userId = userProfile?.user?.userid;
   const myUsername = userProfile?.user?.username;
 
-  
+  // const fetchRooms = async () => {
+  //   const res = await fetch(
+  //     `https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/rooms/${userId}`
+  //   );
+  //   const data = await res.json();
+  //   setPublicRooms(data.filter((room) => room.room_type === "Public"));
+  //   setPrivateRooms(data.filter((room) => room.room_type === "Private"));
+  // };
+
+  // const fetchJoinedRooms = async () => {
+  //   const res = await fetch(
+  //     `https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/rooms/joined/${userId}`
+  //   );
+  //   const data = await res.json();
+
+  //   const publicJoined = data.filter((room) => room.room_type === "Public");
+  //   const privateJoined = data.filter((room) => room.room_type === "Private");
+
+  //   setJoinedPublicRooms(publicJoined);
+  //   setJoinedPrivateRooms(privateJoined);
+  // };
+
   const fetchRooms = async () => {
-  const res = await fetch(
-    `https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/rooms/${userId}`
-  );
-  const data = await res.json();
-    
-  const fetchCounts = await Promise.all(
-    data.map(async (room) => {
-      const { count, error } = await supabase
-        .from("room_members")
-        .select("*", { count: "exact", head: true })
-        .eq("roomid", room.roomid)
-        .is("exited_at", null);
-
-      return {
-        ...room,
-        member_count: count || 0,
-      };
-    })
-  );
-
-  setPublicRooms(fetchCounts.filter((room) => room.room_type === "Public"));
-  setPrivateRooms(fetchCounts.filter((room) => room.room_type === "Private"));
-};
-
+    const res = await fetch(
+      `https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/rooms/${userId}`
+    );
+    const data = await res.json();
+  
+    const roomsWithCounts = await Promise.all(
+      data.map(async (room) => {
+        const { count } = await supabase
+          .from("room_members")
+          .select("*", { count: "exact", head: true })
+          .eq("roomid", room.roomid)
+          .is("exited_at", null);
+  
+        return { ...room, member_count: count || 0 };
+      })
+    );
+  
+    setPublicRooms(roomsWithCounts.filter((room) => room.room_type === "Public"));
+    setPrivateRooms(roomsWithCounts.filter((room) => room.room_type === "Private"));
+  };
 
   const fetchJoinedRooms = async () => {
-  const res = await fetch(
-    `https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/rooms/joined/${userId}`
-  );
-  const data = await res.json();
-
-  const fetchCounts = await Promise.all(
-    data.map(async (room) => {
-      const { count, error } = await supabase
-        .from("room_members")
-        .select("*", { count: "exact", head: true })
-        .eq("roomid", room.roomid)
-        .is("exited_at", null);
-
-      return {
-        ...room,
-        member_count: count || 0,
-      };
-    })
-  );
-
-  setJoinedPublicRooms(fetchCounts.filter((room) => room.room_type === "Public"));
-  setJoinedPrivateRooms(fetchCounts.filter((room) => room.room_type === "Private"));
-};
-
+    const res = await fetch(
+      `https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/rooms/joined/${userId}`
+    );
+    const data = await res.json();
+  
+    const roomsWithCounts = await Promise.all(
+      data.map(async (room) => {
+        const { count } = await supabase
+          .from("room_members")
+          .select("*", { count: "exact", head: true })
+          .eq("roomid", room.roomid)
+          .is("exited_at", null);
+  
+        return { ...room, member_count: count || 0 };
+      })
+    );
+  
+    setJoinedPublicRooms(roomsWithCounts.filter((room) => room.room_type === "Public"));
+    setJoinedPrivateRooms(roomsWithCounts.filter((room) => room.room_type === "Private"));
+  };
+  
 
   const fetchInvites = async () => {
     const { data, error } = await supabase
       .from("room_invites")
       .select("roomid, rooms(name)")
       .eq("userid", userId);
-     console.log("Invite Data Fetched:", data);
 
     if (!error) {
       const formatted = data.map((item, i) => ({
@@ -114,127 +127,125 @@ const ManageRooms = () => {
     fetchInvites();
   }, [userId]);
 
-const handleAddPublicRoom = async () => {
-  const { data: typeRow } = await supabase
-    .from("usertype")
-    .select("usertype")
-    .eq("userid", userId)
-    .maybeSingle();
+  const handleAddPublicRoom = async () => {
+    const res = await fetch(
+      "https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/rooms",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...newPublicRoom,
+          room_type: "Public",
+          created_by: userId,
+        }),
+      }
+    );
 
-  if (!typeRow || typeRow.usertype !== "Premium") {
-    alert("Only Premium users can create public rooms.");
-    return;
-  }
-
-  const res = await fetch(
-    "https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/rooms",
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        ...newPublicRoom,
-        room_type: "Public",
-        created_by: userId,
-      }),
+    if (res.ok) {
+      alert("Public room created");
+      setNewPublicRoom({ name: "", description: "" });
+      fetchRooms();
     }
-  );
+  };
 
-  if (res.ok) {
-    alert("Public room created");
-    setNewPublicRoom({ name: "", description: "" });
-    fetchRooms();
-  }
-};
+  const handleAddPrivateRoom = async () => {
+    const res = await fetch(
+      "https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/rooms",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...newPrivateRoom,
+          room_type: "Private",
+          created_by: userId,
+          member_limit: newPrivateRoom.member_limit || 20,
+        }),
+      }
+    );
 
- const handleAddPrivateRoom = async () => {
-   const usernames = validUserPills;
+    if (res.ok) {
+      alert("Private room created");
+      const roomData = await res.json();
+      console.log("Room creation response:", roomData);
 
-  if (usernames.length > 10) {
-    alert("You can only invite up to 10 users.");
-    return;
-  }
+      // const roomid = roomData.data[0].roomid;
+      const roomid = roomData?.roomid || roomData?.data?.roomid;
 
-  // 🔍 1. Validate and fetch user IDs from Supabase
-  const { data: userRows, error: userErr } = await supabase
-    .from("users")
-    .select("userid, username")
-    .in("username", usernames);
+      // const usernames = newPrivateRoom.invite
+      //   .split(",")
+      //   .map((s) => s.replace("@", "").trim())
+      //   .filter(Boolean);
+      const usernames = validUserPills;
 
-  if (!userRows || userRows.length === 0) {
-    alert("No matching users found.");
-    return;
-  }
+      // if (usernames.length > 10) {
+      //   alert("You can only invite up to 10 users to a private room.");
+      //   return;
+      // }
 
-  // 🔍 2. Check Premium status
-  const userIds = userRows.map((u) => u.userid);
+      if (usernames.length > newPrivateRoom.member_limit - 1) {
+        alert(`You can only invite up to ${newPrivateRoom.member_limit - 1} users.`);
+        return;
+      }      
 
-  const { data: userTypeRows } = await supabase
-    .from("usertype")
-    .select("userid, usertype")
-    .in("userid", userIds);
+      // Validate usernames before inviting
+      // const { data: users } = await supabase
+      //   .from("user_profiles") // adjust table name if different
+      //   .select("username")
+      //   .in("username", usernames);
 
-  const validPremiumUsers = userRows.filter((u) => {
-    const tier = userTypeRows.find((t) => t.userid === u.userid);
-    return tier?.usertype === "Premium";
-  });
+      // const validUsernames = users.map((u) => u.username);
+      // const invalidUsernames = usernames.filter(
+      //   (name) => !validUsernames.includes(name)
+      // );
 
-  const invalidUsers = userRows.filter((u) => {
-    const tier = userTypeRows.find((t) => t.userid === u.userid);
-    return tier?.usertype !== "Premium";
-  });
+      // if (invalidUsernames.length > 0) {
+      //   alert(`The following usernames are invalid: ${invalidUsernames.join(", ")}`);
+      // return;
+      // }
 
-  if (invalidUsers.length > 0) {
-    const names = invalidUsers.map((u) => u.username).join(", ");
-    alert(`These users are not Premium: ${names}`);
-    return;
-  }
+      // Validate usernames AND ensure only Premium users are invited
+      const { data: users } = await supabase
+        .from("user_profiles")
+        .select("username, subscription_tier")
+        .in("username", usernames);
 
-  // ✅ 3. Create Room
-  const res = await fetch("https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/rooms", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      ...newPrivateRoom,
-      room_type: "Private",
-      created_by: userId,
-      member_limit: newPrivateRoom.member_limit,
-    }),
-  });
+      const validUsernames = users
+        .filter((u) => u.subscription_tier === "Premium")
+        .map((u) => u.username);
 
-  if (!res.ok) {
-    alert("Room creation failed.");
-    return;
-  }
+      const invalidUsernames = usernames.filter(
+        (name) => !validUsernames.includes(name)
+      );
 
-  const roomData = await res.json();
-  const roomid = roomData?.data?.[0]?.roomid;
+      if (invalidUsernames.length > 0) {
+        alert(`These users are not Premium: ${invalidUsernames.join(", ")}`);
+      return;
+      }
 
-  if (!roomid) {
-    alert("Room ID not returned.");
-    return;
-  }
+      // for (let username of usernames) {
+      for (let username of validUsernames) {
+        await fetch(
+          "https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/rooms/invite",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              invitee_username: username,
+              roomid,
+            }),
+          }
+        );
+      }
 
-  // ✅ 4. Send invites using correct user ID or username
-  for (let user of validPremiumUsers) {
-    const inviteRes = await fetch("https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/rooms/invite", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        invitee_username: user.username,
-        roomid,
-      }),
-    });
-
-    if (!inviteRes.ok) {
-      console.error(`Failed to invite ${user.username}`);
+      setNewPrivateRoom({
+        name: "",
+        description: "",
+        member_limit: 20,
+        invite: "",
+      });
+      fetchRooms();
     }
-  }
-
-  alert("Private room created and invites sent.");
-  setNewPrivateRoom({ name: "", description: "", invite: "", member_limit: 20 });
-  fetchRooms();
-};
-
+  };
 
   const handleUpdateRoom = async (
     roomid,
@@ -254,8 +265,7 @@ const handleAddPublicRoom = async () => {
     const { data, error } = await supabase
     .from("room_members")
     .select("userid, users(username)")
-    .eq("roomid", roomid)
-    .is("exited_at", null);
+    .eq("roomid", roomid);
   
   if (data) {
     const formatted = data.map((entry) => ({
@@ -358,53 +368,31 @@ if (removedMembers.length > 0) {
     fetchRooms();
   };
 
-const handleExitRoom = async (roomid) => {
-  const res = await fetch(
-    "https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/rooms/exit",
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ userid: userId, roomid }),
-    }
-  );
-
-  if (res.ok) {
+  const handleExitRoom = async (roomid) => {
+    await fetch(
+      "https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/rooms/exit",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userid: userId, roomid }),
+      }
+    );
     alert("You exited the room");
+    fetchJoinedRooms(); // refresh
+  };
 
-    // 🔄 Refresh both owned + joined rooms to update member count
-    await fetchRooms();
-    await fetchJoinedRooms();
-  } else {
-    alert("Failed to exit room");
-  }
-};
-
-
-const handleAcceptInvite = async (roomid) => {
-  const { data: typeRow } = await supabase
-    .from("usertype")
-    .select("usertype")
-    .eq("userid", userId)
-    .maybeSingle();
-
-  if (!typeRow || typeRow.usertype !== "Premium") {
-    alert("Only Premium users can join rooms.");
-    return;
-  }
-
-  await fetch(
-    "https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/rooms/accept",
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ userid: userId, roomid }),
-    }
-  );
-  alert("Joined room");
-  fetchInvites();
-  fetchJoinedRooms();
-};
-
+  const handleAcceptInvite = async (roomid) => {
+    await fetch(
+      "https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/rooms/accept",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userid: userId, roomid }),
+      }
+    );
+    alert("Joined room");
+    fetchInvites();
+  };
 
   const handleDeclineInvite = async (roomid) => {
     await fetch(
@@ -1179,11 +1167,18 @@ const handleAcceptInvite = async (roomid) => {
                           return;
                         }
 
-                        if (roomMembers.some((m) => m.toLowerCase() === trimmed)) {
+                        // if (roomMembers.some((m) => m.toLowerCase() === trimmed)) {
+                        //   alert(`User "${trimmed}" is already in the room.`);
+                        //   setEditInviteInput("");
+                        //   return;
+                        // }
+
+                        if (roomMembers.some((m) => m.username?.toLowerCase() === trimmed)) {
                           alert(`User "${trimmed}" is already in the room.`);
                           setEditInviteInput("");
                           return;
                         }
+                        
 
                         if (editValidUserPills.some((u) => u.toLowerCase() === trimmed)) {
                           setEditInviteInput("");
@@ -1315,3 +1310,4 @@ const handleAcceptInvite = async (roomid) => {
 };
 
 export default ManageRooms;
+
