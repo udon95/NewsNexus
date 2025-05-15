@@ -165,18 +165,29 @@ const PublicProfile = () => {
   </div>
 </section> */}
 
-<section className="w-full bg-white rounded-2xl border shadow p-6 grid grid-cols-1 sm:grid-cols-[100px_1fr] gap-6 items-center">
+<section className="w-full bg-white rounded-2xl border shadow p-6 grid grid-cols-1 sm:grid-cols-[200px_1fr] gap-6">
   {/* Avatar */}
-  <div className="flex-shrink-0">
+  {/* <div className="flex-shrink-0">
     <div className="w-20 h-20 sm:w-24 sm:h-24 bg-black text-white flex items-center justify-center rounded-lg text-2xl font-bold">
       {user.username?.charAt(0).toUpperCase()}
     </div>
+  </div> */}
+  <div className="flex flex-col items-center">
+  <div className="w-24 h-24 sm:w-28 sm:h-28 bg-black text-white flex items-center justify-center rounded-lg text-3xl font-bold">
+    {user.username?.charAt(0).toUpperCase()}
   </div>
+  {expertTopics?.length > 0 && (
+    <div className="mt-4 text-xs font-medium bg-gray-100 text-gray-700 px-3 py-1 rounded-full">
+      {expertTopics.map((t) => t.name).join(", ")}
+    </div>
+  )}
+</div>
+
 
   {/* Info Area */}
   <div className="flex-1 flex flex-col justify-center">
     {/* Username & Badges */}
-    <div className="flex flex-wrap items-center justify-between gap-3 mb-3">
+    {/* <div className="flex flex-wrap items-center justify-between gap-3 mb-3">
       <h1 className="text-2xl font-bold text-gray-900">{user.username}</h1>
       <div className="flex gap-2">
         {user.expert_status === "Approved" && (
@@ -195,7 +206,29 @@ const PublicProfile = () => {
           {user.usertype}
         </span>
       </div>
-    </div>
+    </div> */}
+    <div className="flex items-center gap-3 mb-1">
+  <h1 className="text-2xl font-bold text-gray-900">{user.username}</h1>
+  {user.expert_status === "Approved" && (
+    <span className="flex items-center gap-1 text-blue-600 text-sm font-medium bg-blue-50 px-2 py-1 rounded-full">
+      <BadgeCheck className="w-4 h-4" />
+      Verified Expert
+    </span>
+  )}
+  <span
+    className={`text-sm px-3 py-1 rounded-full font-medium ${
+      user.usertype === "Premium"
+        ? "bg-yellow-400 text-black"
+        : "bg-gray-300 text-black"
+    }`}
+  >
+    {user.usertype}
+  </span>
+</div>
+<p className="text-sm text-gray-500 mb-4">
+  Joined: {new Date(user.created_at).toLocaleDateString()}
+</p>
+
 
     {/* Grid Stats */}
     {/* <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-8 gap-y-1 text-sm text-gray-700">
@@ -220,13 +253,32 @@ const PublicProfile = () => {
         ))}
       </div>
     )} */}
-    <div className="text-sm text-gray-700 grid grid-cols-2 sm:grid-cols-3 gap-y-1 gap-x-6">
+    {/* <div className="text-sm text-gray-700 grid grid-cols-2 sm:grid-cols-3 gap-y-1 gap-x-6">
   <span><strong>Joined:</strong> {new Date(user.created_at).toLocaleDateString()}</span>
   <span><strong>Articles:</strong> {profileData.totalArticles}</span>
   <span><strong>Views:</strong> {profileData.totalViews}</span>
   <span><strong>Upvotes:</strong> {profileData.upvotes}</span>
   <span><strong>Downvotes:</strong> {profileData.downvotes}</span>
+</div> */}
+<div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-4">
+  <div className="bg-gray-100 p-4 rounded-lg shadow text-center">
+    <div className="font-bold text-lg">{profileData.totalArticles}</div>
+    <div className="text-sm text-gray-600">Articles</div>
+  </div>
+  <div className="bg-gray-100 p-4 rounded-lg shadow text-center">
+    <div className="font-bold text-lg">{profileData.totalViews}</div>
+    <div className="text-sm text-gray-600">Views</div>
+  </div>
+  <div className="bg-gray-100 p-4 rounded-lg shadow text-center">
+    <div className="font-bold text-lg">{profileData.upvotes}</div>
+    <div className="text-sm text-gray-600">Upvotes</div>
+  </div>
+  <div className="bg-gray-100 p-4 rounded-lg shadow text-center">
+    <div className="font-bold text-lg">{profileData.downvotes}</div>
+    <div className="text-sm text-gray-600">Downvotes</div>
+  </div>
 </div>
+
 
 {expertTopics?.length > 0 && (
   <div className="mt-4 flex flex-wrap gap-2 items-center text-sm text-gray-700">
