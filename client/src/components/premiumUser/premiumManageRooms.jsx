@@ -1222,7 +1222,7 @@ if (removedMembers.length > 0) {
               </div>
             ))} */}
             {invites.length === 0 ? (
-            <p className="text-sm text-gray-500 italic">You have recieved invites yet.</p>
+            <p className="text-sm text-gray-500 italic">You have recieved no invites yet.</p>
             ) : (
               invites.map((invite, index) => (
                 <div key={invite.id} className={rowStyle}>
