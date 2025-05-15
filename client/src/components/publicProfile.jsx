@@ -165,7 +165,7 @@ const PublicProfile = () => {
   </div>
 </section> */}
 
-<section className="w-full bg-white rounded-2xl border shadow p-6 flex flex-col sm:flex-row gap-6">
+<section className="w-full bg-white rounded-2xl border shadow p-6 grid grid-cols-1 sm:grid-cols-[100px_1fr] gap-6 items-center">
   {/* Avatar */}
   <div className="flex-shrink-0">
     <div className="w-20 h-20 sm:w-24 sm:h-24 bg-black text-white flex items-center justify-center rounded-lg text-2xl font-bold">
@@ -198,16 +198,16 @@ const PublicProfile = () => {
     </div>
 
     {/* Grid Stats */}
-    <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-8 gap-y-1 text-sm text-gray-700">
+    {/* <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-8 gap-y-1 text-sm text-gray-700">
       <span><strong>Joined:</strong> {new Date(user.created_at).toLocaleDateString()}</span>
       <span><strong>Articles:</strong> {profileData.totalArticles}</span>
       <span><strong>Views:</strong> {profileData.totalViews}</span>
       <span><strong>Upvotes:</strong> {profileData.upvotes}</span>
       <span><strong>Downvotes:</strong> {profileData.downvotes}</span>
-    </div>
+    </div> */}
 
     {/* Expertise Tags */}
-    {expertTopics?.length > 0 && (
+    {/* {expertTopics?.length > 0 && (
       <div className="flex flex-wrap items-center gap-2 mt-4">
         <span className="text-sm font-semibold text-gray-600">Expertise:</span>
         {expertTopics.map((t) => (
@@ -219,7 +219,29 @@ const PublicProfile = () => {
           </span>
         ))}
       </div>
-    )}
+    )} */}
+    <div className="text-sm text-gray-700 grid grid-cols-2 sm:grid-cols-3 gap-y-1 gap-x-6">
+  <span><strong>Joined:</strong> {new Date(user.created_at).toLocaleDateString()}</span>
+  <span><strong>Articles:</strong> {profileData.totalArticles}</span>
+  <span><strong>Views:</strong> {profileData.totalViews}</span>
+  <span><strong>Upvotes:</strong> {profileData.upvotes}</span>
+  <span><strong>Downvotes:</strong> {profileData.downvotes}</span>
+</div>
+
+{expertTopics?.length > 0 && (
+  <div className="mt-4 flex flex-wrap gap-2 items-center text-sm text-gray-700">
+    <span className="font-semibold">Expertise:</span>
+    {expertTopics.map((t) => (
+      <span
+        key={t.name}
+        className="bg-gray-100 px-3 py-1 rounded-full text-xs font-medium"
+      >
+        {t.name}
+      </span>
+    ))}
+  </div>
+)}
+
   </div>
 </section>
 
