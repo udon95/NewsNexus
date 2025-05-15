@@ -78,17 +78,11 @@ const Navbar = () => {
         </Link> */}
 
         <div className="border-l border-blue-900 h-6"></div>
-        {userType === "Premium" && (
-          <>
-            <Link
-              to="/rooms"
-              className="hover:underline px-4 sm:px-6 font-bold"
-            >
-              Rooms
-            </Link>
-            <div className="border-l border-blue-900 h-6"></div>
-          </>
-        )}
+
+        <Link to="/rooms" className="hover:underline px-4 sm:px-6 font-bold">
+          Rooms
+        </Link>
+        <div className="border-l border-blue-900 h-6"></div>
       </div>
     </nav>
   );
