@@ -208,7 +208,7 @@ router.post("/invite", async (req, res) => {
     return res.status(400).json({ error: "User is already a member" });
   }
 
-
+console.log("Inserting invite:", { userid: user.userid, roomid });
   const { error: insertError } = await supabase.from("room_invites").insert([
     {
       userid: user.userid,
