@@ -28,16 +28,8 @@ import BulletList from "@tiptap/extension-bullet-list";
 import OrderedList from "@tiptap/extension-ordered-list";
 import { Extension } from "@tiptap/core";
 import { Paragraph } from "@tiptap/extension-paragraph";
-import ListItem from "@tiptap/extension-list-item";
-import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Button,
-  Box,
-  Typography,
-} from "@mui/material";
+import FreeSidebar from "./freeSideBar";
+
 
 const EditFreeArticle = () => {
   const navigate = useNavigate();
@@ -63,14 +55,9 @@ const EditFreeArticle = () => {
   const [amendment, setAmendment] = useState("");
   const [showUpdateSuccess, setShowUpdateSuccess] = useState(false);
 
-  const [aiFeedback, setAiFeedback] = useState("");
-  const [accuracy, setAccuracy] = useState(null);
-  const [openSuccess, setOpenSuccess] = useState(false);
-  const [openError, setOpenError] = useState(false);
 
-  const [uploadAction, setUploadAction] = useState(""); // "post" or "draft"
-  const [isUploading, setIsUploading] = useState(false);
-  const [pendingImages, setPendingImages] = useState([]);
+  console.log("Auth session:", supabase.auth.getSession());
+
 
   const CustomParagraph = Paragraph.extend({
     addAttributes() {
@@ -88,9 +75,11 @@ const EditFreeArticle = () => {
     },
   });
 
+
   useEffect(() => {
     const fetchArticle = async () => {
       if (!articleId) return;
+
 
       const { data, error } = await supabase
         .from("articles")
@@ -98,10 +87,12 @@ const EditFreeArticle = () => {
         .eq("articleid", articleId)
         .single();
 
+
       if (error || !data) {
         alert("Failed to load article.");
         return;
       }
+
 
       setTitle(data.title);
       setTopics(data.topicid);
@@ -114,14 +105,17 @@ const EditFreeArticle = () => {
       setAmendment(data.amendment || "");
     };
 
+
     fetchArticle();
   }, [articleId]);
+
 
   const setEditorContent = (html) => {
     if (editor) {
       editor.commands.setContent(html || "");
     }
   };
+
 
   const IndentExtension = Extension.create({
     name: "custom-indent",
@@ -143,6 +137,7 @@ const EditFreeArticle = () => {
     },
   });
 
+
   const editor = useEditor({
     editable: false, // default to false
     extensions: [
@@ -152,12 +147,11 @@ const EditFreeArticle = () => {
       CustomParagraph,
       BulletList,
       OrderedList,
-      ListItem,
       UnderlineExtension,
       TiptapLink,
       Highlight,
       Image,
-      //IndentExtension, //INDENT
+      IndentExtension, //INDENT
       Heading.configure({ levels: [1, 2, 3] }),
       TextAlign.configure({ types: ["heading", "paragraph"] }),
       Placeholder.configure({ placeholder: "Start writing your article..." }),
@@ -168,28 +162,14 @@ const EditFreeArticle = () => {
       }),
     ],
     content: "",
-    editorProps: {
-      handlePaste(view, event, slice) {
-        const items = event.clipboardData?.items || [];
-        const hasImage = Array.from(items).some((item) =>
-          item.type.startsWith("image")
-        );
 
-        if (hasImage) {
-          alert(
-            "Pasting images is not allowed. Please use the Upload Image button."
-          );
-          return true;
-        }
 
-        return false;
-      },
-    },
     onUpdate: ({ editor }) => {
       const html = editor.getHTML();
       const text = editor.getText();
       const wordsArray = text.trim().split(/\s+/).filter(Boolean);
       const words = wordsArray.length;
+
 
       if (articleStatus === "Draft" && words > MAX_WORDS) {
         alert(`Draft word count limit reached (${MAX_WORDS} words).`);
@@ -208,34 +188,40 @@ const EditFreeArticle = () => {
     },
   });
 
+
   useEffect(() => {
     if (editor && articleStatus !== null) {
       editor.setEditable(articleStatus !== "Published");
     }
   }, [editor, articleStatus]);
 
-  // useEffect(() => {
-  //   const checkSession = async () => {
-  //     const {
-  //       data: { session },
-  //     } = await supabase.auth.getSession();
-  //     console.log("Session:", session);
 
-  //     if (!session?.user) {
-  //       console.warn("No active Supabase session!");
-  //     } else {
-  //       console.log("Supabase user is authenticated");
-  //     }
-  //   };
+  useEffect(() => {
+    const checkSession = async () => {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      console.log("Session:", session);
 
-  //   checkSession();
-  // }, []);
+
+      if (!session?.user) {
+        console.warn("No active Supabase session!");
+      } else {
+        console.log("Supabase user is authenticated");
+      }
+    };
+
+
+    checkSession();
+  }, []);
+
 
   useEffect(() => {
     const fetchMonthlyPostCount = async () => {
       const storedUser = JSON.parse(localStorage.getItem("userProfile"));
       const session = storedUser?.user;
       if (!session) return;
+
 
       const now = new Date();
       const firstDayOfMonth = new Date(
@@ -252,6 +238,7 @@ const EditFreeArticle = () => {
         59
       ).toISOString();
 
+
       const { data, error } = await supabase
         .from("articles")
         .select("articleid")
@@ -260,51 +247,47 @@ const EditFreeArticle = () => {
         .gte("time", firstDayOfMonth)
         .lte("time", lastDayOfMonth);
 
+
       if (!error && data) {
         setMonthlyPostCount(data.length);
       }
     };
 
+
     fetchMonthlyPostCount();
   }, []);
 
-  // useEffect(() => {
-  //   supabase.auth.onAuthStateChange((event, session) => {
-  //     if (event === "SIGNED_IN") {
-  //       console.log(" Logged in");
-  //     } else if (event === "SIGNED_OUT") {
-  //       console.log(" Logged out");
-  //     }
-  //   });
-  // }, []);
+
+  useEffect(() => {
+    supabase.auth.onAuthStateChange((event, session) => {
+      if (event === "SIGNED_IN") {
+        console.log(" Logged in");
+      } else if (event === "SIGNED_OUT") {
+        console.log(" Logged out");
+      }
+    });
+  }, []);
+
 
   const MAX_WORDS = 1000;
 
-  const handlePostArticle = async () => {
-    setUploadAction("post");
-    if (isUploading) return;
-    setIsUploading(true);
 
+  const handlePostArticle = async () => {
     if (!articleId) return;
+
 
     const storedUser = localStorage.getItem("userProfile");
     if (!storedUser) return alert("User not authenticated.");
+
 
     const parsedUser = JSON.parse(storedUser);
     const session = parsedUser?.user;
     if (!session) return alert("User not authenticated.");
 
+
     if (!title || !topics || !articleContent)
       return alert("Please fill in all fields.");
 
-    const doc = new DOMParser().parseFromString(articleContent, "text/html");
-    const uploadedImageUrls = Array.from(doc.querySelectorAll("img")).map(
-      (img) => img.src
-    );
-    console.log("image urls?", uploadedImageUrls);
-
-    const topicName = topicOptions.find((t) => t.topicid === topics)?.name;
-    let updatedHTML = articleContent;
 
     if (articleStatus === "Draft") {
       if (monthlyPostCount >= 4) {
@@ -314,95 +297,32 @@ const EditFreeArticle = () => {
         return;
       }
 
-      const response = await fetch(
-        "https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/api/submit-article",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            title,
-            content: updatedHTML,
-            type: "factual",
-            authorId: session.userid,
-            topicid: topics,
-            topicName,
-            imageUrls: uploadedImageUrls,
-          }),
-        }
-      );
-
-      const result = await response.json();
-
-      if (!response.ok) {
-        if (result.feedback) {
-          setAiFeedback(result.feedback);
-          setAccuracy(result.accuracy || null);
-          //console.log("accuracy", result.accuracy);
-          //console.log("feedback", result.feedback);
-
-          alert(
-            "Article flagged by AI. Please review the highlighted sections."
-          );
-          if (result.accuracy < 75) {
-            setOpenSuccess(false); // Don't show success dialog
-            setOpenError(true); // Show error message instead
-          }
-        } else {
-          alert(result.error || "Submission failed.");
-        }
-        setIsUploading(false);
-        setUploadAction(""); // DEVI ADDED THIS
-        return;
-      }
 
       // --- If it's a draft, update the full article ---
-      // const { error } = await supabase
-      //   .from("articles")
-      //   .update({
-      //     title,
-      //     text: articleContent,
-      //     topicid: topics,
-      //     time: new Date().toISOString(),
-      //     status: "Published",
-      //   })
-      //   .eq("articleid", articleId);
-      pendingImages.forEach((img) => {
-        if (img.previewUrl?.startsWith("blob:")) {
-          URL.revokeObjectURL(img.previewUrl);
-        }
-      });
-      setPendingImages([]);
+      const { error } = await supabase
+        .from("articles")
+        .update({
+          title,
+          text: articleContent,
+          topicid: topics,
+          time: new Date().toISOString(),
+          status: "Published",
+        })
+        .eq("articleid", articleId);
 
-      // Delete the draft article if `id` is defined
-      if (id) {
-        const { error: deleteError } = await supabase
-          .from("articles")
-          .delete()
-          .eq("articleid", id);
 
-        if (deleteError) {
-          console.error("Failed to delete draft article:", deleteError);
-          // Not blocking, just warn
-        }
-      }
-      pendingImages.forEach((img) => URL.revokeObjectURL(img.previewUrl)); // cleanup object URLs
-      setPendingImages([]);
-      handleClearInputs();
-
-      setAccuracy(result.accuracy);
-      setAiFeedback(result.feedback);
-      //alert(`Article posted successfully. Accuracy Score: ${result.accuracy}%`);
-      setOpenSuccess(true);
+      if (error) return alert("Failed to update article.");
+      alert("Article updated and published!");
     } else if (articleStatus === "Published") {
       // --- If it's published, only insert amendment ---
       if (!amendment.trim()) return alert("Please enter your update.");
+
 
       const { error } = await supabase
         .from("articles")
         .update({ amendment: amendment.trim() })
         .eq("articleid", articleId);
+
 
       if (error) return alert("Failed to submit update.");
       alert("Update submitted!");
@@ -410,8 +330,10 @@ const EditFreeArticle = () => {
     }
   };
 
+
   const handleSaveDraft = async () => {
     if (!articleId) return;
+
 
     const storedUser = localStorage.getItem("userProfile");
     if (!storedUser) return alert("User not authenticated.");
@@ -419,10 +341,12 @@ const EditFreeArticle = () => {
     const session = parsedUser?.user;
     if (!session) return alert("User not authenticated.");
 
+
     if (!title || !articleContent || !topics) {
       alert("Please fill in all required fields.");
       return;
     }
+
 
     let updatedHTML = editor?.getHTML() || articleContent;
     const bucket = "articles-images";
@@ -430,17 +354,20 @@ const EditFreeArticle = () => {
       pendingImages.find((img) => img.file === null)?.previewUrl || null;
     let uploadedImageUrls = [];
 
+
     // Remove previous images from Supabase bucket
     // const oldImagePaths = []; // If you stored paths (not just URLs), use those
     // if (oldImagePaths.length > 0) {
     //     await supabase.storage.from("articles-images").remove(oldImagePaths);
     // }
 
+
     // Extract old image paths to delete from Supabase Storage
     const { data: oldImages } = await supabase
       .from("article_images")
       .select("image_url")
       .eq("articleid", articleId);
+
 
     const oldPaths = (oldImages || [])
       .map((img) => {
@@ -452,6 +379,7 @@ const EditFreeArticle = () => {
       })
       .filter(Boolean);
 
+
     if (oldPaths.length > 0) {
       // await supabase.storage.from("articles-images").remove(oldPaths);
       if (oldPaths.length > 0) {
@@ -462,8 +390,10 @@ const EditFreeArticle = () => {
       }
     }
 
+
     // Delete old image records
     await supabase.from("article_images").delete().eq("articleid", articleId);
+
 
     for (const img of pendingImages) {
       const file = img.file;
@@ -474,6 +404,7 @@ const EditFreeArticle = () => {
         .substring(2)}.${fileExt}`;
       const filePath = `user-${session.userid}/${fileName}`;
 
+
       const { error: uploadError } = await supabase.storage
         .from(bucket)
         .upload(filePath, file);
@@ -481,6 +412,7 @@ const EditFreeArticle = () => {
         alert("Image upload failed.");
         return;
       }
+
 
       const { data: urlData } = supabase.storage
         .from(bucket)
@@ -491,26 +423,7 @@ const EditFreeArticle = () => {
         uploadedImageUrls.push(urlData.publicUrl);
       }
     }
-    console.log("edit save draft images", uploadedImageUrls);
-    const response = await fetch(
-      "https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/api/moderate",
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          content: updatedHTML,
-          imageUrls: uploadedImageUrls,
-        }),
-      }
-    );
 
-    const result = await response.json();
-    if (result.error) {
-      alert(`Draft flagged: ${result.error}`);
-      setIsUploading(false);
-      setUploadAction("");
-      return;
-    }
 
     // FIX: Use update instead of insert
     const { error } = await supabase
@@ -525,10 +438,12 @@ const EditFreeArticle = () => {
       })
       .eq("articleid", articleId);
 
+
     if (error) {
       console.error("Draft update error:", error.message); // ADD THIS LOGGING
       return alert("Failed to update draft.");
     }
+
 
     // Insert new images into article_images table
     for (const imageUrl of uploadedImageUrls) {
@@ -537,39 +452,44 @@ const EditFreeArticle = () => {
         .insert([{ articleid: articleId, image_url: imageUrl }]);
     }
 
-    pendingImages.forEach((img) => URL.revokeObjectURL(img.previewUrl));
-    setPendingImages([]);
-    setShowDraftNotification(true);
-    alert("Draft saved!");
-    handleClearInputs();
-    setIsUploading(false);
-    setUploadAction(""); // DEVI ADDED THIS
-    const words = articleContent.trim().split(/\s+/).filter(Boolean).length;
 
+    setShowDraftNotification(true);
+    alert("Draft updated!");
+    const words = articleContent.trim().split(/\s+/).filter(Boolean).length;
+   
     if (words > MAX_WORDS) {
       alert(`Draft exceeds ${MAX_WORDS} word limit. Please reduce content.`);
       return;
     }
   };
 
+
+  const [pendingImages, setPendingImages] = useState([]);
+
+
   const handleEditorImageUpload = async (e) => {
     console.log("Upload triggered", e.target.files[0]);
 
+
     const file = e.target.files[0];
     if (!file) return;
+
 
     if (file.size > 50 * 1024 * 1024) {
       alert("Image size exceeds 50MB limit. Please upload a smaller file.");
       return;
     }
 
+
     const storedUser = JSON.parse(localStorage.getItem("userProfile"));
     const userId = storedUser?.user?.userid;
+
 
     if (!userId) {
       alert("User not authenticated.");
       return;
     }
+
 
     // Fetch usertype from Supabase
     const { data: userTypeData, error } = await supabase
@@ -578,14 +498,18 @@ const EditFreeArticle = () => {
       .eq("userid", userId)
       .single();
 
+
     if (error || !userTypeData) {
       alert("Failed to verify user type.");
       return;
     }
 
+
     const userType = userTypeData.usertype.toLowerCase();
 
+
     // const totalImages = pendingImages.length + (articleStatus === "Draft" || articleStatus === "Published" ? (articleContent.includes("<img") ? 1 : 0) : 0);
+
 
     const doc = new DOMParser().parseFromString(
       editor?.getHTML?.() || "",
@@ -596,6 +520,7 @@ const EditFreeArticle = () => {
     );
     const totalImages = currentImages.length + pendingImages.length;
 
+
     if (userType === "free" && totalImages >= 1) {
       alert(
         "Free users can only upload 1 image. Please remove the existing image first."
@@ -603,20 +528,24 @@ const EditFreeArticle = () => {
       return;
     }
 
+
     const previewUrl = URL.createObjectURL(file);
     setPendingImages((prev) => [...prev, { file, previewUrl }]);
-    // console.log("Added to pendingImages", previewUrl);
+    console.log("Added to pendingImages", previewUrl);
 
-    // console.log("Inserting image to editor");
+
+    console.log("Inserting image to editor");
     editor.chain().focus().setImage({ src: previewUrl }).run();
     e.target.value = null;
   };
+
 
   const handleRemoveImage = (indexToRemove) => {
     const removedUrl = pendingImages[indexToRemove].previewUrl;
     URL.revokeObjectURL(removedUrl); // cleanup memory
     const updatedImages = pendingImages.filter((_, i) => i !== indexToRemove);
     setPendingImages(updatedImages);
+
 
     const parser = new DOMParser();
     const doc = parser.parseFromString(editor.getHTML(), "text/html");
@@ -629,6 +558,7 @@ const EditFreeArticle = () => {
     editor.commands.setContent(doc.body.innerHTML);
   };
 
+
   // Fetch Topics from `topic_categories`
   useEffect(() => {
     const fetchTopics = async () => {
@@ -637,12 +567,14 @@ const EditFreeArticle = () => {
         .from("topic_categories")
         .select("topicid, name");
 
+
       if (!error && data) {
         setTopicOptions(data); // Data is an array of objects like { topicid, name }
       }
     };
     fetchTopics();
   }, []);
+
 
   const handleClearInputs = () => {
     setTitle("");
@@ -651,16 +583,14 @@ const EditFreeArticle = () => {
     setImages([]);
     setShowConfirm(false);
     setPendingImages([]);
-    setAccuracy(null);
-    setAiFeedback("");
-    setUploadAction(""); // <- DEVI ADDED THIS FOR THE LOAD AND POST INDICATOR
-    setOpenError(false);
-    setOpenSuccess(false);
+
+
     // Reset Tiptap editor content (this is the key)
     if (editor) {
       editor.commands.clearContent();
     }
   };
+
 
   useEffect(() => {
     const style = document.createElement("style");
@@ -715,44 +645,45 @@ const EditFreeArticle = () => {
          padding: 0 2px;
          border-radius: 3px;
        }
-         .ProseMirror {
-        outline: none;
-        position: relative;
-        caret-color: black;
-        box-sizing: border-box;
-      }
      `;
     document.head.appendChild(style);
     return () => document.head.removeChild(style); // Cleanup
   }, []);
 
+
   const handleSubmitTopicApplication = async () => {
     const rawInput = newTopicName.trim();
     const normalizedInput = rawInput.toLowerCase();
+
 
     if (!normalizedInput) {
       alert("Please enter a topic name.");
       return;
     }
 
+
     // Check if topic already exists in `topic_categories`
     const { data: existingTopics, error: topicFetchError } = await supabase
       .from("topic_categories")
       .select("name");
+
 
     if (topicFetchError) {
       alert("Error checking existing topics.");
       return;
     }
 
+
     const topicExists = existingTopics.some(
       (topic) => topic.name.trim().toLowerCase() === normalizedInput
     );
+
 
     if (topicExists) {
       alert("This topic already exists. Please choose an existing topic.");
       return;
     }
+
 
     // Check if user already applied for this topic
     const { data: userApplications, error: appFetchError } = await supabase
@@ -761,19 +692,23 @@ const EditFreeArticle = () => {
       .eq("requested_by", userId)
       .eq("status", "Pending");
 
+
     if (appFetchError) {
       alert("Error checking your previous applications.");
       return;
     }
 
+
     const alreadyApplied = userApplications.some(
       (app) => app.topic_name.trim().toLowerCase() === normalizedInput
     );
+
 
     if (alreadyApplied) {
       alert("You’ve already applied for this topic.");
       return;
     }
+
 
     // Insert the application
     const { error: insertError } = await supabase
@@ -787,6 +722,7 @@ const EditFreeArticle = () => {
         },
       ]);
 
+
     if (insertError) {
       alert("Failed to apply for topic.");
     } else {
@@ -796,17 +732,19 @@ const EditFreeArticle = () => {
     }
   };
 
+
   return (
     // <div className="w-full min-h-screen bg-indigo-50 text-black font-grotesk flex justify-center">
     //   <main className="w-full max-w-4xl p-10 flex flex-col gap-6">
-    <div className="w-full min-w-screen min-h-screen flex flex-col overflow-hidden bg-indigo-50 justify-center">
-      <main className="flex-grow w-full flex min-h-full overflow-hidden">
-        <main className="w-full max-w-4xl p-10 flex flex-col gap-6 mx-auto">
+    <div className="flex-1 min-h-full bg-indigo-50 max-md:w-full w-full max-w-screen px-1 md:px-6">
+      <main className="w-full min-h-screen bg-indigo-50 text-black font-grotesk flex justify-center">
+        <main className="w-full max-w-4xl p-10 flex flex-col gap-6">
           <h1 className="text-3xl font-bold mb-1">
             {articleStatus === "Draft"
               ? "Edit Your Draft Articles :"
               : "Edit Your Posted Articles :"}
           </h1>
+
 
           <div className="flex flex-col gap-5 w-full">
             <div>
@@ -823,8 +761,10 @@ const EditFreeArticle = () => {
               />
             </div>
 
+
             <div>
               <label className="block text-xl font-semibold mb-1">Topic:</label>
+
 
               <div className="flex items-center gap-2 w-full">
                 <div className="relative w-full">
@@ -851,6 +791,7 @@ const EditFreeArticle = () => {
                       </button>
                     )}
                   </div>
+
 
                   {showTopicsDropdown && (
                     <div className="absolute z-10 w-full mt-1 bg-white border rounded-md shadow-md max-h-40 overflow-y-auto">
@@ -884,6 +825,7 @@ const EditFreeArticle = () => {
               </div>
             </div>
 
+
             <div>
               <label className="block text-xl font-semibold mb-1">
                 Article Content:
@@ -912,6 +854,7 @@ const EditFreeArticle = () => {
                     </>
                   )}
 
+
                   {/* {pendingImages.length > 0 && ( */}
                   {articleStatus !== "Published" &&
                     pendingImages.length > 0 && (
@@ -939,6 +882,7 @@ const EditFreeArticle = () => {
                       </div>
                     )}
 
+
                   {articleStatus !== "Published" && (
                     <div className="flex flex-wrap items-center gap-2 bg-white p-3 mt-4 border rounded-lg shadow-md text-sm font-medium">
                       <select
@@ -962,6 +906,7 @@ const EditFreeArticle = () => {
                         <option value="2">H2</option>
                         <option value="3">H3</option>
                       </select>
+
 
                       <button
                         onClick={() =>
@@ -1047,34 +992,7 @@ const EditFreeArticle = () => {
                     </div>
                   )}
 
-                  {openError && (
-                    <div className="mt-4 p-4 border border-red-300 bg-red-50 rounded text-sm text-black">
-                      <strong>Fact Check Results:</strong>
 
-                      <p>
-                        <strong>Accuracy: </strong>
-                        {accuracy}%
-                      </p>
-
-                      <p>
-                        <strong>Feedback: </strong>
-                      </p>
-                      <div
-                        className="mt-1"
-                        dangerouslySetInnerHTML={{ __html: aiFeedback }}
-                      />
-                    </div>
-                  )}
-                  <Box mb={1} mt={1}>
-                    <Typography
-                      variant="body2"
-                      color="textSecondary"
-                      sx={{ fontStyle: "italic" }}
-                    >
-                      Note: AI fact-check feedback is provided for guidance only
-                      and may be inaccurate. Please verify facts independently.
-                    </Typography>
-                  </Box>
                   <div
                     className="min-h-[400px] max-h-[600px] overflow-y-auto border rounded-md bg-white p-4 mt-3 focus-within:outline-none"
                     onClick={() => editor.commands.focus()}
@@ -1134,12 +1052,14 @@ const EditFreeArticle = () => {
               )}
             </div>
 
+
             {userId && (
-              <p className="text-right text-sm text-red-600 mb-1">
+              <p className="text-right text-sm text-black mb-1">
                 You’ve posted {monthlyPostCount} out of 4 articles this month.
                 Update your subscription for unlimited posts..!!
               </p>
             )}
+
 
             <div className="flex justify-end gap-3 mt-6">
               <button
@@ -1149,39 +1069,35 @@ const EditFreeArticle = () => {
                 Cancel
               </button>
 
+
               {articleStatus === "Draft" ? (
                 <>
                   <button
                     className="bg-yellow-500 text-white px-4 py-2 rounded-md"
                     onClick={handleSaveDraft}
-                    disabled={isUploading}
                   >
-                    {isUploading && uploadAction === "draft"
-                      ? "Saving..."
-                      : "Save Draft"}
+                    Update
                   </button>
+
 
                   <button
                     className="bg-blue-600 text-white px-4 py-2 rounded-md"
                     onClick={handlePostArticle}
-                    disabled={isUploading}
                   >
-                    {isUploading && uploadAction === "post"
-                      ? "Posting..."
-                      : "Post"}
+                    Post Draft
                   </button>
                 </>
               ) : (
                 <button
                   className="bg-blue-600 text-white px-4 py-2 rounded-md"
                   onClick={handlePostArticle}
-                  disabled={isUploading}
                 >
                   Add Update
                 </button>
               )}
             </div>
           </div>
+
 
           {showConfirm && (
             <div className="fixed inset-0 backdrop-blur-sm bg-white/5 flex items-center justify-center z-50">
@@ -1266,10 +1182,12 @@ const EditFreeArticle = () => {
                     onClick={() => {
                       if (!linkUrl.trim()) return;
 
+
                       const hasSelection =
                         editor &&
                         editor.view.state.selection?.from !==
                           editor.view.state.selection?.to;
+
 
                       if (hasSelection) {
                         editor
@@ -1296,6 +1214,7 @@ const EditFreeArticle = () => {
                           ])
                           .run();
                       }
+
 
                       setShowLinkModal(false);
                       setLinkUrl("");
@@ -1331,6 +1250,7 @@ const EditFreeArticle = () => {
                   before then!
                 </p>
 
+
                 {/* OK Button to acknowledge the notification */}
                 <div className="flex justify-end mt-4">
                   <button
@@ -1346,41 +1266,6 @@ const EditFreeArticle = () => {
               </div>
             </div>
           )}
-          <Dialog
-            open={openSuccess}
-            onClose={() => {
-              setOpenSuccess(false);
-              handleClearInputs();
-            }}
-            aria-labelledby="success-dialog-title"
-          >
-            <DialogTitle id="success-dialog-title">Article Posted!</DialogTitle>
-            <DialogContent>
-              <strong>Fact Check Results:</strong>
-              <p>
-                <strong>Accuracy: </strong>
-                {accuracy}%
-              </p>
-
-              <p>
-                <strong>Feedback: </strong>
-              </p>
-              <div
-                className="mt-1"
-                dangerouslySetInnerHTML={{ __html: aiFeedback }}
-              />
-            </DialogContent>
-            <DialogActions>
-              <Button
-                onClick={() => {
-                  setOpenSuccess(false);
-                  handleClearInputs();
-                }}
-              >
-                OK
-              </Button>
-            </DialogActions>
-          </Dialog>
           {showUpdateSuccess && (
             <div className="fixed inset-0 backdrop-blur-sm bg-white/5 flex items-center justify-center z-50">
               <div
@@ -1394,6 +1279,7 @@ const EditFreeArticle = () => {
                   Your update has been recorded. Thank you for keeping your
                   article accurate and up to date!
                 </p>
+
 
                 <div className="flex justify-end mt-4">
                   <button
@@ -1414,5 +1300,6 @@ const EditFreeArticle = () => {
     </div>
   );
 };
+
 
 export default EditFreeArticle;
