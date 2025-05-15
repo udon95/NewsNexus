@@ -97,6 +97,7 @@ const ManageRooms = () => {
       .from("room_invites")
       .select("roomid, rooms(name)")
       .eq("userid", userId);
+     console.log("Invite Data Fetched:", data);
 
     if (!error) {
       const formatted = data.map((item, i) => ({
