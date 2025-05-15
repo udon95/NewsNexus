@@ -164,18 +164,22 @@ const PublicProfile = () => {
     </div>
   </div>
 </section> */}
-<section className="w-full bg-white rounded-2xl border shadow p-6 flex flex-col sm:flex-row items-start sm:items-center gap-6">
-  {/* Avatar Box */}
-  <div className="w-20 h-20 bg-black text-white flex items-center justify-center rounded-lg text-2xl font-bold">
-    {user.username?.charAt(0).toUpperCase()}
+
+<section className="w-full bg-white rounded-2xl border shadow p-6 flex flex-col sm:flex-row items-start gap-6">
+  {/* Left: Avatar */}
+  <div className="w-full sm:w-1/5 flex justify-center">
+    <div className="w-24 h-24 bg-black text-white flex items-center justify-center rounded-xl text-3xl font-bold">
+      {user.username?.charAt(0).toUpperCase()}
+    </div>
   </div>
 
-  {/* Info Block */}
-  <div className="flex-1 space-y-2">
+  {/* Right: Info Area */}
+  <div className="flex-1 flex flex-col gap-4">
+    {/* Top: Username and badges */}
     <div className="flex items-center gap-3 flex-wrap">
-      <h1 className="text-2xl font-bold text-gray-900">{user.username}</h1>
+      <h1 className="text-3xl font-bold text-gray-900">{user.username}</h1>
       {user.expert_status === "Approved" && (
-        <span className="flex items-center gap-1 text-blue-600 text-sm font-medium">
+        <span className="flex items-center gap-1 text-blue-600 text-sm font-medium bg-blue-50 px-2 py-1 rounded-full">
           <BadgeCheck className="w-4 h-4" />
           Verified Expert
         </span>
@@ -183,7 +187,7 @@ const PublicProfile = () => {
       <span
         className={`text-sm px-3 py-1 rounded-full font-medium ${
           user.usertype === "Premium"
-            ? "bg-blue-400 text-black"
+            ? "bg-yellow-400 text-black"
             : "bg-gray-300 text-black"
         }`}
       >
@@ -192,35 +196,44 @@ const PublicProfile = () => {
     </div>
 
     {/* Meta Info Row */}
-    <div className="text-sm text-gray-700 flex flex-col sm:flex-row sm:items-center sm:gap-6">
-      <p>
-        <span className="font-medium">Joined:</span>{" "}
-        {new Date(user.created_at).toLocaleDateString()}
-      </p>
-      <p>
-        <span className="font-medium">Views:</span> {profileData.totalViews}
-      </p>
-    </div>
-
-    {/* Stats Row */}
-    <div className="text-sm text-gray-700 flex flex-col sm:flex-row sm:items-center sm:gap-6">
-      <p>
-        <span className="font-medium">Articles:</span> {profileData.totalArticles}
-      </p>
-      <p>
-        <span className="font-medium">Upvotes:</span> {profileData.upvotes}
-      </p>
-      <p>
-        <span className="font-medium">Downvotes:</span> {profileData.downvotes}
-      </p>
+    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm text-gray-800">
+      <div>
+        <div className="font-semibold text-gray-600">Joined</div>
+        <div>{new Date(user.created_at).toLocaleDateString()}</div>
+      </div>
+      <div>
+        <div className="font-semibold text-gray-600">Articles</div>
+        <div>{profileData.totalArticles}</div>
+      </div>
+      <div>
+        <div className="font-semibold text-gray-600">Upvotes</div>
+        <div>{profileData.upvotes}</div>
+      </div>
+      <div>
+        <div className="font-semibold text-gray-600">Downvotes</div>
+        <div>{profileData.downvotes}</div>
+      </div>
+      <div>
+        <div className="font-semibold text-gray-600">Views</div>
+        <div>{profileData.totalViews}</div>
+      </div>
     </div>
 
     {/* Expertise */}
     {expertTopics?.length > 0 && (
-      <p className="text-sm text-gray-700">
-        <span className="font-medium">Expertise in:</span>{" "}
-        {expertTopics.map((t) => t.name).join(", ")}
-      </p>
+      <div className="text-sm text-gray-800">
+        <span className="font-semibold text-gray-600">Expertise in:</span>{" "}
+        <span className="inline-flex flex-wrap gap-2 mt-1">
+          {expertTopics.map((t) => (
+            <span
+              key={t.name}
+              className="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-xs font-medium"
+            >
+              {t.name}
+            </span>
+          ))}
+        </span>
+      </div>
     )}
   </div>
 </section>
