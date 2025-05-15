@@ -34,6 +34,7 @@ router.get("/:userid", async (req, res) => {
   res.status(200).json(data);
 });
 
+
 // 🔹 CREATE new room
 router.post("/", async (req, res) => {
   const { name, description, room_type, created_by, member_limit } = req.body;
@@ -52,6 +53,17 @@ const { data, error } = await supabase
   .insert([{ name, description, room_type, created_by, member_limit: limit }])
   .select();
   if (error) return res.status(500).json({ error: error.message });
+    if (data && data.length > 0) {
+    const newRoomId = data[0].roomid;
+    await supabase.from("room_members").insert([
+      {
+        userid: created_by,
+        roomid: newRoomId,
+        joined_at: new Date().toISOString(),
+      },
+    ]);
+  }
+
   res.status(201).json({ message: "Room created", data });
 });
 
@@ -164,8 +176,8 @@ router.post("/invite", async (req, res) => {
   const { data: user, error: userError } = await supabase
     .from("users")
     .select("userid")
-    .eq("username", invitee_username)
-    .single();
+     .ilike("username", invitee_username)
+     .maybeSingle();
 
   if (userError || !user) {
     return res.status(404).json({ error: "User not found" });
@@ -208,7 +220,7 @@ router.post("/invite", async (req, res) => {
     return res.status(500).json({ error: insertError.message });
   }
 
-  res.status(200).json({ message: "Invitation sent" });
+  res.status(200).json({ message: "Invitation sent", userid: user.userid, roomid, });
 });
 
 
