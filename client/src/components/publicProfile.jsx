@@ -158,7 +158,9 @@ const PublicProfile = () => {
         )}
       </div>
 
+
     </div>
+
 
     {/* Info Area */}
     <div className="flex-1 flex flex-col justify-center">
@@ -227,12 +229,15 @@ const PublicProfile = () => {
 
 
             {/* Room Membership Section */}
-            <section className="bg-white rounded-2xl border shadow p-6 mb-6 mt-6">
+            {/* <section className="bg-white rounded-2xl border shadow p-6 mb-6 mt-6"> */}
+            <section className="bg-white rounded-2xl border shadow p-6 mb-6 mt-6 w-full min-w-[600px]">
+
           <h2 className="text-2xl font-semibold mb-4">Room Memberships :</h2>
           {rooms.length === 0 ? (
             <p className="text-gray-500 italic">Not a member of any rooms.</p>
           ) : (
-            <div className="flex flex-wrap gap-3">
+            // <div className="flex flex-wrap gap-3">
+            <div className="w-full min-w-[600px] flex flex-wrap gap-3">
               {rooms.map((room) => {
                 const isPrivate = room.is_private === true;
                 const isMember = room.joined === true;
@@ -257,6 +262,8 @@ const PublicProfile = () => {
                 );
               }
              
+
+
               // PREMIUM USERS — PRIVATE ROOM they are NOT a member of → black, not clickable
               // if (userType === "Premium" && isPrivate && !isMember) {
               //   return (
@@ -318,7 +325,8 @@ const PublicProfile = () => {
         </section>
  
         {/* Articles Section */}
-        <section className="bg-white rounded-2xl border shadow p-6">
+        {/* <section className="bg-white rounded-2xl border shadow p-6"> */}
+        <section className="bg-white rounded-2xl border shadow p-6 w-full min-w-[600px]">
           <h2 className="text-2xl font-semibold mb-4">Articles :</h2>
           {articles.length === 0 ? (
             <p className="text-gray-500 italic">No articles published yet.</p>
@@ -343,6 +351,9 @@ const PublicProfile = () => {
     </div>
   );
  
+
+
 };
+
 
 export default PublicProfile;
