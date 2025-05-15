@@ -270,7 +270,8 @@ const handleAddPublicRoom = async () => {
     const { data, error } = await supabase
     .from("room_members")
     .select("userid, users(username)")
-    .eq("roomid", roomid);
+    .eq("roomid", roomid)
+    .is("exited_at", null);
   
   if (data) {
     const formatted = data.map((entry) => ({
