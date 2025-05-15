@@ -225,9 +225,32 @@ const PublicProfile = () => {
     {user.usertype}
   </span>
 </div>
+{/* <p className="text-sm text-gray-500 mb-4">
+  Joined: {new Date(user.created_at).toLocaleDateString()}
+</p> */}
 <p className="text-sm text-gray-500 mb-4">
   Joined: {new Date(user.created_at).toLocaleDateString()}
 </p>
+
+<div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-4 w-full">
+  <div className="bg-gray-100 p-4 rounded-lg shadow flex flex-col items-center">
+    <div className="font-bold text-xl">{profileData.totalArticles}</div>
+    <div className="text-sm text-gray-600">Articles</div>
+  </div>
+  <div className="bg-gray-100 p-4 rounded-lg shadow flex flex-col items-center">
+    <div className="font-bold text-xl">{profileData.totalViews}</div>
+    <div className="text-sm text-gray-600">Views</div>
+  </div>
+  <div className="bg-gray-100 p-4 rounded-lg shadow flex flex-col items-center">
+    <div className="font-bold text-xl">{profileData.upvotes}</div>
+    <div className="text-sm text-gray-600">Upvotes</div>
+  </div>
+  <div className="bg-gray-100 p-4 rounded-lg shadow flex flex-col items-center">
+    <div className="font-bold text-xl">{profileData.downvotes}</div>
+    <div className="text-sm text-gray-600">Downvotes</div>
+  </div>
+</div>
+
 
 
     {/* Grid Stats */}
@@ -260,7 +283,7 @@ const PublicProfile = () => {
   <span><strong>Upvotes:</strong> {profileData.upvotes}</span>
   <span><strong>Downvotes:</strong> {profileData.downvotes}</span>
 </div> */}
-<div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-4 w-full">
+{/* <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-4 w-full">
   <div className="bg-gray-100 p-4 rounded-lg shadow flex flex-col items-center">
     <div className="font-bold text-xl">{profileData.totalArticles}</div>
     <div className="text-sm text-gray-600">Articles</div>
@@ -277,7 +300,7 @@ const PublicProfile = () => {
     <div className="font-bold text-xl">{profileData.downvotes}</div>
     <div className="text-sm text-gray-600">Downvotes</div>
   </div>
-</div>
+</div> */}
 
 
 
