@@ -146,112 +146,98 @@ const handleAddPublicRoom = async () => {
   }
 };
 
-  const handleAddPrivateRoom = async () => {
-     const { data: typeRow } = await supabase
-    .from("usertype")
-    .select("usertype")
-    .eq("userid", userId)
-    .maybeSingle();
+ const handleAddPrivateRoom = async () => {
+  const usernames = newPrivateRoom.invite
+    .split(",")
+    .map((s) => s.replace("@", "").trim())
+    .filter(Boolean);
 
-  if (!typeRow || typeRow.usertype !== "Premium") {
-    alert("Only Premium users can create private rooms.");
+  if (usernames.length > 10) {
+    alert("You can only invite up to 10 users.");
     return;
   }
 
-    const res = await fetch(
-      "https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/rooms",
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...newPrivateRoom,
-          room_type: "Private",
-          created_by: userId,
-          member_limit: newPrivateRoom.member_limit || 20,
-        }),
-      }
-    );
+  // 🔍 1. Validate and fetch user IDs from Supabase
+  const { data: userRows, error: userErr } = await supabase
+    .from("users")
+    .select("userid, username")
+    .in("username", usernames);
 
-    if (res.ok) {
-      alert("Private room created");
-      const roomData = await res.json();
-      const roomid = roomData.data[0].roomid;
+  if (!userRows || userRows.length === 0) {
+    alert("No matching users found.");
+    return;
+  }
 
-      // const usernames = newPrivateRoom.invite
-      //   .split(",")
-      //   .map((s) => s.replace("@", "").trim())
-      //   .filter(Boolean);
-      const usernames = validUserPills;
+  // 🔍 2. Check Premium status
+  const userIds = userRows.map((u) => u.userid);
 
-      // if (usernames.length > 10) {
-      //   alert("You can only invite up to 10 users to a private room.");
-      //   return;
-      // }
+  const { data: userTypeRows } = await supabase
+    .from("usertype")
+    .select("userid, usertype")
+    .in("userid", userIds);
 
-      if (usernames.length > newPrivateRoom.member_limit - 1) {
-        alert(`You can only invite up to ${newPrivateRoom.member_limit - 1} users.`);
-        return;
-      }      
+  const validPremiumUsers = userRows.filter((u) => {
+    const tier = userTypeRows.find((t) => t.userid === u.userid);
+    return tier?.usertype === "Premium";
+  });
 
-      // Validate usernames before inviting
-      // const { data: users } = await supabase
-      //   .from("user_profiles") // adjust table name if different
-      //   .select("username")
-      //   .in("username", usernames);
+  const invalidUsers = userRows.filter((u) => {
+    const tier = userTypeRows.find((t) => t.userid === u.userid);
+    return tier?.usertype !== "Premium";
+  });
 
-      // const validUsernames = users.map((u) => u.username);
-      // const invalidUsernames = usernames.filter(
-      //   (name) => !validUsernames.includes(name)
-      // );
+  if (invalidUsers.length > 0) {
+    const names = invalidUsers.map((u) => u.username).join(", ");
+    alert(`These users are not Premium: ${names}`);
+    return;
+  }
 
-      // if (invalidUsernames.length > 0) {
-      //   alert(`The following usernames are invalid: ${invalidUsernames.join(", ")}`);
-      // return;
-      // }
+  // ✅ 3. Create Room
+  const res = await fetch("https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/rooms", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      ...newPrivateRoom,
+      room_type: "Private",
+      created_by: userId,
+      member_limit: newPrivateRoom.member_limit,
+    }),
+  });
 
-      // Validate usernames AND ensure only Premium users are invited
-      const { data: users } = await supabase
-        .from("user_profiles")
-        .select("username, subscription_tier")
-        .in("username", usernames);
+  if (!res.ok) {
+    alert("Room creation failed.");
+    return;
+  }
 
-      const validUsernames = users
-        .filter((u) => u.subscription_tier === "Premium")
-        .map((u) => u.username);
+  const roomData = await res.json();
+  const roomid = roomData?.data?.[0]?.roomid;
 
-      const invalidUsernames = usernames.filter(
-        (name) => !validUsernames.includes(name)
-      );
+  if (!roomid) {
+    alert("Room ID not returned.");
+    return;
+  }
 
-      if (invalidUsernames.length > 0) {
-        alert(`These users are not Premium: ${invalidUsernames.join(", ")}`);
-      return;
-      }
+  // ✅ 4. Send invites using correct user ID or username
+  for (let user of validPremiumUsers) {
+    const inviteRes = await fetch("https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/rooms/invite", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        invitee_username: user.username,
+        roomid,
+      }),
+    });
 
-      // for (let username of usernames) {
-      for (let username of validUsernames) {
-        await fetch(
-          "https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/rooms/invite",
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              invitee_username: username,
-              roomid,
-            }),
-          }
-        );
-      }
-
-      setNewPrivateRoom({
-        name: "",
-        description: "",
-        member_limit: 20,
-        invite: "",
-      });
-      fetchRooms();
+    if (!inviteRes.ok) {
+      console.error(`Failed to invite ${user.username}`);
     }
-  };
+  }
+
+  alert("Private room created and invites sent.");
+  setNewPrivateRoom({ name: "", description: "", invite: "", member_limit: 20 });
+  fetchRooms();
+};
+
 
   const handleUpdateRoom = async (
     roomid,
