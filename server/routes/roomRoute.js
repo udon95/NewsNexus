@@ -159,6 +159,7 @@ router.post("/invite", async (req, res) => {
   if (count >= 10) {
   return res.status(400).json({ error: "Invite limit of 10 reached" });
   }
+  
 
   const { data: user, error: userError } = await supabase
     .from("users")
@@ -181,6 +182,7 @@ router.post("/invite", async (req, res) => {
   if (existingInvite) {
     return res.status(400).json({ error: "User already invited" });
   }
+
 
    const { data: existingMember } = await supabase
     .from("room_members")
