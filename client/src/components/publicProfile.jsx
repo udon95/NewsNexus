@@ -165,15 +165,15 @@ const PublicProfile = () => {
   </div>
 </section> */}
 
-<section className="w-full bg-white rounded-2xl border shadow p-6 grid grid-cols-1 sm:grid-cols-[200px_1fr] gap-6">
+<section className="w-full bg-white rounded-2xl border shadow p-6 flex flex-col sm:flex-row gap-6">
   {/* Avatar */}
   {/* <div className="flex-shrink-0">
     <div className="w-20 h-20 sm:w-24 sm:h-24 bg-black text-white flex items-center justify-center rounded-lg text-2xl font-bold">
       {user.username?.charAt(0).toUpperCase()}
     </div>
   </div> */}
-  <div className="flex flex-col items-center">
-  <div className="w-24 h-24 sm:w-28 sm:h-28 bg-black text-white flex items-center justify-center rounded-lg text-3xl font-bold">
+<div className="flex flex-col items-center sm:items-start w-full sm:w-auto">
+<div className="w-24 h-24 sm:w-28 sm:h-28 bg-black text-white flex items-center justify-center rounded-lg text-3xl font-bold">
     {user.username?.charAt(0).toUpperCase()}
   </div>
   {expertTopics?.length > 0 && (
@@ -260,24 +260,25 @@ const PublicProfile = () => {
   <span><strong>Upvotes:</strong> {profileData.upvotes}</span>
   <span><strong>Downvotes:</strong> {profileData.downvotes}</span>
 </div> */}
-<div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-4">
-  <div className="bg-gray-100 p-4 rounded-lg shadow text-center">
-    <div className="font-bold text-lg">{profileData.totalArticles}</div>
+<div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-4 w-full">
+  <div className="bg-gray-100 p-4 rounded-lg shadow flex flex-col items-center">
+    <div className="font-bold text-xl">{profileData.totalArticles}</div>
     <div className="text-sm text-gray-600">Articles</div>
   </div>
-  <div className="bg-gray-100 p-4 rounded-lg shadow text-center">
-    <div className="font-bold text-lg">{profileData.totalViews}</div>
+  <div className="bg-gray-100 p-4 rounded-lg shadow flex flex-col items-center">
+    <div className="font-bold text-xl">{profileData.totalViews}</div>
     <div className="text-sm text-gray-600">Views</div>
   </div>
-  <div className="bg-gray-100 p-4 rounded-lg shadow text-center">
-    <div className="font-bold text-lg">{profileData.upvotes}</div>
+  <div className="bg-gray-100 p-4 rounded-lg shadow flex flex-col items-center">
+    <div className="font-bold text-xl">{profileData.upvotes}</div>
     <div className="text-sm text-gray-600">Upvotes</div>
   </div>
-  <div className="bg-gray-100 p-4 rounded-lg shadow text-center">
-    <div className="font-bold text-lg">{profileData.downvotes}</div>
+  <div className="bg-gray-100 p-4 rounded-lg shadow flex flex-col items-center">
+    <div className="font-bold text-xl">{profileData.downvotes}</div>
     <div className="text-sm text-gray-600">Downvotes</div>
   </div>
 </div>
+
 
 
 {expertTopics?.length > 0 && (
