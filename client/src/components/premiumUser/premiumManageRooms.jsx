@@ -52,6 +52,7 @@ const ManageRooms = () => {
         .from("room_members")
         .select("*", { count: "exact", head: true })
         .eq("roomid", room.roomid);
+        .is("exited_at", null);
 
       return {
         ...room,
@@ -77,6 +78,7 @@ const ManageRooms = () => {
         .from("room_members")
         .select("*", { count: "exact", head: true })
         .eq("roomid", room.roomid);
+        .is("exited_at", null);
 
       return {
         ...room,
