@@ -82,28 +82,50 @@ const ManageRooms = () => {
     fetchInvites();
   }, [userId]);
 
-  const handleAddPublicRoom = async () => {
-    const res = await fetch(
-      "https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/rooms",
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...newPublicRoom,
-          room_type: "Public",
-          created_by: userId,
-        }),
-      }
-    );
+const handleAddPublicRoom = async () => {
+  const { data: typeRow } = await supabase
+    .from("usertype")
+    .select("usertype")
+    .eq("userid", userId)
+    .maybeSingle();
 
-    if (res.ok) {
-      alert("Public room created");
-      setNewPublicRoom({ name: "", description: "" });
-      fetchRooms();
+  if (!typeRow || typeRow.usertype !== "Premium") {
+    alert("Only Premium users can create public rooms.");
+    return;
+  }
+
+  const res = await fetch(
+    "https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/rooms",
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        ...newPublicRoom,
+        room_type: "Public",
+        created_by: userId,
+      }),
     }
-  };
+  );
+
+  if (res.ok) {
+    alert("Public room created");
+    setNewPublicRoom({ name: "", description: "" });
+    fetchRooms();
+  }
+};
 
   const handleAddPrivateRoom = async () => {
+     const { data: typeRow } = await supabase
+    .from("usertype")
+    .select("usertype")
+    .eq("userid", userId)
+    .maybeSingle();
+
+  if (!typeRow || typeRow.usertype !== "Premium") {
+    alert("Only Premium users can create private rooms.");
+    return;
+  }
+
     const res = await fetch(
       "https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/rooms",
       {
