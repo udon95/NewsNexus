@@ -958,15 +958,14 @@ export const FreeWriteArticle = () => {
                   </button>
                 </div>
 
-                {accuracy !== null && aiFeedback !== null && accuracy < 75 && (
+                {openError && (
                   <div className="mt-4 p-4 border border-red-300 bg-red-50 rounded text-sm text-black">
                     <strong>Fact Check Results:</strong>
-                    {accuracy !== null && (
-                      <p>
-                        <strong>Accuracy: </strong>
-                        {accuracy}%
-                      </p>
-                    )}
+                    <p>
+                      <strong>Accuracy: </strong>
+                      {accuracy}%
+                    </p>
+
                     <p>
                       <strong>Feedback: </strong>
                     </p>
