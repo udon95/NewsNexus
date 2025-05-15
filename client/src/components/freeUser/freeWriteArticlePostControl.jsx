@@ -746,7 +746,7 @@ export const FreeWriteArticle = () => {
 
   return (
     <div className="w-full min-h-screen bg-indigo-50 text-black font-grotesk flex justify-center">
-      <main className="w-full max-w-4xl p-10 flex flex-col gap-6">
+      <main className="w-full max-w-5xl px-4 py-10>
         <h1 className="text-3xl font-bold mb-1">Publish Your Articles: </h1>
 
         <div className="flex flex-col gap-5 w-full">
