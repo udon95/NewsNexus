@@ -133,13 +133,15 @@ const PublicProfile = () => {
     <Navbar />
     <div className="flex flex-col lg:flex-row gap-4 px-4">
   {user && (
-    <div className="sticky top-10 self-start w-full lg:w-[100px] left-35">
+    <div className="sticky top-10 self-start w-full lg:w-[100px] left-29">
       <FloatingUserStats user={user} />
     </div>
   )}
-    <main className="max-w-5xl mx-auto px-6 py-10 font-grotesk space-y-6">
+    {/* <main className="max-w-5xl mx-auto px-6 py-10 font-grotesk space-y-6"> */}
+    <main className="w-full max-w-5xl min-w-[700px] mx-auto px-6 py-10 font-grotesk space-y-6">
+
    
- 
+  
   <div className="flex-1">
   <section className="w-full bg-white rounded-2xl border shadow p-6 flex flex-col sm:flex-row gap-6">
     {/* Avatar */}
@@ -357,3 +359,6 @@ const PublicProfile = () => {
 
 
 export default PublicProfile;
+
+
+
