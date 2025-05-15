@@ -230,7 +230,7 @@ const PublicProfile = () => {
 
 
     {/* Expertise Tags */}
-    {expertTopics?.length > 0 && (
+    {/* {expertTopics?.length > 0 && (
       <div className="mt-2 flex flex-wrap gap-2">
         <span className="text-sm font-semibold text-gray-600">Expertise in:</span>
         {expertTopics.map((t) => (
@@ -242,7 +242,7 @@ const PublicProfile = () => {
           </span>
         ))}
       </div>
-    )}
+    )} */}
   </div>
 </section>
 
