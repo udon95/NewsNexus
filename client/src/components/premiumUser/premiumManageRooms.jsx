@@ -147,10 +147,7 @@ const handleAddPublicRoom = async () => {
 };
 
  const handleAddPrivateRoom = async () => {
-  const usernames = newPrivateRoom.invite
-    .split(",")
-    .map((s) => s.replace("@", "").trim())
-    .filter(Boolean);
+   const usernames = validUserPills;
 
   if (usernames.length > 10) {
     alert("You can only invite up to 10 users.");
