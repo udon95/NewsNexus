@@ -51,7 +51,7 @@ const ManageRooms = () => {
       const { count, error } = await supabase
         .from("room_members")
         .select("*", { count: "exact", head: true })
-        .eq("roomid", room.roomid);
+        .eq("roomid", room.roomid)
         .is("exited_at", null);
 
       return {
@@ -77,7 +77,7 @@ const ManageRooms = () => {
       const { count, error } = await supabase
         .from("room_members")
         .select("*", { count: "exact", head: true })
-        .eq("roomid", room.roomid);
+        .eq("roomid", room.roomid)
         .is("exited_at", null);
 
       return {
