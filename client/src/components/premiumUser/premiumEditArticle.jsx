@@ -381,6 +381,15 @@ export const PremiumEditArticle = () => {
         .insert([{ articleid, image_url: url }]);
       //console.log("img3", url);
     }
+    // Also insert any previously uploaded draft images not yet inserted
+    for (const img of pendingImages) {
+      if (!img.file && img.previewUrl?.startsWith("https://")) {
+        await supabase
+          .from("article_images")
+          .insert([{ articleid, image_url: img.previewUrl }]);
+      }
+    }
+
 
     // handled in backend
     // 📝 Insert new published article
@@ -615,6 +624,16 @@ export const PremiumEditArticle = () => {
         .from("room_article_images")
         .insert([{ postid, image_url: url }]);
     }
+
+    // ✅ Also insert any previously uploaded draft images not yet inserted
+    for (const img of pendingImages) {
+      if (!img.file && img.previewUrl?.startsWith("https://")) {
+        await supabase
+          .from("room_article_images")
+          .insert([{ postid, image_url: img.previewUrl }]);
+      }
+    }
+
 
     // Clean up
     pendingImages.forEach((img) => {
