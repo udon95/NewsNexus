@@ -381,7 +381,8 @@ if (removedMembers.length > 0) {
       }
     );
     alert("You exited the room");
-    fetchJoinedRooms(); // refresh
+fetchJoinedRooms();
+fetchRooms(); 
   };
 
 const handleAcceptInvite = async (roomid) => {
