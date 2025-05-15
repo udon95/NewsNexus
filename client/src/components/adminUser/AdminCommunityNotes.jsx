@@ -96,7 +96,7 @@ const AdminCommunityNotes = () => {
   };
 
   const articleRedirect = () => {
-    navigate("/article/" + selectedArticle.title);
+    navigate(`/article/${selectedArticle.articleid}`);
   };
 
   const openNote = (row) => {
@@ -201,7 +201,7 @@ const AdminCommunityNotes = () => {
                   {selectedArticleNotes.map((row, index) => (
                     <tr
                       key={row.id}
-                      className="cursor-pointer hover:bg-gray-300 transition-colors"
+                      className="hover:bg-gray-300 transition-colors"
                     >
                       <td className="p-3">{index + 1}</td>
                       <td className="p-3">{row.username}</td>

@@ -30,7 +30,7 @@ const AdminArticleReports = () => {
     if (error) {
       console.error("Error fetching data:", error);
     } else {
-      setLink("/article/" + data.title);
+      setLink("/article/" + data.articleid);
       setArticle(data);
       console.log(data);
     }

@@ -33,7 +33,7 @@ const AdminUserDetails = () => {
   };
 
   const openArticle = (row) => {
-    navigate(`/article/${encodeURIComponent(row.title)}`);
+    navigate(`/article/${row.articleid}`);
   };
 
   useEffect(() => {
