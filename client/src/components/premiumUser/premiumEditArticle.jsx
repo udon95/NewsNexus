@@ -601,6 +601,7 @@ export const PremiumEditArticle = () => {
         userid: session.userid,
         status: "Published",
         created_at: new Date().toISOString(),
+        imagepath: firstImageUrl || null, // Add this line
       })
       .eq("postid", id)
       .select("postid");
@@ -905,6 +906,7 @@ export const PremiumEditArticle = () => {
           userid: articleData.userid,
           created_at: articleData.time,
           status: articleData.status,
+          imagepath: articleData.imagepath,
         })
         .eq("postid", id);
 
@@ -1262,6 +1264,7 @@ export const PremiumEditArticle = () => {
           topic_name: rawInput, // keep original casing for admin view
           status: "Pending",
           created_at: new Date().toISOString(),
+          
         },
       ]);
 
