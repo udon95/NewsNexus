@@ -6,7 +6,6 @@ import Navbar from "../navbar.jsx";
 import FloatingRoomStats from "../floatingRoomStats.jsx";
 import useAuthHook from "../../hooks/useAuth.jsx";
 
-
 const ViewRoomsPage = () => {
   const [rooms, setRooms] = useState([]);
   const [user, setUser] = useState(null);
@@ -20,9 +19,7 @@ const ViewRoomsPage = () => {
   const { userType } = useAuthHook();
   const [sizeFilter, setSizeFilter] = useState("All");
 
-
   const isPremium = userType === "Premium";
-
 
   useEffect(() => {
     const fetchRoomImages = async () => {
@@ -36,13 +33,11 @@ const ViewRoomsPage = () => {
       setLoadingImages(false);
     };
 
-
     if (rooms.length > 0) {
       // Only fetch images if rooms are available
       fetchRoomImages();
     }
   }, [rooms]); // Runs whenever rooms are updated
-
 
   useEffect(() => {
     const storedUser = JSON.parse(localStorage.getItem("userProfile"));
@@ -53,15 +48,15 @@ const ViewRoomsPage = () => {
     }
   }, []);
 
-
   useEffect(() => {
     const fetchRooms = async () => {
       const { data, error } = await supabase
         .from("rooms")
         // .select("*")
-        .select("roomid, name, description, room_type, member_count, created_by, created_at")
+        .select(
+          "roomid, name, description, room_type, member_count, created_by, created_at"
+        )
         .order("member_count", { ascending: false });
-
 
       if (error) {
         console.error("Error fetching rooms:", error);
@@ -70,21 +65,17 @@ const ViewRoomsPage = () => {
       }
     };
 
-
     fetchRooms();
   }, []);
 
-
   useEffect(() => {
     if (!user) return;
-
 
     const fetchUserRooms = async () => {
       const { data, error } = await supabase
         .from("room_members")
         .select("roomid, exited_at")
         .eq("userid", user.userid);
-
 
       if (error) {
         console.error("Error fetching user rooms:", error);
@@ -96,16 +87,13 @@ const ViewRoomsPage = () => {
       }
     };
 
-
     fetchUserRooms();
   }, [user, rooms]);
-
 
   const handleSearch = (query) => {
     setSearchQuery(query);
     setSearchParams({ query });
   };
-
 
   const handleJoinAndRedirect = async (roomid, e) => {
     e.stopPropagation();
@@ -118,13 +106,10 @@ const ViewRoomsPage = () => {
       return;
     }
 
-
     const userId = user.userid;
-
 
     try {
       setUserRooms((prevRooms) => new Set([...prevRooms, roomid]));
-
 
       const { data: existingMembership, error: checkError } = await supabase
         .from("room_members")
@@ -133,12 +118,10 @@ const ViewRoomsPage = () => {
         .eq("roomid", roomid)
         .single();
 
-
       if (checkError && checkError.code !== "PGRST116") {
         console.error("Error checking previous membership:", checkError);
         return;
       }
-
 
       if (existingMembership) {
         const { error: updateError } = await supabase
@@ -146,7 +129,6 @@ const ViewRoomsPage = () => {
           .update({ exited_at: null, joined_at: new Date().toISOString() })
           .eq("userid", userId)
           .eq("roomid", roomid);
-
 
         if (updateError) {
           console.error("Error rejoining room:", updateError);
@@ -159,13 +141,11 @@ const ViewRoomsPage = () => {
             { userid: userId, roomid, joined_at: new Date().toISOString() },
           ]);
 
-
         if (insertError) {
           console.error("Error joining room:", insertError);
           return;
         }
       }
-
 
       // Use API to update `member_count`
       const { error: countError } = await supabase.rpc(
@@ -173,17 +153,14 @@ const ViewRoomsPage = () => {
         { room_id: roomid }
       );
 
-
       if (countError) {
         console.error("Error updating member count:", countError);
         return;
       }
 
-
       navigate(`/room/${roomid}`);
     } catch (error) {
       console.error("Unexpected error while joining room:", error);
-
 
       setUserRooms((prevRooms) => {
         const newRooms = new Set(prevRooms);
@@ -193,30 +170,26 @@ const ViewRoomsPage = () => {
     }
   };
 
-
   //DEVI ADDED CODE HERE --> SO THE ORDER OF ROOM DISPLAY IS RANK, PRIVATE, JOINED, AND ALL OTHER ROOMS
   const filteredRooms = rooms
-  .filter((room) =>
-    room.name.toLowerCase().includes(searchQuery.toLowerCase())
-  )
-  .filter((room) => {
-    if (sizeFilter === "Small") return room.member_count < 10;
-    if (sizeFilter === "Medium") return room.member_count >= 10 && room.member_count <= 50;
-    if (sizeFilter === "Large") return room.member_count > 50;
-    return true; // All
-  });
-
-
-
+    .filter((room) =>
+      room.name.toLowerCase().includes(searchQuery.toLowerCase())
+    )
+    .filter((room) => {
+      if (sizeFilter === "Small") return room.member_count < 10;
+      if (sizeFilter === "Medium")
+        return room.member_count >= 10 && room.member_count <= 50;
+      if (sizeFilter === "Large") return room.member_count > 50;
+      return true; // All
+    });
 
   const rankedRooms = filteredRooms
-  .filter((room) => room.room_type !== "Private")
-  .slice(0, 3);
-
+    .filter((room) => room.room_type !== "Private")
+    .slice(0, 3);
 
   // FINAL sorted room list: Private → Joined (latest) → Unjoined (latest)
   // const sortedFilteredRooms = [
-    // Only show private rooms if the user is a current member (exited_at is null)
+  // Only show private rooms if the user is a current member (exited_at is null)
   //   ...filteredRooms.filter(
   //     (r) => r.room_type === "Private" && userRooms.has(r.roomid)
   //   ),
@@ -227,7 +200,7 @@ const ViewRoomsPage = () => {
   //     .filter((r) => r.room_type !== "Private" && !userRooms.has(r.roomid))
   //     .sort((a, b) => new Date(b.created_at) - new Date(a.created_at)),
   // ];
- 
+
   const sortedFilteredRooms = [
     // 1. My private rooms
     ...filteredRooms.filter(
@@ -266,7 +239,6 @@ const ViewRoomsPage = () => {
       .filter((r) => r.room_type !== "Private" && !userRooms.has(r.roomid))
       .sort((a, b) => new Date(b.created_at) - new Date(a.created_at)),
   ];
-  
 
   const getRoomImage = async (roomid) => {
     try {
@@ -280,12 +252,10 @@ const ViewRoomsPage = () => {
         .limit(1) // Get only the oldest article
         .single();
 
-
       if (articleError || !oldestArticleData?.postid) {
         console.log("No article found for room:", roomid);
         return "/default-image.png"; // Fallback image if no article is found
       }
-
 
       // Fetch the images associated with the oldest article's postid
       const { data: roomImageData, error: roomImageError } = await supabase
@@ -296,12 +266,10 @@ const ViewRoomsPage = () => {
         .limit(1) // Get the first (oldest) image
         .single(); // Only get one image
 
-
       if (roomImageError || !roomImageData?.image_url) {
         console.log("No image found for the oldest article in room:", roomid);
         return "/default-image.png"; // Fallback image if no image is found
       }
-
 
       return roomImageData.image_url; // Return the URL of the oldest image
     } catch (error) {
@@ -309,7 +277,6 @@ const ViewRoomsPage = () => {
       return "/default-image.png"; // Fallback image in case of error
     }
   };
-
 
   const handleRoomClick = (roomid) => {
     if (userType === "Free") {
@@ -319,102 +286,95 @@ const ViewRoomsPage = () => {
     navigate(`/room/${roomid}`);
   };
 
-
   return (
     <div className="relative min-h-screen w-screen flex flex-col bg-white">
       <Navbar />
       <div className="flex flex-col lg:flex-row gap-4 px-4">
-  {user && (
-    <div className="sticky top-4 self-start w-full lg:w-[100px] left-28">
-      <FloatingRoomStats user={user} />
-    </div>
-  )}
+        {user && (
+          <div className="sticky top-4 self-start w-full lg:w-[100px] left-28">
+            <FloatingRoomStats user={user} />
+          </div>
+        )}
 
-
-<div className="flex-1">
-      <div className="w-full flex justify-center mt-6 mb-6">
-        <div className="w-full max-w-[900px] px-4">
-          <Search
-            onSearch={handleSearch}
-            showSizeFilter={true}
-            sizeFilter={sizeFilter}
-            onSizeFilterChange={setSizeFilter}
-          />
-        </div>
-      </div>
-
-
-      {!isPremium && (
-        <div className="bg-yellow-100 text-yellow-800 p-3 rounded mb-4">
-          You're viewing as a Free user. Join Premium to participate in
-          discussions.
-        </div>
-      )}
-
-
-      <div className="flex flex-col flex-grow items-center w-full px-4">
-        <div className="w-full max-w-5xl p-6 font-grotesk">
-          <h1 className="text-4xl mb-8 font-grotesk text-left">
-            Explore All Rooms:
-          </h1>
-
-
-          {/* RANKING CARD SECTION - UNTOUCHED */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6 w-full">
-            {rankedRooms.map((room, index) => (
-              <div
-                key={room.roomid}
-                onClick={() => handleRoomClick(room.roomid)}
-                className="w-80 h-60 mx-auto border border-black rounded-2xl shadow-md cursor-pointer hover:shadow-lg transition bg-white flex flex-col"
-              >
-                <div className="w-full h-48 bg-gray-200 rounded-t-2xl overflow-hidden relative">
-                  {loadingImages ? (
-                    <div className="w-full h-full flex items-center justify-center bg-gray-200 text-gray-500 text-sm">
-                      Loading...
-                    </div>
-                  ) : roomImages[room.roomid] && roomImages[room.roomid] !== "/default-image.png" ? (
-                    <img
-                      src={roomImages[room.roomid]}
-                      alt={room.name}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center bg-gray-200 text-gray-500 text-sm">
-                      No Images Available
-                    </div>
-                  )}
-
-
-                  <div className="absolute top-2 left-2 bg-black text-white text-sm font-bold px-3 py-1 rounded-lg border-2 border-white">
-                    Rank #{index + 1}
-                  </div>
-                </div>
-
-
-                <div className="w-full border-t border-black"></div>
-
-
-                <p className="text-left text-black font-medium px-4 py-2">
-                  {room.name}
-                </p>
-              </div>
-            ))}
+        <div className="flex-1">
+          <div className="w-full flex justify-center mt-6 mb-6">
+            <div className="w-full max-w-[900px] px-4">
+              <Search
+                onSearch={handleSearch}
+                showSizeFilter={true}
+                sizeFilter={sizeFilter}
+                onSizeFilterChange={setSizeFilter}
+              />
+            </div>
           </div>
 
+          {!isPremium && (
+            <div className="bg-yellow-100 text-yellow-800 p-3 rounded mb-4">
+              Subscribe as Premium to participate in discussions.
+            </div>
+          )}
 
-          {/* DEVI MADE CHANGES HERE - ROOM LIST SECTION - FIXED ORDER: Private → Joined → Others */}
-          <div className="w-full max-w-5xl space-y-4">
-            {sortedFilteredRooms.map((room) => (
-              <div
-                key={room.roomid}
-                onClick={() => handleRoomClick(room.roomid)}
-                className="flex items-center justify-between p-4 border border-black rounded-2xl shadow-md bg-white hover:shadow-lg transition cursor-pointer w-full"
-              >
-                <div>
-                  <span className="text-lg font-bold">{room.name}</span>
-                  <p className="text-sm text-gray-600">{room.description}</p>
-                </div>
-                {/* <button
+          <div className="flex flex-col flex-grow items-center w-full px-4">
+            <div className="w-full max-w-5xl p-6 font-grotesk">
+              <h1 className="text-4xl mb-8 font-grotesk text-left">
+                Explore All Rooms:
+              </h1>
+
+              {/* RANKING CARD SECTION - UNTOUCHED */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6 w-full">
+                {rankedRooms.map((room, index) => (
+                  <div
+                    key={room.roomid}
+                    onClick={() => handleRoomClick(room.roomid)}
+                    className="w-80 h-60 mx-auto border border-black rounded-2xl shadow-md cursor-pointer hover:shadow-lg transition bg-white flex flex-col"
+                  >
+                    <div className="w-full h-48 bg-gray-200 rounded-t-2xl overflow-hidden relative">
+                      {loadingImages ? (
+                        <div className="w-full h-full flex items-center justify-center bg-gray-200 text-gray-500 text-sm">
+                          Loading...
+                        </div>
+                      ) : roomImages[room.roomid] &&
+                        roomImages[room.roomid] !== "/default-image.png" ? (
+                        <img
+                          src={roomImages[room.roomid]}
+                          alt={room.name}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center bg-gray-200 text-gray-500 text-sm">
+                          No Images Available
+                        </div>
+                      )}
+
+                      <div className="absolute top-2 left-2 bg-black text-white text-sm font-bold px-3 py-1 rounded-lg border-2 border-white">
+                        Rank #{index + 1}
+                      </div>
+                    </div>
+
+                    <div className="w-full border-t border-black"></div>
+
+                    <p className="text-left text-black font-medium px-4 py-2">
+                      {room.name}
+                    </p>
+                  </div>
+                ))}
+              </div>
+
+              {/* DEVI MADE CHANGES HERE - ROOM LIST SECTION - FIXED ORDER: Private → Joined → Others */}
+              <div className="w-full max-w-5xl space-y-4">
+                {sortedFilteredRooms.map((room) => (
+                  <div
+                    key={room.roomid}
+                    onClick={() => handleRoomClick(room.roomid)}
+                    className="flex items-center justify-between p-4 border border-black rounded-2xl shadow-md bg-white hover:shadow-lg transition cursor-pointer w-full"
+                  >
+                    <div>
+                      <span className="text-lg font-bold">{room.name}</span>
+                      <p className="text-sm text-gray-600">
+                        {room.description}
+                      </p>
+                    </div>
+                    {/* <button
                   className={`px-6 py-2 text-sm font-bold rounded-full ${
                     userRooms.has(room.roomid)
                     ? "bg-gray-300 text-gray-600 cursor-not-allowed"
@@ -429,43 +389,42 @@ const ViewRoomsPage = () => {
                       : "Joined"
                     : "Join"}
               </button> */}
-              {user?.userid === room.created_by ? (
-                <div className="flex items-center gap-3">
-                <button
-                  className="px-6 py-2 text-sm font-bold rounded-full bg-gray-400 text-white cursor-not-allowed"
-                  disabled
-                >
-                  My Room
-                </button>
-                <span className="bg-black text-white text-xs font-semibold px-3 py-1 rounded-full border border-gray-300">
-                  {room?.room_type?.toUpperCase()}
-                </span>
+                    {user?.userid === room.created_by ? (
+                      <div className="flex items-center gap-3">
+                        <button
+                          className="px-6 py-2 text-sm font-bold rounded-full bg-gray-400 text-white cursor-not-allowed"
+                          disabled
+                        >
+                          My Room
+                        </button>
+                        <span className="bg-black text-white text-xs font-semibold px-3 py-1 rounded-full border border-gray-300">
+                          {room?.room_type?.toUpperCase()}
+                        </span>
+                      </div>
+                    ) : userRooms.has(room.roomid) ? (
+                      <button
+                        className="px-6 py-2 text-sm font-bold rounded-full bg-gray-300 text-gray-600 cursor-not-allowed"
+                        disabled
+                      >
+                        {room.room_type === "Private" ? "Private" : "Joined"}
+                      </button>
+                    ) : (
+                      <button
+                        className="px-6 py-2 text-sm font-bold rounded-full bg-[#BFD8FF] text-black hover:bg-blue-300"
+                        onClick={(e) => handleJoinAndRedirect(room.roomid, e)}
+                      >
+                        Join
+                      </button>
+                    )}
+                  </div>
+                ))}
               </div>
-              ) : userRooms.has(room.roomid) ? (
-                <button
-                  className="px-6 py-2 text-sm font-bold rounded-full bg-gray-300 text-gray-600 cursor-not-allowed"
-                  disabled
-                >
-                  {room.room_type === "Private" ? "Private" : "Joined"}
-                </button>
-              ) : (
-                <button
-                  className="px-6 py-2 text-sm font-bold rounded-full bg-[#BFD8FF] text-black hover:bg-blue-300"
-                  onClick={(e) => handleJoinAndRedirect(room.roomid, e)}
-                >
-                  Join
-                </button>
-              )}
-              </div>
-            ))}
+            </div>
           </div>
         </div>
       </div>
     </div>
-    </div>
-    </div>
   );
 };
-
 
 export default ViewRoomsPage;
