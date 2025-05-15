@@ -371,19 +371,27 @@ if (removedMembers.length > 0) {
     fetchRooms();
   };
 
-  const handleExitRoom = async (roomid) => {
-    await fetch(
-      "https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/rooms/exit",
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userid: userId, roomid }),
-      }
-    );
+const handleExitRoom = async (roomid) => {
+  const res = await fetch(
+    "https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/rooms/exit",
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userid: userId, roomid }),
+    }
+  );
+
+  if (res.ok) {
     alert("You exited the room");
-fetchJoinedRooms();
-fetchRooms(); 
-  };
+
+    // 🔄 Refresh both owned + joined rooms to update member count
+    await fetchRooms();
+    await fetchJoinedRooms();
+  } else {
+    alert("Failed to exit room");
+  }
+};
+
 
 const handleAcceptInvite = async (roomid) => {
   const { data: typeRow } = await supabase
