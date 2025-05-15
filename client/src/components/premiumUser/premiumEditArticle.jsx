@@ -249,14 +249,26 @@ export const PremiumEditArticle = () => {
     setIsUploading(true);
 
     const storedUser = localStorage.getItem("userProfile");
-    if (!storedUser) return alert("User not authenticated. Cannot upload.");
-
+    if (!storedUser) {
+      alert("User not authenticated. Cannot upload.");
+      setIsUploading(false);
+      setUploadAction(""); // DEVI ADDED THIS
+      return;
+    }
     const parsedUser = JSON.parse(storedUser);
     const session = parsedUser?.user;
-    if (!session) return alert("User not authenticated.");
+    if (!session) {
+      alert("User not authenticated. Cannot upload.");
+      setIsUploading(false);
+      setUploadAction(""); // DEVI ADDED THIS
+      return;
+    }
 
     if (!title || !articleContent || !topics) {
-      return alert("Please fill in all required fields.");
+      alert("Please fill in all required fields.");
+      setIsUploading(false);
+      setUploadAction("");
+      return;
     }
 
     let updatedHTML = editor?.getHTML() || articleContent;
@@ -301,7 +313,7 @@ export const PremiumEditArticle = () => {
         uploadedImageUrls.push(urlData.publicUrl);
       }
     }
-    console.log("premium draft post iamges", uploadedImageUrls);
+    //console.log("premium draft post images", uploadedImageUrls);
 
     const topicName = topicOptions.find((t) => t.topicid === topics)?.name;
     const response = await fetch(
@@ -326,7 +338,14 @@ export const PremiumEditArticle = () => {
       if (result.feedback) {
         setAiFeedback(result.feedback);
         setAccuracy(result.accuracy || null);
+        //console.log("accuracy", result.accuracy);
+        //console.log("feedback", result.feedback);
+
         alert("Article flagged by AI. Please review the highlighted sections.");
+        if (result.accuracy < 75) {
+          setOpenSuccess(false); // Don't show success dialog
+          setOpenError(true); // Show error message instead
+        }
       } else {
         alert(result.error || "Submission failed.");
       }
@@ -335,6 +354,44 @@ export const PremiumEditArticle = () => {
       return;
     }
 
+    const articleid = result.article?.articleid;
+    //console.log("result article", result.article);
+
+    if (articleid && firstImageUrl) {
+      // 3. Update imagepath in the `articles` table after successful submission
+      const { data, error } = await supabase
+        .from("articles")
+        .update({ imagepath: firstImageUrl })
+        .eq("articleid", articleid);
+
+      if (error) {
+        console.error("Error updating imagepath:", error);
+        alert("Failed to update image path.");
+        setIsUploading(false);
+        setUploadAction(""); // DEVI ADDED THIS
+        return;
+      }
+
+      //console.log("Image path updated for article:", articleid);
+    }
+
+    for (const url of uploadedImageUrls) {
+      await supabase
+        .from("article_images")
+        .insert([{ articleid, image_url: url }]);
+      //console.log("img3", url);
+    }
+    // Also insert any previously uploaded draft images not yet inserted
+    for (const img of pendingImages) {
+      if (!img.file && img.previewUrl?.startsWith("https://")) {
+        await supabase
+          .from("article_images")
+          .insert([{ articleid, image_url: img.previewUrl }]);
+      }
+    }
+
+
+    // handled in backend
     // 📝 Insert new published article
     // const { data, error } = await supabase
     //   .from("articles")
@@ -390,10 +447,18 @@ export const PremiumEditArticle = () => {
     setPendingImages([]);
     handleClearInputs();
 
-    setAccuracy(result.accuracy);
-    setAiFeedback(result.feedback);
-    //alert(`Article posted successfully. Accuracy Score: ${result.accuracy}%`);
-    setOpenSuccess(true);
+    if (result.accuracy >= 75) {
+      setAccuracy(result.accuracy);
+      setAiFeedback(result.feedback);
+      setOpenSuccess(true); // Show success dialog
+      setOpenError(false); // Hide error warning
+    } else {
+      setAccuracy(result.accuracy);
+      setAiFeedback(result.feedback);
+      setOpenSuccess(false); // Hide success dialog
+      setOpenError(true); // Show error warning
+    }
+    return;
   };
 
   const handlePostRoomArticle = async () => {
@@ -536,6 +601,7 @@ export const PremiumEditArticle = () => {
         userid: session.userid,
         status: "Published",
         created_at: new Date().toISOString(),
+        imagepath: firstImageUrl || null, // Add this line
       })
       .eq("postid", id)
       .select("postid");
@@ -559,6 +625,16 @@ export const PremiumEditArticle = () => {
         .from("room_article_images")
         .insert([{ postid, image_url: url }]);
     }
+
+    // ✅ Also insert any previously uploaded draft images not yet inserted
+    for (const img of pendingImages) {
+      if (!img.file && img.previewUrl?.startsWith("https://")) {
+        await supabase
+          .from("room_article_images")
+          .insert([{ postid, image_url: img.previewUrl }]);
+      }
+    }
+
 
     // Clean up
     pendingImages.forEach((img) => {
@@ -830,6 +906,7 @@ export const PremiumEditArticle = () => {
           userid: articleData.userid,
           created_at: articleData.time,
           status: articleData.status,
+          imagepath: articleData.imagepath,
         })
         .eq("postid", id);
 
@@ -1020,7 +1097,9 @@ export const PremiumEditArticle = () => {
           setEditorContent(roomData.content);
 
           setAmendment(roomData.amendment || "");
-          setWordCount(roomData.content.trim().split(/\s+/).filter(Boolean).length);
+          setWordCount(
+            roomData.content.trim().split(/\s+/).filter(Boolean).length
+          );
           if (editor) editor.setEditable(roomData.status === "Draft");
 
           const { data: imageRows } = await supabase
@@ -1056,7 +1135,9 @@ export const PremiumEditArticle = () => {
     setPendingImages([]);
     setAccuracy(null);
     setAiFeedback("");
-
+    setUploadAction(""); // <- DEVI ADDED THIS FOR THE LOAD AND POST INDICATOR
+    setOpenError(false);
+    setOpenSuccess(false);
     // Reset Tiptap editor content (this is the key)
     if (editor) {
       editor.commands.clearContent();
@@ -1183,6 +1264,7 @@ export const PremiumEditArticle = () => {
           topic_name: rawInput, // keep original casing for admin view
           status: "Pending",
           created_at: new Date().toISOString(),
+          
         },
       ]);
 
@@ -1500,15 +1582,14 @@ export const PremiumEditArticle = () => {
                   </button>
                 </div>
 
-                {accuracy !== null && aiFeedback !== null && accuracy < 75 && (
+                {openError && (
                   <div className="mt-4 p-4 border border-red-300 bg-red-50 rounded text-sm text-black">
                     <strong>Fact Check Results:</strong>
-                    {accuracy !== null && (
-                      <p>
-                        <strong>Accuracy: </strong>
-                        {accuracy}%
-                      </p>
-                    )}
+                    <p>
+                      <strong>Accuracy: </strong>
+                      {accuracy}%
+                    </p>
+
                     <p>
                       <strong>Feedback: </strong>
                     </p>
@@ -1594,6 +1675,7 @@ export const PremiumEditArticle = () => {
                 <button
                   className="bg-yellow-500 text-white px-4 py-2 rounded-md"
                   onClick={handleSaveDraft}
+                  disabled={isUploading}
                 >
                   {isUploading && uploadAction === "draft"
                     ? "Saving..."
@@ -1604,6 +1686,7 @@ export const PremiumEditArticle = () => {
                   <button
                     className="bg-blue-600 text-white px-4 py-2 rounded-md"
                     onClick={handlePostGeneralArticle}
+                    disabled={isUploading}
                   >
                     {isUploading && uploadAction === "post"
                       ? "Posting..."
@@ -1613,6 +1696,7 @@ export const PremiumEditArticle = () => {
                   <button
                     className="bg-blue-600 text-white px-4 py-2 rounded-md"
                     onClick={handlePostRoomArticle}
+                    disabled={isUploading}
                   >
                     {isUploading && uploadAction === "post"
                       ? "Posting..."

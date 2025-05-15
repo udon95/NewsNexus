@@ -378,26 +378,40 @@ export const FreeWriteArticle = () => {
         if (result.feedback) {
           setAiFeedback(result.feedback);
           setAccuracy(result.accuracy || null);
+          //console.log("accuracy", result.accuracy);
+          //console.log("feedback", result.feedback);
+
           alert(
-            " Article flagged by AI. Please review the highlighted sections."
+            "Article flagged by AI. Please review the highlighted sections."
           );
+          if (result.accuracy < 75) {
+            setOpenSuccess(false); // Don't show success dialog
+            setOpenError(true); // Show error message instead
+          }
         } else {
           alert(result.error || "Submission failed.");
         }
         setIsUploading(false);
         setUploadAction(""); // DEVI ADDED THIS
-        //  This is important to prevent saving
         return;
       }
-
       pendingImages.forEach((img) => URL.revokeObjectURL(img.previewUrl)); // cleanup object URLs
       setPendingImages([]);
       handleClearInputs();
 
-      setAccuracy(result.accuracy);
-      setAiFeedback(result.feedback);
-      //alert(`Article posted successfully. Accuracy Score: ${result.accuracy}%`);
-      setOpenSuccess(true);
+      if (result.accuracy >= 75) {
+        setAccuracy(result.accuracy);
+        setAiFeedback(result.feedback);
+        setOpenSuccess(true); // Show success dialog
+        setOpenError(false); // Hide error warning
+      } else {
+        setAccuracy(result.accuracy);
+        setAiFeedback(result.feedback);
+        setOpenSuccess(false); // Hide success dialog
+        setOpenError(true); // Show error warning
+      }
+      //console.log("accuracy final", accuracy);
+      //console.log("feedback final", aiFeedback);
       return;
     }
   };
@@ -731,8 +745,10 @@ export const FreeWriteArticle = () => {
   };
 
   return (
-    <div className="w-full min-h-screen bg-indigo-50 text-black font-grotesk flex justify-center">
-      <main className="w-full max-w-4xl p-10 flex flex-col gap-6">
+    // <div className="w-full min-h-screen bg-indigo-50 text-black font-grotesk flex justify-center">
+    //   <main className="w-full max-w-5xl px-4 py-10>
+    <div className="w-full min-h-screen flex flex-col items-center bg-indigo-50 text-black font-grotesk">
+      <div className="w-full max-w-5xl px-4 py-10">
         <h1 className="text-3xl font-bold mb-1">Publish Your Articles: </h1>
 
         <div className="flex flex-col gap-5 w-full">
@@ -942,15 +958,14 @@ export const FreeWriteArticle = () => {
                   </button>
                 </div>
 
-                {accuracy !== null && aiFeedback !== null && accuracy < 75 && (
+                {openError && (
                   <div className="mt-4 p-4 border border-red-300 bg-red-50 rounded text-sm text-black">
                     <strong>Fact Check Results:</strong>
-                    {accuracy !== null && (
-                      <p>
-                        <strong>Accuracy: </strong>
-                        {accuracy}%
-                      </p>
-                    )}
+                    <p>
+                      <strong>Accuracy: </strong>
+                      {accuracy}%
+                    </p>
+
                     <p>
                       <strong>Feedback: </strong>
                     </p>
@@ -1029,7 +1044,7 @@ export const FreeWriteArticle = () => {
                   : "bg-blue-600"
               } text-white`}
               onClick={monthlyPostCount >= 4 ? null : handlePostArticle}
-              disabled={monthlyPostCount >= 4}
+              disabled={monthlyPostCount >= 4 || isUploading}
             >
               {isUploading && uploadAction === "post" ? "Posting..." : "Post"}
             </button>
@@ -1228,7 +1243,7 @@ export const FreeWriteArticle = () => {
             </Button>
           </DialogActions>
         </Dialog>
-      </main>
+      </div>
     </div>
   );
 };

@@ -25,8 +25,6 @@ import FloatingWriteButton from "./components/writeButton.jsx";
 import supabase from "./api/supabaseClient.js";
 import "./index.css";
 
-import TestWrite from "./components/premiumUser/testWriteArticle.jsx";
-
 function RequireAuth({ children, requirePremium = false, onlyFree = false }) {
   const [loading, setLoading] = useState(true);
   const [isAuthorized, setIsAuthorized] = useState(false);
@@ -121,7 +119,6 @@ function App() {
               path="/subscription-status/:status"
               element={<SubscriptionStatus />}
             />
-            {/* <Route path="/test" element={<TestWrite />} /> */}
 
             <Route path="/explore" element={<Explore />} />
             <Route path="/guidelines" element={<Guidelines />} />

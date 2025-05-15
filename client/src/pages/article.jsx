@@ -17,6 +17,8 @@ import {
   BookOpenIcon,
   X,
   Loader,
+  Pause,
+  CircleStop,
 } from "lucide-react";
 import TranslateButton from "../components/translate.jsx";
 
@@ -24,7 +26,6 @@ const Article = () => {
   const articleRef = useRef(null);
   const { userType, user } = useAuthHook();
   const { articleId } = useParams();
-  //const decodedTitle = decodeURIComponent(articleName);
   const navigate = useNavigate();
 
   const [articleData, setArticleData] = useState(null);
@@ -34,6 +35,7 @@ const Article = () => {
   const [isSpeaking, setIsSpeaking] = useState(false);
   const speechRef = useRef(null);
   const [originalText, setOriginalText] = useState("");
+  const [originalHtml, setOriginalHtml] = useState("");
   const [translatedText, setTranslatedText] = useState("");
   const [selectedLanguage, setSelectedLanguage] = useState("en");
   const [ttsLoading, setTtsLoading] = useState(false);
@@ -112,7 +114,7 @@ const Article = () => {
 
     setTtsLoading(true);
     try {
-      const text = articleRef.current.innerText;
+      const text = articleRef.current.innerText.trim();
       const locale = selectedLanguage === "en" ? "en-SG" : selectedLanguage;
       //console.log("selected lang", locale);
 
@@ -157,10 +159,22 @@ const Article = () => {
       return;
     }
 
-    setSelectedLanguage(targetLang);
-    const textToTranslate = originalText;
-    setTranslating(true);
+    if (targetLang === "en") {
+      setTranslatedText("");
+      setSelectedLanguage("en");
+      return;
+    }
 
+    if (targetLang === selectedLanguage) {
+      return;
+    }
+
+    setSelectedLanguage(targetLang);
+    //const parser = new DOMParser().parseFromString(originalText, "text/html");
+    //const plain = parser.body.textContent || "";
+    const textToTranslate = originalText;
+
+    setTranslating(true);
     try {
       const response = await fetch(
         "https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/translate",
@@ -255,6 +269,16 @@ const Article = () => {
 
   const hasRecordedRef = useRef(false);
 
+  const displayHtml =
+    //  if still English or nothing translated yet:
+    selectedLanguage === "en" || !translatedText
+      ? originalHtml
+      : // otherwise, wrap each paragraph in <p>…</p>
+        translatedText
+          .split("\n\n") // split on blank lines
+          .map((para) => `<p>${para}</p>`)
+          .join("");
+
   useEffect(() => {
     const fetchArticle = async () => {
       const { data, error } = await supabase
@@ -268,7 +292,11 @@ const Article = () => {
 
       if (!error && data?.articleid) {
         setArticleData(data);
-        setOriginalText(data.text);
+        setOriginalHtml(data.text);
+
+        const doc = new DOMParser().parseFromString(data.text, "text/html");
+        const plain = doc.body.textContent || "";
+        setOriginalText(plain);
 
         // Optional: check for expert status
         if (data?.userid && data?.topicid) {
@@ -424,11 +452,17 @@ const Article = () => {
                   <button
                     onClick={handleTTS}
                     disabled={ttsLoading}
-                    title="Text-to-Speech"
-                    className="w-10 h-10 p-2 bg-gray-200 rounded-lg hover:bg-gray-300 flex items-center justify-center"
+                    title={isSpeaking ? "Pause TTS" : "Play TTS"}
+                    className={`w-10 h-10 p-2 bg-gray-200 rounded-lg hover:bg-gray-300 flex items-center justify-center ${
+                      ttsLoading
+                        ? "bg-gray-100 cursor-wait"
+                        : "bg-gray-200 hover:bg-gray-300"
+                    }`}
                   >
                     {ttsLoading ? (
                       <Loader className="animate-spin h-5 w-5 text-gray-600" />
+                    ) : isSpeaking ? (
+                      <Pause className="h-5 w-5 text-black" />
                     ) : (
                       <Headphones className="h-5 w-5 text-black" />
                     )}
@@ -473,7 +507,8 @@ const Article = () => {
               <ArticleContent
                 articleRef={articleRef}
                 title={articleData.title}
-                text={translatedText || originalText}
+                //text={translatedText || originalText}
+                text={displayHtml}
                 imagepath={articleData.imagepath}
                 postDate={new Date(articleData.time).toLocaleDateString()}
                 author={{
@@ -529,10 +564,12 @@ const Article = () => {
                       <X className="h-6 w-6 text-gray-600 hover:text-black" />
                     </button>
                   </div>
-                  <p className="text-lg mt-2">
-                    <strong>{selectedText}:</strong>{" "}
-                    {loading ? "Loading..." : definition}
-                  </p>
+                  <div className="mt-4 max-h-60 overflow-y-auto text-left">
+                    <p className="text-lg mt-2">
+                      <strong>{selectedText}:</strong>{" "}
+                      {loading ? "Loading..." : definition}
+                    </p>
+                  </div>
                 </div>
               </div>
             )}

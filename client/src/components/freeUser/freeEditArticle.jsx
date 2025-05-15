@@ -281,6 +281,10 @@ const EditFreeArticle = () => {
   const MAX_WORDS = 1000;
 
   const handlePostArticle = async () => {
+    setUploadAction("post");
+    if (isUploading) return;
+    setIsUploading(true);
+
     if (!articleId) return;
 
     const storedUser = localStorage.getItem("userProfile");
@@ -335,15 +339,21 @@ const EditFreeArticle = () => {
         if (result.feedback) {
           setAiFeedback(result.feedback);
           setAccuracy(result.accuracy || null);
+          //console.log("accuracy", result.accuracy);
+          //console.log("feedback", result.feedback);
+
           alert(
-            " Article flagged by AI. Please review the highlighted sections."
+            "Article flagged by AI. Please review the highlighted sections."
           );
+          if (result.accuracy < 75) {
+            setOpenSuccess(false); // Don't show success dialog
+            setOpenError(true); // Show error message instead
+          }
         } else {
           alert(result.error || "Submission failed.");
         }
         setIsUploading(false);
         setUploadAction(""); // DEVI ADDED THIS
-        //  This is important to prevent saving
         return;
       }
 
@@ -358,7 +368,25 @@ const EditFreeArticle = () => {
       //     status: "Published",
       //   })
       //   .eq("articleid", articleId);
+      pendingImages.forEach((img) => {
+        if (img.previewUrl?.startsWith("blob:")) {
+          URL.revokeObjectURL(img.previewUrl);
+        }
+      });
+      setPendingImages([]);
 
+      // Delete the draft article if `id` is defined
+      if (id) {
+        const { error: deleteError } = await supabase
+          .from("articles")
+          .delete()
+          .eq("articleid", id);
+
+        if (deleteError) {
+          console.error("Failed to delete draft article:", deleteError);
+          // Not blocking, just warn
+        }
+      }
       pendingImages.forEach((img) => URL.revokeObjectURL(img.previewUrl)); // cleanup object URLs
       setPendingImages([]);
       handleClearInputs();
@@ -625,7 +653,9 @@ const EditFreeArticle = () => {
     setPendingImages([]);
     setAccuracy(null);
     setAiFeedback("");
-
+    setUploadAction(""); // <- DEVI ADDED THIS FOR THE LOAD AND POST INDICATOR
+    setOpenError(false);
+    setOpenSuccess(false);
     // Reset Tiptap editor content (this is the key)
     if (editor) {
       editor.commands.clearContent();
@@ -1017,26 +1047,24 @@ const EditFreeArticle = () => {
                     </div>
                   )}
 
-                  {accuracy !== null &&
-                    aiFeedback !== null &&
-                    accuracy < 75 && (
-                      <div className="mt-4 p-4 border border-red-300 bg-red-50 rounded text-sm text-black">
-                        <strong>Fact Check Results:</strong>
-                        {accuracy !== null && (
-                          <p>
-                            <strong>Accuracy: </strong>
-                            {accuracy}%
-                          </p>
-                        )}
-                        <p>
-                          <strong>Feedback: </strong>
-                        </p>
-                        <div
-                          className="mt-1"
-                          dangerouslySetInnerHTML={{ __html: aiFeedback }}
-                        />
-                      </div>
-                    )}
+                  {openError && (
+                    <div className="mt-4 p-4 border border-red-300 bg-red-50 rounded text-sm text-black">
+                      <strong>Fact Check Results:</strong>
+
+                      <p>
+                        <strong>Accuracy: </strong>
+                        {accuracy}%
+                      </p>
+
+                      <p>
+                        <strong>Feedback: </strong>
+                      </p>
+                      <div
+                        className="mt-1"
+                        dangerouslySetInnerHTML={{ __html: aiFeedback }}
+                      />
+                    </div>
+                  )}
                   <Box mb={1} mt={1}>
                     <Typography
                       variant="body2"
@@ -1126,6 +1154,7 @@ const EditFreeArticle = () => {
                   <button
                     className="bg-yellow-500 text-white px-4 py-2 rounded-md"
                     onClick={handleSaveDraft}
+                    disabled={isUploading}
                   >
                     {isUploading && uploadAction === "draft"
                       ? "Saving..."
@@ -1135,6 +1164,7 @@ const EditFreeArticle = () => {
                   <button
                     className="bg-blue-600 text-white px-4 py-2 rounded-md"
                     onClick={handlePostArticle}
+                    disabled={isUploading}
                   >
                     {isUploading && uploadAction === "post"
                       ? "Posting..."
@@ -1145,6 +1175,7 @@ const EditFreeArticle = () => {
                 <button
                   className="bg-blue-600 text-white px-4 py-2 rounded-md"
                   onClick={handlePostArticle}
+                  disabled={isUploading}
                 >
                   Add Update
                 </button>

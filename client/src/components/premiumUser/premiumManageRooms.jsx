@@ -11,6 +11,9 @@ const ManageRooms = () => {
   const [invites, setInvites] = useState([]);
   const [inviteInput, setInviteInput] = useState("");
   const [validUserPills, setValidUserPills] = useState([]); // list of confirmed usernames
+  const [editInviteInput, setEditInviteInput] = useState("");
+  const [editValidUserPills, setEditValidUserPills] = useState([]);
+  const [removedMembers, setRemovedMembers] = useState([]);
 
   const [newPublicRoom, setNewPublicRoom] = useState({
     name: "",
@@ -36,33 +39,65 @@ const ManageRooms = () => {
   const userId = userProfile?.user?.userid;
   const myUsername = userProfile?.user?.username;
 
+  
   const fetchRooms = async () => {
-    const res = await fetch(
-      `https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/rooms/${userId}`
-    );
-    const data = await res.json();
-    setPublicRooms(data.filter((room) => room.room_type === "Public"));
-    setPrivateRooms(data.filter((room) => room.room_type === "Private"));
-  };
+  const res = await fetch(
+    `https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/rooms/${userId}`
+  );
+  const data = await res.json();
+    
+  const fetchCounts = await Promise.all(
+    data.map(async (room) => {
+      const { count, error } = await supabase
+        .from("room_members")
+        .select("*", { count: "exact", head: true })
+        .eq("roomid", room.roomid)
+        .is("exited_at", null);
+
+      return {
+        ...room,
+        member_count: count || 0,
+      };
+    })
+  );
+
+  setPublicRooms(fetchCounts.filter((room) => room.room_type === "Public"));
+  setPrivateRooms(fetchCounts.filter((room) => room.room_type === "Private"));
+};
+
 
   const fetchJoinedRooms = async () => {
-    const res = await fetch(
-      `https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/rooms/joined/${userId}`
-    );
-    const data = await res.json();
+  const res = await fetch(
+    `https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/rooms/joined/${userId}`
+  );
+  const data = await res.json();
 
-    const publicJoined = data.filter((room) => room.room_type === "Public");
-    const privateJoined = data.filter((room) => room.room_type === "Private");
+  const fetchCounts = await Promise.all(
+    data.map(async (room) => {
+      const { count, error } = await supabase
+        .from("room_members")
+        .select("*", { count: "exact", head: true })
+        .eq("roomid", room.roomid)
+        .is("exited_at", null);
 
-    setJoinedPublicRooms(publicJoined);
-    setJoinedPrivateRooms(privateJoined);
-  };
+      return {
+        ...room,
+        member_count: count || 0,
+      };
+    })
+  );
+
+  setJoinedPublicRooms(fetchCounts.filter((room) => room.room_type === "Public"));
+  setJoinedPrivateRooms(fetchCounts.filter((room) => room.room_type === "Private"));
+};
+
 
   const fetchInvites = async () => {
     const { data, error } = await supabase
       .from("room_invites")
       .select("roomid, rooms(name)")
       .eq("userid", userId);
+     console.log("Invite Data Fetched:", data);
 
     if (!error) {
       const formatted = data.map((item, i) => ({
@@ -79,104 +114,127 @@ const ManageRooms = () => {
     fetchInvites();
   }, [userId]);
 
-  const handleAddPublicRoom = async () => {
-    const res = await fetch(
-      "https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/rooms",
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...newPublicRoom,
-          room_type: "Public",
-          created_by: userId,
-        }),
-      }
-    );
+const handleAddPublicRoom = async () => {
+  const { data: typeRow } = await supabase
+    .from("usertype")
+    .select("usertype")
+    .eq("userid", userId)
+    .maybeSingle();
 
-    if (res.ok) {
-      alert("Public room created");
-      setNewPublicRoom({ name: "", description: "" });
-      fetchRooms();
+  if (!typeRow || typeRow.usertype !== "Premium") {
+    alert("Only Premium users can create public rooms.");
+    return;
+  }
+
+  const res = await fetch(
+    "https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/rooms",
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        ...newPublicRoom,
+        room_type: "Public",
+        created_by: userId,
+      }),
     }
-  };
+  );
 
-  const handleAddPrivateRoom = async () => {
-    const res = await fetch(
-      "https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/rooms",
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...newPrivateRoom,
-          room_type: "Private",
-          created_by: userId,
-          member_limit: newPrivateRoom.member_limit || 20,
-        }),
-      }
-    );
+  if (res.ok) {
+    alert("Public room created");
+    setNewPublicRoom({ name: "", description: "" });
+    fetchRooms();
+  }
+};
 
-    if (res.ok) {
-      alert("Private room created");
-      const roomData = await res.json();
-      const roomid = roomData.data[0].roomid;
+ const handleAddPrivateRoom = async () => {
+   const usernames = validUserPills;
 
-      // const usernames = newPrivateRoom.invite
-      //   .split(",")
-      //   .map((s) => s.replace("@", "").trim())
-      //   .filter(Boolean);
-      const usernames = validUserPills;
+  if (usernames.length > 10) {
+    alert("You can only invite up to 10 users.");
+    return;
+  }
 
-      // if (usernames.length > 10) {
-      //   alert("You can only invite up to 10 users to a private room.");
-      //   return;
-      // }
+  // 🔍 1. Validate and fetch user IDs from Supabase
+  const { data: userRows, error: userErr } = await supabase
+    .from("users")
+    .select("userid, username")
+    .in("username", usernames);
 
-      if (usernames.length > newPrivateRoom.member_limit - 1) {
-        alert(`You can only invite up to ${newPrivateRoom.member_limit - 1} users.`);
-        return;
-      }      
+  if (!userRows || userRows.length === 0) {
+    alert("No matching users found.");
+    return;
+  }
 
-      // Validate usernames before inviting
-      const { data: users } = await supabase
-        .from("user_profiles") // adjust table name if different
-        .select("username")
-        .in("username", usernames);
+  // 🔍 2. Check Premium status
+  const userIds = userRows.map((u) => u.userid);
 
-      const validUsernames = users.map((u) => u.username);
-      const invalidUsernames = usernames.filter(
-        (name) => !validUsernames.includes(name)
-      );
+  const { data: userTypeRows } = await supabase
+    .from("usertype")
+    .select("userid, usertype")
+    .in("userid", userIds);
 
-      if (invalidUsernames.length > 0) {
-        alert(`The following usernames are invalid: ${invalidUsernames.join(", ")}`);
-      return;
-      }
+  const validPremiumUsers = userRows.filter((u) => {
+    const tier = userTypeRows.find((t) => t.userid === u.userid);
+    return tier?.usertype === "Premium";
+  });
 
+  const invalidUsers = userRows.filter((u) => {
+    const tier = userTypeRows.find((t) => t.userid === u.userid);
+    return tier?.usertype !== "Premium";
+  });
 
-      // for (let username of usernames) {
-      for (let username of validUsernames) {
-        await fetch(
-          "https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/rooms/invite",
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              invitee_username: username,
-              roomid,
-            }),
-          }
-        );
-      }
+  if (invalidUsers.length > 0) {
+    const names = invalidUsers.map((u) => u.username).join(", ");
+    alert(`These users are not Premium: ${names}`);
+    return;
+  }
 
-      setNewPrivateRoom({
-        name: "",
-        description: "",
-        member_limit: 20,
-        invite: "",
-      });
-      fetchRooms();
+  // ✅ 3. Create Room
+  const res = await fetch("https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/rooms", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      ...newPrivateRoom,
+      room_type: "Private",
+      created_by: userId,
+      member_limit: newPrivateRoom.member_limit,
+    }),
+  });
+
+  if (!res.ok) {
+    alert("Room creation failed.");
+    return;
+  }
+
+  const roomData = await res.json();
+  const roomid = roomData?.data?.[0]?.roomid;
+
+  if (!roomid) {
+    alert("Room ID not returned.");
+    return;
+  }
+
+  // ✅ 4. Send invites using correct user ID or username
+  for (let user of validPremiumUsers) {
+    const inviteRes = await fetch("https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/rooms/invite", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        invitee_username: user.username,
+        roomid,
+      }),
+    });
+
+    if (!inviteRes.ok) {
+      console.error(`Failed to invite ${user.username}`);
     }
-  };
+  }
+
+  alert("Private room created and invites sent.");
+  setNewPrivateRoom({ name: "", description: "", invite: "", member_limit: 20 });
+  fetchRooms();
+};
+
 
   const handleUpdateRoom = async (
     roomid,
@@ -193,11 +251,19 @@ const ManageRooms = () => {
       member_limit: currentLimit || 20,
     });
 
-    const res = await fetch(
-      `https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/rooms/members/${roomid}`
-    );
-    const data = await res.json();
-    setRoomMembers(data || []);
+    const { data, error } = await supabase
+    .from("room_members")
+    .select("userid, users(username)")
+    .eq("roomid", roomid)
+    .is("exited_at", null);
+  
+  if (data) {
+    const formatted = data.map((entry) => ({
+      userid: entry.userid,
+      username: entry.users?.username || "",
+    }));
+    setRoomMembers(formatted);
+  }  
     setShowModal(true);
   };
 
@@ -213,13 +279,14 @@ const ManageRooms = () => {
       }
     );
     
-     if (room_type === "Private" && editRoom.invite) {
+    //  if (room_type === "Private" && editRoom.invite) {
+      if (room_type === "Private" && editValidUserPills.length > 0) {
     // const usernames = editRoom.invite
     //   .split(",")
     //   .map((s) => s.replace("@", "").trim())
     //   .filter(Boolean);
 
-    const usernames = validUserPills;
+    const usernames = editValidUserPills;
 
     if (usernames.length > 10) {
       alert("You can only invite up to 10 users.");
@@ -239,7 +306,41 @@ const ManageRooms = () => {
         }
       );
     }
+    setEditValidUserPills([]);
+
   }
+
+  // 🔹 Remove members from the room
+if (removedMembers.length > 0) {
+  for (let member of removedMembers) {
+    await fetch("https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/rooms/remove-member", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ roomid, username: member.username }),
+    });
+  }
+  setRemovedMembers([]);
+}
+
+
+  // Remove marked members
+  // if (removedMembers.length > 0) {
+    // for (let username of removedMembers) {
+    //   await fetch("https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/rooms/remove-member", {
+    //     method: "POST",
+    //     headers: { "Content-Type": "application/json" },
+    //     body: JSON.stringify({ roomid, username }),
+    //   });
+    // }
+  //   for (let member of removedMembers) {
+  //     await fetch("https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/rooms/remove-member", {
+  //       method: "POST",
+  //       headers: { "Content-Type": "application/json" },
+  //       body: JSON.stringify({ roomid, username: member.username }),
+  //     });
+  //   }    
+  //     setRemovedMembers([]);
+  // }
 
     setEditRoom((prev) => ({ ...prev, invite: "" }));
 
@@ -257,31 +358,53 @@ const ManageRooms = () => {
     fetchRooms();
   };
 
-  const handleExitRoom = async (roomid) => {
-    await fetch(
-      "https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/rooms/exit",
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userid: userId, roomid }),
-      }
-    );
-    alert("You exited the room");
-    fetchJoinedRooms(); // refresh
-  };
+const handleExitRoom = async (roomid) => {
+  const res = await fetch(
+    "https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/rooms/exit",
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userid: userId, roomid }),
+    }
+  );
 
-  const handleAcceptInvite = async (roomid) => {
-    await fetch(
-      "https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/rooms/accept",
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userid: userId, roomid }),
-      }
-    );
-    alert("Joined room");
-    fetchInvites();
-  };
+  if (res.ok) {
+    alert("You exited the room");
+
+    // 🔄 Refresh both owned + joined rooms to update member count
+    await fetchRooms();
+    await fetchJoinedRooms();
+  } else {
+    alert("Failed to exit room");
+  }
+};
+
+
+const handleAcceptInvite = async (roomid) => {
+  const { data: typeRow } = await supabase
+    .from("usertype")
+    .select("usertype")
+    .eq("userid", userId)
+    .maybeSingle();
+
+  if (!typeRow || typeRow.usertype !== "Premium") {
+    alert("Only Premium users can join rooms.");
+    return;
+  }
+
+  await fetch(
+    "https://bwnu7ju2ja.ap-southeast-1.awsapprunner.com/rooms/accept",
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userid: userId, roomid }),
+    }
+  );
+  alert("Joined room");
+  fetchInvites();
+  fetchJoinedRooms();
+};
+
 
   const handleDeclineInvite = async (roomid) => {
     await fetch(
@@ -521,21 +644,21 @@ const ManageRooms = () => {
             />
           </div> */}
 
-<div className="flex items-center gap-3">
-  <span className="text-base font-medium text-gray-700 w-[40px]">New:</span>
-  <input
-    placeholder="Name"
-    value={newPrivateRoom.name}
-    onChange={(e) => setNewPrivateRoom({ ...newPrivateRoom, name: e.target.value })}
-    className="flex-1 px-3 py-2 border border-gray-300 rounded-md text-sm"
-  />
-  <input
-    placeholder="Description"
-    value={newPrivateRoom.description}
-    onChange={(e) => setNewPrivateRoom({ ...newPrivateRoom, description: e.target.value })}
-    className="flex-[2] px-3 py-2 border border-gray-300 rounded-md text-sm"
-  />
-  {/* <select
+        <div className="flex items-center gap-3">
+          <span className="text-base font-medium text-gray-700 w-[40px]">New:</span>
+          <input
+            placeholder="Name"
+            value={newPrivateRoom.name}
+            onChange={(e) => setNewPrivateRoom({ ...newPrivateRoom, name: e.target.value })}
+            className="flex-1 px-3 py-2 border border-gray-300 rounded-md text-sm"
+          />
+          <input
+            placeholder="Description"
+            value={newPrivateRoom.description}
+            onChange={(e) => setNewPrivateRoom({ ...newPrivateRoom, description: e.target.value })}
+            className="flex-[2] px-3 py-2 border border-gray-300 rounded-md text-sm"
+          />
+          {/* <select
     value={newPrivateRoom.member_limit}
     onChange={(e) => setNewPrivateRoom({ ...newPrivateRoom, member_limit: parseInt(e.target.value) })}
     className="w-[110px] px-3 py-2 border border-gray-300 rounded-md text-sm"
@@ -543,32 +666,32 @@ const ManageRooms = () => {
     <option value={20}>Limit: 20</option>
     <option value={50}>Limit: 50</option>
     <option value={100}>Limit: 100</option>
-  </select> */}
-  <div className="flex items-center gap-2">
-  <label className="text-sm font-medium text-gray-700">Limit:</label>
-  <select
-    value={newPrivateRoom.member_limit}
-    onChange={(e) =>
-      setNewPrivateRoom({
-        ...newPrivateRoom,
-        member_limit: parseInt(e.target.value),
-      })
-    }
-    className="px-3 py-2 border border-gray-300 rounded-md text-sm"
-  >
-    <option value={20}>20</option>
-    <option value={50}>50</option>
-    <option value={100}>100</option>
-  </select>
-</div>
+          </select> */}
+          <div className="flex items-center gap-2">
+          <label className="text-sm font-medium text-gray-700">Limit:</label>
+          <select
+            value={newPrivateRoom.member_limit}
+            onChange={(e) =>
+                setNewPrivateRoom({
+                ...newPrivateRoom,
+                member_limit: parseInt(e.target.value),
+              })
+            }
+            className="px-3 py-2 border border-gray-300 rounded-md text-sm"
+          >
+            <option value={20}>20</option>
+            <option value={50}>50</option>
+            <option value={100}>100</option>
+          </select>
+        </div>
 
-  <button
-    onClick={handleAddPrivateRoom}
-    className="bg-black text-white px-4 py-2 rounded-md text-sm hover:bg-blue-700"
-  >
-    +
-  </button>
-</div>
+          <button
+            onClick={handleAddPrivateRoom}
+            className="bg-black text-white px-4 py-2 rounded-md text-sm hover:bg-blue-700"
+          >
+            +
+          </button>
+        </div>
 
 
           <div className="flex flex-col gap-2 mb-4">
@@ -626,57 +749,137 @@ const ManageRooms = () => {
       //     setInviteInput("");
       //   }
               // }}
-              onKeyDown={async (e) => {
+              // onKeyDown={async (e) => {
 
+              //   if (e.key === "Enter" || e.key === ",") {
+              //     e.preventDefault();
+        
+              //     if (validUserPills.length >= newPrivateRoom.member_limit - 1) {
+              //       alert(`You can only invite up to ${newPrivateRoom.member_limit - 1} users.`);
+              //       setInviteInput("");
+              //       return;
+              //     }
+        
+              //     const trimmed = inviteInput.replace("@", "").trim().toLowerCase();
+              //     // Block self-invite
+              //     if (trimmed === myUsername?.toLowerCase()) {
+              //       alert("You cannot invite yourself to your own room.");
+              //       setInviteInput("");
+              //       return;
+              //     }
+              //     if (!trimmed) return;
+
+              //     // Live limit check
+              //     if (validUserPills.length >= newPrivateRoom.member_limit - 1) {
+              //       alert(`You can only invite up to ${newPrivateRoom.member_limit - 1} users.`);
+              //       setInviteInput("");
+              //       return;
+              //     }
+      
+              //     // Check for duplicates (case-insensitive)
+              //     if (validUserPills.some((u) => u.toLowerCase() === trimmed)) {
+              //       setInviteInput("");
+              //       return;
+              //     }
+      
+              //     // Validate with Supabase
+              //     // const { data, error } = await supabase
+              //     //   .from("users")
+              //     //   .select("username");
+      
+              //     // const matchingUser = data?.find(
+              //     //   (u) => u.username.toLowerCase() === trimmed
+              //     //   );
+      
+              //     // if (matchingUser) {
+              //     //   setValidUserPills([...validUserPills, matchingUser.username]);
+              //     // } else {
+              //     //   alert(`Username "${inviteInput}" not found.`);
+              //     // }
+      
+              //     // setInviteInput("");
+              //     const { data: userMatch, error: userError } = await supabase
+              //     .from("users")
+              //     .select("username, userid")
+              //     .ilike("username", trimmed)
+              //     .maybeSingle();
+                
+              //   if (!userMatch) {
+              //     alert(`Username "${inviteInput}" not found.`);
+              //     setInviteInput("");
+              //     return;
+              //   }
+                
+              //   const { data: tierMatch, error: tierError } = await supabase
+              //     .from("usertype")
+              //     .select("usertype")
+              //     .eq("userid", userMatch.userid)
+              //     .maybeSingle();
+                
+              //   if (tierMatch?.usertype !== "Premium") {
+              //     alert(`User "${userMatch.username}" is not a Premium user.`);
+              //   } else {
+              //     setValidUserPills([...validUserPills, userMatch.username]);
+              //   }
+                
+              //   setInviteInput("");
+                
+              //   }
+              // }}
+              onKeyDown={async (e) => {
                 if (e.key === "Enter" || e.key === ",") {
                   e.preventDefault();
-        
-                  if (validUserPills.length >= newPrivateRoom.member_limit - 1) {
-                    alert(`You can only invite up to ${newPrivateRoom.member_limit - 1} users.`);
-                    setInviteInput("");
-                    return;
-                  }
-        
+              
                   const trimmed = inviteInput.replace("@", "").trim().toLowerCase();
-                  // Block self-invite
-                  if (trimmed === myUsername?.toLowerCase()) {
-                    alert("You cannot invite yourself to your own room.");
+                  if (!trimmed || trimmed === myUsername?.toLowerCase()) {
+                    alert("You cannot invite yourself or an empty username.");
                     setInviteInput("");
                     return;
                   }
-                  if (!trimmed) return;
-
-                  // Live limit check
-                  if (validUserPills.length >= newPrivateRoom.member_limit - 1) {
-                    alert(`You can only invite up to ${newPrivateRoom.member_limit - 1} users.`);
-                    setInviteInput("");
-                    return;
-                  }
-      
-                  // Check for duplicates (case-insensitive)
+              
                   if (validUserPills.some((u) => u.toLowerCase() === trimmed)) {
                     setInviteInput("");
                     return;
                   }
-      
-                  // Validate with Supabase
-                  const { data, error } = await supabase
-                    .from("users")
-                    .select("username");
-      
-                  const matchingUser = data?.find(
-                    (u) => u.username.toLowerCase() === trimmed
-                    );
-      
-                  if (matchingUser) {
-                    setValidUserPills([...validUserPills, matchingUser.username]);
-                  } else {
-                    alert(`Username "${inviteInput}" not found.`);
+              
+                  if (validUserPills.length >= newPrivateRoom.member_limit - 1) {
+                    alert(`You can only invite up to ${newPrivateRoom.member_limit - 1} users.`);
+                    setInviteInput("");
+                    return;
                   }
-      
+              
+                  // Step 1: Get userid for the username
+                  const { data: userRow, error: userErr } = await supabase
+                    .from("users")
+                    .select("userid, username")
+                    .ilike("username", trimmed)
+                    .maybeSingle();
+              
+                  if (!userRow) {
+                    alert(`Username "${inviteInput}" not found.`);
+                    setInviteInput("");
+                    return;
+                  }
+              
+                  const userIdToCheck = userRow.userid;
+              
+                  // Step 2: Check Premium status for that userid
+                  const { data: typeRow, error: typeErr } = await supabase
+                    .from("usertype")
+                    .select("usertype")
+                    .eq("userid", userIdToCheck)
+                    .maybeSingle();
+              
+                  if (!typeRow || typeRow.usertype !== "Premium") {
+                    alert(`User "${userRow.username}" is not a Premium user.`);
+                  } else {
+                    setValidUserPills([...validUserPills, userRow.username]);
+                  }
+              
                   setInviteInput("");
                 }
               }}
+              
       
             />
           </div>
@@ -728,7 +931,6 @@ const ManageRooms = () => {
               </div>
             ))}
           </div> */}
-          {/* <div className="bg-white p-4 rounded-xl shadow space-y-2"> */}
           {/* <div className="bg-white p-4 rounded-xl shadow space-y-2 max-h-[200px] overflow-y-auto pr-2"> */}
           <div className="bg-gray-100 p-4 rounded-xl shadow space-y-2 h-[180px] overflow-y-scroll scrollbar scrollbar-thumb-gray-400 scrollbar-track-gray-200">
           {[...privateRooms, ...joinedPrivateRooms].length === 0 ? (
@@ -834,7 +1036,7 @@ const ManageRooms = () => {
                   <label className="block text-sm font-medium mb-1">
                     Member Limit
                   </label>
-                  <input
+                  {/* <input
                     type="number"
                     min={1}
                     max={100}
@@ -846,7 +1048,22 @@ const ManageRooms = () => {
                       })
                     }
                     className="w-full px-3 py-2 border rounded-md"
-                  />
+                  /> */}
+                  <select
+                    value={editRoom.member_limit}
+                    onChange={(e) =>
+                    setEditRoom({
+                      ...editRoom,
+                      member_limit: parseInt(e.target.value),
+                    })
+                    }
+                      className="w-full px-3 py-2 border rounded-md"
+                    >
+                      <option value={20}>20 members</option>
+                      <option value={50}>50 members</option>
+                      <option value={100}>100 members</option>
+                    </select>
+
                 </div>
               )}
 
@@ -857,37 +1074,167 @@ const ManageRooms = () => {
                 {roomMembers.length === 0 ? (
                   <p className="text-sm text-gray-500">No members yet.</p>
                 ) : (
-                  <ul className="list-disc list-inside text-sm text-gray-700">
-                    {roomMembers.map((username, idx) => (
-                      <li key={idx}>{username}</li>
-                    ))}
-                  </ul>
+
+                  <div className="max-h-40 overflow-y-auto border rounded-md px-3 py-2 bg-gray-50 scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100">
+                    {/* <ul className="list-disc list-inside text-sm text-gray-700">
+                      {roomMembers.map((username, idx) => (
+                        <li key={idx}>{username}</li>
+                      ))}
+                    </ul> */}
+                    <div className="flex flex-wrap gap-2">
+                    {/* {roomMembers
+                      .filter((member) => !removedMembers.includes(member.userid))
+                      .map((member, index) => (
+                        <div
+                          key={index}
+                          className="flex items-center bg-gray-200 text-sm rounded-full px-3 py-1"
+                        >
+                          {member.username}
+                          <button
+                            className="ml-2 text-gray-600 hover:text-red-500"
+                            // onClick={() => setRemovedMembers([...removedMembers, member])}
+                            onClick={() => setRemovedMembers([...removedMembers, member.userid])}
+                          >
+                            &times;
+                          </button>
+                        </div>
+                        ))} */}
+                        {roomMembers
+                          // .filter((member) => !removedMembers.includes(member.userid))
+                          .filter((member) => !removedMembers.some((rm) => rm.userid === member.userid))
+                          .map((member, index) => (
+                          <div
+                            key={index}
+                            className="flex items-center bg-gray-200 text-sm rounded-full px-3 py-1"
+                          >
+                            {member.username}
+                            {member.userid !== userId && (
+                              <button
+                                className="ml-2 text-gray-600 hover:text-red-500"
+                                // onClick={() => setRemovedMembers([...removedMembers, member.userid])}
+                                onClick={() => setRemovedMembers([...removedMembers, { userid: member.userid, username: member.username }])}
+                              >
+                                &times;
+                              </button>
+                            )}
+                          </div>
+                        ))}
+
+                    </div>
+
+                  </div>
+
                 )}
               </div>
 
 
               {editRoom.room_type === "Private" && (
-          <div>
-            <div className="flex justify-between items-center mt-2 mb-1">
-              <label className="block text-sm font-medium">
-                Invite New Users
-              </label>
-              <span className="text-xs text-gray-500 italic">(put username to invite)</span>
-            </div>
-            <input
-              placeholder="@user1, @user2 (max 10)"
-              value={editRoom.invite}
-              onChange={(e) =>
-                setEditRoom({ ...editRoom, invite: e.target.value }) 
-              }
-              className="w-full px-3 py-2 border rounded-md"
-            />
-          </div>
-        )}
+              <div>
+                <div className="flex justify-between items-center mt-2 mb-1">
+                  <label className="block text-sm font-medium">
+                    Invite New Users
+                  </label>
+                  <span className="text-xs text-gray-500 italic">(put username to invite)</span>
+                </div>
+                {/* <input
+                  placeholder="@user1, @user2 (max 10)"
+                  value={editRoom.invite}
+                  onChange={(e) =>
+                    setEditRoom({ ...editRoom, invite: e.target.value }) 
+                  }
+                  className="w-full px-3 py-2 border rounded-md"
+                /> */}
+                <div className="flex items-center flex-wrap gap-2 border border-gray-300 rounded-md px-3 py-2 max-h-28 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100">
+                  {editValidUserPills.map((user) => (
+                    <div
+                      key={user}
+                      className="flex items-center bg-gray-200 text-sm rounded-full px-3 py-1"
+                    >
+                      {user}
+                      <button
+                        className="ml-2 text-gray-600 hover:text-red-500"
+                        onClick={() =>
+                          setEditValidUserPills(editValidUserPills.filter((u) => u !== user))
+                        }
+                      >
+                        &times;
+                      </button>
+                    </div>
+                  ))}
+
+                  <input
+                    type="text"
+                    placeholder="Type username and hit Enter"
+                    className="flex-1 px-2 py-1 outline-none text-sm"
+                    value={editInviteInput}
+                    onChange={(e) => setEditInviteInput(e.target.value)}
+                    onKeyDown={async (e) => {
+                      if (e.key === "Enter" || e.key === ",") {
+                      e.preventDefault();
+
+                      const trimmed = editInviteInput.replace("@", "").trim().toLowerCase();
+                        if (!trimmed || trimmed === myUsername?.toLowerCase()) {
+                          alert("You cannot invite yourself or an empty username.");
+                          setEditInviteInput("");
+                          return;
+                        }
+
+                        if (roomMembers.some((m) => m.toLowerCase() === trimmed)) {
+                          alert(`User "${trimmed}" is already in the room.`);
+                          setEditInviteInput("");
+                          return;
+                        }
+
+                        if (editValidUserPills.some((u) => u.toLowerCase() === trimmed)) {
+                          setEditInviteInput("");
+                          return;
+                        }
+
+                        if (editValidUserPills.length >= editRoom.member_limit - roomMembers.length) {
+                          alert(`You can only invite up to ${editRoom.member_limit - roomMembers.length} more users.`);
+                          setEditInviteInput("");
+                            return;
+                        }
+
+                        const { data: userRow } = await supabase
+                          .from("users")
+                          .select("userid, username")
+                          .ilike("username", trimmed)
+                          .maybeSingle();
+
+                        if (!userRow) {
+                          alert(`Username "${editInviteInput}" not found.`);
+                          setEditInviteInput("");
+                          return;
+                        }
+
+                        const { data: typeRow } = await supabase
+                          .from("usertype")
+                          .select("usertype")
+                          .eq("userid", userRow.userid)
+                          .maybeSingle();
+
+                        if (!typeRow || typeRow.usertype !== "Premium") {
+                          alert(`User "${userRow.username}" is not a Premium user.`);
+                        } else {
+                          setEditValidUserPills([...editValidUserPills, userRow.username]);
+                        }
+
+                        setEditInviteInput("");
+                      }
+                    }}
+                    />
+              </div>
+
+              <div className="mt-1 text-sm text-gray-500">
+                {editValidUserPills.length} of {editRoom.member_limit - roomMembers.length} invited
+              </div>
+
+              </div>
+            )}
 
 
 
-      
 
               <div className="flex justify-end gap-2 pt-2">
                 <button
@@ -935,7 +1282,7 @@ const ManageRooms = () => {
               </div>
             ))} */}
             {invites.length === 0 ? (
-            <p className="text-sm text-gray-500 italic">You have recieved invites yet.</p>
+            <p className="text-sm text-gray-500 italic">You have recieved no invites yet.</p>
             ) : (
               invites.map((invite, index) => (
                 <div key={invite.id} className={rowStyle}>

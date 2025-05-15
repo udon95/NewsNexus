@@ -85,13 +85,10 @@ const FloatingUserStats = ({ user, customClassName }) => {
 
   return (
     // <div className="absolute top-[498px] left-20 z-40 flex flex-col items-start gap-3">
-    // <div
-    //   className={`mt-[35px] z-40 flex flex-col items-start gap-3 ${
-    //     customClassName || "top-[498px] left-20"
-    //   }`}
-    // >
     <div
-      className={`sticky top-4 left-4 z-[9999] inline-flex flex-col items-start gap-3`}
+      className={`mt-[35px] z-40 flex flex-col items-start gap-3 ${
+        customClassName || "top-[498px] left-20"
+      }`}
     >
       <div className="text-sm font-bold text-[#00317F] mb-2 -ml-1">
         {new Date().toLocaleString("default", { month: "long" })}'s Streak

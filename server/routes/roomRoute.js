@@ -34,6 +34,7 @@ router.get("/:userid", async (req, res) => {
   res.status(200).json(data);
 });
 
+
 // 🔹 CREATE new room
 router.post("/", async (req, res) => {
   const { name, description, room_type, created_by, member_limit } = req.body;
@@ -52,6 +53,17 @@ const { data, error } = await supabase
   .insert([{ name, description, room_type, created_by, member_limit: limit }])
   .select();
   if (error) return res.status(500).json({ error: error.message });
+    if (data && data.length > 0) {
+    const newRoomId = data[0].roomid;
+    await supabase.from("room_members").insert([
+      {
+        userid: created_by,
+        roomid: newRoomId,
+        joined_at: new Date().toISOString(),
+      },
+    ]);
+  }
+
   res.status(201).json({ message: "Room created", data });
 });
 
@@ -159,12 +171,13 @@ router.post("/invite", async (req, res) => {
   if (count >= 10) {
   return res.status(400).json({ error: "Invite limit of 10 reached" });
   }
+  
 
   const { data: user, error: userError } = await supabase
     .from("users")
     .select("userid")
-    .eq("username", invitee_username)
-    .single();
+     .ilike("username", invitee_username)
+     .maybeSingle();
 
   if (userError || !user) {
     return res.status(404).json({ error: "User not found" });
@@ -182,6 +195,7 @@ router.post("/invite", async (req, res) => {
     return res.status(400).json({ error: "User already invited" });
   }
 
+
    const { data: existingMember } = await supabase
     .from("room_members")
     .select("*")
@@ -194,11 +208,12 @@ router.post("/invite", async (req, res) => {
     return res.status(400).json({ error: "User is already a member" });
   }
 
-
+console.log("Inserting invite:", { userid: user.userid, roomid });
   const { error: insertError } = await supabase.from("room_invites").insert([
     {
       userid: user.userid,
       roomid,
+      invited_at: new Date().toISOString()
     },
   ]);
 
@@ -206,7 +221,7 @@ router.post("/invite", async (req, res) => {
     return res.status(500).json({ error: insertError.message });
   }
 
-  res.status(200).json({ message: "Invitation sent" });
+  res.status(200).json({ message: "Invitation sent", userid: user.userid, roomid, });
 });
 
 
@@ -307,7 +322,37 @@ router.get("/members/:roomid", async (req, res) => {
 });
 
 
+// 🔹 REMOVE a member from room
+router.post("/remove-member", async (req, res) => {
+  const { roomid, username } = req.body;
 
+  if (!roomid || !username) {
+    return res.status(400).json({ error: "Missing roomid or username" });
+  }
+
+  // Get user ID from username
+  const { data: user, error: userError } = await supabase
+    .from("users")
+    .select("userid")
+    .eq("username", username)
+    .maybeSingle();
+
+  if (userError || !user) {
+    return res.status(404).json({ error: "User not found" });
+  }
+
+  const { error: deleteError } = await supabase
+    .from("room_members")
+    .delete()
+    .eq("roomid", roomid)
+    .eq("userid", user.userid);
+
+  if (deleteError) {
+    return res.status(500).json({ error: deleteError.message });
+  }
+
+  res.status(200).json({ message: "Member removed from room" });
+});
 
 
 

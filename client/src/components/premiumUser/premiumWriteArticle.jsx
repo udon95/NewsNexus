@@ -68,6 +68,7 @@ export const PremiumWriteArticle = () => {
   const [accuracy, setAccuracy] = useState(null);
   const [openSuccess, setOpenSuccess] = useState(false);
   const [openError, setOpenError] = useState(false);
+
   const [searchParams] = useSearchParams();
   const preSelectedType = searchParams.get("type"); // e.g. "room"
   const preSelectedRoomId = searchParams.get("roomid");
@@ -481,7 +482,7 @@ export const PremiumWriteArticle = () => {
         }
       }
 
-      console.log("room images", uploadedImageUrls);
+      //console.log("room images", uploadedImageUrls);
 
       const articleData = {
         title,

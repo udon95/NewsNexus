@@ -205,7 +205,7 @@ async function factCheck(content, topicName) {
         { role: "system", content: "You are a category validation assistant." },
         { role: "user", content: generateCategoryPrompt(content, topicName) },
       ],
-      temperature: 0.0,
+      temperature: 0.2,
     }),
   });
 
@@ -294,7 +294,7 @@ async function factCheck(content, topicName) {
         accuracy: presult.accuracy,
         feedback: presult.feedback,
       };
-      //console.log("Final extracted result:", finalResult);
+      console.log("perplexity final result:", finalResult);
     } else {
       throw new Error("Perplexity response missing expected fields.");
     }
@@ -371,6 +371,7 @@ async function factCheck(content, topicName) {
       accuracy: gptParsed.accuracy,
       feedback: cleanText(gptParsed.feedback),
     };
+    console.log("gpt final results", finalResult);
   }
 
   //console.log("parsed result:", result);
