@@ -173,7 +173,7 @@ const Article = () => {
     //const parser = new DOMParser().parseFromString(originalText, "text/html");
     //const plain = parser.body.textContent || "";
     const textToTranslate = originalText;
-    console.log("text to translate", textToTranslate);
+    //console.log("text to translate", textToTranslate);
 
     setTranslating(true);
     try {
@@ -190,7 +190,7 @@ const Article = () => {
       }
       const data = await response.json();
       setTranslatedText(data.translatedText);
-      console.log("translated text", data.translatedText);
+      //console.log("translated text", data.translatedText);
     } catch (error) {
       console.error("Error translating article:", error);
       alert("Error translating article: " + error.message);
@@ -303,7 +303,7 @@ const Article = () => {
         );
         const plain = doc.body.textContent || "";
         setOriginalText(plain);
-        console.log("plain", plain);
+        //console.log("plain", plain);
 
         // Optional: check for expert status
         if (data?.userid && data?.topicid) {
