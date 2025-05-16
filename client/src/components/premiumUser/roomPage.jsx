@@ -1475,14 +1475,19 @@ const Room = () => {
                   >
                     Reply
                   </button> */}
-                  {userType !== "Admin" && (
-  <button
-    className="mt-3 px-4 py-2 bg-gray-700 text-white rounded-lg prose-p:mb-2"
-    onClick={() => setReplyingToArticle(article.postid)}
-  >
-    Reply
-  </button>
-)}
+<button
+  className="mt-3 px-4 py-2 bg-gray-700 text-white rounded-lg prose-p:mb-2"
+  onClick={() => {
+    if (userType === "Admin") {
+      alert("Admins cannot post comments.");
+      return;
+    }
+    setReplyingToArticle(article.postid);
+  }}
+>
+  Reply
+</button>
+
 
 
                   {replyingToArticle === article.postid && (
