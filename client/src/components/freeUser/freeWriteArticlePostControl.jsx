@@ -531,7 +531,6 @@ export const FreeWriteArticle = () => {
     pendingImages.forEach((img) => URL.revokeObjectURL(img.previewUrl));
     setPendingImages([]);
     setShowDraftNotification(true);
-    alert("Draft saved!");
     handleClearInputs();
     setIsUploading(false);
     setUploadAction(""); // DEVI ADDED THIS
