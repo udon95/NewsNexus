@@ -308,11 +308,11 @@ const ViewRoomsPage = () => {
             </div>
           </div>
 
-          {!isPremium && (
-          //   <div className="bg-yellow-100 text-yellow-800 p-3 rounded mb-4">
-          //     Subscribe as Premium to participate in discussions.
-          //   </div>
-          // )}
+          {/* {!isPremium && (
+            <div className="bg-yellow-100 text-yellow-800 p-3 rounded mb-4">
+              Subscribe as Premium to participate in discussions.
+            </div>
+          )} */}
 {!isPremium && (
   <div className="flex justify-center w-full px-4 -mt-2 mb-8">
     <div className="w-80 md:w-[26rem] border border-red-600 rounded-2xl shadow-md bg-red-100 text-red-800 p-4 font-semibold text-sm text-center">
