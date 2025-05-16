@@ -1177,51 +1177,48 @@ const Room = () => {
               </div>
             </div> */}
 
-              <div className="flex gap-3">
-                {userType === "Admin" ? (
-                  <span className="bg-gray-300 text-gray-700 text-sm font-semibold px-4 py-2 rounded-full">
-                    Admin View
-                  </span>
-                ) : isCreator ? (
-                  <div className="flex items-center gap-3">
-                    <button
-                      className="px-6 py-2 rounded-full text-lg font-semibold bg-gray-400 text-white cursor-not-allowed"
-                      disabled
-                    >
-                      My Room
-                    </button>
-                    <span className="bg-black text-white text-xs font-semibold px-3 py-1 rounded-full border border-gray-300">
-                      {room?.room_type?.toUpperCase()}
-                    </span>
-                  </div>
-                ) : (
-                  <>
-                    <button
-                      className={`px-6 py-2 rounded-full text-lg font-semibold transition-all ${
-                        !isMember || isUpdating
-                          ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                          : "bg-blue-500 text-white hover:bg-blue-600"
-                      }`}
-                      onClick={handleExitRoom}
-                      disabled={!isMember || isUpdating}
-                    >
-                      Exit
-                    </button>
+{userType !== "Admin" && (
+  isCreator ? (
+    <div className="flex items-center gap-3">
+      <button
+        className="px-6 py-2 rounded-full text-lg font-semibold bg-gray-400 text-white cursor-not-allowed"
+        disabled
+      >
+        My Room
+      </button>
+      <span className="bg-black text-white text-xs font-semibold px-3 py-1 rounded-full border border-gray-300">
+        {room?.room_type?.toUpperCase()}
+      </span>
+    </div>
+  ) : (
+    <>
+      <button
+        className={`px-6 py-2 rounded-full text-lg font-semibold transition-all ${
+          !isMember || isUpdating
+            ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+            : "bg-blue-500 text-white hover:bg-blue-600"
+        }`}
+        onClick={handleExitRoom}
+        disabled={!isMember || isUpdating}
+      >
+        Exit
+      </button>
 
-                    <button
-                      className={`px-6 py-2 rounded-full text-lg font-semibold transition-all ${
-                        isMember || isUpdating
-                          ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                          : "bg-green-500 text-white hover:bg-green-600"
-                      }`}
-                      onClick={handleJoinRoom}
-                      disabled={isMember || isUpdating}
-                    >
-                      {isMember ? "Joined" : "Join"}
-                    </button>
-                  </>
-                )}
-              </div>
+      <button
+        className={`px-6 py-2 rounded-full text-lg font-semibold transition-all ${
+          isMember || isUpdating
+            ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+            : "bg-green-500 text-white hover:bg-green-600"
+        }`}
+        onClick={handleJoinRoom}
+        disabled={isMember || isUpdating}
+      >
+        {isMember ? "Joined" : "Join"}
+      </button>
+    </>
+  )
+)}
+
 
               <p className="text-gray-600 text-lg mb-6">
                 {room ? room.description : "No description available."}
