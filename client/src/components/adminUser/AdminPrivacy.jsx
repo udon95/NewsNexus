@@ -30,12 +30,12 @@ const AdminPrivacy = () => {
     const { data: existing } = await supabase
       .from("privacy")
       .select("effective_date")
-      .eq("displayed", true)
+      .is("displayed", true)
       .maybeSingle();
 
     const now = new Date().toISOString();
 
-    const { error } = await supabase.from("guideline").upsert([
+    const { error } = await supabase.from("privacy").upsert([
       {
         guidelineid: crypto.randomUUID(),
         text: text,
