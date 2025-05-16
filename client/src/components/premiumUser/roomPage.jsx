@@ -42,7 +42,7 @@ const Room = () => {
       navigate("/rooms");
     }
   }, [userType, navigate]);
-
+  
   const nextSlide = (postid, imageCount) => {
     setCarouselIndex((prev) => ({
       ...prev,
@@ -1042,7 +1042,7 @@ const Room = () => {
 
         {/* Reply button */}
         <div className="flex flex-col items-end mt-2">
-          {/*           {!isReplying &&
+{/*           {!isReplying &&
             editingCommentId !== comment.commentid &&
             !comment.is_deleted && (
               <button
@@ -1056,19 +1056,20 @@ const Room = () => {
               </button>
             )} */}
           {!isReplying &&
-            editingCommentId !== comment.commentid &&
-            !comment.is_deleted &&
-            userType !== "Admin" && ( // Prevent Admin from replying
-              <button
-                className="text-blue-500 hover:text-blue-700"
-                onClick={() =>
-                  onReplyClick(comment.commentid, comment.username)
-                }
-                aria-label="Reply"
-              >
-                <CornerDownLeft size={18} />
-              </button>
-            )}
+  editingCommentId !== comment.commentid &&
+  !comment.is_deleted &&
+  userType !== "Admin" && ( // Prevent Admin from replying
+    <button
+      className="text-blue-500 hover:text-blue-700"
+      onClick={() =>
+        onReplyClick(comment.commentid, comment.username)
+      }
+      aria-label="Reply"
+    >
+      <CornerDownLeft size={18} />
+    </button>
+)}
+
         </div>
 
         {/* Reply box (conditionally rendered) */}
@@ -1134,7 +1135,7 @@ const Room = () => {
                     }${room.name}`
                   : "Not Found"}
               </h1>
-              <div className="flex gap-3">
+{/*               <div className="flex gap-3">
                 {isCreator ? (
                   <div className="flex items-center gap-3">
                     <button
@@ -1175,10 +1176,14 @@ const Room = () => {
                   </>
                 )}
               </div>
-            </div>
+            </div> */}
 
-            {/* {userType !== "Admin" && (
-  isCreator ? (
+              <div className="flex gap-3">
+  {userType === "Admin" ? (
+    <span className="bg-gray-300 text-gray-700 text-sm font-semibold px-4 py-2 rounded-full">
+      Admin View
+    </span>
+  ) : isCreator ? (
     <div className="flex items-center gap-3">
       <button
         className="px-6 py-2 rounded-full text-lg font-semibold bg-gray-400 text-white cursor-not-allowed"
@@ -1216,8 +1221,9 @@ const Room = () => {
         {isMember ? "Joined" : "Join"}
       </button>
     </>
-  )
-)} */}
+  )}
+</div>
+
 
             <p className="text-gray-600 text-lg mb-6">
               {room ? room.description : "No description available."}
