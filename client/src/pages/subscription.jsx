@@ -141,7 +141,7 @@ const SubscriptionPage = () => {
   };
 
   return (
-    <div className="relative min-h-screen w-screen flex flex-col bg-white">
+    <div className="w-full min-w-screen min-h-screen flex flex-col bg-white">
       <Navbar />
 
       {/* Show PaymentStatus Popup if Stripe Redirects Here */}
