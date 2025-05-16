@@ -418,17 +418,28 @@ export const FreeWriteArticle = () => {
 
   const handleSaveDraft = async () => {
     setUploadAction("draft");
+
     if (isUploading) return;
     setIsUploading(true);
     const storedUser = localStorage.getItem("userProfile");
-    if (!storedUser) return alert("User not authenticated. Cannot save draft.");
-
+    if (!storedUser) {
+      alert("User not authenticated. Cannot save draft.");
+      setIsUploading(false);
+      setUploadAction(""); // DEVI ADDED THIS
+      return;
+    }
     const parsedUser = JSON.parse(storedUser);
     const session = parsedUser?.user;
-    if (!session) return alert("User not authenticated.");
-
+    if (!session) {
+      alert("User not authenticated.");
+      setIsUploading(false);
+      setUploadAction(""); // DEVI ADDED THIS
+      return;
+    }
     if (!title || !articleContent || !topics) {
       alert("Please fill in all required fields.");
+      setIsUploading(false);
+      setUploadAction("");
       return;
     }
 
@@ -436,8 +447,11 @@ export const FreeWriteArticle = () => {
     const bucket = "articles-images";
     let firstImageUrl = null;
     let uploadedImageUrls = [];
+
     for (const img of pendingImages) {
       const file = img.file;
+      if (!file?.name) continue;
+
       const fileExt = file.name.split(".").pop();
       const fileName = `${Date.now()}-${Math.random()
         .toString(36)
@@ -455,6 +469,7 @@ export const FreeWriteArticle = () => {
       const { data: urlData } = supabase.storage
         .from(bucket)
         .getPublicUrl(filePath);
+
       if (urlData?.publicUrl) {
         if (!firstImageUrl) firstImageUrl = urlData.publicUrl;
         updatedHTML = updatedHTML.replaceAll(img.previewUrl, urlData.publicUrl);

@@ -214,23 +214,6 @@ const EditFreeArticle = () => {
     }
   }, [editor, articleStatus]);
 
-  // useEffect(() => {
-  //   const checkSession = async () => {
-  //     const {
-  //       data: { session },
-  //     } = await supabase.auth.getSession();
-  //     console.log("Session:", session);
-
-  //     if (!session?.user) {
-  //       console.warn("No active Supabase session!");
-  //     } else {
-  //       console.log("Supabase user is authenticated");
-  //     }
-  //   };
-
-  //   checkSession();
-  // }, []);
-
   useEffect(() => {
     const fetchMonthlyPostCount = async () => {
       const storedUser = JSON.parse(localStorage.getItem("userProfile"));
@@ -267,16 +250,6 @@ const EditFreeArticle = () => {
 
     fetchMonthlyPostCount();
   }, []);
-
-  // useEffect(() => {
-  //   supabase.auth.onAuthStateChange((event, session) => {
-  //     if (event === "SIGNED_IN") {
-  //       console.log(" Logged in");
-  //     } else if (event === "SIGNED_OUT") {
-  //       console.log(" Logged out");
-  //     }
-  //   });
-  // }, []);
 
   const MAX_WORDS = 1000;
 
@@ -402,7 +375,6 @@ const EditFreeArticle = () => {
 
       setAccuracy(result.accuracy);
       setAiFeedback(result.feedback);
-      //alert(`Article posted successfully. Accuracy Score: ${result.accuracy}%`);
       setOpenSuccess(true);
     } else if (articleStatus === "Published") {
       // --- If it's published, only insert amendment ---
@@ -498,7 +470,7 @@ const EditFreeArticle = () => {
       const { data: urlData } = supabase.storage
         .from(bucket)
         .getPublicUrl(filePath);
-        
+
       if (urlData?.publicUrl) {
         const doc = new DOMParser().parseFromString(updatedHTML, "text/html");
         doc.querySelectorAll("img").forEach((imgTag) => {
@@ -560,10 +532,11 @@ const EditFreeArticle = () => {
     pendingImages.forEach((img) => URL.revokeObjectURL(img.previewUrl));
     setPendingImages([]);
     setShowDraftNotification(true);
-    alert("Draft saved!");
+
     handleClearInputs();
     setIsUploading(false);
     setUploadAction(""); // DEVI ADDED THIS
+
     const words = articleContent.trim().split(/\s+/).filter(Boolean).length;
 
     if (words > MAX_WORDS) {
@@ -676,6 +649,7 @@ const EditFreeArticle = () => {
     setUploadAction(""); // <- DEVI ADDED THIS FOR THE LOAD AND POST INDICATOR
     setOpenError(false);
     setOpenSuccess(false);
+
     // Reset Tiptap editor content (this is the key)
     if (editor) {
       editor.commands.clearContent();
