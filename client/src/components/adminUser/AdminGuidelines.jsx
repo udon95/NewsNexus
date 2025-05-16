@@ -30,7 +30,7 @@ const AdminGuidelines = () => {
     const { data: existing } = await supabase
       .from("guideline")
       .select("effective_date")
-      .eq("displayed", true)
+      .is("displayed", true)
       .maybeSingle();
 
     const now = new Date().toISOString();
