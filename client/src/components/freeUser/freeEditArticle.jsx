@@ -68,6 +68,8 @@ const EditFreeArticle = () => {
   const [openSuccess, setOpenSuccess] = useState(false);
   const [openError, setOpenError] = useState(false);
 
+  const [initialContent, setInitialContent] = useState("");
+
   const [uploadAction, setUploadAction] = useState(""); // "post" or "draft"
   const [isUploading, setIsUploading] = useState(false);
   const [pendingImages, setPendingImages] = useState([]);
@@ -106,11 +108,29 @@ const EditFreeArticle = () => {
       setTitle(data.title);
       setTopics(data.topicid);
       setArticleContent(data.text);
+
+      // if (data.imagepath) {
+      //   setPendingImages([{ file: null, previewUrl: data.imagepath }]);
+      // }
+
       if (data.imagepath) {
         setPendingImages([{ file: null, previewUrl: data.imagepath }]);
+      
+        // Insert image into editor immediately if it's not already in the HTML
+        if (!data.text.includes(data.imagepath)) {
+          const updatedTextWithImage =
+            `<p><img src="${data.imagepath}" /></p>` + data.text;
+          setInitialContent(updatedTextWithImage);
+        } else {
+          setInitialContent(data.text);
+        }
+      } else {
+        setInitialContent(data.text);
       }
+      
       setArticleStatus(data.status);
-      setEditorContent(data.text); // initialize editor
+      // setEditorContent(data.text); // initialize editor
+      setInitialContent(data.text); // defer setting until editor ready
       setAmendment(data.amendment || "");
     };
 
@@ -358,11 +378,11 @@ const EditFreeArticle = () => {
       setPendingImages([]);
 
       // Delete the draft article if `id` is defined
-      if (id) {
+      if (articleId) {
         const { error: deleteError } = await supabase
           .from("articles")
           .delete()
-          .eq("articleid", id);
+          .eq("articleid", articleId);
 
         if (deleteError) {
           console.error("Failed to delete draft article:", deleteError);
@@ -789,6 +809,13 @@ const EditFreeArticle = () => {
       setNewTopicName("");
     }
   };
+
+  useEffect(() => {
+    if (editor && initialContent) {
+      editor.commands.setContent(initialContent);
+    }
+  }, [editor, initialContent]);
+  
 
   return (
     <div className="flex-1 min-h-full bg-indigo-50 max-md:w-full w-full max-w-screen px-1 md:px-6">
