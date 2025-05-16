@@ -532,6 +532,7 @@ const Room = () => {
     parentCommentId = null,
     parentUsername = null
   ) => {
+    if (userType === "Admin") return;
     if (!replyText.trim()) return;
     if (!user) {
       alert("You must be logged in to reply.");
@@ -664,6 +665,7 @@ const Room = () => {
   };
 
   const handlePostArticleReply = async (postid) => {
+    if (userType === "Admin") return;
     if (!articleReplyText.trim()) return;
     if (!user) {
       alert("You must be logged in to comment.");
@@ -1037,7 +1039,7 @@ const Room = () => {
 
         {/* Reply button */}
         <div className="flex flex-col items-end mt-2">
-          {!isReplying &&
+{/*           {!isReplying &&
             editingCommentId !== comment.commentid &&
             !comment.is_deleted && (
               <button
@@ -1049,7 +1051,22 @@ const Room = () => {
               >
                 <CornerDownLeft size={18} />
               </button>
-            )}
+            )} */}
+          {!isReplying &&
+  editingCommentId !== comment.commentid &&
+  !comment.is_deleted &&
+  userType !== "Admin" && ( // Prevent Admin from replying
+    <button
+      className="text-blue-500 hover:text-blue-700"
+      onClick={() =>
+        onReplyClick(comment.commentid, comment.username)
+      }
+      aria-label="Reply"
+    >
+      <CornerDownLeft size={18} />
+    </button>
+)}
+
         </div>
 
         {/* Reply box (conditionally rendered) */}
@@ -1115,7 +1132,7 @@ const Room = () => {
                     }${room.name}`
                   : "Not Found"}
               </h1>
-              <div className="flex gap-3">
+{/*               <div className="flex gap-3">
                 {isCreator ? (
                   <div className="flex items-center gap-3">
                     <button
@@ -1156,7 +1173,54 @@ const Room = () => {
                   </>
                 )}
               </div>
-            </div>
+            </div> */}
+
+              <div className="flex gap-3">
+  {userType === "Admin" ? (
+    <span className="bg-gray-300 text-gray-700 text-sm font-semibold px-4 py-2 rounded-full">
+      Admin View
+    </span>
+  ) : isCreator ? (
+    <div className="flex items-center gap-3">
+      <button
+        className="px-6 py-2 rounded-full text-lg font-semibold bg-gray-400 text-white cursor-not-allowed"
+        disabled
+      >
+        My Room
+      </button>
+      <span className="bg-black text-white text-xs font-semibold px-3 py-1 rounded-full border border-gray-300">
+        {room?.room_type?.toUpperCase()}
+      </span>
+    </div>
+  ) : (
+    <>
+      <button
+        className={`px-6 py-2 rounded-full text-lg font-semibold transition-all ${
+          !isMember || isUpdating
+            ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+            : "bg-blue-500 text-white hover:bg-blue-600"
+        }`}
+        onClick={handleExitRoom}
+        disabled={!isMember || isUpdating}
+      >
+        Exit
+      </button>
+
+      <button
+        className={`px-6 py-2 rounded-full text-lg font-semibold transition-all ${
+          isMember || isUpdating
+            ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+            : "bg-green-500 text-white hover:bg-green-600"
+        }`}
+        onClick={handleJoinRoom}
+        disabled={isMember || isUpdating}
+      >
+        {isMember ? "Joined" : "Join"}
+      </button>
+    </>
+  )}
+</div>
+
 
             <p className="text-gray-600 text-lg mb-6">
               {room ? room.description : "No description available."}
