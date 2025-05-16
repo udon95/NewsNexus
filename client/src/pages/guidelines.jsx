@@ -3,7 +3,7 @@ import "../index.css";
 import Navbar from "../components/navbar.jsx";
 import supabase from "../api/supabaseClient";
 
-function Guidelines({hideNavbar = false}) {
+function Guidelines({ hideNavbar = false }) {
   const [guidelines, setGuidelines] = useState("");
   const [dates, setDates] = useState({ effective: "", updated: "" });
 
@@ -43,10 +43,9 @@ function Guidelines({hideNavbar = false}) {
         </p>
 
         <div
-          className="mt-6 text-base sm:text-lg text-gray-800 leading-relaxed w-full whitespace-pre-wrap"
-        >
-          {guidelines}
-        </div>
+          className="whitespace-pre-wrap text-base sm:text-lg text-gray-800 leading-relaxed w-full"
+          dangerouslySetInnerHTML={{ __html: guidelines }}
+        ></div>
       </main>
     </div>
   );
