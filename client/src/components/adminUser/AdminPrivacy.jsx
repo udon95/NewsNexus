@@ -37,7 +37,7 @@ const AdminPrivacy = () => {
 
     const { error } = await supabase.from("privacy").upsert([
       {
-        guidelineid: crypto.randomUUID(),
+        privacyid: crypto.randomUUID(),
         text: text,
         displayed: true,
         last_updated: now,
