@@ -54,6 +54,8 @@ const Article = () => {
   const [notes, setNotes] = useState([]);
 
   const [isExpertArticle, setIsExpertArticle] = useState(false);
+  const [isExpertUser, setIsExpertUser] = useState(false);
+
 
   const handleTextSelection = () => {
     const selection = window.getSelection();
@@ -317,6 +319,18 @@ const Article = () => {
           setIsExpertArticle(!!match);
         }
 
+        // Check if current viewer is expert for this topic
+        if (user?.userid && data?.topicid) {
+          const { data: expertUserMatch } = await supabase
+            .from("expert_application")
+            .select("status")
+            .eq("userid", user.userid)
+            .eq("topicid", data.topicid)
+            .eq("status", "Approved")
+            .maybeSingle();
+          setIsExpertUser(!!expertUserMatch);
+        }
+
         // Load notes
         const { data: noteData } = await supabase
           .from("community_notes")
@@ -434,7 +448,8 @@ const Article = () => {
             <div className="flex justify-between items-center w-full mb-4">
               <Rate articleId={articleData.articleid} />
               <div className="flex items-center gap-3">
-                {userType === "Premium" && (
+
+                {isExpertUser && (
                   <button
                     onClick={() => setShowNote(true)}
                     title="Add Community Note"
@@ -443,6 +458,8 @@ const Article = () => {
                     <StickyNote className="h-5 w-5 text-black" />
                   </button>
                 )}
+
+                
                 <button
                   onClick={() =>
                     setReportTarget({
