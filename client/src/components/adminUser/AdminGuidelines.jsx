@@ -24,7 +24,7 @@ const AdminGuidelines = () => {
     await supabase
       .from("guideline")
       .update({ displayed: false })
-      .eq("displayed", true);
+      .is("displayed", true);
 
     // Get any existing guideline to preserve effective_date
     const { data: existing } = await supabase
