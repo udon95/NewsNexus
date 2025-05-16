@@ -287,7 +287,7 @@ const ViewRoomsPage = () => {
   };
 
   return (
-    <div className="relative min-h-screen w-screen flex flex-col bg-white">
+    <div className="w-full min-w-screen min-h-screen flex flex-col bg-white">
       <Navbar />
       <div className="flex flex-col lg:flex-row gap-4 px-4">
         {user && (
@@ -313,22 +313,21 @@ const ViewRoomsPage = () => {
               Subscribe as Premium to participate in discussions.
             </div>
           )} */}
-{!isPremium && (
-  <div className="flex justify-center w-full px-4 -mt-2 mb-8">
-    <div className="w-80 md:w-[26rem] border border-red-600 rounded-2xl shadow-md bg-red-100 text-red-800 p-4 font-semibold text-sm text-center">
-      🔒 Room access is restricted to <span className="font-bold">Premium users</span> only.{" "}
-      <span
-        className="underline cursor-pointer text-red-700 hover:text-red-900"
-        onClick={() => navigate("/subscription")}
-      >
-        Upgrade now
-      </span>{" "}
-      to join or view room discussions.
-    </div>
-  </div>
-)}
-
-
+          {!isPremium && (
+            <div className="flex justify-center w-full px-4 -mt-2 mb-8">
+              <div className="w-80 md:w-[26rem] border border-red-600 rounded-2xl shadow-md bg-red-100 text-red-800 p-4 font-semibold text-sm text-center">
+                🔒 Room access is restricted to{" "}
+                <span className="font-bold">Premium users</span> only.{" "}
+                <span
+                  className="underline cursor-pointer text-red-700 hover:text-red-900"
+                  onClick={() => navigate("/subscription")}
+                >
+                  Upgrade now
+                </span>{" "}
+                to join or view room discussions.
+              </div>
+            </div>
+          )}
 
           <div className="flex flex-col flex-grow items-center w-full px-4">
             <div className="w-full max-w-5xl p-6 font-grotesk">
