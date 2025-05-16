@@ -20,13 +20,13 @@ import AdminRoomCommentReports from "./AdminRoomCommentReports.jsx";
 
 function AdminDashboard() {
   return (
-<div className="w-screen min-h-screen flex flex-col overflow-hidden">
-<main className="flex-grow w-full flex min-h-full overflow-hidden">
-<aside className="w-[210px] md:w-[290px] flex-none">
+    <div className="w-screen min-h-screen flex flex-col overflow-hidden">
+      <main className="flex-grow w-full flex min-h-full overflow-hidden">
+        <aside className="w-[210px] md:w-[290px] flex-none">
           <AdminSidebar />
         </aside>
         <div className="flex-1 min-h-full bg-indigo-50 max-md:w-full w-full max-w-screen pr-6">
-        <Routes>
+          <Routes>
             <Route index element={<Navigate to="AdminProfile" />} />
 
             <Route path="AdminExperts/*" element={<AdminExperts />} />

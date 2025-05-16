@@ -81,15 +81,17 @@ const AdminPrivacy = () => {
   return (
     <div className="w-full min-h-screen py-10 px-4 font-grotesk bg-indigo-50 flex justify-center">
       <div className="w-full max-w-4xl space-y-6">
-        <h1 className="text-2xl font-semibold text-gray-800">Privacy Policies</h1>
-  
+        <h1 className="text-2xl font-semibold text-gray-800">
+          Privacy Policies
+        </h1>
+
         <textarea
           value={text}
           onChange={(e) => setText(e.target.value)}
           className="w-full min-h-[600px] p-4 rounded-lg shadow bg-white border border-gray-300 text-base whitespace-pre-wrap resize-none"
           placeholder="Paste your formatted privacy policies here..."
         />
-  
+
         <div className="flex justify-end">
           <button
             onClick={handleClick}
@@ -101,8 +103,6 @@ const AdminPrivacy = () => {
       </div>
     </div>
   );
-  
-
 };
 
 export default AdminPrivacy;

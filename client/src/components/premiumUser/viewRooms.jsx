@@ -19,7 +19,8 @@ const ViewRoomsPage = () => {
   const { userType } = useAuthHook();
   const [sizeFilter, setSizeFilter] = useState("All");
 
-  const isPremium = userType === "Premium";
+  // const isPremium = userType === "Premium";
+  const isPremium = userType === "Premium" || userType === "Admin";
 
   useEffect(() => {
     const fetchRoomImages = async () => {
@@ -308,21 +309,21 @@ const ViewRoomsPage = () => {
             </div>
           </div>
 
-{!isPremium && (
-  <div className="w-full flex justify-center mb-4">
-    <div className="w-full max-w-[1000px] border border-red-600 rounded-2xl shadow-md bg-red-100 text-red-800 p-4 font-semibold text-sm text-center">
-      🔒 Room access is restricted to <span className="font-bold">Premium users</span> only.{" "}
-      <span
-        className="underline cursor-pointer text-red-700 hover:text-red-900"
-        onClick={() => navigate("/subscription")}
-      >
-        Upgrade now
-      </span>{" "}
-      to join or view room discussions.
-    </div>
-  </div>
-)}
-
+          {!isPremium && (
+            <div className="w-full flex justify-center mb-4">
+              <div className="w-full max-w-[1000px] border border-red-600 rounded-2xl shadow-md bg-red-100 text-red-800 p-4 font-semibold text-sm text-center">
+                🔒 Room access is restricted to{" "}
+                <span className="font-bold">Premium users</span> only.{" "}
+                <span
+                  className="underline cursor-pointer text-red-700 hover:text-red-900"
+                  onClick={() => navigate("/subscription")}
+                >
+                  Upgrade now
+                </span>{" "}
+                to join or view room discussions.
+              </div>
+            </div>
+          )}
 
           <div className="flex flex-col flex-grow items-center w-full px-4">
             <div className="w-full max-w-5xl p-6 font-grotesk">
