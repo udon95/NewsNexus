@@ -107,27 +107,19 @@ function App() {
   }, []);
 
   useEffect(() => {
-  const cleanBrokenSupabaseToken = async () => {
-    const { data, error } = await supabase.auth.getSession();
+    // Unconditionally remove all Supabase auth tokens from localStorage
+    Object.keys(localStorage).forEach((key) => {
+      if (key.startsWith("sb-") && key.endsWith("-auth-token")) {
+        localStorage.removeItem(key);
+      }
+    });
 
-    if (!data?.session || error) {
-      console.warn("Invalid or missing session. Cleaning up Supabase auth tokens.");
-      
-      // Remove any sb-* Supabase auth tokens
-      Object.keys(localStorage).forEach((key) => {
-        if (key.startsWith("sb-") && key.endsWith("-auth-token")) {
-          localStorage.removeItem(key);
-        }
-      });
+    // Optional: Also sign out Supabase session
+    supabase.auth.signOut();
 
-      await supabase.auth.signOut(); // optional: ensure logout from Supabase
-      window.location.reload(); // optional: refresh app to clean state
-    }
-  };
-
-  cleanBrokenSupabaseToken();
-}, []);
-
+    // Optional: Force refresh to reset app state
+    // window.location.reload();
+  }, []);
 
   return (
     <router>
