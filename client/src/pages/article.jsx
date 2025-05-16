@@ -611,7 +611,7 @@ const Article = () => {
 
         {/* Report Modal */}
         {reportTarget && (
-          <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+          <div className="fixed inset-0 flex items-center justify-center backdrop-blur-sm bg-black/10 z-50">
             <div className="bg-white p-6 rounded-xl w-[90%] max-w-md">
               <h2 className="text-lg font-semibold mb-4">Report Article</h2>
               <div className="space-y-2">
@@ -654,7 +654,7 @@ const Article = () => {
 
         {/* Community Note Modal */}
         {showNote && (
-          <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+          <div className="fixed inset-0 flex items-center justify-center backdrop-blur-sm bg-black/10 z-50">
             <div className="bg-white p-6 rounded-xl w-[90%] max-w-md">
               <h2 className="text-lg font-semibold mb-4">
                 Submit a Community Note
