@@ -104,7 +104,7 @@ const AdminCategories = () => {
   };
 
   return (
-    <div className="w-screen min-h-screen flex flex-col overflow-auto">
+    <div className="w-full min-h-screen flex flex-col overflow-auto">
       <div className="flex">
         <div className="flex-1 font-grotesk">
           <div className="text-2xl sm:text-3xl text-left mt-8 ml-10 font-bold">
@@ -124,7 +124,7 @@ const AdminCategories = () => {
             </button>
           </div>
           <div className="flex flex-col items-start w-full mx-10 my-10">
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-3 md:grid-cols-6 gap-4">
               {topics.map((topic, index) => (
                 <button
                   key={index}
