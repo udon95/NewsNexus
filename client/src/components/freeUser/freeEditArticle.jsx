@@ -797,11 +797,9 @@ const EditFreeArticle = () => {
   };
 
   return (
-    // <div className="w-full min-h-screen bg-indigo-50 text-black font-grotesk flex justify-center">
-    //   <main className="w-full max-w-4xl p-10 flex flex-col gap-6">
-    <div className="w-full min-w-screen min-h-screen flex flex-col overflow-hidden bg-indigo-50 justify-center">
-      <main className="flex-grow w-full flex min-h-full overflow-hidden">
-        <main className="w-full max-w-4xl p-10 flex flex-col gap-6 mx-auto">
+    <div className="flex-1 min-h-full bg-indigo-50 max-md:w-full w-full max-w-screen px-1 md:px-6">
+      <main className="w-full min-h-screen bg-indigo-50 text-black font-grotesk flex justify-center">
+        <main className="w-full max-w-4xl p-10 flex flex-col gap-6">
           <h1 className="text-3xl font-bold mb-1">
             {articleStatus === "Draft"
               ? "Edit Your Draft Articles :"
@@ -1135,7 +1133,7 @@ const EditFreeArticle = () => {
             </div>
 
             {userId && (
-              <p className="text-right text-sm text-red-600 mb-1">
+              <p className="text-right text-sm text-black mb-1">
                 You’ve posted {monthlyPostCount} out of 4 articles this month.
                 Update your subscription for unlimited posts..!!
               </p>
