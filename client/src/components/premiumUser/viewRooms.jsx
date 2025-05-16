@@ -309,10 +309,41 @@ const ViewRoomsPage = () => {
           </div>
 
           {!isPremium && (
-            <div className="bg-yellow-100 text-yellow-800 p-3 rounded mb-4">
-              Subscribe as Premium to participate in discussions.
-            </div>
-          )}
+          //   <div className="bg-yellow-100 text-yellow-800 p-3 rounded mb-4">
+          //     Subscribe as Premium to participate in discussions.
+          //   </div>
+          // )}
+      {!isPremium && (
+  <div className="w-full max-w-[900px] px-4 mx-auto -mt-4 mb-6">
+    <div className="bg-yellow-100 border border-yellow-300 text-yellow-800 px-4 py-3 rounded-md shadow-sm flex items-start gap-2">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        className="h-5 w-5 mt-0.5 flex-shrink-0"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth={2}
+          d="M13 16h-1v-4h-1m1-4h.01M12 20.5C6.753 20.5 2.5 16.247 2.5 11S6.753 1.5 12 1.5 21.5 5.753 21.5 11 17.247 20.5 12 20.5z"
+        />
+      </svg>
+      <p className="text-sm">
+        <strong className="font-semibold">Premium Only:</strong> Room features are available only for Premium users.{" "}
+        <span
+          className="underline text-blue-600 hover:text-blue-800 cursor-pointer"
+          onClick={() => navigate("/subscription")}
+        >
+          Upgrade now
+        </span>{" "}
+        to join discussions and create rooms.
+      </p>
+    </div>
+  </div>
+)}
+
 
           <div className="flex flex-col flex-grow items-center w-full px-4">
             <div className="w-full max-w-5xl p-6 font-grotesk">
