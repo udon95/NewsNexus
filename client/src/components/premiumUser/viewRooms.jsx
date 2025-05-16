@@ -203,14 +203,14 @@ const ViewRoomsPage = () => {
   // ];
 
   const sortedFilteredRooms = [
-    // 1. My private rooms
-    ...filteredRooms.filter(
-      (r) =>
-        r.room_type === "Private" &&
-        // userRooms.has(r.roomid) &&
-        (userRooms.has(r.roomid) || userType === "Admin") &&
-        r.created_by === user?.userid
-    ),
+    // 1. My private rooms and Admin sees ALL private rooms first
+  ...(userType === "Admin"
+    ? filteredRooms.filter((r) => r.room_type === "Private")
+    : filteredRooms.filter(
+        (r) =>
+          r.room_type === "Private" &&
+          userRooms.has(r.roomid)
+      )),
     // 2. Joined private rooms (not created by me)
     ...filteredRooms.filter(
       (r) =>
