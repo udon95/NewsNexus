@@ -157,8 +157,8 @@ const AdminTestimonials = () => {
                           }
                         >
                           {row.homepage_display
-                            ? "Takedown testimonial"
-                            : "Display testimonial"}
+                            ? "Takedown Testimonial"
+                            : "Display Testimonial"}
                         </button>}
                         </td>
                     </tr>
