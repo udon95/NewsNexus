@@ -106,6 +106,29 @@ function App() {
     };
   }, []);
 
+  useEffect(() => {
+  const cleanBrokenSupabaseToken = async () => {
+    const { data, error } = await supabase.auth.getSession();
+
+    if (!data?.session || error) {
+      console.warn("Invalid or missing session. Cleaning up Supabase auth tokens.");
+      
+      // Remove any sb-* Supabase auth tokens
+      Object.keys(localStorage).forEach((key) => {
+        if (key.startsWith("sb-") && key.endsWith("-auth-token")) {
+          localStorage.removeItem(key);
+        }
+      });
+
+      await supabase.auth.signOut(); // optional: ensure logout from Supabase
+      window.location.reload(); // optional: refresh app to clean state
+    }
+  };
+
+  cleanBrokenSupabaseToken();
+}, []);
+
+
   return (
     <router>
       <div className="relative min-h-screen">
