@@ -1134,7 +1134,7 @@ const Room = () => {
                     }${room.name}`
                   : "Not Found"}
               </h1>
-              {/*               <div className="flex gap-3">
+                            <div className="flex gap-3">
                 {isCreator ? (
                   <div className="flex items-center gap-3">
                     <button
@@ -1175,9 +1175,9 @@ const Room = () => {
                   </>
                 )}
               </div>
-            </div> */}
+            </div>
 
-{userType !== "Admin" && (
+{/* {userType !== "Admin" && (
   isCreator ? (
     <div className="flex items-center gap-3">
       <button
@@ -1217,7 +1217,7 @@ const Room = () => {
       </button>
     </>
   )
-)}
+)} */}
 
 
               <p className="text-gray-600 text-lg mb-6">
