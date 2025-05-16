@@ -95,11 +95,13 @@ const AdminSubscription = () => {
   };
 
   return (
-    <div className="min-h-screen w-screen bg-[#EEF4FF] flex flex-col">
-      <div className="flex flex-1 min-h-screen">
-        {/* <AdminSidebar /> */}
+    // <div className="min-h-screen w-screen bg-[#EEF4FF] flex flex-col">
+    //   <div className="flex flex-1 min-h-screen">
+    //     <div className="w-full max-w-4xl mx-auto px-6 py-14 font-grotesk">
+    <div className="min-h-screen w-full bg-[#EEF4FF] flex justify-center px-4 py-12 font-grotesk">
+  <div className="w-full max-w-4xl space-y-20">
 
-        <div className="flex-1 px-32 py-14 font-grotesk">
+
           <div className="text-2xl sm:text-3xl font-bold mb-3">
             Free Subscription:
           </div>
@@ -187,7 +189,7 @@ const AdminSubscription = () => {
           </div>
         </div>
       </div>
-    </div>
+    // </div>
   );
 };
 
