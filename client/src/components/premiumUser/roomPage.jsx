@@ -717,6 +717,8 @@ const Room = () => {
       alert("You need to be logged in to exit.");
       return;
     }
+    if (userType === "Admin") return; // ← BLOCK ADMIN
+
     if (!isMember) return;
 
     setIsUpdating(true);
@@ -778,6 +780,7 @@ const Room = () => {
       alert("You need to be logged in to join.");
       return;
     }
+    if (userType === "Admin") return; // ← BLOCK ADMIN
     if (isMember) return;
     setIsUpdating(true);
     try {
