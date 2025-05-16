@@ -129,10 +129,10 @@ const AdminFeatures = () => {
   };
 
   return (
-    <div className="w-screen min-h-screen flex flex-col overflow-auto">
-      <div className="flex">
-        <div className="flex-1 font-grotesk">
-          <div className="text-2xl sm:text-3xl text-left mt-8 ml-10 font-bold">
+<div className="min-h-screen w-full bg-[#EEF4FF] flex justify-center px-4 py-12 font-grotesk">
+  <div className="w-full max-w-4xl space-y-12">
+
+          {/* <div className="text-2xl sm:text-3xl text-left mt-8 ml-10 font-bold">
             Upload Video:
           </div>
           <input
@@ -146,13 +146,33 @@ const AdminFeatures = () => {
             onClick={handleUpload}
           >
             Upload
-          </button>
+          </button> */}
+          <section>
+  <h2 className="text-2xl sm:text-3xl font-bold mt-1 mb-4">Upload Feature Video</h2>
+  <input
+    type="file"
+    className="w-full min-h-[160px] bg-white rounded-xl p-4 shadow border border-gray-300 text-base"
+    onChange={handleFileChange}
+  />
+  <div className="flex justify-end mt-2 mb-2">
+    <button
+      type="button"
+      className="px-6 py-3 bg-[#3F414C] text-white rounded-lg hover:bg-opacity-90"
+      onClick={handleUpload}
+    >
+      Upload
+    </button>
+  </div>
+</section>
 
-          <div className="text-2xl sm:text-3xl text-left mt-8 ml-10 font-bold">
+
+          {/* <div className="text-2xl sm:text-3xl text-left mt-8 ml-10 font-bold">
             Feature Videos:
-          </div>
+          </div> */}
+          <h2 className="text-2xl sm:text-3xl font-bold mb-4">Feature Videos</h2>
 
-          {videoData ? (
+
+          {/* {videoData ? (
             <div className="flex w-full mt-10 ml-10 font-grotesk">
               <div className="relative w-full max-w-[900px] bg-gray-300 rounded-lg shadow-md">
                 <video
@@ -168,11 +188,23 @@ const AdminFeatures = () => {
             </div>
           ) : (
             <div></div>
-          )}
+          )} */}
+          {videoData && (
+  <div className="w-full bg-gray-200 rounded-lg shadow overflow-hidden mb-6">
+    <video
+      key={videoData.link}
+      controls
+      className="w-full max-h-[400px] object-cover"
+    >
+      <source src={videoData.link} type="video/mp4" />
+      Your browser does not support the video tag.
+    </video>
+  </div>
+)}
+
 
           {/* {featureVideos.map((video) => ( */}
-
-              <div className="overflow-x-auto ml-10 mt-8 max-w-5xl">
+              {/* <div className="overflow-x-auto ml-10 mt-8 max-w-5xl">
               <table className="min-w-full bg-gray-100 rounded-2xl shadow-lg text-left">
               <thead className="bg-gray-200">
                 <tr>
@@ -214,7 +246,50 @@ const AdminFeatures = () => {
                 ))}
               </tbody>
               </table>
-              </div>
+              </div> */}
+              <div className="overflow-x-auto">
+  <table className="w-full bg-white border border-gray-200 rounded-xl shadow text-left">
+    <thead className="bg-gray-100">
+      <tr>
+        <th className="p-3">#</th>
+        <th className="p-3">Video</th>
+        <th className="p-3">Displayed</th>
+        <th className="p-3">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {featureVideos.map((video, index) => (
+        <tr
+          key={video.id}
+          className="hover:bg-gray-50 transition-colors"
+        >
+          <td className="p-3 align-middle">{index + 1}</td>
+          <td className="p-3 align-middle">{video.name}</td>
+          <td className="p-3 align-middle">{video.displayed ? "Yes" : "No"}</td>
+          <td className="p-3 flex flex-wrap gap-3 items-center">
+            <button
+              type="button"
+              className="px-4 py-2 bg-gray-700 text-white rounded hover:bg-opacity-90"
+              onClick={() => changeVideoData(video)}
+            >
+              View
+            </button>
+            <button
+              type="button"
+              className={`px-4 py-2 text-white rounded hover:bg-opacity-90 ${
+                video.displayed ? "bg-red-600" : "bg-gray-700"
+              }`}
+              onClick={() => handleSetDisplayed(video)}
+            >
+              {video.displayed ? "Remove" : "Display"}
+            </button>
+          </td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+</div>
+
 
 
             {/* <div key={video.id} className="flex items-center ml-10 mt-8">
@@ -238,7 +313,7 @@ const AdminFeatures = () => {
             </div> */}
         </div>
       </div>
-    </div>
+        // </div>
   );
 };
 
