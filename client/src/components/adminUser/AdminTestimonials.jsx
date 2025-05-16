@@ -87,93 +87,177 @@ const AdminTestimonials = () => {
     setDisplayedtatus(statusElement.value);
   };
 
-  return (
-    <div className="w-screen min-h-screen flex flex-col overflow-auto">
-      <div className="flex">
-        <div className="flex-1 font-grotesk">
-          <div className="flex">
-            <div className="text-2xl sm:text-3xl text-left mt-8 ml-10 font-bold">
-              User Testimonials:
-            </div>
-            <select
-              id="status"
-              name="status"
-              className=" sm:text-xl text-left mt-8 ml-40 font-bold"
-              onChange={handleResolvedStatusChange}
-            >
-              <option value="all">All</option>
-              <option value="displayed">Displayed</option>
-              <option value="not displayed">Not displayed</option>
-            </select>
-          </div>
+  // return (
+  //   <div className="w-screen min-h-screen flex flex-col overflow-auto">
+  //     <div className="flex">
+  //       <div className="flex-1 font-grotesk">
+  //         <div className="flex">
+  //           <div className="text-2xl sm:text-3xl text-left mt-8 ml-10 font-bold">
+  //             User Testimonials:
+  //           </div>
+  //           <select
+  //             id="status"
+  //             name="status"
+  //             className=" sm:text-xl text-left mt-8 ml-40 font-bold"
+  //             onChange={handleResolvedStatusChange}
+  //           >
+  //             <option value="all">All</option>
+  //             <option value="displayed">Displayed</option>
+  //             <option value="not displayed">Not displayed</option>
+  //           </select>
+  //         </div>
 
-          <div>
-            {displayedRows.length > 0 ? (
-              <div className="overflow-x-auto ml-10 mt-8 max-w-[1400px]">
-                <table className="min-w-full bg-gray-100 rounded-2xl shadow-lg text-left">
-                <thead className="bg-gray-200">
-                  <tr>
-                    <th className="p-3">#</th>
-                    <th className="p-3">Username</th>
-                    <th className="p-3">Feedback text</th>
-                    <th className="p-3">Design</th>
-                    <th className="p-3">Access</th>
-                    <th className="p-3">Safety</th>
-                    <th className="p-3">Pricing</th>
-                    <th className="p-3">Factcheck</th>
-                    <th className="p-3">News Quality</th>
-                    <th className="p-3">Submitted</th>
-                    <th className="p-3">Displayed</th>
-                    <th className="p-3">Toggle display</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {displayedRows.map((row, index) => (
-                    <tr
-                      key={row.id}
-                      className="hover:bg-gray-300 transition-colors"
-                      onClick={() => openReport(row)}
-                    >
-                      <td className="p-3">{index + 1}</td>
-                      <td className="p-3">{users.find((user) => user.userid === row.userid)?.username || "Unknown"}</td>
-                      <td className="p-3">{row.areas_to_improve}</td>
-                      <td className="p-3">{row.design}</td>
-                      <td className="p-3">{row.accessible}</td>
-                      <td className="p-3">{row.safety}</td>
-                      <td className="p-3">{row.price}</td>
-                      <td className="p-3">{row.factcheck}</td>
-                      <td className="p-3">{row.news}</td>
-                      <td className="p-3">{row.submitted}</td>
-                      <td className="p-3">{row.homepage_display? "Yes" : "No"}</td>
-                      <td className="p-3">{                
-                        <button
-                          type="button"
-                          className={`px-6 py-3 flex text-white rounded-lg hover:bg-opacity-90 cursor-pointer ${
-                            row.homepage_display ? 'bg-red-600' : 'bg-[#3F414C]'}`}                          
-                            onClick={() =>setDisplay(
-                              row.id,
-                              row.homepage_display ? false : true
-                            )
-                          }
-                        >
-                          {row.homepage_display
-                            ? "Takedown Testimonial"
-                            : "Display Testimonial"}
-                        </button>}
-                        </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-            ) : (
-              <div className="ml-10 mt-8">0 Results</div>
-            )}
-          </div>
+  //         <div>
+  //           {displayedRows.length > 0 ? (
+  //             <div className="overflow-x-auto ml-10 mt-8 max-w-[1400px]">
+  //               <table className="min-w-full bg-gray-100 rounded-2xl shadow-lg text-left">
+  //               <thead className="bg-gray-200">
+  //                 <tr>
+  //                   <th className="p-3">#</th>
+  //                   <th className="p-3">Username</th>
+  //                   <th className="p-3">Feedback text</th>
+  //                   <th className="p-3">Design</th>
+  //                   <th className="p-3">Access</th>
+  //                   <th className="p-3">Safety</th>
+  //                   <th className="p-3">Pricing</th>
+  //                   <th className="p-3">Factcheck</th>
+  //                   <th className="p-3">News Quality</th>
+  //                   <th className="p-3">Submitted</th>
+  //                   <th className="p-3">Displayed</th>
+  //                   <th className="p-3">Toggle display</th>
+  //                 </tr>
+  //               </thead>
+  //               <tbody>
+  //                 {displayedRows.map((row, index) => (
+  //                   <tr
+  //                     key={row.id}
+  //                     className="hover:bg-gray-300 transition-colors"
+  //                     onClick={() => openReport(row)}
+  //                   >
+  //                     <td className="p-3">{index + 1}</td>
+  //                     <td className="p-3">{users.find((user) => user.userid === row.userid)?.username || "Unknown"}</td>
+  //                     <td className="p-3">{row.areas_to_improve}</td>
+  //                     <td className="p-3">{row.design}</td>
+  //                     <td className="p-3">{row.accessible}</td>
+  //                     <td className="p-3">{row.safety}</td>
+  //                     <td className="p-3">{row.price}</td>
+  //                     <td className="p-3">{row.factcheck}</td>
+  //                     <td className="p-3">{row.news}</td>
+  //                     <td className="p-3">{row.submitted}</td>
+  //                     <td className="p-3">{row.homepage_display? "Yes" : "No"}</td>
+  //                     <td className="p-3">{                
+  //                       <button
+  //                         type="button"
+  //                         className={`px-6 py-3 flex text-white rounded-lg hover:bg-opacity-90 cursor-pointer ${
+  //                           row.homepage_display ? 'bg-red-600' : 'bg-[#3F414C]'}`}                          
+  //                           onClick={() =>setDisplay(
+  //                             row.id,
+  //                             row.homepage_display ? false : true
+  //                           )
+  //                         }
+  //                       >
+  //                         {row.homepage_display
+  //                           ? "Takedown testimonial"
+  //                           : "Display testimonial"}
+  //                       </button>}
+  //                       </td>
+  //                   </tr>
+  //                 ))}
+  //               </tbody>
+  //             </table>
+  //           </div>
+  //           ) : (
+  //             <div className="ml-10 mt-8">0 Results</div>
+  //           )}
+  //         </div>
+  //       </div>
+  //     </div>
+  //   </div>
+  // );
+
+  return (
+    <div className="min-h-screen w-full bg-[#EEF4FF] flex justify-center px-4 py-12 font-grotesk">
+      <div className="w-full max-w-5xl mx-auto space-y-10">
+  
+        {/* Header + Filter */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <h2 className="text-2xl sm:text-3xl font-bold">User Testimonials</h2>
+          <select
+            id="status"
+            name="status"
+            className="text-base sm:text-lg bg-white shadow border border-gray-300 rounded-lg px-4 py-2 focus:outline-none"
+            onChange={handleResolvedStatusChange}
+          >
+            <option value="all">All</option>
+            <option value="displayed">Displayed</option>
+            <option value="not displayed">Not displayed</option>
+          </select>
         </div>
+  
+        {/* Scrollable Table Box */}
+        {displayedRows.length > 0 ? (
+          <div className="rounded-2xl shadow-md border border-gray-200 bg-white overflow-x-auto">
+            <table className="min-w-[1200px] w-full text-left text-sm">
+              <thead className="bg-gray-100 text-gray-700">
+                <tr>
+                  <th className="px-4 py-3">#</th>
+                  <th className="px-4 py-3">Username</th>
+                  <th className="px-4 py-3">Feedback</th>
+                  <th className="px-4 py-3">Design</th>
+                  <th className="px-4 py-3">Access</th>
+                  <th className="px-4 py-3">Safety</th>
+                  <th className="px-4 py-3">Pricing</th>
+                  <th className="px-4 py-3">Factcheck</th>
+                  <th className="px-4 py-3">News Quality</th>
+                  <th className="px-4 py-3">Submitted</th>
+                  <th className="px-4 py-3">Displayed</th>
+                  <th className="px-4 py-3">Action</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {displayedRows.map((row, index) => (
+                  <tr
+                    key={row.id}
+                    className="hover:bg-gray-50 transition"
+                    onClick={() => openReport(row)}
+                  >
+                    <td className="px-4 py-2">{index + 1}</td>
+                    <td className="px-4 py-2">{users.find((u) => u.userid === row.userid)?.username || "Unknown"}</td>
+                    <td className="px-4 py-2">{row.areas_to_improve}</td>
+                    <td className="px-4 py-2">{row.design}</td>
+                    <td className="px-4 py-2">{row.accessible}</td>
+                    <td className="px-4 py-2">{row.safety}</td>
+                    <td className="px-4 py-2">{row.price}</td>
+                    <td className="px-4 py-2">{row.factcheck}</td>
+                    <td className="px-4 py-2">{row.news}</td>
+                    <td className="px-4 py-2">{row.submitted}</td>
+                    <td className="px-4 py-2">{row.homepage_display ? "Yes" : "No"}</td>
+                    <td className="px-4 py-2">
+                      <button
+                        type="button"
+                        className={`w-full px-4 py-2 text-sm text-white rounded-lg hover:bg-opacity-90 ${
+                          row.homepage_display ? "bg-red-600" : "bg-[#3F414C]"
+                        }`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setDisplay(row.id, !row.homepage_display);
+                        }}
+                      >
+                        {row.homepage_display ? "Takedown" : "Display"}
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <div className="text-gray-500">No testimonials found.</div>
+        )}
       </div>
     </div>
   );
+  
 };
 
 export default AdminTestimonials;
