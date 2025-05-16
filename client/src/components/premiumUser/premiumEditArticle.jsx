@@ -1297,8 +1297,10 @@ export const PremiumEditArticle = () => {
   };
 
   return (
-    <div className="w-full min-h-screen bg-indigo-50 text-black font-grotesk flex justify-center">
-      <main className="w-full max-w-4xl p-10 flex flex-col gap-6">
+    // <div className="w-full min-h-screen bg-indigo-50 text-black font-grotesk flex justify-center">
+    //   <main className="w-full max-w-4xl p-10 flex flex-col gap-6">
+    <main className="min-h-screen bg-indigo-50 text-black font-grotesk">
+      <div className="max-w-screen-xl mx-auto w-full p-4 md:p-10 flex flex-col gap-6">
         <h1 className="text-3xl font-bold mb-1">
           {isDraft
             ? "Edit Your Draft Articles :"
@@ -1986,8 +1988,8 @@ export const PremiumEditArticle = () => {
             </div>
           </div>
         )}
+              </div>
       </main>
-    </div>
   );
 };
 
