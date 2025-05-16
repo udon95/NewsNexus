@@ -24,7 +24,7 @@ const AdminGuidelines = () => {
     await supabase
       .from("guideline")
       .update({ displayed: false })
-      .is("displayed", true);
+      .eq("displayed", true);
 
     // Get any existing guideline to preserve effective_date
     const { data: existing } = await supabase
@@ -54,14 +54,17 @@ const AdminGuidelines = () => {
   };
 
   return (
-    <div className="w-full h-full p-10 font-grotesk">
-  <h1 className="text-2xl font-semibold mb-4">Guidelines:</h1>
+    // <div className="w-full h-full p-10 font-grotesk">
+    <div className="w-full min-h-screen py-10 px-4 font-grotesk bg-indigo-50 flex justify-center">
+  <div className="w-full max-w-4xl space-y-6">
+
+  <h1 className="text-2xl font-semibold mb-4">Manage Guidelines:</h1>
 
   <div className="relative w-full">
     <textarea
       value={text}
       onChange={(e) => setText(e.target.value)}
-      className="w-full h-[500px] p-4 rounded-lg shadow bg-white border border-gray-300 text-base whitespace-pre-wrap resize-none"
+      className="w-full h-[550px] p-4 rounded-lg shadow bg-white border border-gray-300 text-base whitespace-pre-wrap resize-none"
       placeholder="Paste your formatted guidelines here..."
     />
     {/* Add padding-bottom here if needed to give spacing below textarea */}
@@ -76,7 +79,7 @@ const AdminGuidelines = () => {
     </button>
   </div>
 </div>
-
+</div>
   );
 };
 
