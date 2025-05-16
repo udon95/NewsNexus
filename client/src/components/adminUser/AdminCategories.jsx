@@ -71,7 +71,7 @@ const AdminCategories = () => {
     if (error) {
       console.error("Error inserting data:", error);
     } else {
-      alert("Added topic : " + newTopic);
+      alert("Added topic: " + newTopic);
     }
 
     window.location.reload();

@@ -111,11 +111,11 @@ const AdminCommentReports = () => {
           {selectedItem && comment ? (
             <div>
               <div className="text-2xl sm:text-3xl text-left mt-8 ml-10 mb-5 font-bold">
-                Report details:
+                Report Details:
               </div>
               <div className="ml-10 mt-5 max-w-[700px] bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300">
                 <div className="flex">                
-                  <div className="font-black mb-1">Username : &emsp;</div>
+                  <div className="font-black mb-1">Username: &emsp;</div>
                   <div className="text-blue-600">
                     {selectedItem ? selectedItem.username : ""}
                   </div>
@@ -123,7 +123,7 @@ const AdminCommentReports = () => {
               </div>
               <div className="ml-10 mt-5 max-w-[700px] bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300">
                 <div className="flex">                
-                  <div className="font-black mb-1">Infringement : &emsp;</div>
+                  <div className="font-black mb-1">Infringement: &emsp;</div>
                   <div className="text-blue-600">
                     {selectedItem ? selectedItem.reason : ""}
                   </div>
@@ -131,7 +131,7 @@ const AdminCommentReports = () => {
               </div>
               <div className="ml-10 mt-5 max-w-[700px] bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300">
                 <div className="flex">                
-                  <div className="font-black mb-1">Comment Status : &emsp;</div>
+                  <div className="font-black mb-1">Comment Status: &emsp;</div>
                   <div className="text-blue-600">
                     {comment && comment.Suspended ? "Suspended" : "Active"}
                   </div>
@@ -139,7 +139,7 @@ const AdminCommentReports = () => {
               </div>
               <div className="ml-10 mt-5 max-w-[700px] bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300">
                 <div className="flex">                
-                  <div className="font-black mb-1">Comment : &emsp;</div>
+                  <div className="font-black mb-1">Comment: &emsp;</div>
                   <div className="text-blue-600">
                     {selectedItem ? comment.content : ""}
                   </div>
@@ -163,7 +163,7 @@ const AdminCommentReports = () => {
                     className="px-6 py-3 bg-[#3F414C] flex ml-5 mt-7 text-white rounded-lg hover:bg-opacity-90 cursor-pointer"
                     onClick={() => suspendComment(selectedItem, false)}
                   >
-                    Reject report
+                    Reject Report
                   </button>
                 ) : (
                   <div></div>
@@ -227,7 +227,7 @@ const AdminCommentReports = () => {
               //   </div>
               // ))
             ) : (
-              <div className="ml-10 mt-8">0 results</div>
+              <div className="ml-10 mt-8">0 Results</div>
             )}
           </div>
         </div>

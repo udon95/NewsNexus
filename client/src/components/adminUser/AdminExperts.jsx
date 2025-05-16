@@ -77,9 +77,7 @@ const AdminExperts = () => {
     setUserTopic(topics.find((topic) => topic.topicid == application.topicid));
     console.log(application.topicid);
     console.log(userTopic);
-
-
-  } 
+  };
 
   return (
     <div className="w-screen min-h-screen flex flex-col overflow-auto">
@@ -88,41 +86,40 @@ const AdminExperts = () => {
           {applicant ? (
             <div>
               <div className="text-2xl sm:text-3xl text-left mt-8 ml-10 mb-5 font-bold">
-                Applicant particulars:
+                Applicant Particulars:
               </div>
               <div className="ml-10 mt-5 max-w-[700px] bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300">
-                <div className="flex">                
-                  <div className="font-black mb-1">User : &emsp;</div>
-                  <div className="text-blue-600">
-                    {applicant.username}
-                  </div>
+                <div className="flex">
+                  <div className="font-black mb-1">User: &emsp;</div>
+                  <div className="text-blue-600">{applicant.username}</div>
                 </div>
               </div>
               <div className="ml-10 mt-5 max-w-[700px] bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300">
-                <div className="flex">                
-                  <div className="font-black mb-1">Topic : &emsp;</div>
-                  <div className="text-blue-600">
-                    {userTopic.name}
-                  </div>
+                <div className="flex">
+                  <div className="font-black mb-1">Topic: &emsp;</div>
+                  <div className="text-blue-600">{userTopic.name}</div>
                 </div>
               </div>
               <div className="ml-10 mt-5 max-w-[700px] bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300">
-                <div className="flex">                
-                  <div className="font-black mb-1">Profession : &emsp;</div>
+                <div className="flex">
+                  <div className="font-black mb-1">Profession: &emsp;</div>
                   <div className="text-blue-600">
                     {applicant ? applicant.description : "Nil"}
                   </div>
                 </div>
               </div>
               <div className="ml-10 mt-5 max-w-[700px] min-h-[200px] bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300">
-                <div className="flex">                
-                  <div className="font-black mb-1">Experiences : &emsp;</div>
+                <div className="flex">
+                  <div className="font-black mb-1">Experiences: &emsp;</div>
                   <div className="text-blue-600">
-                    {applicant.cv ? applicant.cv.split("\n").map((line, idx) => (
-                      <span key={idx}>
-                        {line}<br />
-                      </span>
-                    )) : "No professional designation"}
+                    {applicant.cv
+                      ? applicant.cv.split("\n").map((line, idx) => (
+                          <span key={idx}>
+                            {line}
+                            <br />
+                          </span>
+                        ))
+                      : "No professional designation"}
                   </div>
                 </div>
               </div>
@@ -148,10 +145,10 @@ const AdminExperts = () => {
             <div></div>
           )}
           <div className="text-2xl sm:text-3xl text-left mt-8 ml-10 font-bold">
-            Expert applications:
+            Expert Applications:
           </div>
           <div className="overflow-x-auto ml-10 mt-8 max-w-5xl">
-              <table className="min-w-full bg-gray-100 rounded-2xl shadow-lg text-left">
+            <table className="min-w-full bg-gray-100 rounded-2xl shadow-lg text-left">
               <thead className="bg-gray-200">
                 <tr>
                   <th className="p-3">#</th>
@@ -168,7 +165,11 @@ const AdminExperts = () => {
                   >
                     <td className="p-3">{index + 1}</td>
                     <td className="p-3">{application.username}</td>
-                    <td className="p-3">  {topics.find((topic) => topic.topicid === application.topicid)?.name || "Unknown"}
+                    <td className="p-3">
+                      {" "}
+                      {topics.find(
+                        (topic) => topic.topicid === application.topicid
+                      )?.name || "Unknown"}
                     </td>
                   </tr>
                 ))}

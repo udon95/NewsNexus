@@ -304,7 +304,6 @@ export const PremiumEditArticle = () => {
         .from(bucket)
         .getPublicUrl(filePath);
       if (urlData?.publicUrl) {
-
         const doc = new DOMParser().parseFromString(updatedHTML, "text/html");
         doc.querySelectorAll("img").forEach((imgTag) => {
           if (imgTag.src === img.previewUrl) {
@@ -392,7 +391,6 @@ export const PremiumEditArticle = () => {
           .insert([{ articleid, image_url: img.previewUrl }]);
       }
     }
-
 
     // handled in backend
     // 📝 Insert new published article
@@ -528,7 +526,7 @@ export const PremiumEditArticle = () => {
         if (error) console.error("Error removing room article images:", error);
       }
     }
-console.log(pendingImages)
+    console.log(pendingImages);
     // Upload new images and replace in HTML
     for (const img of pendingImages) {
       const file = img.file;
@@ -596,20 +594,20 @@ console.log(pendingImages)
     }
     // Update article in DB
     const { data, error } = await supabase
-  .from("room_articles")
-  .upsert(
-    {
-      title,
-      content: updatedHTML,
-      roomid: selectedRoom,
-      userid: session.userid,
-      status: "Published",
-      created_at: new Date().toISOString(),
-      postid: id,
-    },
-    { onConflict: ["postid"] } // Conflicts happen based on postid
-  )
-  .select("postid");
+      .from("room_articles")
+      .upsert(
+        {
+          title,
+          content: updatedHTML,
+          roomid: selectedRoom,
+          userid: session.userid,
+          status: "Published",
+          created_at: new Date().toISOString(),
+          postid: id,
+        },
+        { onConflict: ["postid"] } // Conflicts happen based on postid
+      )
+      .select("postid");
 
     if (error) {
       console.error("Post room article failed:", error);
@@ -639,7 +637,6 @@ console.log(pendingImages)
           .insert([{ postid, image_url: img.previewUrl }]);
       }
     }
-
 
     // Clean up
     pendingImages.forEach((img) => {
@@ -685,7 +682,7 @@ console.log(pendingImages)
 
     if (id) {
       if (postType === "General") {
-        console.log(pendingImages)
+        console.log(pendingImages);
         const { data: oldImages } = await supabase
           .from("article_images")
           .select("image_url")
@@ -778,7 +775,7 @@ console.log(pendingImages)
 
     // Upload new images
     let uploadedImageUrls = [];
-    console.log(pendingImages)
+    console.log(pendingImages);
     for (const img of pendingImages) {
       // If this is the first image, set firstImageUrl from the previewUrl
       if (!firstImageUrl) {
@@ -788,30 +785,30 @@ console.log(pendingImages)
 
       const file = img.file;
       if (!file) continue;
-    
-      
-    
+
       const fileExt = file.name.split(".").pop();
-      const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+      const fileName = `${Date.now()}-${Math.random()
+        .toString(36)
+        .substring(2)}.${fileExt}`;
       const filePath = `user-${session.userid}/${fileName}`;
-    
+
       console.log(filePath);
-    
+
       // Upload the file to Supabase storage
       const { error: uploadError } = await supabase.storage
         .from(bucket)
         .upload(filePath, file, { upsert: true });
-    
+
       if (uploadError) {
         alert("Image upload failed.");
         return;
       }
-    
+
       // Get the public URL of the uploaded file
       const { data: urlData } = supabase.storage
         .from(bucket)
         .getPublicUrl(filePath);
-    
+
       console.log(urlData);
       if (urlData?.publicUrl) {
         // Replace local image src in HTML (for General posts)
@@ -824,7 +821,7 @@ console.log(pendingImages)
           });
           updatedHTML = doc.body.innerHTML;
         }
-    
+
         // Add the uploaded image URL to the list of uploadedImageUrls
         uploadedImageUrls.push(urlData.publicUrl);
       }
@@ -840,7 +837,7 @@ console.log(pendingImages)
       status: "Draft",
     };
 
-    console.log(articleData)
+    console.log(articleData);
 
     if (postType === "General") {
       try {
@@ -918,20 +915,20 @@ console.log(pendingImages)
         return;
       }
       const { data, error } = await supabase
-  .from("room_articles")
-  .upsert(
-    {
-      title: articleData.title,
-      content: updatedHTML,
-      roomid: selectedRoom,
-      userid: articleData.userid,
-      created_at: articleData.time,
-      status: articleData.status,
-      postid: id, 
-    },
-    { onConflict: ["postid"] } 
-  )
-  .select("postid"); 
+        .from("room_articles")
+        .upsert(
+          {
+            title: articleData.title,
+            content: updatedHTML,
+            roomid: selectedRoom,
+            userid: articleData.userid,
+            created_at: articleData.time,
+            status: articleData.status,
+            postid: id,
+          },
+          { onConflict: ["postid"] }
+        )
+        .select("postid");
 
       if (error) {
         console.error("Error saving room draft:", error);
@@ -1287,7 +1284,6 @@ console.log(pendingImages)
           topic_name: rawInput, // keep original casing for admin view
           status: "Pending",
           created_at: new Date().toISOString(),
-          
         },
       ]);
 

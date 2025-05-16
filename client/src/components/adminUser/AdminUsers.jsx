@@ -122,7 +122,7 @@ const AdminUsers = () => {
     <div className="w-screen min-h-screen flex flex-col overflow-auto">
       <div className="flex-1 font-grotesk">
         <div className="text-2xl sm:text-3xl text-left mt-8 ml-10 font-bold">
-          Search users:
+          Search Users:
         </div>
         <div className="flex">
           <input

@@ -119,11 +119,11 @@ const AdminArticleReports = () => {
           {selectedItem ? (
             <div>
               <div className="text-2xl sm:text-3xl text-left mt-8 ml-10 mb-5 font-bold">
-                Report details:
+                Report Details:
               </div>
               <div className="ml-10 mt-5 max-w-[700px] bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300">
                 <div className="flex">                
-                  <div className="font-black mb-1">Username : &emsp;</div>
+                  <div className="font-black mb-1">Username: &emsp;</div>
                   <div className="text-blue-600">
                     {selectedItem ? selectedItem.username : ""}
                   </div>
@@ -131,7 +131,7 @@ const AdminArticleReports = () => {
               </div>
               <div className="ml-10 mt-5 max-w-[700px] bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300">
                 <div className="flex">                
-                  <div className="font-black mb-1">Infringement : &emsp;</div>
+                  <div className="font-black mb-1">Infringement: &emsp;</div>
                   <div className="text-blue-600">
                     {selectedItem ? selectedItem.reason : ""}
                   </div>
@@ -139,14 +139,14 @@ const AdminArticleReports = () => {
               </div>
               <div className="ml-10 mt-5 max-w-[700px] bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300">
                 <div className="flex">
-                  <div className="font-black mb-1">Article Status : &emsp;</div>
+                  <div className="font-black mb-1">Article Status: &emsp;</div>
                   <div className="text-blue-600">
                     {article && article.Suspended ? "Suspended" : "Active"}
                   </div>
                 </div>
               </div>
               <div className="ml-10 mt-5 max-w-[700px] bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300">
-                  <div className="font-black mb-1">Article link :</div>
+                  <div className="font-black mb-1">Article Link:</div>
                   <div className="underline cursor-pointer text-blue-600"  
                       onClick={() => articleRedirect()}>
                     {article ? article.title : ""}
@@ -163,7 +163,7 @@ const AdminArticleReports = () => {
                   {article && article.Suspended == true
                     ? "Unsuspend"
                     : "Suspend"}{" "}
-                  article
+                  Article
                 </button>
                 {selectedItem.resolved == false ? (
                   <button
@@ -173,7 +173,7 @@ const AdminArticleReports = () => {
                       suspendArticle(selectedItem, false)
                     }
                   >
-                    Reject report
+                    Reject Report
                   </button>
                 ) : (
                   <div></div>
@@ -185,7 +185,7 @@ const AdminArticleReports = () => {
           )}
           <div className="flex">
             <div className="text-2xl sm:text-3xl text-left mt-8 ml-10 font-bold">
-              Article reports:
+              Article Reports:
             </div>
             <select
               id="status"
@@ -237,7 +237,7 @@ const AdminArticleReports = () => {
               //   </div>
               // ))
             ) : (
-              <div className="ml-10 mt-8">0 results</div>
+              <div className="ml-10 mt-8">0 Results</div>
             )}
           </div>
         </div>

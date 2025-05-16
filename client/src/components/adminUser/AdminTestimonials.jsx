@@ -167,7 +167,7 @@ const AdminTestimonials = () => {
               </table>
             </div>
             ) : (
-              <div className="ml-10 mt-8">0 results</div>
+              <div className="ml-10 mt-8">0 Results</div>
             )}
           </div>
         </div>

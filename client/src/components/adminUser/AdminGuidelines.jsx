@@ -49,7 +49,7 @@ const AdminGuidelines = () => {
       alert("Error updating guidelines.");
       console.error(error);
     } else {
-      alert("✅ Guidelines updated successfully!");
+      alert("Guidelines updated successfully!");
     }
   };
 

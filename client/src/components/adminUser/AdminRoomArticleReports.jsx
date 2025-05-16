@@ -117,12 +117,12 @@ const AdminRoomArticleReports = () => {
           {selectedItem ? (
             <div>
               <div className="text-2xl sm:text-3xl text-left mt-8 ml-10 mb-5 font-bold">
-                Report details:
+                Report Details:
               </div>
 
               <div className="ml-10 mt-5 max-w-[700px] bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300">
                 <div className="flex">
-                  <div className="font-black mb-1">Username : &emsp; </div>
+                  <div className="font-black mb-1">Username: &emsp; </div>
                   <div className="text-blue-600">
                     {selectedItem ? selectedItem.username : ""}
                   </div>
@@ -130,7 +130,7 @@ const AdminRoomArticleReports = () => {
               </div>
               <div className="ml-10 mt-5 max-w-[700px] bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300">
                 <div className="flex">
-                  <div className="font-black mb-1">Infringement : &emsp; </div>
+                  <div className="font-black mb-1">Infringement: &emsp; </div>
                   <div className="text-blue-600">
                     {selectedItem ? selectedItem.reason : ""}
                   </div>
@@ -138,7 +138,7 @@ const AdminRoomArticleReports = () => {
               </div>
               <div className="ml-10 mt-5 max-w-[700px] bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300">
                 <div className="flex">
-                  <div className="font-black mb-1">Article Status : &emsp; </div>
+                  <div className="font-black mb-1">Article Status: &emsp; </div>
                   <div className="text-blue-600">
                     {article && article.Suspended ? "Suspended" : "Active"}
                   </div>
@@ -146,14 +146,14 @@ const AdminRoomArticleReports = () => {
               </div>
               <div className="ml-10 mt-5 max-w-[700px] bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300">
                 <div className="flex">
-                  <div className="font-black mb-1">Article Title : &emsp; </div>
+                  <div className="font-black mb-1">Article Title: &emsp; </div>
                   <div className="text-blue-600">
                     {article ? article.title : ""}
                   </div>
                 </div>
               </div>
               <div className="ml-10 mt-5 max-w-[700px] bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300">
-                <div className="font-black mb-1">Article Text :<br/></div>
+                <div className="font-black mb-1">Article Text:<br/></div>
                 <div className="text-blue-600">
                   {article ? (<div dangerouslySetInnerHTML={{ __html: article.content }} />) : ("No text in article")}
                 </div>
@@ -164,7 +164,7 @@ const AdminRoomArticleReports = () => {
                   className="px-6 py-3 bg-[#3F414C] flex ml-10 mt-7 text-white rounded-lg hover:bg-opacity-90 cursor-pointer"
                   onClick={() => suspendArticle(selectedItem, !article.Suspended)}
                 >
-                  {article && article.Suspended == true? "Unsuspend": "Suspend"}{" "}article
+                  {article && article.Suspended == true? "Unsuspend": "Suspend"}{" "}Article
                 </button>
                 {selectedItem.resolved == false ? (
                   <button
@@ -172,7 +172,7 @@ const AdminRoomArticleReports = () => {
                     className="px-6 py-3 bg-[#3F414C] flex ml-5 mt-7 text-white rounded-lg hover:bg-opacity-90 cursor-pointer"
                     onClick={() => suspendArticle(selectedItem, false)}
                   >
-                    Reject report
+                    Reject Report
                   </button>
                 ) : (
                   <div></div>
@@ -184,7 +184,7 @@ const AdminRoomArticleReports = () => {
           )}
           <div className="flex">
             <div className="text-2xl sm:text-3xl text-left mt-8 ml-10 font-bold">
-              Room Article reports:
+              Room Article Reports:
             </div>
             <select
               id="status"
@@ -235,7 +235,7 @@ const AdminRoomArticleReports = () => {
               //   </div>
               // ))
             ) : (
-              <div className="ml-10 mt-8">0 results</div>
+              <div className="ml-10 mt-8">0 Results</div>
             )}
           </div>
         </div>

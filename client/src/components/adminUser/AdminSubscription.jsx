@@ -101,7 +101,7 @@ const AdminSubscription = () => {
 
         <div className="flex-1 px-32 py-14 font-grotesk">
           <div className="text-2xl sm:text-3xl font-bold mb-3">
-            Free Subscription :
+            Free Subscription:
           </div>
           <div className="relative w-full max-w-[1180px]">
             <textarea
@@ -120,12 +120,12 @@ const AdminSubscription = () => {
           </div>
 
           <div className="text-2xl sm:text-3xl font-bold mt-20 mb-3">
-            Premium Subscription :
+            Premium Subscription:
           </div>
           <div className="relative w-full max-w-[1180px]">
             <div className="flex items-center gap-4 mb-4">
               <label className="text-base text-gray-800 font-semibold whitespace-nowrap">
-                Default Price :
+                Default Price:
               </label>
               <div className="w-full h-[48px] flex items-center justify-center bg-white rounded-xl shadow-md text-gray-800 font-semibold text-lg">
                 ${originalPrice}

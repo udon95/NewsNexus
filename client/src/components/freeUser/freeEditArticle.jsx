@@ -292,10 +292,19 @@ const EditFreeArticle = () => {
 
     const parsedUser = JSON.parse(storedUser);
     const session = parsedUser?.user;
-    if (!session) return alert("User not authenticated.");
+    if (!session) {
+      alert("User not authenticated.");
+      setIsUploading(false);
+      setUploadAction("");
+      return;
+    }
 
-    if (!title || !topics || !articleContent)
-      return alert("Please fill in all fields.");
+    if (!title || !topics || !articleContent) {
+      alert("Please fill in all fields.");
+      setIsUploading(false);
+      setUploadAction("");
+      return;
+    }
 
     const doc = new DOMParser().parseFromString(articleContent, "text/html");
     const uploadedImageUrls = Array.from(doc.querySelectorAll("img")).map(
@@ -466,6 +475,10 @@ const EditFreeArticle = () => {
     await supabase.from("article_images").delete().eq("articleid", articleId);
 
     for (const img of pendingImages) {
+      if (!firstImageUrl) {
+        firstImageUrl = img.previewUrl; // Assign first image previewUrl here
+        console.log("First image URL:", firstImageUrl);
+      }
       const file = img.file;
       if (!file) continue;
       const fileExt = file.name.split(".").pop();
@@ -485,9 +498,16 @@ const EditFreeArticle = () => {
       const { data: urlData } = supabase.storage
         .from(bucket)
         .getPublicUrl(filePath);
+        
       if (urlData?.publicUrl) {
-        if (!firstImageUrl) firstImageUrl = urlData.publicUrl;
-        updatedHTML = updatedHTML.replaceAll(img.previewUrl, urlData.publicUrl);
+        const doc = new DOMParser().parseFromString(updatedHTML, "text/html");
+        doc.querySelectorAll("img").forEach((imgTag) => {
+          if (imgTag.src === img.previewUrl) {
+            imgTag.src = urlData.publicUrl;
+          }
+        });
+        updatedHTML = doc.body.innerHTML;
+
         uploadedImageUrls.push(urlData.publicUrl);
       }
     }

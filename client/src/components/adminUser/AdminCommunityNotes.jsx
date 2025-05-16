@@ -88,9 +88,10 @@ const AdminCommunityNotes = () => {
     const statusElement = document.getElementById("status").value;
     setDisplayedArticlesList(
       articles.filter((article) =>
-          statusElement == "Approved" ? approvedNotes.some((note) => note.target_id === article.articleid)
-            : pendingNotes.some((note) => note.target_id === article.articleid) &&
-              !approvedNotes.some((note) => note.target_id === article.articleid)
+        statusElement == "Approved"
+          ? approvedNotes.some((note) => note.target_id === article.articleid)
+          : pendingNotes.some((note) => note.target_id === article.articleid) &&
+            !approvedNotes.some((note) => note.target_id === article.articleid)
       )
     );
   };
@@ -150,26 +151,26 @@ const AdminCommunityNotes = () => {
           {selectedArticle ? (
             <div>
               <div className="text-2xl sm:text-3xl text-left mt-8 ml-10 mb-5 font-bold">
-                Community Notes details:
+                Community Notes Details:
               </div>
               <div className="ml-10 mt-5 max-w-[700px] bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300">
-                <div className="font-black mb-1">Article link :</div>
-                <div className="underline cursor-pointer text-blue-600"  
-                    onClick={() => articleRedirect()}>
+                <div className="font-black mb-1">Article Link:</div>
+                <div
+                  className="underline cursor-pointer text-blue-600"
+                  onClick={() => articleRedirect()}
+                >
                   {selectedArticle ? selectedArticle.title : ""}
                 </div>
               </div>
               <div className="ml-10 mt-5 max-w-[700px] bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300">
-                <div className="flex">                
-                  <div className="font-black mb-1">Posted by : &emsp;</div>
-                  <div className="text-blue-600">
-                    {articleOwner}
-                  </div>
+                <div className="flex">
+                  <div className="font-black mb-1">Posted By: &emsp;</div>
+                  <div className="text-blue-600">{articleOwner}</div>
                 </div>
               </div>
               <div className="ml-10 mt-5 max-w-[700px] bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300">
-                <div className="flex">                
-                  <div className="font-black mb-1">Article Status : &emsp;</div>
+                <div className="flex">
+                  <div className="font-black mb-1">Article Status: &emsp;</div>
                   <div className="text-blue-600">
                     {selectedArticle && selectedArticle.Suspended
                       ? "Suspended"
@@ -187,41 +188,47 @@ const AdminCommunityNotes = () => {
               )}
               {selectedArticleNotes.length > 0 ? (
                 <div className="overflow-x-auto ml-10 mt-8 max-w-5xl">
-                <table className="min-w-full bg-gray-100 rounded-2xl shadow-lg text-left">
-                <thead className="bg-gray-200">
-                  <tr>
-                    <th className="p-3">#</th>
-                    <th className="p-3">User</th>
-                    <th className="p-3">Note</th>
-                    <th className="p-3">Displayed</th>
-                    <th className="p-3">Toggle display</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {selectedArticleNotes.map((row, index) => (
-                    <tr
-                      key={row.id}
-                      className="hover:bg-gray-300 transition-colors"
-                    >
-                      <td className="p-3">{index + 1}</td>
-                      <td className="p-3">{row.username}</td>
-                      <td className="p-3">{row.note}</td>
-                      <td className="p-3">{row.Status == "Approved" ? "Yes" : "No"}</td>
-                      <td className="p-3"><button
-                      type="button"
-                      className={`px-6 py-3 bg-[#3F414C] flex items-center justify-center text-white rounded-lg hover:bg-opacity-90 cursor-pointer ${
-                        row.Status == "Approved"  ? 'bg-red-600' : 'bg-[#3F414C]'}`}
-                      onClick={() => setDisplayNotes(row)}
-                    >
-                      {row.Status == "Approved" ? "Remove" : "Display"}
-                    </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-                
+                  <table className="min-w-full bg-gray-100 rounded-2xl shadow-lg text-left">
+                    <thead className="bg-gray-200">
+                      <tr>
+                        <th className="p-3">#</th>
+                        <th className="p-3">User</th>
+                        <th className="p-3">Note</th>
+                        <th className="p-3">Displayed</th>
+                        <th className="p-3">Toggle display</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {selectedArticleNotes.map((row, index) => (
+                        <tr
+                          key={row.id}
+                          className="hover:bg-gray-300 transition-colors"
+                        >
+                          <td className="p-3">{index + 1}</td>
+                          <td className="p-3">{row.username}</td>
+                          <td className="p-3">{row.note}</td>
+                          <td className="p-3">
+                            {row.Status == "Approved" ? "Yes" : "No"}
+                          </td>
+                          <td className="p-3">
+                            <button
+                              type="button"
+                              className={`px-6 py-3 bg-[#3F414C] flex items-center justify-center text-white rounded-lg hover:bg-opacity-90 cursor-pointer ${
+                                row.Status == "Approved"
+                                  ? "bg-red-600"
+                                  : "bg-[#3F414C]"
+                              }`}
+                              onClick={() => setDisplayNotes(row)}
+                            >
+                              {row.Status == "Approved" ? "Remove" : "Display"}
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
                 // selectedArticleNotes.map((row) => (
                 //   <div className="flex" key={row.id}>
                 //     <div className="ml-10 mt-5 max-w-150 bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300">
@@ -237,7 +244,6 @@ const AdminCommunityNotes = () => {
                 //     </button>
                 //   </div>
                 // ))
-              ) : (
                 <div></div>
               )}
             </div>
@@ -268,7 +274,6 @@ const AdminCommunityNotes = () => {
                     <tr>
                       <th className="p-3">#</th>
                       <th className="p-3">Title</th>
-                      
                     </tr>
                   </thead>
                   <tbody>
@@ -285,7 +290,7 @@ const AdminCommunityNotes = () => {
                   </tbody>
                 </table>
               </div>
-
+            ) : (
               // displayedArticleList.map((row) => (
               //   <div key={row.articleid}>
               //     <div
@@ -296,8 +301,7 @@ const AdminCommunityNotes = () => {
               //     </div>
               //   </div>
               // ))
-            ) : (
-              <div className="ml-10 mt-8">0 results</div>
+              <div className="ml-10 mt-8">0 Results</div>
             )}
           </div>
         </div>

@@ -32,7 +32,7 @@ const AdminFeatures = () => {
   }, []);
 
   if (loading) {
-    return <div>Loading video...</div>; // Loading state
+    return <div>Loading Video...</div>; // Loading state
   }
 
   const getLuminance = (hexColor) => {

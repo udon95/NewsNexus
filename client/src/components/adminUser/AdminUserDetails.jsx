@@ -108,11 +108,11 @@ const AdminUserDetails = () => {
       <div className="flex">
         <div className="flex-1 font-grotesk">
           <div className="text-2xl sm:text-3xl text-left mt-8 ml-10 font-bold">
-            User details:
+            User Details:
           </div>
           <div className="ml-10 mt-5 max-w-[700px] bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300">
             <div className="flex">                
-              <div className="font-black mb-1">Username : &emsp;</div>
+              <div className="font-black mb-1">Username: &emsp;</div>
               <div className="text-blue-600">
                 {userDetails.username}
               </div>
@@ -120,7 +120,7 @@ const AdminUserDetails = () => {
           </div>
           <div className="ml-10 mt-5 max-w-[700px] bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300">
             <div className="flex">                
-              <div className="font-black mb-1">Email : &emsp;</div>
+              <div className="font-black mb-1">Email: &emsp;</div>
               <div className="text-blue-600">
                 {userDetails.email}
               </div>
@@ -129,7 +129,7 @@ const AdminUserDetails = () => {
 
           <div className="ml-10 mt-5 max-w-[700px] bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300">
             <div className="flex">                
-              <div className="font-black mb-1">User Type : &emsp;</div>
+              <div className="font-black mb-1">User Type: &emsp;</div>
               <div className="text-blue-600">
                 {(premiumUserList.some((user) => user.userid === userDetails.userid)
                 ? "Premium User"
@@ -140,7 +140,7 @@ const AdminUserDetails = () => {
           </div>
           <div className="ml-10 mt-5 max-w-[700px] bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300">
             <div className="flex">                
-              <div className="font-black mb-1">Expert User : &emsp;</div>
+              <div className="font-black mb-1">Expert User: &emsp;</div>
               <div className="text-blue-600">
                 {(expertUserList.some((user) => user.username === userDetails.username)
                 ? "Yes"
@@ -151,7 +151,7 @@ const AdminUserDetails = () => {
           </div>
           <div className="ml-10 mt-5 max-w-[700px] bg-gray-100 rounded-2xl p-3 text-lg shadow-lg outline-none focus:ring-2 focus:ring-gray-300">
             <div className="flex">                
-              <div className="font-black mb-1">Account status : &emsp;</div>
+              <div className="font-black mb-1">Account status: &emsp;</div>
               <div className="text-blue-600">
                 {userDetails.status}
               </div>
@@ -185,7 +185,7 @@ const AdminUserDetails = () => {
           </div>
 
           <div className="text-2xl sm:text-3xl text-left mt-8 ml-10 mb-5 font-bold">
-            {userDetails.username} articles:
+            {userDetails.username} Articles:
           </div>
 
           {userArticles != null ? (
@@ -214,7 +214,7 @@ const AdminUserDetails = () => {
             </table>
           </div>
           ) : (
-            <div className="ml-10 mt-8">0 results</div>
+            <div className="ml-10 mt-8">0 Results</div>
           )}
         </div>
       </div>
