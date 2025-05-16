@@ -15,8 +15,6 @@ function chunkText(text, maxLen = 4500) {
   const sentenceRegex = /[^\.!\?]+[\.!\?]+(\s|$)|[^\.!\?]+$/g;
   const sentences = text.match(sentenceRegex) || [];
 
-  console.log("🔍 ChunkText - Total sentences matched:", sentences.length);
-
   const chunks = [];
   let current = "";
   for (const s of sentences) {
@@ -38,7 +36,6 @@ function chunkText(text, maxLen = 4500) {
     }
   }
   if (current) chunks.push(current.trim());
-  console.log("🧩 Total text chunks generated:", chunks.length);
 
   return chunks;
 }
@@ -46,15 +43,11 @@ function chunkText(text, maxLen = 4500) {
 router.post("/", async (req, res) => {
   try {
     const { text, targetLang } = req.body;
-    console.log("🌐 Incoming translation request");
-    console.log("Target Language:", targetLang);
-    console.log("Original text length:", text.length);
 
     const parts = chunkText(text, 4500);
     const translatedParts = [];
 
     for (let i = 0; i < parts.length; i++) {
-      console.log(`🔄 Translating chunk ${i + 1}/${parts.length}`);
       const { TranslatedText } = await translate
         .translateText({
           Text: parts[i],
@@ -67,10 +60,6 @@ router.post("/", async (req, res) => {
 
     // Reassemble translated chunks
     const translatedText = translatedParts.join(" ");
-    console.log(
-      "✅ Translation complete. Total characters returned:",
-      translatedText.length
-    );
 
     return res.status(200).json({ translatedText });
   } catch (error) {
