@@ -412,6 +412,8 @@ const EditFreeArticle = () => {
   };
 
   const handleSaveDraft = async () => {
+    setUploadAction("draft");
+    setIsUploading(true); // ADD THIS
     if (!articleId) return;
 
     const storedUser = localStorage.getItem("userProfile");
@@ -467,10 +469,12 @@ const EditFreeArticle = () => {
     await supabase.from("article_images").delete().eq("articleid", articleId);
 
     for (const img of pendingImages) {
-      if (!firstImageUrl) {
-        firstImageUrl = img.previewUrl; // Assign first image previewUrl here
-        console.log("First image URL:", firstImageUrl);
-      }
+      // if (!firstImageUrl) {
+
+      //   firstImageUrl = img.previewUrl; // Assign first image previewUrl here
+      //   console.log("First image URL:", firstImageUrl);
+      // }
+
       const file = img.file;
       if (!file) continue;
       const fileExt = file.name.split(".").pop();
@@ -490,6 +494,12 @@ const EditFreeArticle = () => {
       const { data: urlData } = supabase.storage
         .from(bucket)
         .getPublicUrl(filePath);
+
+        if (urlData?.publicUrl) {
+          if (!firstImageUrl) {
+            firstImageUrl = urlData.publicUrl;
+          }
+        }        
 
       if (urlData?.publicUrl) {
         const doc = new DOMParser().parseFromString(updatedHTML, "text/html");
