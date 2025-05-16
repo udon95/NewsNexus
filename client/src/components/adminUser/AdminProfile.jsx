@@ -126,7 +126,7 @@ const AdminProfile = () => {
     
 return (
   <div className="w-screen min-h-screen flex py-10 overflow-auto font-grotesk">
-    <div className="w-full max-w-3xl px-6">
+    <div className="w-full max-w-5xl px-6">
       {/* Profile Section */}
       <section className="mb-12">
         <h2 className="text-2xl sm:text-3xl font-bold mb-6 text-gray-800">Profile Particulars</h2>
