@@ -308,21 +308,21 @@ const ViewRoomsPage = () => {
             </div>
           </div>
 
-          {!isPremium && (
+{!isPremium && (
   <div className="w-full flex justify-center mb-6">
-    <div className="w-full max-w-5xl border border-red-600 rounded-2xl shadow-md bg-red-100 text-red-800 p-4 font-semibold text-sm text-center">
-                🔒 Room access is restricted to{" "}
-                <span className="font-bold">Premium users</span> only.{" "}
-                <span
-                  className="underline cursor-pointer text-red-700 hover:text-red-900"
-                  onClick={() => navigate("/subscription")}
-                >
-                  Upgrade now
-                </span>{" "}
-                to join or view room discussions.
-              </div>
-            </div>
-          )}
+    <div className="w-full max-w-[800px] border border-red-600 rounded-2xl shadow-md bg-red-100 text-red-800 p-4 font-semibold text-sm text-center">
+      🔒 Room access is restricted to <span className="font-bold">Premium users</span> only.{" "}
+      <span
+        className="underline cursor-pointer text-red-700 hover:text-red-900"
+        onClick={() => navigate("/subscription")}
+      >
+        Upgrade now
+      </span>{" "}
+      to join or view room discussions.
+    </div>
+  </div>
+)}
+
 
           <div className="flex flex-col flex-grow items-center w-full px-4">
             <div className="w-full max-w-5xl p-6 font-grotesk">
