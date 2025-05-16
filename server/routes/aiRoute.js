@@ -69,9 +69,9 @@ async function moderateImages(imageUrls) {
     const safeSearch = res.safeSearchAnnotation || {};
 
     const isFlagged =
-      levels.indexOf(safeSearch.adult) >= 3 ||
-      levels.indexOf(safeSearch.violence) >= 3 ||
-      levels.indexOf(safeSearch.racy) >= 3;
+      levels.indexOf(safeSearch.adult) > 3 ||
+      levels.indexOf(safeSearch.violence) > 3 ||
+      levels.indexOf(safeSearch.racy) > 3;
 
     results.push({ imageUrl: url, safeSearch, isFlagged });
     if (isFlagged) flagged.push(url);
