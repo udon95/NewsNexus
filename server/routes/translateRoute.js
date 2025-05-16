@@ -8,10 +8,15 @@ AWS.config.update({
 
 const translate = new AWS.Translate();
 const polly = new AWS.Polly({ signatureVersion: "v4" });
+
 // Splits `text` into pieces < maxLen characters, breaking on sentence end-punctuation.
 function chunkText(text, maxLen = 4500) {
   // Grab sentences (including trailing .!? and whitespace)
-  const sentences = text.match(/[^\.!\?]+[\.!\?]+(\s|$)/g) || [];
+  const sentenceRegex = /[^\.!\?]+[\.!\?]+(\s|$)|[^\.!\?]+$/g;
+  const sentences = text.match(sentenceRegex) || [];
+
+  console.log("🔍 ChunkText - Total sentences matched:", sentences.length);
+
   const chunks = [];
   let current = "";
   for (const s of sentences) {
@@ -33,19 +38,26 @@ function chunkText(text, maxLen = 4500) {
     }
   }
   if (current) chunks.push(current.trim());
+  console.log("🧩 Total text chunks generated:", chunks.length);
+
   return chunks;
 }
 
 router.post("/", async (req, res) => {
   try {
     const { text, targetLang } = req.body;
+    console.log("🌐 Incoming translation request");
+    console.log("Target Language:", targetLang);
+    console.log("Original text length:", text.length);
+
     const parts = chunkText(text, 4500);
     const translatedParts = [];
 
-    for (const part of parts) {
+    for (let i = 0; i < parts.length; i++) {
+      console.log(`🔄 Translating chunk ${i + 1}/${parts.length}`);
       const { TranslatedText } = await translate
         .translateText({
-          Text: part,
+          Text: parts[i],
           SourceLanguageCode: "en",
           TargetLanguageCode: targetLang,
         })
@@ -55,6 +67,11 @@ router.post("/", async (req, res) => {
 
     // Reassemble translated chunks
     const translatedText = translatedParts.join(" ");
+    console.log(
+      "✅ Translation complete. Total characters returned:",
+      translatedText.length
+    );
+
     return res.status(200).json({ translatedText });
   } catch (error) {
     console.error("Translation error:", error);
