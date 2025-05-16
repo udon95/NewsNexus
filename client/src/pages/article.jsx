@@ -295,12 +295,15 @@ const Article = () => {
       if (!error && data?.articleid) {
         setArticleData(data);
         setOriginalHtml(data.text);
-        console.log("original html", data.text);
 
-        const doc = new DOMParser().parseFromString(data.text, "text/html");
+        const htmlWithBreaks = data.text.replace(/<\/p>/gi, "</p>\n\n");
+        const doc = new DOMParser().parseFromString(
+          htmlWithBreaks,
+          "text/html"
+        );
         const plain = doc.body.textContent || "";
         setOriginalText(plain);
-        console.log("plain", plain)
+        console.log("plain", plain);
 
         // Optional: check for expert status
         if (data?.userid && data?.topicid) {

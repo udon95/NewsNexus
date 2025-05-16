@@ -27,7 +27,7 @@ function AdminDashboard() {
         </aside>
         <div className="flex-1 min-h-full bg-indigo-50 max-md:w-full w-full max-w-screen pr-6">
         <Routes>
-            <Route index element={<AdminHome />} />
+            <Route index element={<Navigate to="AdminProfile" />} />
 
             <Route path="AdminExperts/*" element={<AdminExperts />} />
             <Route path="AdminProfile/*" element={<AdminProfile />} />
