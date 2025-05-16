@@ -254,7 +254,7 @@ const ViewRoomsPage = () => {
         .single();
 
       if (articleError || !oldestArticleData?.postid) {
-        console.log("No article found for room:", roomid);
+        //console.log("No article found for room:", roomid);
         return "/default-image.png"; // Fallback image if no article is found
       }
 
@@ -268,7 +268,7 @@ const ViewRoomsPage = () => {
         .single(); // Only get one image
 
       if (roomImageError || !roomImageData?.image_url) {
-        console.log("No image found for the oldest article in room:", roomid);
+        //console.log("No image found for the oldest article in room:", roomid);
         return "/default-image.png"; // Fallback image if no image is found
       }
 
