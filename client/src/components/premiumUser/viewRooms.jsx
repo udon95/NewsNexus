@@ -309,7 +309,7 @@ const ViewRoomsPage = () => {
           </div>
 
 {!isPremium && (
-  <div className="w-full flex justify-center mb-6">
+  <div className="w-full flex justify-center mb-4">
     <div className="w-full max-w-[800px] border border-red-600 rounded-2xl shadow-md bg-red-100 text-red-800 p-4 font-semibold text-sm text-center">
       🔒 Room access is restricted to <span className="font-bold">Premium users</span> only.{" "}
       <span
