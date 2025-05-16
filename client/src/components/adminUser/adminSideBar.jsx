@@ -45,7 +45,7 @@ export const AdminSidebar = () => {
             Subscription &gt;
           </a>
           <a href="/adminDashboard/AdminFeatures" className="tracking-wide">
-            Feature display &gt;
+            Feature Display &gt;
           </a>
           <a href="/adminDashboard/AdminUsers" className="tracking-wide">
             Users &gt;

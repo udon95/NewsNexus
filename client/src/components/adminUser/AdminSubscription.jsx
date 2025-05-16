@@ -159,7 +159,7 @@ const AdminSubscription = () => {
               <div className="h-[48px]">
                 <button
                   onClick={togglePromotion}
-                  className="h-full px-5 bg-[#3F414C] text-white text-sm rounded-full hover:bg-opacity-90"
+                  className="h-full px-5 bg-[#3F414C] text-white text-sm rounded-xl hover:bg-opacity-90"
                 >
                   {promotionActive ? "Deactivate" : "Activate"}
                 </button>

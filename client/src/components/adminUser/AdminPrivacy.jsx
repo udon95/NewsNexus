@@ -56,6 +56,7 @@ const AdminPrivacy = () => {
   return (
     // <div className="w-full h-full p-10 font-grotesk">
     <div className="min-h-screen w-screen bg-[#EEF4FF] flex flex-col">
+      <div className="flex flex-1 min-h-screen">
         <div className="flex-1 px-32 py-14 font-grotesk">
           <h1 className="text-2xl font-semibold mb-4">Privacy Policies:</h1>
 
@@ -79,6 +80,7 @@ const AdminPrivacy = () => {
           </div>
         </div>
       </div>
+    </div>
   );
 };
 
