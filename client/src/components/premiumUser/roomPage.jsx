@@ -326,15 +326,15 @@ const Room = () => {
         const isExpert = expertData?.length > 0;
 
         // Check if user is admin
-        const { data: adminData, error: adminError } = await supabase
-          .from("admin")
-          .select("adminid")
-          .eq("adminid", userid)
-          .limit(1);
+        // const { data: adminData, error: adminError } = await supabase
+        //   .from("admin")
+        //   .select("adminid")
+        //   .eq("adminid", userid)
+        //   .limit(1);
 
-        const isAdmin = adminData?.length > 0;
+        // const isAdmin = adminData?.length > 0;
 
-        setIsExpertOrAdmin(isExpert || isAdmin);
+        setIsExpertOrAdmin(isExpert);
       };
 
       checkExpertOrAdminStatus();
@@ -1656,31 +1656,34 @@ const Room = () => {
                             return;
                           }
 
+                          //const { error } = await supabase
+                          // .from("community_notes")
+                          // .insert([
+                          //   {
+                          //     target_id: reportTarget.id,
+                          //     target_type: "room_article",
+                          //     note: selectedReason,
+                          //     username: user?.username ?? "Anonymous",
+                          //     userid: user?.userid,
+                          //     created_at: new Date().toISOString(),
+                          //   },
+                          // ]);
+
                           const { error } = await supabase
-                            // .from("community_notes")
-                            // .insert([
-                            //   {
-                            //     target_id: reportTarget.id,
-                            //     target_type: "room_article",
-                            //     note: selectedReason,
-                            //     username: user?.username ?? "Anonymous",
-                            //     userid: user?.userid,
-                            //     created_at: new Date().toISOString(),
-                            //   },
-                            // ]);
-
-                          const { error } = await supabase.from("community_notes").insert([
-  {
-    target_id: reportTarget.id,
-    target_type: "room_article",
-    note: selectedReason,
-    username: user?.username ?? "Anonymous",
-    userid: userType !== "Admin" ? user?.userid : null,
-    adminid: userType === "Admin" ? user?.userid : null,
-    created_at: new Date().toISOString(),
-  },
-]);
-
+                            .from("community_notes")
+                            .insert([
+                              {
+                                target_id: reportTarget.id,
+                                target_type: "room_article",
+                                note: selectedReason,
+                                username: user?.username ?? "Anonymous",
+                                userid:
+                                  userType !== "Admin" ? user?.userid : null,
+                                adminid:
+                                  userType === "Admin" ? user?.userid : null,
+                                created_at: new Date().toISOString(),
+                              },
+                            ]);
 
                           if (error) {
                             console.error("Error submitting note:", error);
