@@ -66,18 +66,33 @@ const AdminExperts = () => {
     fetchTopics();
   }, []);
 
+  useEffect(() => {
+  if (applicant && topics.length > 0) {
+    const matchedTopic = topics.find(
+      (topic) => topic.topicid === applicant.topicid
+    );
+    setUserTopic(matchedTopic);
+  }
+}, [applicant, topics]);
+
+
   // useEffect(() => {
   //   setUserTopic(topics.find((topic) => topic.topicid == applicant.topicid));
   //   console.log(userTopic);
 
   // }, [applicant]);
 
+  // const setApplicantWithTopic = (application) => {
+  //   setApplicant(application);
+  //   setUserTopic(topics.find((topic) => topic.topicid == application.topicid));
+  //   console.log(application.topicid);
+  //   console.log(userTopic);
+  // };
+
   const setApplicantWithTopic = (application) => {
-    setApplicant(application);
-    setUserTopic(topics.find((topic) => topic.topicid == application.topicid));
-    console.log(application.topicid);
-    console.log(userTopic);
-  };
+  setApplicant(application); // ONLY this line
+};
+
 
   // return (
   //   <div className="w-screen min-h-screen flex flex-col overflow-auto">
@@ -284,6 +299,20 @@ const AdminExperts = () => {
         </div>
       </div>
     </div>
+
+      <div className="sm:col-span-2">
+    <label className="block text-sm font-semibold text-gray-700 mb-1">Profession</label>
+    <div className="bg-gray-100 px-4 py-2 rounded-lg text-base font-medium text-gray-800">
+      {applicant.description || "Nil"}
+    </div>
+  </div>
+
+  <div className="sm:col-span-2">
+    <label className="block text-sm font-semibold text-gray-700 mb-1">Experience</label>
+    <div className="bg-gray-100 px-4 py-2 rounded-lg text-base font-medium text-gray-800 whitespace-pre-line">
+      {applicant.cv || "No professional designation"}
+    </div>
+  </div>
 
     <div className="flex justify-end pt-4 gap-4">
       <button
