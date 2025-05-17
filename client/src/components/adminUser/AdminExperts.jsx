@@ -35,22 +35,52 @@ const AdminExperts = () => {
     }
   };
 
-  useEffect(() => {
-    const fetchApplications = async () => {
-      const { data, error } = await supabase
-        .from("expert_application")
-        .select("*")
-        .eq("status", "Pending");
-      if (error) {
-        console.error("Error fetching users:", error);
-      } else {
-        setApplications(data);
-        console.log(data);
-      }
-    };
-    fetchApplications();
-  }, []);
+  // useEffect(() => {
+  //   const fetchApplications = async () => {
+  //     const { data, error } = await supabase
+  //       .from("expert_application")
+  //       .select("*")
+  //       .eq("status", "Pending");
+  //     if (error) {
+  //       console.error("Error fetching users:", error);
+  //     } else {
+  //       setApplications(data);
+  //       console.log(data);
+  //     }
+  //   };
+  //   fetchApplications();
+  // }, []);
 
+useEffect(() => {
+  const fetchApplications = async () => {
+    const { data, error } = await supabase
+      .from("expert_application")
+      .select(`
+        *,
+        users (
+          email,
+          usertype
+        )
+      `)
+      .eq("status", "Pending"); // Only get pending applications
+
+    if (error) {
+      console.error("Error fetching applications:", error);
+    } else {
+      // Flatten user fields for easier access
+      const flattened = data.map(app => ({
+        ...app,
+        email: app.users?.email || "N/A",
+        usertype: app.users?.usertype || "Free",
+      }));
+      setApplications(flattened);
+    }
+  };
+
+  fetchApplications();
+}, []);
+
+  
   useEffect(() => {
     const fetchTopics = async () => {
       const { data, error } = await supabase
@@ -288,7 +318,9 @@ const AdminExperts = () => {
       <div>
         <label className="block text-sm font-semibold text-gray-700 mb-1">Expert User</label>
         <div className="bg-gray-100 px-4 py-2 rounded-lg text-base font-medium text-gray-800">
-          {userTopic ? "Yes" : "No"}
+{/*           {userTopic ? "Yes" : "No"} */}
+          {applicant.status === "Approved" ? "Yes" : "No"}
+
         </div>
       </div>
 
