@@ -204,13 +204,11 @@ const ViewRoomsPage = () => {
 
   const sortedFilteredRooms = [
     // 1. My private rooms and Admin sees ALL private rooms first
-  ...(userType === "Admin"
-    ? filteredRooms.filter((r) => r.room_type === "Private")
-    : filteredRooms.filter(
-        (r) =>
-          r.room_type === "Private" &&
-          userRooms.has(r.roomid)
-      )),
+    ...(userType === "Admin"
+      ? filteredRooms.filter((r) => r.room_type === "Private")
+      : filteredRooms.filter(
+          (r) => r.room_type === "Private" && userRooms.has(r.roomid)
+        )),
     // 2. Joined private rooms (not created by me)
     ...filteredRooms.filter(
       (r) =>
@@ -401,7 +399,7 @@ const ViewRoomsPage = () => {
                       : "Joined"
                     : "Join"}
               </button> */}
-{/*                     {user?.userid === room.created_by ? (
+                    {/*                     {user?.userid === room.created_by ? (
                       <div className="flex items-center gap-3">
                         <button
                           className="px-6 py-2 text-sm font-bold rounded-full bg-gray-400 text-white cursor-not-allowed"
@@ -428,38 +426,37 @@ const ViewRoomsPage = () => {
                         Join
                       </button>
                     )} */}
-                      {userType === "Admin" ? (
-  <span className="bg-gray-300 text-gray-700 text-sm font-semibold px-4 py-2 rounded-full">
-    Admin View
-  </span>
-) : user?.userid === room.created_by ? (
-  <div className="flex items-center gap-3">
-    <button
-      className="px-6 py-2 text-sm font-bold rounded-full bg-gray-400 text-white cursor-not-allowed"
-      disabled
-    >
-      My Room
-    </button>
-    <span className="bg-black text-white text-xs font-semibold px-3 py-1 rounded-full border border-gray-300">
-      {room?.room_type?.toUpperCase()}
-    </span>
-  </div>
-) : userRooms.has(room.roomid) ? (
-  <button
-    className="px-6 py-2 text-sm font-bold rounded-full bg-gray-300 text-gray-600 cursor-not-allowed"
-    disabled
-  >
-    {room.room_type === "Private" ? "Private" : "Joined"}
-  </button>
-) : (
-  <button
-    className="px-6 py-2 text-sm font-bold rounded-full bg-[#BFD8FF] text-black hover:bg-blue-300"
-    onClick={(e) => handleJoinAndRedirect(room.roomid, e)}
-  >
-    Join
-  </button>
-)}
-
+                    {userType === "Admin" ? (
+                      <span className="bg-gray-300 text-gray-700 text-sm font-semibold px-4 py-2 rounded-full">
+                        Admin View
+                      </span>
+                    ) : user?.userid === room.created_by ? (
+                      <div className="flex items-center gap-3">
+                        <button
+                          className="px-6 py-2 text-sm font-bold rounded-full bg-gray-400 text-white cursor-not-allowed"
+                          disabled
+                        >
+                          My Room
+                        </button>
+                        <span className="bg-black text-white text-xs font-semibold px-3 py-1 rounded-full border border-gray-300">
+                          {room?.room_type?.toUpperCase()}
+                        </span>
+                      </div>
+                    ) : userRooms.has(room.roomid) ? (
+                      <button
+                        className="px-6 py-2 text-sm font-bold rounded-full bg-gray-300 text-gray-600 cursor-not-allowed"
+                        disabled
+                      >
+                        {room.room_type === "Private" ? "Private" : "Joined"}
+                      </button>
+                    ) : (
+                      <button
+                        className="px-6 py-2 text-sm font-bold rounded-full bg-[#BFD8FF] text-black hover:bg-blue-300"
+                        onClick={(e) => handleJoinAndRedirect(room.roomid, e)}
+                      >
+                        Join
+                      </button>
+                    )}
                   </div>
                 ))}
               </div>
