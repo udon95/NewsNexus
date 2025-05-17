@@ -59,19 +59,20 @@ useEffect(() => {
         *,
         users (
           email,
-          usertype
+          usertype (
+            type
+          )
         )
       `)
-      .eq("status", "Pending"); // Only get pending applications
+      .eq("status", "Pending");
 
     if (error) {
       console.error("Error fetching applications:", error);
     } else {
-      // Flatten user fields for easier access
       const flattened = data.map(app => ({
         ...app,
         email: app.users?.email || "N/A",
-        usertype: app.users?.usertype || "Free",
+        usertype: app.users?.usertype?.type || "Free",
       }));
       setApplications(flattened);
     }
@@ -79,6 +80,7 @@ useEffect(() => {
 
   fetchApplications();
 }, []);
+
 
   
   useEffect(() => {
