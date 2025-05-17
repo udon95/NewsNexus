@@ -32,7 +32,6 @@ function Register() {
   const [showGuidelinesModal, setShowGuidelinesModal] = useState(false);
   const [showPrivacyModal, setShowPrivacyModal] = useState(false);
 
-
   // useEffect(() => {
   //   const validateForm = () => {
   //     const newErrors = {};
@@ -79,7 +78,7 @@ function Register() {
         newErrors.password = "Password must be at least 8 characters.";
       if (userData.password !== userData.confirmPassword)
         newErrors.confirmPassword = "Passwords do not match.";
-  
+
       if (!userData.dob) {
         newErrors.dob = "Date of birth is required.";
       } else {
@@ -95,22 +94,22 @@ function Register() {
           newErrors.dob = "You must be at least 16 years old to register.";
         }
       }
-  
+
       if (!userData.gender) newErrors.gender = "Please select a gender.";
-  
+
       if (!acceptedGuidelines)
-        newErrors.acceptedGuidelines = "You must agree to the platform guidelines.";
+        newErrors.acceptedGuidelines =
+          "You must agree to the platform guidelines.";
       if (!acceptedPrivacy)
         newErrors.acceptedPrivacy = "You must agree to the privacy policy.";
-  
+
       setErrors(newErrors);
       setIsValid(Object.keys(newErrors).length === 0);
     };
-  
+
     validateForm();
   }, [userData, acceptedGuidelines, acceptedPrivacy]);
-  
-  
+
   useEffect(() => {
     async function fetchCategories() {
       const { data, error } = await supabase
@@ -208,7 +207,9 @@ function Register() {
             <h2 className="text-3xl sm:text-5xl font-bold text-gray-900 mb-10 mt-0 font-grotesk">
               Register
             </h2>
-
+            <p className="text-sm text-gray-600 mb-4">
+              You are registering as a <strong>Free User</strong>.
+            </p>
             {/* Step 1: User Information */}
             <form className="space-y-6 sm:space-y-5">
               <div>
@@ -218,7 +219,6 @@ function Register() {
                     htmlFor="username"
                     // className="text-2xl sm:text-2xl font-normal text-black w-30"
                     className="text-base font-medium text-gray-800 w-32 mr-4"
-
                   >
                     Username:
                   </label>
@@ -341,29 +341,32 @@ function Register() {
                     )}
                   </div> */}
                   <div className="w-full relative group">
-                  <DatePicker
-                    selected={userData.dob}
-                    onChange={(date) =>
-                      setUserData((prev) => ({ ...prev, dob: date }))
-                    }
-                    dateFormat="dd-MM-yyyy"
-                    maxDate={new Date(new Date().setFullYear(new Date().getFullYear() - 16))}
-                    showMonthDropdown
-                    showYearDropdown
-                    dropdownMode="select"
-                    scrollableYearDropdown
-                    yearDropdownItemNumber={100}
-                    placeholderText="Select your date of birth (Must >16 years old)"
-                    className="block w-full p-3 text-base rounded-md bg-[#F3F3F3] focus:ring-2 focus:ring-blue-500 shadow-md"
-                    wrapperClassName="w-full"
-                  />
-                  {errors.dob && (
-                    <div className="absolute top-[-30px] left-1/2 -translate-x-1/2 bg-red-500 text-white text-xs p-2 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                      {errors.dob}
-                    </div>
-                  )}
-                </div>
-
+                    <DatePicker
+                      selected={userData.dob}
+                      onChange={(date) =>
+                        setUserData((prev) => ({ ...prev, dob: date }))
+                      }
+                      dateFormat="dd-MM-yyyy"
+                      maxDate={
+                        new Date(
+                          new Date().setFullYear(new Date().getFullYear() - 16)
+                        )
+                      }
+                      showMonthDropdown
+                      showYearDropdown
+                      dropdownMode="select"
+                      scrollableYearDropdown
+                      yearDropdownItemNumber={100}
+                      placeholderText="Select your date of birth (Must >16 years old)"
+                      className="block w-full p-3 text-base rounded-md bg-[#F3F3F3] focus:ring-2 focus:ring-blue-500 shadow-md"
+                      wrapperClassName="w-full"
+                    />
+                    {errors.dob && (
+                      <div className="absolute top-[-30px] left-1/2 -translate-x-1/2 bg-red-500 text-white text-xs p-2 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                        {errors.dob}
+                      </div>
+                    )}
+                  </div>
                 </div>
                 <div className="flex items-center mb-6 relative group">
                   {/* <label className="text-2xl sm:text-2xl font-normal text-black w-30"> */}
@@ -391,56 +394,64 @@ function Register() {
                 </div>
 
                 <div className="mb-6 space-y-4">
-                <div className="flex items-start space-x-2">
-                  <input
-                    type="checkbox"
-                    id="guidelines"
-                    checked={acceptedGuidelines}
-                    onChange={() => setAcceptedGuidelines((v) => !v)}
-                    className="mt-1 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                  />
-                  <label htmlFor="guidelines" className="text-sm text-gray-700 leading-5">
-                    I agree to the{" "}
-                    <button
-                      type="button"
-                      onClick={() => setShowGuidelinesModal(true)}
-                      className="underline text-blue-600 hover:text-blue-800"
+                  <div className="flex items-start space-x-2">
+                    <input
+                      type="checkbox"
+                      id="guidelines"
+                      checked={acceptedGuidelines}
+                      onChange={() => setAcceptedGuidelines((v) => !v)}
+                      className="mt-1 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                    />
+                    <label
+                      htmlFor="guidelines"
+                      className="text-sm text-gray-700 leading-5"
                     >
-                      Platform Guidelines
-                    </button>
-                    .
-                    {errors.acceptedGuidelines && (
-                      <p className="text-red-500 mt-1">{errors.acceptedGuidelines}</p>
-                    )}
-                  </label>
-                </div>
+                      I agree to the{" "}
+                      <button
+                        type="button"
+                        onClick={() => setShowGuidelinesModal(true)}
+                        className="underline text-blue-600 hover:text-blue-800"
+                      >
+                        Platform Guidelines
+                      </button>
+                      .
+                      {errors.acceptedGuidelines && (
+                        <p className="text-red-500 mt-1">
+                          {errors.acceptedGuidelines}
+                        </p>
+                      )}
+                    </label>
+                  </div>
 
-                <div className="flex items-start space-x-2">
-                  <input
-                    type="checkbox"
-                    id="privacy"
-                    checked={acceptedPrivacy}
-                    onChange={() => setAcceptedPrivacy((v) => !v)}
-                    className="mt-1 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                  />
-                  <label htmlFor="privacy" className="text-sm text-gray-700 leading-5">
-                    I agree to the{" "}
-                    <button
-                      type="button"
-                      onClick={() => setShowPrivacyModal(true)}
-                     className="underline text-blue-600 hover:text-blue-800"
+                  <div className="flex items-start space-x-2">
+                    <input
+                      type="checkbox"
+                      id="privacy"
+                      checked={acceptedPrivacy}
+                      onChange={() => setAcceptedPrivacy((v) => !v)}
+                      className="mt-1 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                    />
+                    <label
+                      htmlFor="privacy"
+                      className="text-sm text-gray-700 leading-5"
                     >
+                      I agree to the{" "}
+                      <button
+                        type="button"
+                        onClick={() => setShowPrivacyModal(true)}
+                        className="underline text-blue-600 hover:text-blue-800"
+                      >
                         Privacy Policy
-                    </button>
-                    .
-                    {errors.acceptedPrivacy && (
-                      <p className="text-red-500 mt-1">{errors.acceptedPrivacy}</p>
-                    )}
-                  </label>
+                      </button>
+                      .
+                      {errors.acceptedPrivacy && (
+                        <p className="text-red-500 mt-1">
+                          {errors.acceptedPrivacy}
+                        </p>
+                      )}
+                    </label>
+                  </div>
                 </div>
-              </div>
-
-
 
                 {/* <div className="flex justify-end gap-3 mt-4 sm:mt-4"> */}
                 <div className="flex justify-end gap-4 mt-6">
@@ -465,7 +476,7 @@ function Register() {
                       isValid
                         ? "bg-[#3F414C] hover:bg-opacity-90 cursor-pointer"
                         : "bg-gray-400 cursor-not-allowed"
-                    }`}                    
+                    }`}
                     disabled={!isValid}
                   >
                     Next
@@ -510,15 +521,15 @@ function Register() {
           //   </button>
           // </div>
           <div className="flex items-center justify-center min-h-screen w-full px-4 font-grotesk">
-          <div className="bg-white shadow-md rounded-xl p-8 w-full max-w-xl">
-            <h2 className="text-2xl sm:text-3xl font-bold text-center mb-2">
-              Select Your Interests
-            </h2>
-            <p className="text-center text-sm text-gray-600 mb-6">
-              (Choose 6. Starting from Most Interested)
-            </p>
+            <div className="bg-white shadow-md rounded-xl p-8 w-full max-w-xl">
+              <h2 className="text-2xl sm:text-3xl font-bold text-center mb-2">
+                Select Your Interests
+              </h2>
+              <p className="text-center text-sm text-gray-600 mb-6">
+                (Choose 6. Starting from Most Interested)
+              </p>
 
-    {/* {Array.from({ length: 6 }).map((_, index) => (
+              {/* {Array.from({ length: 6 }).map((_, index) => (
       <div key={index} className="flex items-center mb-4">
         <span className="text-lg w-6 text-right mr-3">{index + 1}.</span>
         <select
@@ -537,45 +548,45 @@ function Register() {
       </div>
     ))} */}
 
-          {Array.from({ length: 6 }).map((_, index) => {
-            const selectedSet = new Set(dropdownValues);
-            selectedSet.delete(dropdownValues[index]); // allow re-selecting current slot
-              const availableOptions = categories.filter(
-              (cat) => !selectedSet.has(cat.name)
-            );
+              {Array.from({ length: 6 }).map((_, index) => {
+                const selectedSet = new Set(dropdownValues);
+                selectedSet.delete(dropdownValues[index]); // allow re-selecting current slot
+                const availableOptions = categories.filter(
+                  (cat) => !selectedSet.has(cat.name)
+                );
 
-            return (
-              <div key={index} className="flex items-center mb-4">
-                <span className="text-lg w-6 text-right mr-3">{index + 1}.</span>
-                <select
-                  value={dropdownValues[index]}
-                  onChange={(e) => handleDropdownChange(index, e)}
-                  className="w-full p-3 rounded-md bg-[#F3F3F3] focus:ring-2 focus:ring-blue-500 shadow-md"
+                return (
+                  <div key={index} className="flex items-center mb-4">
+                    <span className="text-lg w-6 text-right mr-3">
+                      {index + 1}.
+                    </span>
+                    <select
+                      value={dropdownValues[index]}
+                      onChange={(e) => handleDropdownChange(index, e)}
+                      className="w-full p-3 rounded-md bg-[#F3F3F3] focus:ring-2 focus:ring-blue-500 shadow-md"
+                    >
+                      <option value="">Select a category</option>
+                      {availableOptions.map((cat) => (
+                        <option key={cat.id} value={cat.name}>
+                          {cat.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                );
+              })}
+
+              <div className="flex justify-end mt-6">
+                <button
+                  type="button"
+                  onClick={() => handleFinalSubmit(selectedTopics)}
+                  className="bg-[#3F414C] text-white px-6 py-2 rounded-md hover:bg-opacity-90 transition"
                 >
-                  <option value="">Select a category</option>
-                  {availableOptions.map((cat) => (
-                    <option key={cat.id} value={cat.name}>
-                      {cat.name}
-                    </option>
-                  ))}
-                  </select>
+                  Submit
+                </button>
               </div>
-            );
-          })}
-
-
-          <div className="flex justify-end mt-6">
-          <button
-            type="button"
-            onClick={() => handleFinalSubmit(selectedTopics)}
-            className="bg-[#3F414C] text-white px-6 py-2 rounded-md hover:bg-opacity-90 transition"
-          >
-            Submit
-          </button>
-        </div>
-      </div>
-    </div>
-
+            </div>
+          </div>
         )}
 
         {/* <button
@@ -586,45 +597,44 @@ function Register() {
           Resend confirmation email
         </button> */}
         {showGuidelinesModal && (
-    <div
-      style={{ backdropFilter: "blur(4px)" }}
-      className="fixed inset-0 bg-opacity-50 z-50 flex items-center justify-center"
-    >
-      <div className="bg-white w-11/12 max-w-2xl rounded-lg relative">
-        <button
-          onClick={() => setShowGuidelinesModal(false)}
-          className="absolute top-4 right-4 text-gray-500 hover:text-gray-800 z-10"
-          aria-label="Close guidelines"
-        >
-          ✕
-        </button>
-        <div className="overflow-y-auto max-h-[90vh] p-6">
-          <Guidelines hideNavbar />
-        </div>
-      </div>
-    </div>
-  )}
+          <div
+            style={{ backdropFilter: "blur(4px)" }}
+            className="fixed inset-0 bg-opacity-50 z-50 flex items-center justify-center"
+          >
+            <div className="bg-white w-11/12 max-w-2xl rounded-lg relative">
+              <button
+                onClick={() => setShowGuidelinesModal(false)}
+                className="absolute top-4 right-4 text-gray-500 hover:text-gray-800 z-10"
+                aria-label="Close guidelines"
+              >
+                ✕
+              </button>
+              <div className="overflow-y-auto max-h-[90vh] p-6">
+                <Guidelines hideNavbar />
+              </div>
+            </div>
+          </div>
+        )}
 
-  {showPrivacyModal && (
-    <div
-      style={{ backdropFilter: "blur(4px)" }}
-      className="fixed inset-0 bg-opacity-50 z-50 flex items-center justify-center"
-    >
-      <div className="bg-white w-11/12 max-w-2xl rounded-lg relative">
-        <button
-          onClick={() => setShowPrivacyModal(false)}
-          className="absolute top-4 right-4 text-gray-500 hover:text-gray-800 z-10"
-          aria-label="Close privacy"
-        >
-          ✕
-        </button>
-        <div className="overflow-y-auto max-h-[90vh] p-6">
-          <Privacy hideNavbar />
-        </div>
-      </div>
-    </div>
-  )}
-
+        {showPrivacyModal && (
+          <div
+            style={{ backdropFilter: "blur(4px)" }}
+            className="fixed inset-0 bg-opacity-50 z-50 flex items-center justify-center"
+          >
+            <div className="bg-white w-11/12 max-w-2xl rounded-lg relative">
+              <button
+                onClick={() => setShowPrivacyModal(false)}
+                className="absolute top-4 right-4 text-gray-500 hover:text-gray-800 z-10"
+                aria-label="Close privacy"
+              >
+                ✕
+              </button>
+              <div className="overflow-y-auto max-h-[90vh] p-6">
+                <Privacy hideNavbar />
+              </div>
+            </div>
+          </div>
+        )}
       </main>
     </div>
   );
