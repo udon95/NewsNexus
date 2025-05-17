@@ -6,7 +6,6 @@ const AdminExperts = () => {
   const [applicant, setApplicant] = useState(null);
   const [topics, setTopics] = useState([]);
   const [userTopic, setUserTopic] = useState(null);
-  // const [statusFilter, setStatusFilter] = useState("Pending");
 
   const handleClick = async (isApproved) => {
     // Ensure 'applicant' is defined
@@ -36,40 +35,21 @@ const AdminExperts = () => {
     }
   };
 
-  // useEffect(() => {
-  //   const fetchApplications = async () => {
-  //     const { data, error } = await supabase
-  //       .from("expert_application")
-  //       // .select("*")
-  //       .select("username, email, usertype, topicid, description, cv, status")
-  //       .eq("status", "Pending");
-  //     if (error) {
-  //       console.error("Error fetching users:", error);
-  //     } else {
-  //       setApplications(data);
-  //       console.log(data);
-  //     }
-  //   };
-  //   fetchApplications();
-  // }, []);
-
   useEffect(() => {
-  const fetchApplications = async () => {
-    const { data, error } = await supabase
-      .from("expert_application")
-      .select("username, usertype, topicid, description, cv, status")
-      .eq("status", "Pending")
-
-    if (error) {
-      console.error("Error fetching applications:", error);
-    } else {
-      setApplications(data);
-    }
-  };
-
-  fetchApplications();
-}, []);
-
+    const fetchApplications = async () => {
+      const { data, error } = await supabase
+        .from("expert_application")
+        .select("*")
+        .eq("status", "Pending");
+      if (error) {
+        console.error("Error fetching users:", error);
+      } else {
+        setApplications(data);
+        console.log(data);
+      }
+    };
+    fetchApplications();
+  }, []);
 
   useEffect(() => {
     const fetchTopics = async () => {
@@ -304,20 +284,6 @@ const AdminExperts = () => {
         </div>
       </div>
     </div>
-        {/* ✅ ADD THESE TWO BLOCKS BELOW THE GRID */}
-    <div className="sm:col-span-2">
-      <label className="block text-sm font-semibold text-gray-700 mb-1">Profession</label>
-      <div className="bg-gray-100 px-4 py-2 rounded-lg text-base font-medium text-gray-800">
-        {applicant.description || "No profession/description provided"}
-      </div>
-    </div>
-
-    <div className="sm:col-span-2">
-      <label className="block text-sm font-semibold text-gray-700 mb-1">Experience (CV)</label>
-      <div className="bg-gray-100 px-4 py-2 rounded-lg text-base text-gray-800 whitespace-pre-line max-h-60 overflow-y-auto">
-        {applicant.cv ? applicant.cv : "No CV submitted"}
-      </div>
-    </div>
 
     <div className="flex justify-end pt-4 gap-4">
       <button
@@ -350,7 +316,7 @@ const AdminExperts = () => {
                 <th className="px-4 py-3">Category</th>
               </tr>
             </thead>
-{/*             <tbody className="divide-y divide-gray-100">
+            <tbody className="divide-y divide-gray-100">
               {applications.map((application, index) => (
                 <tr
                   key={application.username}
@@ -364,25 +330,7 @@ const AdminExperts = () => {
                   </td>
                 </tr>
               ))}
-            </tbody> */}
-            <tbody className="divide-y divide-gray-100">
-  {applications.map((application, index) => (
-    <tr
-      key={`${application.username}-${index}`}
-      className="hover:bg-gray-50 cursor-pointer transition"
-      onClick={() => setApplicantWithTopic(application)}
-    >
-      <td className="px-4 py-3">{index + 1}</td>
-      <td className="px-4 py-3">{application.username}</td>
-      <td className="px-4 py-3">
-        {topics.find(
-          (topic) => String(topic.topicid) === String(application.topicid)
-        )?.name || "Unknown"}
-      </td>
-    </tr>
-  ))}
-</tbody>
-
+            </tbody>
           </table>
         </div>
       </div>
