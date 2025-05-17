@@ -1346,8 +1346,11 @@ const Room = () => {
                                   className="block w-full text-left p-2 hover:bg-gray-100 text-black"
                                   onClick={() =>
                                     setReportTarget({
-                                      type: "community_note",
+                                      // type: "community_note",
+                                      // id: article.postid,
+                                      type: "room_article", // ✅ FIXED: match backend schema
                                       id: article.postid,
+                                      isCommunityNote: true, // ✅ distinguish from report
                                     })
                                   }
                                 >
@@ -1610,7 +1613,8 @@ const Room = () => {
                     ×
                   </button>
 
-                  {reportTarget.type === "community_note" ? (
+{/*                   {reportTarget.type === "community_note" ? ( */}
+                  {reportTarget.isCommunityNote ? (
                     <>
                       <h2 className="text-xl font-bold mb-2">
                         Add Community Note
