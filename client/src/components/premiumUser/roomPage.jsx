@@ -1649,7 +1649,7 @@ const Room = () => {
                           //     },
                           //   ]);
 
-                          if (userType !== "Admin" && !isMember) {
+                          if (!isExpertOrAdmin && !isMember) {
                             alert(
                               "You must join the room to submit a Community Note."
                             );
