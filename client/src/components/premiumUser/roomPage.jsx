@@ -1636,7 +1636,8 @@ const Room = () => {
                                 target_type: "article",
                                 note: selectedReason,
                                 username: user?.username,
-                                userid: user?.userid,
+                                // userid: user?.userid,
+                                userid: userType === "Admin" ? null : user?.userid,
                                 created_at: new Date().toISOString(),
                               },
                             ]);
@@ -1700,7 +1701,8 @@ const Room = () => {
                                 target_type: reportTarget.type,
                                 reason: selectedReason,
                                 username: user?.username,
-                                userid: user?.userid,
+                                // userid: user?.userid,
+                                userid: userType === "Admin" ? null : user?.userid,
                                 created_at: new Date().toISOString(),
                               },
                             ]);
