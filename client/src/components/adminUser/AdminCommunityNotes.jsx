@@ -165,12 +165,11 @@ const AdminCommunityNotes = () => {
 
   const articleRedirect = () => {
     // navigate(`/article/${selectedArticle.articleid}`);
-    if (selectedArticle?.type === "room_article") {
-  navigate(`/room-article/${selectedArticle.postid}`);
+if (selectedArticle?.type === "room_article") {
+  navigate(`/room/${selectedArticle.roomid}`);
 } else {
   navigate(`/article/${selectedArticle.articleid}`);
 }
-
   };
 
   const openNote = (row) => {
