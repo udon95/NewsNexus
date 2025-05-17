@@ -67,7 +67,7 @@ const VideoComponent = () => {
         loop
         muted
         controls
-        className="w-full h-full object-cover scale-110"
+        className="w-full h-full object-cover scale-100"
       >
         <source src={videoData.link} type="video/mp4" />
         Your browser does not support the video tag.
