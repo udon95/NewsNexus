@@ -57,7 +57,7 @@ const AdminExperts = () => {
   const fetchApplications = async () => {
     const { data, error } = await supabase
       .from("expert_application")
-      .select("username, email, usertype, topicid, description, cv, status")
+      .select("username, usertype, topicid, description, cv, status")
       .eq("status", "Pending")
 
     if (error) {
