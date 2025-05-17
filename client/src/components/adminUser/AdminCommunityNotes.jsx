@@ -26,36 +26,70 @@ const AdminCommunityNotes = () => {
         setNotes(noteData);
       }
     };
-    const fetchArticle = async () => {
-      const { data, error } = await supabase.from("articles").select("*");
-      if (error) {
-        console.error("Error fetching data:", error);
-      } else {
-        setArticles(data);
-        console.log(data);
-      }
-    };
-    const fetchRoomArticle = async () => {
-      const { data, error } = await supabase.from("room_articles").select("*");
-      if (error) {
-        console.error("Error fetching data:", error);
-      } else {
-        setArticles(data);
-        console.log(data);
-      }
-    };
+    // const fetchArticle = async () => {
+    //   const { data, error } = await supabase.from("articles").select("*");
+    //   if (error) {
+    //     console.error("Error fetching data:", error);
+    //   } else {
+    //     setArticles(data);
+    //     console.log(data);
+    //   }
+    // };
+    // const fetchRoomArticle = async () => {
+    //   const { data, error } = await supabase.from("room_articles").select("*");
+    //   if (error) {
+    //     console.error("Error fetching data:", error);
+    //   } else {
+    //     setArticles(data);
+    //     console.log(data);
+    //   }
+    // };
+    const fetchAllArticles = async () => {
+  const [{ data: generalArticles, error: err1 }, { data: roomArticles, error: err2 }] = await Promise.all([
+    supabase.from("articles").select("*"),
+    supabase.from("room_articles").select("*"),
+  ]);
+
+  if (err1 || err2) {
+    console.error("Error fetching articles:", err1 || err2);
+    return;
+  }
+
+  // Add type labels to distinguish them
+  const generalWithType = generalArticles.map(a => ({ ...a, type: "article" }));
+  const roomWithType = roomArticles.map(a => ({ ...a, type: "room_article" }));
+
+  setArticles([...generalWithType, ...roomWithType]);
+};
+
+    // fetchRows();
+    // fetchArticle();
+    // fetchRoomArticle();
+
     fetchRows();
-    fetchArticle();
-    fetchRoomArticle();
+    fetchAllArticles();
+
   }, []);
 
   useEffect(() => {
     setDisplayedArticlesList(
+      // articles.filter(
+      //   (article) =>
+      //     pendingNotes.some((note) => note.target_id === article.articleid) &&
+      //     !approvedNotes.some((note) => note.target_id === article.articleid)
+      // )
       articles.filter(
-        (article) =>
-          pendingNotes.some((note) => note.target_id === article.articleid) &&
-          !approvedNotes.some((note) => note.target_id === article.articleid)
-      )
+  (article) =>
+    pendingNotes.some(
+      (note) =>
+        note.target_id === article.articleid || note.target_id === article.postid
+    ) &&
+    !approvedNotes.some(
+      (note) =>
+        note.target_id === article.articleid || note.target_id === article.postid
+    )
+)
+
     );
 
     console.log("pendingNotes");
@@ -80,7 +114,12 @@ const AdminCommunityNotes = () => {
     console.log(selectedArticle);
 
     setSelecteddArticlesNotes(
-      notes.filter((note) => note.target_id === selectedArticle.articleid)
+      // notes.filter((note) => note.target_id === selectedArticle.articleid)
+      notes.filter(
+  (note) =>
+    note.target_id === selectedArticle.articleid ||
+    note.target_id === selectedArticle.postid
+)
     );
   }, [selectedArticle]);
 
@@ -96,18 +135,42 @@ const AdminCommunityNotes = () => {
 
   const handleResolvedStatusChange = () => {
     const statusElement = document.getElementById("status").value;
+    // setDisplayedArticlesList(
+    //   articles.filter((article) =>
+    //     statusElement == "Approved"
+    //       ? approvedNotes.some((note) => note.target_id === article.articleid)
+    //       : pendingNotes.some((note) => note.target_id === article.articleid) &&
+    //         !approvedNotes.some((note) => note.target_id === article.articleid)
+    //   )
+    // );
     setDisplayedArticlesList(
-      articles.filter((article) =>
-        statusElement == "Approved"
-          ? approvedNotes.some((note) => note.target_id === article.articleid)
-          : pendingNotes.some((note) => note.target_id === article.articleid) &&
-            !approvedNotes.some((note) => note.target_id === article.articleid)
-      )
-    );
+  articles.filter((article) =>
+    statusElement === "Approved"
+      ? approvedNotes.some(
+          (note) =>
+            note.target_id === article.articleid || note.target_id === article.postid
+        )
+      : pendingNotes.some(
+          (note) =>
+            note.target_id === article.articleid || note.target_id === article.postid
+        ) &&
+        !approvedNotes.some(
+          (note) =>
+            note.target_id === article.articleid || note.target_id === article.postid
+        )
+  )
+);
+
   };
 
   const articleRedirect = () => {
-    navigate(`/article/${selectedArticle.articleid}`);
+    // navigate(`/article/${selectedArticle.articleid}`);
+    if (selectedArticle?.type === "room_article") {
+  navigate(`/room-article/${selectedArticle.postid}`);
+} else {
+  navigate(`/article/${selectedArticle.articleid}`);
+}
+
   };
 
   const openNote = (row) => {
