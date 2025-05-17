@@ -65,40 +65,39 @@ useEffect(() => {
       return;
     }
 
-    // Step 2: Fetch all user profiles in one go
-    const usernames = applicationsData.map(app => app.username);
+    const userIds = applicationsData.map(app => app.userid);
 
+    // Step 2: Fetch matching users
     const { data: usersData, error: usersError } = await supabase
       .from("users")
-      .select("username, email, usertypeid")
-      .in("username", usernames);
+      .select("userid, username, email")
+      .in("userid", userIds);
 
     if (usersError) {
       console.error("Error fetching users:", usersError);
       return;
     }
 
-    // Step 3: Fetch all usertypes in one go
-    const usertypeIds = usersData.map(u => u.usertypeid);
-    const { data: usertypeData, error: usertypeError } = await supabase
+    // Step 3: Fetch matching usertypes
+    const { data: usertypesData, error: usertypeError } = await supabase
       .from("usertype")
-      .select("usertypeid, type")
-      .in("usertypeid", usertypeIds);
+      .select("userid, usertype")
+      .in("userid", userIds);
 
     if (usertypeError) {
       console.error("Error fetching usertypes:", usertypeError);
       return;
     }
 
-    // Step 4: Combine application + user + usertype
+    // Step 4: Combine everything
     const flattened = applicationsData.map(app => {
-      const user = usersData.find(u => u.username === app.username);
-      const usertype = usertypeData.find(t => t.usertypeid === user?.usertypeid);
-
+      const user = usersData.find(u => u.userid === app.userid);
+      const type = usertypesData.find(t => t.userid === app.userid);
       return {
         ...app,
+        username: user?.username || "Unknown",
         email: user?.email || "N/A",
-        usertype: usertype?.type || "Free"
+        usertype: type?.usertype || "Free"
       };
     });
 
@@ -107,8 +106,6 @@ useEffect(() => {
 
   fetchApplications();
 }, []);
-
-
 
 
   
