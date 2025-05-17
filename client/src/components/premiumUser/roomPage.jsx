@@ -539,10 +539,9 @@ const Room = () => {
       return;
     }
     if (!isMember) {
-  alert("You must join the room to reply.");
-  return;
-}
-
+      alert("You must join the room to reply.");
+      return;
+    }
 
     let formattedReplyText = replyText;
 
@@ -678,10 +677,9 @@ const Room = () => {
     }
 
     if (!isMember) {
-  alert("You must join the room to comment.");
-  return;
-}
-
+      alert("You must join the room to comment.");
+      return;
+    }
 
     const { data, error } = await supabase
       .from("room_comments")
@@ -1613,7 +1611,7 @@ const Room = () => {
                     ×
                   </button>
 
-{/*                   {reportTarget.type === "community_note" ? ( */}
+                  {/*                   {reportTarget.type === "community_note" ? ( */}
                   {reportTarget.isCommunityNote ? (
                     <>
                       <h2 className="text-xl font-bold mb-2">
@@ -1652,33 +1650,25 @@ const Room = () => {
                           //   ]);
 
                           if (!isMember) {
-  alert("You must join the room to submit a Community Note.");
-  return;
-}
+                            alert(
+                              "You must join the room to submit a Community Note."
+                            );
+                            return;
+                          }
 
-  const { error } = await supabase
-    .from("community_notes")
-    .insert([
-      {
-        target_id: reportTarget.id,
-        target_type: "room_article",
-        note: selectedReason,
-        username: user?.username ?? "Anonymous",
-        userid: user?.userid,
-        created_at: new Date().toISOString(),
-      },
-    ]);
+                          const { error } = await supabase
+                            .from("community_notes")
+                            .insert([
+                              {
+                                target_id: reportTarget.id,
+                                target_type: "room_article",
+                                note: selectedReason,
+                                username: user?.username ?? "Anonymous",
+                                userid: user?.userid,
+                                created_at: new Date().toISOString(),
+                              },
+                            ]);
 
-  if (error) {
-    console.error("Error submitting note:", error);
-  } else {
-    alert("Community Note submitted.");
-    setReportTarget(null);
-    setSelectedReason("");
-  }
-}}
-
-                    
                           if (error) {
                             console.error("Error submitting note:", error);
                           } else {
