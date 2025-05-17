@@ -307,12 +307,19 @@ const AdminExperts = () => {
     </div>
   </div>
 
-  <div className="sm:col-span-2">
-    <label className="block text-sm font-semibold text-gray-700 mb-1">Experience</label>
+{/*   <div className="sm:col-span-2">
+    <label className="block text-sm font-semibold text-gray-700 mb-1">Experience (CV)</label>
     <div className="bg-gray-100 px-4 py-2 rounded-lg text-base font-medium text-gray-800 whitespace-pre-line">
       {applicant.cv || "No professional designation"}
     </div>
+  </div> */}
+    <div className="sm:col-span-2">
+  <label className="block text-sm font-semibold text-gray-700 mb-1">Experience</label>
+  <div className="bg-gray-100 px-4 py-3 rounded-lg text-base font-medium text-gray-800 whitespace-pre-line max-h-64 overflow-y-auto">
+    {applicant.cv || "No professional designation"}
   </div>
+</div>
+
 
     <div className="flex justify-end pt-4 gap-4">
       <button
