@@ -62,7 +62,7 @@ const VideoComponent = () => {
         </p>
 
         {/* Video Element */}
-        <div className="w-full aspect-video flex items-center justify-center">
+        <div className="w-full h-full flex items-center justify-center">
           <video
             autoPlay
             loop
