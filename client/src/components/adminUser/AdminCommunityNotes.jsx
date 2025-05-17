@@ -35,8 +35,18 @@ const AdminCommunityNotes = () => {
         console.log(data);
       }
     };
+    const fetchRoomArticle = async () => {
+      const { data, error } = await supabase.from("room_articles").select("*");
+      if (error) {
+        console.error("Error fetching data:", error);
+      } else {
+        setArticles(data);
+        console.log(data);
+      }
+    };
     fetchRows();
     fetchArticle();
+    fetchRoomArticle();
   }, []);
 
   useEffect(() => {
