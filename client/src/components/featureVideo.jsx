@@ -62,13 +62,13 @@ const VideoComponent = () => {
         </p>
 
         {/* Video Element */}
-        <div className="w-full aspect-video">
+        <div className="w-full aspect-video flex items-center justify-center">
           <video
             autoPlay
             loop
             muted
             controls
-            className="w-full h-full object-contain"
+            className="max-w-full max-h-full object-contain"
           >
             <source src={videoData.link} type="video/mp4" />
             Your browser does not support the video tag.
