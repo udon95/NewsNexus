@@ -68,7 +68,7 @@ const AdminExperts = () => {
   };
 
   fetchApplications();
-}, [statusFilter]);
+}, []);
 
 
   useEffect(() => {
