@@ -1649,7 +1649,7 @@ const Room = () => {
                           //     },
                           //   ]);
 
-                          if (!isMember) {
+                          if (userType !== "Admin" && !isMember) {
                             alert(
                               "You must join the room to submit a Community Note."
                             );
@@ -1657,17 +1657,30 @@ const Room = () => {
                           }
 
                           const { error } = await supabase
-                            .from("community_notes")
-                            .insert([
-                              {
-                                target_id: reportTarget.id,
-                                target_type: "room_article",
-                                note: selectedReason,
-                                username: user?.username ?? "Anonymous",
-                                userid: user?.userid,
-                                created_at: new Date().toISOString(),
-                              },
-                            ]);
+                            // .from("community_notes")
+                            // .insert([
+                            //   {
+                            //     target_id: reportTarget.id,
+                            //     target_type: "room_article",
+                            //     note: selectedReason,
+                            //     username: user?.username ?? "Anonymous",
+                            //     userid: user?.userid,
+                            //     created_at: new Date().toISOString(),
+                            //   },
+                            // ]);
+
+                          const { error } = await supabase.from("community_notes").insert([
+  {
+    target_id: reportTarget.id,
+    target_type: "room_article",
+    note: selectedReason,
+    username: user?.username ?? "Anonymous",
+    userid: userType !== "Admin" ? user?.userid : null,
+    adminid: userType === "Admin" ? user?.userid : null,
+    created_at: new Date().toISOString(),
+  },
+]);
+
 
                           if (error) {
                             console.error("Error submitting note:", error);
