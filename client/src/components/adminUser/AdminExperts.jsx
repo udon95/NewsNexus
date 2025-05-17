@@ -51,15 +51,16 @@ const AdminExperts = () => {
   //   fetchApplications();
   // }, []);
 
+
 useEffect(() => {
   const fetchApplications = async () => {
     const { data, error } = await supabase
       .from("expert_application")
       .select(`
         *,
-        users (
+        users:users!expert_application_userid_fkey (
           email,
-          usertype (
+          usertype:usertype!users_usertypeid_fkey (
             type
           )
         )
@@ -80,6 +81,7 @@ useEffect(() => {
 
   fetchApplications();
 }, []);
+
 
 
   
