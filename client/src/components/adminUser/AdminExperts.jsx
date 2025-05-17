@@ -54,33 +54,60 @@ const AdminExperts = () => {
 
 useEffect(() => {
   const fetchApplications = async () => {
-    const { data, error } = await supabase
+    // Step 1: Get all pending expert applications
+    const { data: applicationsData, error: appError } = await supabase
       .from("expert_application")
-      .select(`
-        *,
-        users:users!expert_application_userid_fkey (
-          email,
-          usertype:usertype!users_usertypeid_fkey (
-            type
-          )
-        )
-      `)
+      .select("*")
       .eq("status", "Pending");
 
-    if (error) {
-      console.error("Error fetching applications:", error);
-    } else {
-      const flattened = data.map(app => ({
-        ...app,
-        email: app.users?.email || "N/A",
-        usertype: app.users?.usertype?.type || "Free",
-      }));
-      setApplications(flattened);
+    if (appError) {
+      console.error("Error fetching applications:", appError);
+      return;
     }
+
+    // Step 2: Fetch all user profiles in one go
+    const usernames = applicationsData.map(app => app.username);
+
+    const { data: usersData, error: usersError } = await supabase
+      .from("users")
+      .select("username, email, usertypeid")
+      .in("username", usernames);
+
+    if (usersError) {
+      console.error("Error fetching users:", usersError);
+      return;
+    }
+
+    // Step 3: Fetch all usertypes in one go
+    const usertypeIds = usersData.map(u => u.usertypeid);
+    const { data: usertypeData, error: usertypeError } = await supabase
+      .from("usertype")
+      .select("usertypeid, type")
+      .in("usertypeid", usertypeIds);
+
+    if (usertypeError) {
+      console.error("Error fetching usertypes:", usertypeError);
+      return;
+    }
+
+    // Step 4: Combine application + user + usertype
+    const flattened = applicationsData.map(app => {
+      const user = usersData.find(u => u.username === app.username);
+      const usertype = usertypeData.find(t => t.usertypeid === user?.usertypeid);
+
+      return {
+        ...app,
+        email: user?.email || "N/A",
+        usertype: usertype?.type || "Free"
+      };
+    });
+
+    setApplications(flattened);
   };
 
   fetchApplications();
 }, []);
+
 
 
 
