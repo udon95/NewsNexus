@@ -350,7 +350,7 @@ const AdminExperts = () => {
                 <th className="px-4 py-3">Category</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100">
+{/*             <tbody className="divide-y divide-gray-100">
               {applications.map((application, index) => (
                 <tr
                   key={application.username}
@@ -364,7 +364,25 @@ const AdminExperts = () => {
                   </td>
                 </tr>
               ))}
-            </tbody>
+            </tbody> */}
+            <tbody className="divide-y divide-gray-100">
+  {applications.map((application, index) => (
+    <tr
+      key={`${application.username}-${index}`}
+      className="hover:bg-gray-50 cursor-pointer transition"
+      onClick={() => setApplicantWithTopic(application)}
+    >
+      <td className="px-4 py-3">{index + 1}</td>
+      <td className="px-4 py-3">{application.username}</td>
+      <td className="px-4 py-3">
+        {topics.find(
+          (topic) => String(topic.topicid) === String(application.topicid)
+        )?.name || "Unknown"}
+      </td>
+    </tr>
+  ))}
+</tbody>
+
           </table>
         </div>
       </div>
