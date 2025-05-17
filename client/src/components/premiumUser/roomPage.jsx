@@ -538,6 +538,11 @@ const Room = () => {
       alert("You must be logged in to reply.");
       return;
     }
+    if (!isMember) {
+  alert("You must join the room to reply.");
+  return;
+}
+
 
     let formattedReplyText = replyText;
 
@@ -671,6 +676,12 @@ const Room = () => {
       alert("You must be logged in to comment.");
       return;
     }
+
+    if (!isMember) {
+  alert("You must join the room to comment.");
+  return;
+}
+
 
     const { data, error } = await supabase
       .from("room_comments")
@@ -1621,20 +1632,49 @@ const Room = () => {
                             : "bg-gray-200 text-gray-500 cursor-not-allowed"
                         }`}
                         onClick={async () => {
-                          const { error } = await supabase
-                            .from("community_notes")
-                            .insert([
-                              {
-                                target_id: reportTarget.id,
-                                target_type: "article",
-                                note: selectedReason,
-                                username: user?.username,
-                                // userid: user?.userid,
-                                userid:
-                                  userType === "Admin" ? null : user?.userid,
-                                created_at: new Date().toISOString(),
-                              },
-                            ]);
+                          // const { error } = await supabase
+                          //   .from("community_notes")
+                          //   .insert([
+                          //     {
+                          //       target_id: reportTarget.id,
+                          //       target_type: "article",
+                          //       note: selectedReason,
+                          //       username: user?.username,
+                          //       // userid: user?.userid,
+                          //       userid:
+                          //         userType === "Admin" ? null : user?.userid,
+                          //       created_at: new Date().toISOString(),
+                          //     },
+                          //   ]);
+
+                          if (!isMember) {
+  alert("You must join the room to submit a Community Note.");
+  return;
+}
+
+  const { error } = await supabase
+    .from("community_notes")
+    .insert([
+      {
+        target_id: reportTarget.id,
+        target_type: "room_article",
+        note: selectedReason,
+        username: user?.username ?? "Anonymous",
+        userid: user?.userid,
+        created_at: new Date().toISOString(),
+      },
+    ]);
+
+  if (error) {
+    console.error("Error submitting note:", error);
+  } else {
+    alert("Community Note submitted.");
+    setReportTarget(null);
+    setSelectedReason("");
+  }
+}}
+
+                    
                           if (error) {
                             console.error("Error submitting note:", error);
                           } else {
