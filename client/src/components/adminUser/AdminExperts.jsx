@@ -58,7 +58,7 @@ const AdminExperts = () => {
     const { data, error } = await supabase
       .from("expert_application")
       .select("username, email, usertype, topicid, description, cv, status")
-      // .eq("status", statusFilter);
+      .eq("status", "Pending")
 
     if (error) {
       console.error("Error fetching applications:", error);
