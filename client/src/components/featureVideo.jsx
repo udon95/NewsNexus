@@ -55,25 +55,26 @@ const VideoComponent = () => {
 
   return (
     <div className="flex justify-center w-full mt-10 font-grotesk">
-    <div className="relative w-full max-w-[1000px] h-[400px] overflow-hidden rounded-xl shadow-md bg-black">
-      {/* Text Overlay */}
-      <p className="absolute top-3 left-4 px-4 py-1 bg-black text-white font-bold text-2xl rounded-full border-2 border-white z-10">
-        Features:
-      </p>
+      <div className="relative w-full max-w-[1000px] h-[400px] overflow-hidden rounded-xl shadow-md bg-black">
+        {/* Text Overlay */}
+        <p className="absolute top-3 left-4 px-4 py-1 bg-black text-white font-bold text-2xl rounded-full border-2 border-white z-10">
+          Features:
+        </p>
 
-      {/* Video Element */}
-      <video
-        autoPlay
-        loop
-        muted
-        controls
-        className="w-full h-full object-cover scale-100"
-      >
-        <source src={videoData.link} type="video/mp4" />
-        Your browser does not support the video tag.
-      </video>
-    </div>
-
+        {/* Video Element */}
+        <div className="w-full aspect-video">
+          <video
+            autoPlay
+            loop
+            muted
+            controls
+            className="w-full h-full object-contain scale-100"
+          >
+            <source src={videoData.link} type="video/mp4" />
+            Your browser does not support the video tag.
+          </video>
+        </div>
+      </div>
     </div>
   );
 };
