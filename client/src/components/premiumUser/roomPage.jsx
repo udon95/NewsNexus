@@ -321,6 +321,7 @@ const Room = () => {
           .from("expert_application")
           .select("status")
           .eq("userid", userid)
+          .eq("topicid", data.topicid)
           .eq("status", "Approved");
 
         const isExpert = expertData?.length > 0;
