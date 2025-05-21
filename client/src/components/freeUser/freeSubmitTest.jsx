@@ -8,6 +8,7 @@ export const FreeSubmitTest = () => {
 
   const feedbackQuestions = [
     { text: "How well designed is the UI ?", column: "design" },
+    { text: "How accurate is the AI fact-checking ?", column: "factcheck" },
     { text: "How is the content safety in the news site ?", column: "safety" },
     { text: "How reasonably priced is the news subscription ?", column: "price" },
     { text: "Do you think NewsNexus has good news coverage and well curated news ?", column: "news" }
